@@ -1,0 +1,20 @@
+*,,
+*Fuel costs in EUR/MWhth,,
+*,,
+*ct,reg,fuel price
+ror,DEU,0
+nuc,DEU,3
+lig,DEU,4.9
+hc,DEU,23.04
+CCGT,DEU,38.16
+OCGT_ineff,DEU,38.16
+OCGT_eff,DEU,38.16
+bio,DEU,23.04
+ror,IND,0
+nuc,IND,3
+lig,IND,
+hc,IND,14.4
+CCGT,IND,34
+OCGT_ineff,IND,34
+OCGT_eff,IND,34
+bio,IND,

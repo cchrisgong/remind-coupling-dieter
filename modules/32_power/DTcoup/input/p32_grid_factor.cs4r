@@ -1,0 +1,26 @@
+* description: multiplicative factor that scales total grid requirements down in comparatively small or homogeneous regions
+* unit: factor
+* comment: 2e06b62e4776c635454acb4b65a80797
+* origin: calcOutput(type = "GridFactor", file = "p32_grid_factor.cs4r", round = 6) (madrat 1.75.2 | moinput 9.328.0)
+* creation date: Tue Mar 24 17:17:44 2020
+OAS,1.5
+ENC,1
+NES,1
+MEA,1
+SSA,1
+LAM,1.490811
+REF,1.327084
+CAZ,1
+EWN,1
+ECS,1
+CHA,1.490592
+ESC,1
+ECE,1
+FRA,1
+DEU,1
+UKI,1
+NEN,1
+IND,1
+JPN,1
+ESW,1
+USA,1
