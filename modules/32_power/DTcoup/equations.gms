@@ -53,28 +53,28 @@ q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND teVRE(te))..
  	- sum(teVRE$sameas(te,teVRE), v32_storloss(t,regi,teVRE) )
 ;
 
-***---------------------------------------------------------------------------
-*** Definition of capacity constraints for storage:
-***---------------------------------------------------------------------------
-q32_limitCapTeStor(t,regi,teStor)$(t.val ge 2015)..
-	sum(VRE2teStor(teVRE,teStor), v32_storloss(t,regi,teVRE) )
-	* pm_eta_conv(t,regi,teStor) / ( 1 - pm_eta_conv(t,regi,teStor))
-	=l=
-	sum(te2rlf(teStor,rlf),
-		vm_capFac(t,regi,teStor) * pm_dataren(regi,"nur",rlf,teStor) * vm_cap(t,regi,teStor,rlf) )
-;
-
-q32_h2turbVREcapfromTestor(t,regi)..
-  vm_cap(t,regi,"h2turbVRE","1")
-  =e=
-  sum(te$testor(te), p32_storageCap(te,"h2turbVREcapratio") * vm_cap(t,regi,te,"1") )
-;
-
-q32_elh2VREcapfromTestor(t,regi)..
-  vm_cap(t,regi,"elh2VRE","1")
-  =e=
-  sum(te$testor(te), p32_storageCap(te,"elh2VREcapratio") * vm_cap(t,regi,te,"1") )
-;
+**---------------------------------------------------------------------------
+** Definition of capacity constraints for storage:
+**---------------------------------------------------------------------------
+* q32_limitCapTeStor(t,regi,teStor)$(t.val ge 2015)..
+* 	sum(VRE2teStor(teVRE,teStor), v32_storloss(t,regi,teVRE) )
+* 	* pm_eta_conv(t,regi,teStor) / ( 1 - pm_eta_conv(t,regi,teStor))
+* 	=l=
+* 	sum(te2rlf(teStor,rlf),
+* 		vm_capFac(t,regi,teStor) * pm_dataren(regi,"nur",rlf,teStor) * vm_cap(t,regi,teStor,rlf) )
+* ;
+*
+* q32_h2turbVREcapfromTestor(t,regi)..
+*  vm_cap(t,regi,"h2turbVRE","1")
+*  =e=
+*  sum(te$testor(te), p32_storageCap(te,"h2turbVREcapratio") * vm_cap(t,regi,te,"1") )
+* ;
+*
+* q32_elh2VREcapfromTestor(t,regi)..
+*  vm_cap(t,regi,"elh2VRE","1")
+*  =e=
+*  sum(te$testor(te), p32_storageCap(te,"elh2VREcapratio") * vm_cap(t,regi,te,"1") )
+* ;
 
 ***---------------------------------------------------------------------------
 *** Definition of capacity constraints for CHP technologies:
@@ -158,3 +158,14 @@ q32_limitSolarWind(t,regi)$( (cm_solwindenergyscen = 2) OR (cm_solwindenergyscen
 	=l=
 	0.2 * vm_usableSe(t,regi,"seel")
 ;
+
+***---------------------------------------------------------------------------
+*** DIETER related equations
+***---------------------------------------------------------------------------
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+q32_peakDemand_DT(tall, enty2)$(t_DT_32(tall) AND sameas(enty2,"seel")) ..
+	sum(all_te$(DISPATCHte_32(all_te)), sum(rlf, vm_cap(tall,"DEU",all_te,rlf)))
+	=g= 
+	p32_peakDemand_relFac(tall) * v32_seelDem(tall,"DEU",enty2) * 8760 * s32_iteration_ge_5 !! either NO (= 0) for iteration lt 5, or YES (= 1) otherwise
+	;
+$ENDIF.DTcoup

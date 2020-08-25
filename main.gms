@@ -7,48 +7,48 @@
 *** SOF ./main.gms
 *' @title REMIND - REgional Model of INvestments and Development
 *'
-*' @description REMIND is a global multi-regional model incorporating the economy, the climate system 
-*' and a detailed representation of the energy sector. It solves for an intertemporal Pareto optimum 
-*' in economic and energy investments in the model regions, fully accounting for interregional trade in 
-*' goods, energy carriers and emissions allowances. REMIND enables analyses of technology options and 
+*' @description REMIND is a global multi-regional model incorporating the economy, the climate system
+*' and a detailed representation of the energy sector. It solves for an intertemporal Pareto optimum
+*' in economic and energy investments in the model regions, fully accounting for interregional trade in
+*' goods, energy carriers and emissions allowances. REMIND enables analyses of technology options and
 *' policy proposals for climate change mitigation.
 *'
-*' The macro-economic core of REMIND is a Ramsey-type optimal growth model in which intertemporal global 
-*' welfare is optimized subject to equilibrium constraints ([02_welfare]). Intertemporal optimization 
-*' ([80_optimization]) with perfect foresight is subject to market clearing. The model explicitly represents 
-*' trade in final goods, primary energy carriers, and when certain climate policies are enabled, emissions 
-*' allowances ([24_trade]). The macro-economic production factors are capital, labor, and final energy. 
-*' A nested production function with constant elasticity of substitution determines the final energy demand 
-*' ([01_macro], [29_CES_parameters]). REMIND uses economic output for investments in the macro-economic 
-*' capital stock as well as for consumption, trade, and energy system expenditures. 
-*' 
-*' The macro-economic core and the energy system part are hard-linked via the final energy demand and the 
-*' costs incurred by the energy system. Economic activity results in demand for final energy in different 
-*' sectors (transport ([35_transport]), industry ([37_industry]), buildings ([36_buildings])...) and of 
-*' different type (electric ([32_power]) and non-electric). The primary energy carriers in REMIND include 
-*' both exhaustible and renewable resources. Exhaustible resources comprise uranium as well as three fossil 
-*' resources ([31_fossil]), namely coal, oil, and gas. Renewable resources include hydro, wind, solar, 
-*' geothermal, and biomass ([30_biomass]). More than 50 technologies are available for the conversion of 
-*' primary energy into secondary energy carriers as well as for the distribution of secondary energy carriers 
+*' The macro-economic core of REMIND is a Ramsey-type optimal growth model in which intertemporal global
+*' welfare is optimized subject to equilibrium constraints ([02_welfare]). Intertemporal optimization
+*' ([80_optimization]) with perfect foresight is subject to market clearing. The model explicitly represents
+*' trade in final goods, primary energy carriers, and when certain climate policies are enabled, emissions
+*' allowances ([24_trade]). The macro-economic production factors are capital, labor, and final energy.
+*' A nested production function with constant elasticity of substitution determines the final energy demand
+*' ([01_macro], [29_CES_parameters]). REMIND uses economic output for investments in the macro-economic
+*' capital stock as well as for consumption, trade, and energy system expenditures.
+*'
+*' The macro-economic core and the energy system part are hard-linked via the final energy demand and the
+*' costs incurred by the energy system. Economic activity results in demand for final energy in different
+*' sectors (transport ([35_transport]), industry ([37_industry]), buildings ([36_buildings])...) and of
+*' different type (electric ([32_power]) and non-electric). The primary energy carriers in REMIND include
+*' both exhaustible and renewable resources. Exhaustible resources comprise uranium as well as three fossil
+*' resources ([31_fossil]), namely coal, oil, and gas. Renewable resources include hydro, wind, solar,
+*' geothermal, and biomass ([30_biomass]). More than 50 technologies are available for the conversion of
+*' primary energy into secondary energy carriers as well as for the distribution of secondary energy carriers
 *' into final energy.
 *'
-*' The model accounts for the full range of anthropogenic greenhouse gas (GHG) emissions, most of which are 
-*' represented by source. REMIND simulates emissions from long-lived GHGs (CO2, CH4, N2O), short-lived GHGs 
-*' (CO, NOx, VOC) and aerosols (SO2, BC, OC). It accounts for these emissions with different levels of detail 
-*' depending on the types and sources of emissions. It calculates CO2 emissions from fuel combustion, CH4 
-*' emissions from fossil fuel extraction and residential energy use, and N2O emissions from energy supply 
-*' based on sources. 
+*' The model accounts for the full range of anthropogenic greenhouse gas (GHG) emissions, most of which are
+*' represented by source. REMIND simulates emissions from long-lived GHGs (CO2, CH4, N2O), short-lived GHGs
+*' (CO, NOx, VOC) and aerosols (SO2, BC, OC). It accounts for these emissions with different levels of detail
+*' depending on the types and sources of emissions. It calculates CO2 emissions from fuel combustion, CH4
+*' emissions from fossil fuel extraction and residential energy use, and N2O emissions from energy supply
+*' based on sources.
 *'
-*' The code is structured in a modular way, with code belonging either to the model's core, or to one of the 
-*' modules. The folder structure is as follows: at the top level are the folders config, core, modules and 
-*' scripts. The config folder contains the REMIND settings and configuration information. The core folder 
-*' contains all the files that are part of the core. The modules folder holds all the files that belong to 
-*' the modules, with numbered sub-folders for every module. The scripts folder contains helpful scripts for 
+*' The code is structured in a modular way, with code belonging either to the model's core, or to one of the
+*' modules. The folder structure is as follows: at the top level are the folders config, core, modules and
+*' scripts. The config folder contains the REMIND settings and configuration information. The core folder
+*' contains all the files that are part of the core. The modules folder holds all the files that belong to
+*' the modules, with numbered sub-folders for every module. The scripts folder contains helpful scripts for
 *' starting a model run and analysing results.
-*' 
-*' REMIND is run by executing the main.gms file, which loads the configuration information and builds the model, 
-*' by concatenating all necessary files from the core and modules folders into a single file called full.gms. 
-*' The concatenation process starts with files from the core and continues with files from activated modules, 
+*'
+*' REMIND is run by executing the main.gms file, which loads the configuration information and builds the model,
+*' by concatenating all necessary files from the core and modules folders into a single file called full.gms.
+*' The concatenation process starts with files from the core and continues with files from activated modules,
 *' in increasing order of module-number. It observes the following structure:
 *'
 *' ![Technical Structure of REMIND](technical_structure.png){ width=100% }
@@ -62,30 +62,30 @@
 *' * "f_" to designate file parameters (parameters that contain unaltered data read in from input files),
 *' * "o_" to designate output parameters (parameters that do not affect the optimization, but are affected by it),
 *' * "c_" to designate switches (parameters that enable different configuration choices),
-*' * "s_FIRSTUNIT_2_SECONDUNIT" to designate a scalar used to convert from the FIRSTUNIT to the SECONDUNIT 
+*' * "s_FIRSTUNIT_2_SECONDUNIT" to designate a scalar used to convert from the FIRSTUNIT to the SECONDUNIT
 *'                              through multiplication, e.g. s_GWh_2_EJ.
 *'
 *' These prefixes are extended in some cases by a second letter:
 *'
 *' * "?m_" to designate objects used in the core and in at least one module.
-*' * "?00_" to designate objects used in a single module, exclusively, with the 2-digit number corresponding 
+*' * "?00_" to designate objects used in a single module, exclusively, with the 2-digit number corresponding
 *'          to the module number.
 *'
-*' Sets are treated differently: instead of a prefix, sets exclusively used within a module get that module's 
-*' number added as a suffix. If the set is used in more than one module no suffix is given. 
-*' 
+*' Sets are treated differently: instead of a prefix, sets exclusively used within a module get that module's
+*' number added as a suffix. If the set is used in more than one module no suffix is given.
+*'
 *' The units (e.g., TWa, EJ, GtC, GtCO2, ...) of variables and parameters are documented in the declaration files.
 
 
 
 *##################### R SECTION START (VERSION INFO) ##########################
-* 
+*
 * Regionscode: 690d3718e151be1b450b394c1064b1c5
-* 
+*
 * Input data revision: 5.94
-* 
+*
 * Last modification (input data): Thu Mar 19 16:15:13 2020
-*  
+*
 *###################### R SECTION END (VERSION INFO) ###########################
 
 *----------------------------------------------------------------------
@@ -309,7 +309,7 @@ cm_nucscen       = 2;        !! def = 2
 cm_ccapturescen  = 1;        !! def = 1
 c_bioliqscen     = 1;        !! def = 1
 c_bioh2scen      = 1;        !! def = 1
-c_solscen        = 1;        !! def = 1
+c_solscen        = 1;        !! def = 0
 
 cm_IndCCSscen          = 1;        !! def = 1
 cm_optimisticMAC       = 0;        !! def = 0
@@ -327,7 +327,7 @@ cm_cprice_red_factor  = 1;         !! def = 1
 
 $setglobal cm_POPscen  pop_SSP2  !! def = pop_SSP2
 $setglobal cm_GDPscen  gdp_SSP2  !! def = gdp_SSP2
-$setglobal c_GDPpcScen  SSP2     !! def = gdp_SSP2   (automatically adjusted by start_run() based on GDPscen) 
+$setglobal c_GDPpcScen  SSP2     !! def = gdp_SSP2   (automatically adjusted by start_run() based on GDPscen)
 
 *AG* and *CB* for cm_startyear greater than 2005, you have to copy the fulldata.gdx (rename it to: input_ref.gdx) from the run you want to build your new run onto.
 cm_startyear      = 2005;      !! def = 2005 for a BAU, 2015 for policy runs
@@ -379,13 +379,13 @@ cm_taxCO2inc_after_peakBudgYr = 2;      !! def = 2
 cm_CO2priceRegConvEndYr       = 2050;   !! def = 2050
 $setGlobal cm_emiMktETS  off       !! def = off
 $setGlobal cm_emiMktETS_type  off   !! def = off
-$setGlobal cm_emiMktES  off       !! def = off	
-$setGlobal cm_emiMktES_type  netGHG !! def = netGHG	
-$setGlobal cm_emiMktEScoop  off   !! def = off	
-$setGlobal cm_emiMktES2050	 off   !! def = off	
-$setGlobal cm_NucRegiPol	 off   !! def = off		
+$setGlobal cm_emiMktES  off       !! def = off
+$setGlobal cm_emiMktES_type  netGHG !! def = netGHG
+$setGlobal cm_emiMktEScoop  off   !! def = off
+$setGlobal cm_emiMktES2050	 off   !! def = off
+$setGlobal cm_NucRegiPol	 off   !! def = off
 $setGlobal cm_proNucRegiPol	 off   !! def = off
-$setGlobal cm_CCSRegiPol	 off   !! def = off	
+$setGlobal cm_CCSRegiPol	 off   !! def = off
 
 cm_trdadj            = 2;    !! def = 2.0
 cm_trdcst            = 1.5;  !! def = 1.5
@@ -413,6 +413,8 @@ $setGlobal c_regi_capturescen  all !! def = all
 ***                           YOU ARE IN THE WARNING ZONE (DON'T DO CHANGES HERE)
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *--------------------flags------------------------------------------------------------
+$setglobal cm_DTcoup  on         !! def = off
+
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
 $setGlobal cm_nash_mode  parallel      !! def = parallel
 $setGlobal c_EARLYRETIRE       on         !! def = on
@@ -466,7 +468,7 @@ $setglobal cm_INNOPATHS_adj_coeff_cont  off
 $setglobal cm_INNOPATHS_inco0Factor  off !! def = off
 
 $setglobal cm_INNOPATHS_CCS_markup  off !! def = off
-$setglobal cm_INNOPATHS_renewables_floor_cost  off !! def = off 
+$setglobal cm_INNOPATHS_renewables_floor_cost  off !! def = off
 
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------

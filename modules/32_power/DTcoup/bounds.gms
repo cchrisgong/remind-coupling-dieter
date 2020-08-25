@@ -36,7 +36,6 @@ loop(regi$(p32_factorStorage(regi,"csp") < 1),
   v32_shSeEl.lo(t,regi,"csp")$(t.val > 2100) = 2;
 );
 
-
-* fix capacity value to the value from DIETER
-vm_cap.fx(tall,all_regi,"storspv",rlf)$(tall.val > 2010 AND sameas(all_regi,"DEU")
-AND sameas(rlf,"1")) = p32_capStor_DIET(tall,all_regi)$(tall.val > 2010 AND sameas(all_regi,"DEU"));
+* $IFTHEN.DTCoup %cm_DTCoup% == 1
+* if( (ord(iteration) ge 6 ),
+* $ENDIF.DTCoup

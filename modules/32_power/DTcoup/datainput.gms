@@ -60,4 +60,7 @@ $include "./modules/32_power/IntC/input/f32_storageCap.prn"
 p32_storageCap(te,char) = f32_storageCap(char,te);
 display p32_storageCap;
 
-p32_capStor_DIET(tall,all_regi) = 0;
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+s32_iteration_ge_5 = 0;
+p32_peakDemand_relFac(tall)$(t_DT_32(tall)) = 0.000156;
+$ENDIF.DTcoup

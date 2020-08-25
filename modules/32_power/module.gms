@@ -20,5 +20,6 @@
 *###################### R SECTION START (MODULETYPES) ##########################
 $Ifi "%power%" == "IntC" $include "./modules/32_power/IntC/realization.gms"
 $Ifi "%power%" == "RLDC" $include "./modules/32_power/RLDC/realization.gms"
+$Ifi "%power%" == "DTcoup" $include "./modules/32_power/DTcoup/realization.gms"
 *###################### R SECTION END (MODULETYPES) ############################
 *** EOF ./modules/32_power/module.gms
