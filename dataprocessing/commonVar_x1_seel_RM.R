@@ -1,8 +1,8 @@
 #for shared variable such as peak demand (one iteration series)
 
 mypath = "~/remind/dataprocessing/"
-mydatapath = "~/remind/output/capfac18/"
-mydatapath2 = "~/remind/output/capfac14_nocoupl/"
+mydatapath = "~/remind/output/capfac19/"
+mydatapath2 = "~/remind/output/capfac19_uncoupl/"
 
 # import library
 source(paste0(mypath, "library_import.R"))
@@ -57,8 +57,11 @@ get_CAPCONvariable <- function(gdx){
   # transform from tr$2005/TW to $2015/kW
   vrdata = list(capcondata, budgetdata) %>%
     reduce(full_join) %>%
+    select(ttot, capcon, budget) %>% 
+    replace(is.na(.), 0) %>% 
     mutate(capcon= capcon/ budget * 1e12 / 1e9 * 1.2) 
     
+  
   return(vrdata)
 }
 
@@ -115,11 +118,11 @@ secAxisScale = 1/8.76
 p1<-ggplot() +
   geom_line(data = vr1, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
   geom_line(data = vr1_capcon, aes(x = iter, y = capcon*secAxisScale, color = model), size = 1.2, alpha = 0.5) +
-  # geom_line(data = vr1_2, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
+  geom_line(data = vr1_2, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
   scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0(CapConstraintKey, "(USD/kW)")))+
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
   xlab("iteration") + ylab(paste0(VARkey1, "(USD/MWh)"))  +
-  coord_cartesian(ylim = c(-300,300))+
+  coord_cartesian(ylim = c(-20,200))+
   facet_wrap(~ttot, nrow = 3)
   
 ggsave(filename = paste0(mypath, "iter_seelprice_capfac", str_sub(mydatapath,-3,-2), "_RM.png"),  width = 28, height =15, units = "in", dpi = 120)

@@ -15,9 +15,10 @@ parameters
     p32_storageCap(all_te,char)           "multiplicative factor between dummy seel<-->h2 technologies and storXXX technologies"
 *   p32_capStor_DIET(tall,all_regi)       "storage cap from DIETER"
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-    report4RM(gdxfile_32, tall, all_regi, DIETER_te_32, DIETERvarname_32) "load report from DIETER"
+    report4RM(gdxfile_32,tall,all_regi,DIETER_te_32,DIETERvarname_32) "load report from DIETER"
     p32_peakDemand_relFac(tall)           "peak demand from DIETER of a year"
     p32_peakDemand(tall)                  "peak demand from DIETER of a year"
+*    p32_flex_multmk(tall,all_te) "fractional parameter from DIETER that indicates the multiplicative price mark up of a flexible demand side technology"
 $ENDIF.DTcoup
 ;
 
@@ -48,6 +49,7 @@ equations
     q32_limitSolarWind(tall,all_regi)           	"limits on fluctuating renewables, only turned on for special EMF27 scenarios"
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 q32_peakDemand_DT(tall, all_enty)              "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"
+*q32_flexAdj(tall,all_regi,all_te)               "calculate flexibility used in flexibility tax for technologies with electricity input"
 $ENDIF.DTcoup
 *	  q32_h2turbVREcapfromTestor(tall,all_regi)     "calculate capacities of dummy seel<--h2 technology from storXXX technologies"
 *   q32_elh2VREcapfromTestor(tall,all_regi)       "calculate capacities of dummy seel-->h2 technology from storXXX technologies"

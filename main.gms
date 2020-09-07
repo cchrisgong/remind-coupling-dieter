@@ -287,6 +287,7 @@ cm_taxCO2inc_after_peakBudgYr "annual increase of CO2 price after the Peak Budge
 cm_CO2priceRegConvEndYr      "Year at which regional CO2 prices converge in module 45 realization diffPhaseIn2LinFlex"
 c_regi_nucscen				"regions to apply nucscen to"
 c_regi_capturescen			"region to apply ccapturescen to"
+cm_flex_tax                 "switch for enabling flexibility tax"
 ;
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -414,7 +415,7 @@ $setGlobal c_regi_capturescen  all !! def = all
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *--------------------flags------------------------------------------------------------
 $setglobal cm_DTcoup  on         !! def = off
-
+cm_flex_tax = 0; !! def 0
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
 $setGlobal cm_nash_mode  parallel      !! def = parallel
 $setGlobal c_EARLYRETIRE       on         !! def = on

@@ -1,8 +1,9 @@
 #for shared variable such as peak demand (one iteration series)
 
 mypath = "~/remind/dataprocessing/"
-mydatapath = "~/remind/output/capfac18/"
-mydatapath2 = "~/remind/output/capfac14_nocoupl/"
+run_number = 19
+mydatapath =  paste0("~/remind/output/capfac", run_number, "/")
+mydatapath2 =  paste0("~/remind/output/capfac", run_number, "_uncoupl/")
 
 # import library
 source(paste0(mypath, "library_import.R"))
@@ -73,9 +74,9 @@ get_CAPFAC_variable <- function(gdx){
     mutate(all_te = str_replace(all_te, TECHkeylst_hydro[[1]], plot_RMte_names[[7]])) %>%
     mutate(all_te = str_replace(all_te, TECHkeylst_peakGas[[1]], plot_RMte_names[[6]])) %>% 
     dplyr::group_by(all_te) %>%
-    dplyr::summarise( value = mean(value) ) %>% 
-    dplyr::ungroup(all_te) 
-
+    dplyr::summarise( value = mean(value), .groups = 'keep' ) %>% 
+    dplyr::ungroup(all_te)
+  
   # pm_dataren("nur") = capacity factor at different grade levels (quality of wind resources), pm_dataren is used to represent different cost levels necessary to create the same amount of energy if you have to build your wind farm in places with lower wind. The grades are ordered from 1 to 10. 1 is closer to the wind always blowing (highest nur capacity factor), 10 is the worst place to install wind.
   dataren <- read.gdx(gdx, VARkey1_b) %>% 
     filter(char == "nur") %>%
@@ -103,7 +104,7 @@ get_CAPFAC_variable <- function(gdx){
   vrdata2 <- vrdata2_0 %>% 
     select(all_te, new_rennur)  %>% 
     dplyr::group_by(all_te) %>%
-    dplyr::summarise(new_rennur = sum(new_rennur)) %>% 
+    dplyr::summarise(new_rennur = sum(new_rennur), .groups = 'keep' ) %>% 
     dplyr::ungroup(all_te) %>% 
     dplyr::rename(VRE_potential = new_rennur)
 
@@ -124,7 +125,7 @@ for(fname in files){
 vr1 <- rbindlist(vr1)
 
 get_variable_DT <- function(gdx){
-  gdx = sorted_files_DT[[1]]
+  # gdx = sorted_files_DT[[1]]
   vrdata <- read.gdx(gdx, VARkey1_DT) %>% 
     filter(X..1 == year_toplot) %>%
     dplyr::rename(all_te = X..3) %>% 
@@ -164,7 +165,7 @@ vr1_DT2 <- rbindlist(vr1_DT2)
 
 p1<-ggplot() +
   geom_line(data = vr1_DT, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
-  # geom_line(data = vr1_DT2, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
+  geom_line(data = vr1_DT2, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
   geom_line(data = vr1, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
   xlab("iteration") + ylab(paste0(VARsubkey1_DT)) +
@@ -172,7 +173,7 @@ p1<-ggplot() +
 # +
   # coord_cartesian(ylim = c(0,80)) 
 
-ggsave(filename = paste0(mypath, "iter_capfac_capfac", str_sub(mydatapath,-3,-2), "_", year_toplot, ".png"),  width = 8, height =6, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, "iter_capfac_capfac", run_number, "_", year_toplot, ".png"),  width = 8, height =6, units = "in", dpi = 120)
 
 }
 

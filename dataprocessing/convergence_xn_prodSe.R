@@ -1,6 +1,6 @@
 mypath = "~/remind/dataprocessing/"
-mydatapath = "~/remind/output/capfac18/"
-
+# mydatapath = "~/remind/output/capfac19_uncoupl/"
+mydatapath = "~/remind/output/capfac19/"
 # import library
 source(paste0(mypath, "library_import.R"))
 library(readr)
@@ -84,7 +84,7 @@ get_variable <- function(gdx){
     mutate(all_te = str_replace(all_te, TECHkeylst_hydro[[1]], plot_RMte_names[[7]])) %>%
     mutate(all_te = str_replace(all_te, TECHkeylst_peakGas[[1]], plot_RMte_names[[6]])) %>% 
     dplyr::group_by(all_te) %>%
-    dplyr::summarise( value = sum(value) ) %>% 
+    dplyr::summarise( value = sum(value) , .groups = 'keep' ) %>% 
     dplyr::ungroup(all_te)
 
   vrdata$all_te <- factor(vrdata$all_te, levels= c("solar", "wind", "hydro", "combined cycle gas", "biomass", "open cycle gas turbine",  "nuclear", "coal"))
@@ -113,7 +113,7 @@ get_variable_DT <- function(gdx){
     mutate(all_te = str_replace(all_te, TECHkeylst_DT[[8]], plot_DTte_names[[8]])) %>% 
     mutate(all_te = str_replace(all_te, TECHkeylst_DT[[9]], plot_DTte_names[[9]])) %>% 
     dplyr::group_by(all_te) %>%
-    dplyr::summarise( value = sum(value) ) %>% 
+    dplyr::summarise( value = sum(value) , .groups = 'keep' ) %>% 
     dplyr::ungroup(all_te)
   
   vrdata$all_te <- factor(vrdata$all_te, levels= c("solar", "wind", "hydro", "combined cycle gas", "biomass", "open cycle gas turbine", "nuclear","lignite",  "hard coal"))
@@ -167,7 +167,7 @@ grid.newpage()
 p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
 grid.draw(p)
 
-ggsave(filename = paste0(mypath, "iter_xN_GEN_capFac18_", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, "iter_xN_GEN_capFac19_", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
 
 
 }

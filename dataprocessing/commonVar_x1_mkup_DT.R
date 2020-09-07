@@ -1,8 +1,7 @@
 #for shared variable such as peak demand (one iteration series)
 
 mypath = "~/remind/dataprocessing/"
-mydatapath = "~/remind/output/capfac19/"
-mydatapath2 = "~/remind/output/capfac19_uncoupl/"
+mydatapath = "~/remind/output/mkup1/"
 
 # import library
 source(paste0(mypath, "library_import.R"))
@@ -17,23 +16,20 @@ igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 files_DT <- list.files(mydatapath, pattern="results_DIETER_i[0-9]+\\.gdx")
 sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 5, to = length(files_DT)*5, by = 5), ".gdx")
 
-files_DT2 <- list.files(mydatapath2, pattern="results_DIETER_i[0-9]+\\.gdx")
-sorted_files_DT2 <- paste0(mydatapath2, "results_DIETER_i", seq(from = 5, to = length(files_DT2)*5, by = 5), ".gdx")
-
 year_toplot = 2030
 maxiter = 100
 print(paste0("Year: ", year_toplot))
 
 VARkey1_DT = "report4RM"
-VARsubkey1_DT = "peakDem"
+VARsubkey1_DT = "mult_markup"
 TECHkey1_DT = "all_te"
 
 get_variable_DT <- function(gdx){
-  # gdx = sorted_files_DT[[1]]
-  vrdata <- read.gdx(gdx, VARkey1_DT) %>% 
+  gdx = sorted_files_DT[[1]]
+  vrdata <- read.gdx(gdx, VARkey1_DT) 
     filter(X..4 == VARsubkey1_DT) %>%
     filter(X..3 == TECHkey1_DT) %>%
-    mutate(value = value/1e3)
+    mutate(value = value)
   return(vrdata)
 }
 
@@ -59,12 +55,12 @@ vr1_DT2 <- rbindlist(vr1_DT2)
 
 p1<-ggplot() +
   geom_line(data = vr1_DT, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
-  geom_line(data = vr1_DT2, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
+  # geom_line(data = vr1_DT2, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
   xlab("iteration") + ylab(paste0(VARsubkey1_DT, "(GWh)")) +
   facet_wrap(~X..1, nrow = 3)
 # +
   # coord_cartesian(ylim = c(0,80)) 
 
-ggsave(filename = paste0(mypath, "iter_peakdem_capfac", str_sub(mydatapath,-3,-2), ".png"),  width = 10, height = 8, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, "iter_mkup_capfac", str_sub(mydatapath,-2,-2), ".png"),  width = 10, height = 8, units = "in", dpi = 120)
 

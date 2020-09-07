@@ -1,5 +1,5 @@
 mypath = "~/remind/dataprocessing/DIETER_plots/"
-runnumber = 18
+runnumber = 19
 
 mydatapath = paste0("~/remind/output/capfac", runnumber, "/")
 
@@ -15,7 +15,7 @@ igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 file1 = "report_DIETER_i30.gdx"
 
 # gdxToQuitte_annual(mydatapath, file1)
-# gdxToQuitte_hourly(mydatapath, file1)
+gdxToQuitte_hourly(mydatapath, file1)
 
 #####################################################
 #plot load duration curve of residual loads once production is being accounted for for various tech., one by one, ordered by their capacity factor
@@ -23,14 +23,15 @@ year_toplot_list <- c(2010, 2015, 2020, 2025, 2030, 2040, 2050, 2070)
 
 for(year_toplot in year_toplot_list){
   
-# year_toplot = 2015
+year_toplot = 2025
 
 mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "solar" = "#ffcc00", "wind" = "#337fff", "biomass" = "#005900", "open cycle gas turbine" = "#e51900", "hydro" =  "#191999", "nuclear" =  "#ff33ff", "hard coal" = "#808080")
 
 hourly_reportCSV = read.csv(paste0(mypath, "capfac", runnumber, "_i30_hourlyreport.csv"), sep = ';', header = T, stringsAsFactors = F)
 hourly_reportQUITT <- as.quitte(hourly_reportCSV) 
 QUITTobj<-hourly_reportQUITT %>% 
-  filter(period == year_toplot)
+  filter(period == year_toplot) %>% 
+  mutate(hour = sort(as.character(hour)))
 
 LDC <- QUITTobj %>% 
   filter(variable == "Net fixed electricity demand") %>% 

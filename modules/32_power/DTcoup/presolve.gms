@@ -31,6 +31,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *   sum over gdxfile set removes this extra index that comes from gdxmerge algorithm
     pm_cf(tall,"DEU",all_te)$(t_DT_32(tall) AND COALte_32(all_te)) = (sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "lig", "capfac"))
       + sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "hc", "capfac")))$(t_DT_32(tall))/2;
+*   pm_cf(tall,"DEU",all_te)$(t_DT_32(tall) AND COALte_32(all_te)) = sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "coal", "capfac"));
     pm_cf(tall,"DEU",all_te)$(t_DT_32(tall) AND NonPeakGASte_32(all_te)) = sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "CCGT", "capfac")$(t_DT_32(tall)));
     pm_cf(tall,"DEU",all_te)$(t_DT_32(tall) AND BIOte_32(all_te)) = sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "bio", "capfac")$(t_DT_32(tall)));
     pm_cf(tall,"DEU","ngt")$(t_DT_32(tall)) = sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "OCGT_eff", "capfac")$(t_DT_32(tall)));
@@ -40,6 +41,8 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_peakDemand_relFac(tall)$(t_DT_32(tall)) = sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "all_te", "peakDem_relFac")$(t_DT_32(tall)));
 
 s32_iteration_ge_5 = (iteration.val ge 5); !! either NO (= 0) for iteration lt 5, or YES (= 1) otherwise
+
+*p32_flex_multmk(tall,"elh2")$(t_DT_32(tall)) = sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "elh2", "mult_markup")$(t_DT_32(tall)));
 
 $ENDIF.DTcoup
 

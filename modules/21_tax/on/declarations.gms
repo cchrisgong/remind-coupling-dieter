@@ -42,6 +42,7 @@ p21_taxrevSO20(ttot,all_regi)                "reference level value of SO2 tax"
 p21_taxrevBio0(ttot,all_regi)                "reference level value of bioenergy tax"
 p21_implicitDiscRate0(ttot,all_regi)           "reference level value of implicit tax on energy efficient capital"
 p21_taxemiMkt0(ttot,all_regi,all_emiMkt)     "reference level value of pe2se technologies tax"
+p21_taxrevFlex0(ttot,all_regi)                  "reference level value of flexibility tax"
 
 p21_taxrevGHG_iter(iteration,ttot,all_regi)                "reference level value of GHG emission tax revenue"
 p21_taxrevCCS_iter(iteration,ttot,all_regi)                "reference level value of CCS tax revenue"
@@ -55,7 +56,6 @@ p21_taxrevXport_iter(iteration,ttot,all_regi)              "reference level valu
 p21_taxrevSO2_iter(iteration,ttot,all_regi)                "reference level value of SO2 tax revenue"
 p21_taxrevBio_iter(iteration,ttot,all_regi)                "reference level value of bioenergy tax revenue"
 p21_implicitDiscRate_iter(iteration,ttot,all_regi)           "reference level value of implicit tax on energy efficient capital"
-
 p21_deltarev(iteration,all_regi)             "convergence criteria for iteration on tax revenue recycling"
 
 p21_tau_CO2_tax_gdx(ttot,all_regi)           "tax path from gdx, may overwrite default values"
@@ -85,6 +85,7 @@ v21_taxrevPE2SE(ttot,all_regi)               "tax on pe2se technologies (?)"
 v21_taxrevXport(ttot,all_regi)               "tax on exports (?)"
 v21_taxrevSO2(ttot,all_regi)                 "tax on SO2 (to reflect health impacts)"
 v21_taxrevBio(ttot,all_regi)                 "tax on bioenergy (to reflect sustainability constraints on bioenergy production)"
+v21_taxrevFlex(ttot,all_regi)                 "tax on technologies with flexible or inflexible electricity input"
 v21_implicitDiscRate(ttot,all_regi)           "implicit tax on energy efficient capital"
 v21_taxemiMkt(ttot,all_regi,all_emiMkt)      "tax on greenhouse gas emissions"
 ;
@@ -93,7 +94,7 @@ Positive Variable
 v21_emiALLco2neg(ttot,all_regi)             "negative part of total CO2 emissions"
 v21_emiALLco2neg_slack(ttot,all_regi)       "dummy variable to extract negatice CO2 emissions from emiAll"
 ;
-equations 
+equations
 q21_taxrev(ttot,all_regi)                    "calculation of difference in tax volume"
 q21_emiAllco2neg(ttot,all_regi)              "calculates negative part of CO2 emissions"
 q21_tau_bio(ttot)                            "calculation of demand-dependent bioenergy tax"
@@ -109,8 +110,9 @@ q21_taxrevPE2SE(ttot,all_regi)               "calculation of tax on pe2se techno
 q21_taxrevXport(ttot,all_regi)               "calculation of tax on exports"
 q21_taxrevSO2(ttot,all_regi)                 "calculation of tax on SO2"
 q21_taxrevBio(ttot,all_regi)                 "calculation of tax on bioenergy"
+q21_taxrevFlex(ttot,all_regi)                 "tax on technologies with flexible or inflexible electricity input"
 q21_implicitDiscRate(ttot,all_regi)           "calculation of the implicit discount rate on energy efficiency capital"
 q21_taxemiMkt(ttot,all_regi,all_emiMkt)      "calculation of specific emission market tax on CO2 emissions"
-;   
+;
 
 *** EOF ./modules/21_tax/on/declarations.gms

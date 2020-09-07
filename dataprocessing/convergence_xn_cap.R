@@ -1,12 +1,13 @@
 mypath = "~/remind/dataprocessing/"
-mydatapath = "~/remind/output/capfac18/"
+mydatapath = "~/remind/output/capfac19/"
+# mydatapath = "~/remind/output/capfac19_uncoupl/"
 
 # import library
 source(paste0(mypath, "library_import.R"))
 library(readr)
 require(rmndt)
 
-# igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
+igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
 #remind output iteration gdx files
 files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
@@ -74,7 +75,7 @@ for(id in idx_DT){
 vr1_DEM_DT <- rbindlist(vr1_DEM_DT) 
 
 get_variable <- function(gdx){
-  # gdx = sorted_files[[30]]
+  # gdx = sorted_files[[5]]
   vrdata <- read.gdx(gdx, VARkey1, factors = FALSE) %>% 
     filter(tall == year_toplot) %>%
     filter(all_regi == REGIkey1) %>%
@@ -100,7 +101,7 @@ get_variable <- function(gdx){
     mutate(all_te = str_replace(all_te, TECHkeylst_hydro[[1]], plot_RMte_names[[7]])) %>%
     mutate(all_te = str_replace(all_te, TECHkeylst_peakGas[[1]], plot_RMte_names[[6]])) %>% 
     dplyr::group_by(all_te, rlf) %>%
-    dplyr::summarise( value = sum(value) ) %>% 
+    dplyr::summarise( value = sum(value) , .groups = 'keep' ) %>% 
     dplyr::ungroup(all_te, rlf)
 
     vrdata$all_te <- factor(vrdata$all_te, levels= c("solar", "wind", "combined cycle gas", "biomass", "open cycle gas turbine", "hydro", "nuclear", "coal"))
@@ -155,11 +156,12 @@ p2<-ggplot() +
   geom_line(data = vr1_DEM_DT, aes(x = iter, y = value, color = X..4), size = 1.2, alpha = 1,linetype="dotted") +
   scale_fill_manual(name = "Technology", values = mycolors)+
   scale_color_manual(values=c("black"))+
-  theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+  theme(axis.text=element_text(size=14), axis.title=element_text(size= 14,face="bold")) +
   xlab("iteration") + ylab(paste0(VARkey1, "(GW)")) +
   coord_cartesian(xlim = c(0, max(vr1_DEM_DT$iter)))+
-  ggtitle(paste0("DIETER", year_toplot))+
-  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank()) +
+  ggtitle(paste0("DIETER ", year_toplot))+
+  theme(plot.title = element_text(size = 16, face = "bold"))+
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text=element_text(size=14)) +
   theme(aspect.ratio = .5)
 
 
@@ -168,11 +170,12 @@ p1<-ggplot() +
   geom_line(data = vr1_DEM_DT, aes(x = iter, y = value, color = X..4), size = 1.2, alpha = 0.5,linetype="dotted") +
   scale_fill_manual(name = "Technology", values = mycolors)+
   scale_color_manual(values=c("black"))+
-  theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+  theme(axis.text=element_text(size=14), axis.title=element_text(size= 14,face="bold")) +
   xlab("iteration") + ylab(paste0(VARkey1, "(GW)")) +
-  ggtitle(paste0("REMIND", year_toplot))+
+  ggtitle(paste0("REMIND ", year_toplot))+
   coord_cartesian(xlim = c(0, max(vr1_DEM_DT$iter)))+
-  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank()) +
+  theme(plot.title = element_text(size = 16, face = "bold"))+
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text=element_text(size=14)) +
   theme(aspect.ratio = .5)
 
                     
@@ -181,7 +184,6 @@ grid.newpage()
 p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
 grid.draw(p)
 
-ggsave(filename = paste0(mypath, "iter_xN_CAP_capFac18_", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, "iter_xN_CAP_capfac19_", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
 
 }
-

@@ -11,12 +11,12 @@
 ***                   MODEL             HYBRID
 ***------------------------------------------------------------------------------
 ***------------------------------------------------------------------------------
-*** definition of model hybrid 
+*** definition of model hybrid
 model hybrid /all/;
 
 ***------------------------------------------------------------------------------
 ***------------------------------------------------------------------------------
-***                   GDX    stuff       
+***                   GDX    stuff
 ***------------------------------------------------------------------------------
 ***------------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ vm_fuExtr.l(ttot,regi,"pebiolc","1")$(ttot.val ge 2005)  = 0;
 vm_pebiolc_price.l(ttot,regi)$(ttot.val ge 2005)         = 0;
 vm_emiAllMkt.l(t,regi,enty,emiMkt) = 0;
 vm_co2eqMkt.l(ttot,regi,emiMkt) = 0;
-  
+
 *** overwrite default targets with gdx values if wanted
 Execute_Loadpoint 'input' p_emi_budget1_gdx = sm_budgetCO2eqGlob;
 Execute_Loadpoint 'input' vm_demPe.l = vm_demPe.l;
@@ -41,6 +41,8 @@ Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;
 Execute_Loadpoint 'input' qm_budget.m = qm_budget.m;
 Execute_Loadpoint 'input' pm_pvpRegi = pm_pvpRegi;
 Execute_Loadpoint 'input' pm_pvp = pm_pvp;
+Execute_Loadpoint 'input' q32_balSe.m = q32_balSe.m;
+
 if (cm_gdximport_target eq 1,
   if ( ((p_emi_budget1_gdx < 1.5 * sm_budgetCO2eqGlob) AND (p_emi_budget1_gdx > 0.5 * sm_budgetCO2eqGlob)),
   sm_budgetCO2eqGlob=p_emi_budget1_gdx;
@@ -53,7 +55,7 @@ display sm_budgetCO2eqGlob;
 
 *cb adjustment of vintages to account for fast growth in developing countries
 *** adjust vintages for real fe growth in years 1995-2005
-*** 2005 capacity addition (regi,"1",te) is scaled with ratio between (growth rate + 1/lifetime) and 1/lifetime, 
+*** 2005 capacity addition (regi,"1",te) is scaled with ratio between (growth rate + 1/lifetime) and 1/lifetime,
 *** with an offset of 0.5% to account for the general growth assumed in generisdata_vintages; for  regions with declining FE, 10% is minimum ratio
 *** 2000 capacity addition (regi,"6",te) is scaled with the average of the above ratio and 1
 *** PE2SE technologies
@@ -75,8 +77,8 @@ pm_vintage_in(regi,"6",te) = pm_vintage_in(regi,"6",te) * max(((pm_histfegrowth(
 *RP
 *** First adjustment of CO2 price path for peakBudget runs (set by cm_iterative_target_adj eq 9)
 if(cm_iterative_target_adj eq 9,
-*** Save the original functional form of the CO2 price trajectory so values for all times can be accessed even if the peakBudgYr is shifted. 
-*** Then change to linear increasing CO2 price after peaking time 
+*** Save the original functional form of the CO2 price trajectory so values for all times can be accessed even if the peakBudgYr is shifted.
+*** Then change to linear increasing CO2 price after peaking time
   p_taxCO2eq_until2150(t,regi) = pm_taxCO2eq(t,regi);
   loop(t2$(t2.val eq cm_peakBudgYr),
     pm_taxCO2eq(t,regi)$(t.val gt cm_peakBudgYr) = p_taxCO2eq_until2150(t2,regi) + (t.val - t2.val) * cm_taxCO2inc_after_peakBudgYr * sm_DptCO2_2_TDpGtC;  !! increase by cm_taxCO2inc_after_peakBudgYr per year

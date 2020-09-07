@@ -35,7 +35,3 @@ loop(regi$(p32_factorStorage(regi,"csp") < 1),
   v32_shSeEl.lo(t,regi,"csp")$(t.val > 2050) = 1;
   v32_shSeEl.lo(t,regi,"csp")$(t.val > 2100) = 2;
 );
-
-* $IFTHEN.DTCoup %cm_DTCoup% == 1
-* if( (ord(iteration) ge 6 ),
-* $ENDIF.DTCoup

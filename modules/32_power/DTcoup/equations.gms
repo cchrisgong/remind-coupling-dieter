@@ -163,9 +163,29 @@ q32_limitSolarWind(t,regi)$( (cm_solwindenergyscen = 2) OR (cm_solwindenergyscen
 *** DIETER related equations
 ***---------------------------------------------------------------------------
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
+
 q32_peakDemand_DT(tall, enty2)$(t_DT_32(tall) AND sameas(enty2,"seel")) ..
 	sum(all_te$(DISPATCHte_32(all_te)), sum(rlf, vm_cap(tall,"DEU",all_te,rlf)))
-	=g= 
+	=g=
 	p32_peakDemand_relFac(tall) * v32_seelDem(tall,"DEU",enty2) * 8760 * s32_iteration_ge_5 !! either NO (= 0) for iteration lt 5, or YES (= 1) otherwise
 	;
+
+***----------------------------------------------------------------------------
+*** FS: calculate flexibility adjustment used in flexibility tax for technologies with electricity input
+***----------------------------------------------------------------------------
+* $IFTHEN.DTcoup %cm_DTcoup% == "on"
+* *** calculate flexibility benefit or cost per unit output of flexibile or inflexibly technology
+* q32_flexAdj(tall,"DEU",teFlex)$(t_DT_32(tall))..
+* 	vm_flexAdj(tall,"DEU",teFlex)
+* 	=e=
+* *** inflexible/flexible technology sees with increasing VRE share up to p32_flex_maxdiscount
+* *** p32_flex_maxdiscount positive -> lower-than-average electricity price (flexible demand),
+* *** p32_flex_maxdiscount negative -> higher-than-average electricity price (inflexible demand)
+* 	( 1 - p32_flex_multmk(tall,teFlex) ) * p_priceSeel(tall,"DEU")
+* *** convert to fuel cost for flexible technology (converts to cost per unit output)
+* 	/ pm_eta_conv(tall,"DEU",teFlex)
+* ;
+*
+* $ENDIF.DTcoup
+
 $ENDIF.DTcoup

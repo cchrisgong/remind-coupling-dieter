@@ -20,7 +20,7 @@ p32_shCHP(all_regi,char) = f32_shCHP(all_regi,char);
 
 
 ***parameter p32_grid_factor(all_regi) - multiplicative factor that scales total grid requirements down in comparatively small or homogeneous regions like Japan, Europe or India
-parameter p32_grid_factor(all_regi)                "multiplicative factor that scales total grid requirements down in comparatively small or homogeneous regions like Japan, Europe or India"
+parameter p32_grid_factor(all_regi)  "multiplicative factor that scales total grid requirements down in comparatively small or homogeneous regions like Japan, Europe or India"
 /
 $ondelim
 $include "./modules/32_power/IntC/input/p32_grid_factor.cs4r"
@@ -63,4 +63,5 @@ display p32_storageCap;
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 s32_iteration_ge_5 = 0;
 p32_peakDemand_relFac(tall)$(t_DT_32(tall)) = 0.000156;
+*p32_flex_multmk(tall,teFlex)$(t_DT_32(tall)) = 0.6;
 $ENDIF.DTcoup

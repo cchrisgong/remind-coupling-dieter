@@ -1,5 +1,5 @@
 mypath = "~/remind/dataprocessing/"
-run_number = 18
+run_number = 19
 mydatapath = paste0("~/remind/output/capfac", run_number, "/")
 myDIETERPLOT_path = "~/remind/dataprocessing/DIETER_plots/"
 # import library
@@ -17,7 +17,6 @@ sorted_files_DT_rep <- paste0(mydatapath, "report_DIETER_i", seq(from = 5, to = 
 for(fname in files_DT_rep){
   gdxToQuitte_annual(mydatapath, fname)
 }
-
 
 iteration_toplot_list <- c(5, 10, 20, 30)
 # year_toplot = 2050
@@ -155,7 +154,7 @@ get_capfac <- function(iteration){
   
 capfac <- annual_reportQUITT %>% 
   filter(period == year_toplot) %>% 
-  filter(variable == "capacity factor") %>% 
+  filter(variable == "avg capacity factor") %>% 
   filter(tech %in% TECHkeylst_DT) %>% 
   select(period, tech, value) %>% 
   mutate(value = round(value,2))

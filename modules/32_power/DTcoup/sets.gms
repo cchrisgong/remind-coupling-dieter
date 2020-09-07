@@ -6,9 +6,9 @@ t_DT_32(tall) "time points" /2010,2015,2020,2025,2030,2035,2040,2045,2050,2055,2
 
 * DIETER_te_stor "technologies for storage in DIETER" /Sto1*Sto7/
 
-DIETER_te_32 "technologies in DIETER" /lig,hc,nuc,CCGT,OCGT_eff,bio,Wind_on,Solar,ror,all_te/
+DIETER_te_32 "technologies in DIETER" /coal,hc,lig,nuc,CCGT,OCGT_eff,bio,Wind_on,Solar,ror,all_te,elh2/
 
-DIETERvarname_32 "DIETER name" /capfac,peakDem_relFac,peakDem/
+DIETERvarname_32 "DIETER name" /capfac,peakDem_relFac,peakDem,mult_markup/
 
 COALte_32(all_te) "coal to seel tech in REMIND" /igcc,igccc,pc,pcc,pco,coalchp/
 

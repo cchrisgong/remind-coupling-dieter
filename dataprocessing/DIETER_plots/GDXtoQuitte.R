@@ -25,7 +25,7 @@ tech_dict <- setNames(as.list(tech_dictionary$report_name), tech_dictionary$diet
 
 gdxToQuitte_hourly <- function(mydatapath, gdxfile){
   file = paste0(mydatapath, gdxfile)
-  # file = paste0(mydatapath, "report_DIETER_i5.gdx")
+  file = paste0(mydatapath, "report_DIETER_i30.gdx")
   out_hourly <- NULL
   
   ######################################################################################################################## 
@@ -33,16 +33,18 @@ gdxToQuitte_hourly <- function(mydatapath, gdxfile){
   names(rep_hrs) <- c("gdxfile", "model", "year", "country", "variable", "hour", "value")
   
   out_h <- rep_hrs %>% 
-    group_by(model, year, variable, country) %>%
-    complete(hour = paste0("h",1:8760)) %>%
-    mutate(hour = sort(as.character(hour))) %>% 
+    select(model, year, variable, country, hour,value) %>%
+    mutate(hour = as.numeric(str_extract(hour, "[0-9]+"))) %>% 
+    dplyr::group_by(model, variable, year,  country) %>%
+    # filter(year == "2010") %>% 
+    complete(hour = (1:8760)) %>%
     replace(is.na(.), 0) %>%
-    ungroup(model, year, variable, country) %>% 
+    dplyr::ungroup(model, variable, year, country) %>%
     mutate(MODEL = model, SCENARIO = paste0("baseline"), REGION = country,
-           HOUR = hour, YEAR = year, TECH = "all Tech") %>% 
+           HOUR = hour, TECH = "all Tech") %>% 
     mutate(VARIABLE = as.vector(unlist(variable_dict[variable])), PERIOD = year,
            UNIT = as.vector(unlist(unit_dict[variable])), VALUE = round(value, digits = 4)) %>%
-    arrange(YEAR) %>% 
+    arrange(PERIOD) %>% 
     select(MODEL, SCENARIO, PERIOD, HOUR, REGION, VARIABLE, TECH, VALUE, UNIT)
   
   ###################################################################
@@ -50,17 +52,18 @@ gdxToQuitte_hourly <- function(mydatapath, gdxfile){
   
   names(rep_techHrs) <- c("gdxfile", "model","year", "country","variable", "tech", "hour", "value")
   
-  out_th <- rep_techHrs %>%
+  out_th <- rep_techHrs %>% 
+  select(model, year, tech,variable, country, hour,value) %>%
+  mutate(hour = as.numeric(str_extract(hour, "[0-9]+"))) %>% 
   mutate(tech = as.character(tech)) %>%
   group_by(model, tech, hour, variable, country) %>%
   mutate(year = as.numeric(year)) %>% 
-  complete(year = c(2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090,2100)) %>%
+  complete(year = c(2010,2015,2020,2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090,2100)) %>%
   ungroup(model, tech, hour, variable, country) %>% 
   group_by(model, year, variable, country,tech) %>%
-  complete(hour = paste0("h",1:8760)) %>%
-  mutate(hour = sort(as.character(hour))) %>%
+  complete(hour = (1:8760)) %>%
   replace(is.na(.), 0) %>%
-  ungroup(model, year, variable, country,tech) %>%
+  ungroup(model, year, variable, country,tech)
   mutate(MODEL = model, SCENARIO = paste0("baseline"),  REGION = country,
          HOUR = hour, YEAR = year, TECH = as.vector(unlist(tech_dict[tech]))) %>%
   mutate(VARIABLE = as.vector(unlist(variable_dict[variable])), PERIOD = year,
