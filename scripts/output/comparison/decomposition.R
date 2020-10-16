@@ -7,8 +7,8 @@
 
 library(magpie)
 slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) {
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')
+  if (slurm) { 
+    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
   } else {
     library(remind)
   }
@@ -119,65 +119,65 @@ if(change_agr){
   tmp <- dimSums(cons[re_map[[1]],,], dims=1)
   getCells(tmp) <- names(re_map[1])
   cons <- mbind(tmp, cons[c("GLO", "AFR"),,])
-
+  
   tmp <- dimSums(gdp[re_map[[1]],,], dims=1)
   getCells(tmp) <- names(re_map[1])
   gdp <- mbind(tmp, gdp[c("GLO", "AFR"),,])
-
+  
   tmp <- dimSums(currac[re_map[[1]],,], dims=1)
   getCells(tmp) <- names(re_map[1])
   currac <- mbind(tmp, currac[c("GLO", "AFR"),,])
-
+  
   tmp <- dimSums(tcoal[re_map[[1]],,], dims=1)
   getCells(tmp) <- names(re_map[1])
   tcoal <- mbind(tmp, tcoal[c("GLO", "AFR"),,])
-
+  
   tmp <- dimSums(toil[re_map[[1]],,], dims=1)
   getCells(tmp) <- names(re_map[1])
   toil <- mbind(tmp, toil[c("GLO", "AFR"),,])
-
+  
   tmp <- dimSums(tgas[re_map[[1]],,], dims=1)
   getCells(tmp) <- names(re_map[1])
   tgas <- mbind(tmp, tgas[c("GLO", "AFR"),,])
-
+  
   tmp <- dimSums(tbio[re_map[[1]],,], dims=1)
   getCells(tmp) <- names(re_map[1])
   tbio <- mbind(tmp, tbio[c("GLO", "AFR"),,])
-
+  
   tmp <- dimSums(turan[re_map[[1]],,], dims=1)
   getCells(tmp) <- names(re_map[1])
   turan <- mbind(tmp, turan[c("GLO", "AFR"),,])
-
+  
   tmp <- dimSums(tperm[re_map[[1]],,], dims=1)
   getCells(tmp) <- names(re_map[1])
   tperm <- mbind(tmp, tperm[c("GLO", "AFR"),,])
-
+  
   tmp <- dimSums(fuel[re_map[[1]],,], dims=1)
   getCells(tmp) <- names(re_map[1])
   fuel <- mbind(tmp, fuel[c("GLO", "AFR"),,])
-
+  
   tmp <- dimSums(oam[re_map[[1]],,], dims=1)
   getCells(tmp) <- names(re_map[1])
   oam <- mbind(tmp, oam[c("GLO", "AFR"),,])
-
+  
   tmp <- dimSums(einv[re_map[[1]],,], dims=1)
   getCells(tmp) <- names(re_map[1])
   einv <- mbind(tmp, einv[c("GLO", "AFR"),,])
-
+  
   tmp <- dimSums(inv[re_map[[1]],,], dims=1)
   getCells(tmp) <- names(re_map[1])
   inv <- mbind(tmp, inv[c("GLO", "AFR"),,])
-
+  
   tmp <- dimSums(abat[re_map[[1]],,], dims=1)
   getCells(tmp) <- names(re_map[1])
   abat <- mbind(tmp, abat[c("GLO", "AFR"),,])
 }
 
 for(c in 1:length(compare)){
-
+  
   bau <- names(compare)[c]
   pol <- unlist(compare[c])
-
+  
   # normalize energy and permit prices
   pcoaln <- pcoal[,y_plot,c(pol,bau)] / pgood[,y_plot,c(pol,bau)]
   poiln <- poil[,y_plot,c(pol,bau)] / pgood[,y_plot,c(pol,bau)]
@@ -185,7 +185,7 @@ for(c in 1:length(compare)){
   pbion <- pbio[,y_plot,c(pol,bau)] / pgood[,y_plot,c(pol,bau)]
   purann <- puran[,y_plot,c(pol,bau)] / pgood[,y_plot,c(pol,bau)]
   ppermn <- pperm[,y_plot,c(pol,bau)] / pgood[,y_plot,c(pol,bau)]
-
+  
   # discount and sum over time ----
   sconsd <- dimSums(cons[,y_plot,c(pol,bau)] * setNames(pgood[,y_plot,bau], NULL) * setNames(tsw[,y_plot,bau], NULL), dims = 2)
   sgdpd <- dimSums(gdp[,y_plot,c(pol,bau)] * setNames(pgood[,y_plot,bau], NULL) * setNames(tsw[,y_plot,bau], NULL), dims = 2)
@@ -201,68 +201,68 @@ for(c in 1:length(compare)){
   sinvd <- dimSums(inv[,y_plot,c(pol,bau)] * setNames(pgood[,y_plot,bau], NULL) * setNames(tsw[,y_plot,bau], NULL), dims = 2)
   sabatd <- dimSums(abat[,y_plot,c(pol,bau)] * setNames(pgood[,y_plot,bau], NULL) * setNames(tsw[,y_plot,bau], NULL), dims = 2)
   soamd <- dimSums(oam[,y_plot,c(pol,bau)] * setNames(pgood[,y_plot,bau], NULL) * setNames(tsw[,y_plot,bau], NULL), dims = 2)
-
+  
   # calculate differences between policy and bau ####
 
-  # consider current account effect
-  sconscurrd <- sconsd[,,bau] + scurracd[,,bau]
+  # consider current account effect 
+  sconscurrd <- sconsd[,,bau] + scurracd[,,bau] 
 
   # consumption differences
   dcons <- collapseNames((sconsd[,,pol] - sconsd[,,bau]) / sconscurrd[,,bau] * (-100))
   getNames(dcons) <- paste(getNames(dcons), "Policy_cost", sep=".")
-
+  
   # gdp effect
   gdpeff <- collapseNames((sgdpd[,,pol] - sgdpd[,,bau]) / sconscurrd[,,bau] * (-100))
   getNames(gdpeff) <- paste(getNames(gdpeff), "GDP_effect", sep=".")
-
+  
   # current account
   dcurrac <- collapseNames((scurracd[,,pol] - scurracd[,,bau]) / (sconscurrd[,,bau]) * (-100))
   getNames(dcurrac) <- paste(getNames(dcurrac), "Current_account", sep=".")
-
+  
   # fuel supply costs
   dfuel <- collapseNames((sfueld[,,pol] - sfueld[,,bau]) / sconscurrd[,,bau] * 100)
   getNames(dfuel) <- paste(getNames(dfuel), "ESM_var", sep=".")
-
+  
   # coal trade
   dcoal <- collapseNames((scoald[,,pol] - scoald[,,bau]) / sconscurrd[,,bau] * (-100))
   getNames(dcoal) <- paste(getNames(dcoal), "Coal_trade", sep=".")
-
+  
   # oil trade
   doil <- collapseNames((soild[,,pol] - soild[,,bau]) / sconscurrd[,,bau] * (-100))
   getNames(doil) <- paste(getNames(doil), "Oil_trade", sep=".")
-
+  
   # gas trade
   dgas <- collapseNames((sgasd[,,pol] - sgasd[,,bau]) / sconscurrd[,,bau] * (-100))
   getNames(dgas) <- paste(getNames(dgas), "Gas_trade", sep=".")
-
+  
   # uranium trade
   duran <- collapseNames((surand[,,pol] - surand[,,bau]) / sconscurrd[,,bau] * (-100))
   getNames(duran) <- paste(getNames(duran), "Uranium_trade", sep=".")
-
+  
   # biomass trade
   dbio <- collapseNames((sbiod[,,pol] - sbiod[,,bau]) / sconscurrd[,,bau] * (-100))
   getNames(dbio) <- paste(getNames(dbio), "Biomass_trade", sep=".")
-
+  
   # permit trade
   dperm <- collapseNames((spermd[,,pol] - spermd[,,bau]) / sconscurrd[,,bau] * (-100))
   getNames(dperm) <- paste(getNames(dperm), "Permit_trade", sep=".")
-
+  
   # macro investments
   dinv <- collapseNames((sinvd[,,pol] - sinvd[,,bau]) / sconscurrd[,,bau] * 100)
   getNames(dinv) <- paste(getNames(dinv), "Investments", sep=".")
-
+  
   # non-energy abatement costs
   dabat <- collapseNames((sabatd[,,pol] - sabatd[,,bau]) / sconscurrd[,,bau] * 100)
   getNames(dabat) <- paste(getNames(dabat), "non-Energy_Abatement", sep=".")
-
+  
   # energy system investments
   deinv <- collapseNames((seinvd[,,pol] - seinvd[,,bau]) / sconscurrd[,,bau] * 100)
   #   getNames(deinv) <- paste(getNames(deinv), "ESM_Investments", sep=".")
-
+  
   # operation and maintenance
   doam <- collapseNames((soamd[,,pol] - soamd[,,bau]) / sconscurrd[,,bau] * 100)
   #   getNames(doam) <- paste(getNames(doam), "Operation_Maintenance", sep=".")
-
+  
   # energy system + operation and maintenance (ESM fixed costs)
   esmfix <- deinv + doam
   getNames(esmfix) <- paste(getNames(deinv), "ESM_fixed", sep=".")
@@ -270,20 +270,20 @@ for(c in 1:length(compare)){
   # difference between commodity price in BAU and policy
   #   dpgood <- collapseNames(pgood[,,bau] - pgood[,,pol])
   dpgood <- setNames(pgood[,,bau], NULL) - pgood[,,pol]
-
+  
   #   # capital market effect
   capeff <- dimSums(dpgood[,y_plot,] *(cons[,y_plot, pol] + inv[,y_plot, pol] + fuel[,y_plot, pol] + abat[,y_plot, pol] - gdp[,y_plot, pol]) * setNames(tsw[,y_plot,bau], NULL), dims = 2) * 100 #setNames(pgood[,y_plot,bau], NULL)
   getNames(capeff) <- paste(getNames(capeff), "Capital_market_effect", sep=".")
 
-  # correct policy costs by current account
-  polcost <- dcons + dcurrac
+  # correct policy costs by current account 
+  polcost <- dcons + dcurrac 
   getNames(polcost) <- paste(getNames(polcost), "Policy_cost", sep=".")
 
 
-  plot.data <- mbind(gdpeff, dinv, esmfix, dfuel, dabat, dcoal, dgas, doil, duran, dbio, dperm, capeff) #
+  plot.data <- mbind(gdpeff, dinv, esmfix, dfuel, dabat, dcoal, dgas, doil, duran, dbio, dperm, capeff) # 
   splot.data <- dimSums(plot.data, dims = 4)
   getNames(splot.data) <- getNames(polcost)
-
+  
   magpie2ggplot2(plot.data,stack=TRUE, geom="bar", fill="Data2", xaxis="Data1",ylab="%",xlab="",
 #                title = paste("Decomposition of policy costs, baseline:", bau)) +
                 title = paste("Decomposition of policy costs")) +
@@ -297,5 +297,8 @@ for(c in 1:length(compare)){
                  title = paste("Policy costs, baseline:", bau))
   ggsave(file=file.path("plots", paste0("polcost_", bau, ".png")),
          width=plot.width, height=plot.height, units="mm")
-
+  
 }
+
+
+

@@ -7,8 +7,8 @@
 
 library(lucode)
 slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) {
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')
+  if (slurm) { 
+    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
   } else {
     library(remind)
   }
@@ -20,10 +20,10 @@ library(mip)
 if(!exists("source_include")) {
   #Define arguments that can be read from command line
   outputdirs <- c("C:/Users/lavinia/Documents/MEINS/MO/comparisonREMIND17REMIND20/output/r7463c_SSP2-Base-rem-5",
-                  "C:/Users/lavinia/Documents/MEINS/MO/comparisonREMIND17REMIND20/output/BAU_2018-04-28_11.23.55");
+                  "C:/Users/lavinia/Documents/MEINS/MO/comparisonREMIND17REMIND20/output/BAU_2018-04-28_11.23.55");   
   # path to the output folder
    readArgs("outputdirs")
-}
+} 
 
 ###############################################################################
 
@@ -34,3 +34,5 @@ hist_path <- path(outputdirs[1],"historical.mif")
 
 # make comparision based on mif files
 plotCDR(mif=mif_path, hist=hist_path, reg="all_reg")
+
+

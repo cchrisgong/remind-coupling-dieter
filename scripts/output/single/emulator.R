@@ -13,8 +13,8 @@ library(luplot)
 library(gdx)
 library(ggplot2)
 slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) {
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')
+  if (slurm) { 
+    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
   } else {
     library(remind)
   }
@@ -23,7 +23,7 @@ library(mip)
 #####################################################
 ################## CONFIGURATION ####################
 #####################################################
-
+ 
 if(!exists("source_include")) {
    outputdir <- "~/Transferfolder/coupling/"
 }
@@ -101,19 +101,19 @@ regions <- sort(getRegions(x$supplycurve))
 
 for (y in years) {
 
-  title <- paste0(y)
+  title <- paste0(y) 
   dat <- gginput(x$supplycurve[regions,y,],scatter="type")
   dat$year<-factor(dat$year)
 
   p <- ggplot(dat, aes(x=.value.x,y=.value.y)) +
-    geom_line(aes(colour=scenario, linetype=curve)) + #geom_line(size=0.5) +
+    geom_line(aes(colour=scenario, linetype=curve)) + #geom_line(size=0.5) + 
     geom_point(data=gginput(x$rem_point[regions,y,],scatter = "variable"),aes(x=.value.x,y=.value.y,colour=scenario)) +
     geom_point(data=gginput(x$mag_point[regions,y,],scatter = "variable"),aes(x=.value.x,y=.value.y,colour=scenario),shape=5) +
     facet_wrap(~region) +
     ggtitle(title) + ylab("$/GJ") + xlab("EJ") + coord_cartesian(xlim=c(0,80),ylim=c(0,30)) +
-    theme(legend.position="top") + guides(linetype=guide_legend(nrow=2,byrow=TRUE, title.position = "top")) +
+    theme(legend.position="top") + guides(linetype=guide_legend(nrow=2,byrow=TRUE, title.position = "top")) + 
     guides(color=guide_legend(nrow=1,byrow=TRUE, title.position = "top"))
-
+  
   swfigure(pdf,print,p) #,sw_option="height=9,width=12")
 }
 
@@ -151,14 +151,14 @@ for (r in regions){
     swlatex(pdf,plot.title)
     var_price = c("Price|Biomass|MAgPIE (US$2005/GJ)","Price|Biomass|Emulator presolve (US$2005/GJ)","Price|Biomass|Emulator presolve shifted (US$2005/GJ)","Price|Biomass|Emulator shifted (US$2005/GJ)")
     dat<-as.ggplot(csv[r,years,var_price])
-
-    p <- ggplot(data=dat, aes(x=Year, y=Value,colour=Data3)) + geom_line(size=1) + labs(y="$/GJ") +
+    
+    p <- ggplot(data=dat, aes(x=Year, y=Value,colour=Data3)) + geom_line(size=1) + labs(y="$/GJ") + 
           geom_point(aes(shape=Data3),size=4) +
           scale_shape_manual(values = var_price_shapes) +
           theme(legend.position="top",legend.title=element_blank()) +
           guides(shape = guide_legend(nrow = length(var_price))) +
           theme(legend.text = element_text(size = 8))
-
+    
     swfigure(pdf,print,p)#,sw_option="height=6,width=10",fig.placement="!h")
   } else {
     # Add empty page so that for all following regions demand is printed on left pages and price on right
@@ -183,7 +183,7 @@ if (!identical(var_pe, character(0))) {
     plot.title<-paste0("\\subsection{Bioenergy costs}")
     swlatex(pdf,plot.title)
     dat<-as.ggplot(csv[,years,var_pe]["GLO",,invert=TRUE])
-
+    
     p <- ggplot(data=dat, aes(x=Year, y=Value)) + geom_line(aes(colour=Data3),size=1) + labs(y="billion US$2005") +
       geom_point(aes(colour=Data3),size=1) +
       guides(color = guide_legend(nrow = length(var_pe))) +
@@ -193,6 +193,6 @@ if (!identical(var_pe, character(0))) {
 
     swfigure(pdf,print,p,fig.width=1)
 }
-
+    
 #close pdf and Change the name
 swclose(pdf,outfile=emulator_file,clean_output=TRUE,save_stream=FALSE)

@@ -22,7 +22,7 @@
 *   - 2012-05-04 : Creation
 *===========================================
 
-*' @equations
+*' @equations 
 *' Uranium extraction is represented as a 3rd order polynomial parametrized by long-term marginal extraction costs.
 *---------------------------------------
 *** Uranium extraction (3rd order poly)
@@ -50,15 +50,15 @@ q31_costFuExPol(ttot,regi,peExPol(enty))$(ttot.val ge cm_startyear)..
      * vm_fuExtr(ttot,regi,enty,"1")
 ;
 
-*' Two dummy equations further determine regional uranium extraction bounds.
+*' Two dummy equations further determine regional uranium extraction bounds. 
 *NB* the 2 dummy equations only for determining the regional uranium bounds
 q31_mc_dummy(regi,peExPol(enty))$(cm_limit_peur_scen eq 1)..
-  v31_fuExtrMC(enty,"1")
+  v31_fuExtrMC(enty,"1") 
   =e=
   p31_costExPoly(regi,"xi1",enty)
     + p31_costExPoly(regi,"xi2",enty) * v31_fuExtrCumMax(regi,enty, "1")
     + p31_costExPoly(regi,"xi3",enty) * v31_fuExtrCumMax(regi,enty, "1")**2
-    + p31_costExPoly(regi,"xi4",enty) * v31_fuExtrCumMax(regi,enty, "1")**3
+    + p31_costExPoly(regi,"xi4",enty) * v31_fuExtrCumMax(regi,enty, "1")**3 
 ;
 
 q31_totfuex_dummy(peExPol(enty))$(cm_limit_peur_scen eq 1)..
@@ -73,7 +73,7 @@ q31_totfuex_dummy(peExPol(enty))$(cm_limit_peur_scen eq 1)..
 *** LB, JH
 
 *' MOFEX (Model of Fossil Extraction) minimizes the discounted extraction and trade costs of fossils while balancing trade for each time step.
-*' The model takes fossil demand, imports and exports from a prior REMIND run as inputs, and it calculates fossil extraction and trade as outputs.
+*' The model takes fossil demand, imports and exports from a prior REMIND run as inputs, and it calculates fossil extraction and trade as outputs. 
 *' In this realization, the output variables are returned to the current REMIND run as starting points for the hybrid optimization.
 
 $IFTHEN.mofex %cm_MOFEX% == "on"
@@ -81,11 +81,11 @@ $IFTHEN.mofex %cm_MOFEX% == "on"
 q31_MOFEX_tradebal(t,trade(peExGrade))..
     sum(regi,  vm_Xport(t,regi,trade) - vm_Mport(t,regi,trade)) =e= 0;
 
-*** Discounted extraction and trade costs of fossil fuels
+*** Discounted extraction and trade costs of fossil fuels 
 q31_MOFEX_costMinFuelEx..
          v31_MOFEX_costMinFuelEx
          =e=
-         sum(ttot$(ttot.val ge cm_startyear),
+         sum(ttot$(ttot.val ge cm_startyear), 
            sum(regi,
              pm_ts(ttot) / ((1 + pm_prtp(regi))**(pm_ttot_val(ttot)-cm_startyear))
              * (sum(peFos(enty), vm_costFuEx(ttot,regi,enty))
@@ -108,7 +108,7 @@ $ENDIF.mofex
 *NB/LB/BB/GL/IM* fossil extraction costs as grade structure with linearly increasing marginal extraction costs
 ***This is used for oil, gas and coal. Notice that coal supply cost curves remain constant over time
 
-*' Fossil fuels are represented by discrete grades based on ranges of marginal extraction costs. The total extraction cost for each time step
+*' Fossil fuels are represented by discrete grades based on ranges of marginal extraction costs. The total extraction cost for each time step 
 *' is calculated based on long-term marginal extraction costs and short-term calibrated adjustment costs which capture inertias, e.g. from infrastructure
 
 q31_costFuExGrade(ttot,regi,peExGrade(enty))$(ttot.val ge cm_startyear)..
@@ -125,10 +125,10 @@ q31_costFuExGrade(ttot,regi,peExGrade(enty))$(ttot.val ge cm_startyear)..
          (1 +
            (p31_datafosdyn(regi,enty,rlf,"alph") * 1/(sqr(pm_ttot_val(ttot)-pm_ttot_val(ttot-1)))
              * sqr(((vm_fuExtr(ttot,regi,enty,rlf)-vm_fuExtr(ttot-1,regi,enty,rlf))/(vm_fuExtr(ttot-1,regi,enty,rlf)+
-                                                                                     0.001*p31_grades(ttot,regi,"xi3",enty,rlf) +
+                                                                                     0.001*p31_grades(ttot,regi,"xi3",enty,rlf) + 
                                                                                      p31_extraseed(ttot,regi,enty,rlf) +
                                                                                      1.e-9)))
-           )$(ttot.val gt 2005)
+           )$(ttot.val gt 2005) 
          )
        )
        * vm_fuExtr(ttot,regi,enty,rlf)
@@ -143,8 +143,8 @@ q31_costFuExGrade(ttot,regi,peExGrade(enty))$(ttot.val ge cm_startyear)..
 *' If early retirement of oil wells is switched on, any slack capacity from those fields is also added.
 
 q31_fuExtrCum(ttot,regi,pe2rlf(peEx(enty),rlf))$(ttot.val ge cm_startyear)..
-        v31_fuExtrCum(ttot,regi,enty,rlf)
-        =e=
+        v31_fuExtrCum(ttot,regi,enty,rlf) 
+        =e= 
         v31_fuExtrCum(ttot-1,regi,enty,rlf)$(ttot.val gt 2005) + pm_ts(ttot)*(vm_fuExtr(ttot,regi,enty,rlf)
 $if %cm_OILRETIRE% == "on"    + v31_fuSlack(ttot,regi,enty,rlf)
         );
@@ -167,7 +167,7 @@ $IFTHEN.cm_OILRETIRE %cm_OILRETIRE% == "on"
 q31_smoothoilphaseout(ttot,regi,enty2rlf_dec(enty,rlf))$( (ttot.val ge cm_startyear) AND (ttot.val lt 2120) AND (sameas(enty,"peoil")) )..
     v31_fuSlack(ttot+1,regi,enty,rlf)
     =l=
-    v31_fuSlack(ttot,regi,enty,rlf) + (pm_ttot_val(ttot+1)-pm_ttot_val(ttot)) * cm_earlyreti_rate * 0.3 * p31_max_oil_extraction(regi,enty,rlf); !! 0.3 is an arbitrarily chosen number to make the retirement of oil comparable to retirement of other sectors- the "max_oil_extraction" is alsways higher than the real extraction, so some decrease of this limit makes the results smoother.
+    v31_fuSlack(ttot,regi,enty,rlf) + (pm_ttot_val(ttot+1)-pm_ttot_val(ttot)) * cm_earlyreti_rate * 0.3 * p31_max_oil_extraction(regi,enty,rlf); !! 0.3 is an arbitrarily chosen number to make the retirement of oil comparable to retirement of other sectors- the "max_oil_extraction" is alsways higher than the real extraction, so some decrease of this limit makes the results smoother. 
 ;
 $ENDIF.cm_OILRETIRE
 

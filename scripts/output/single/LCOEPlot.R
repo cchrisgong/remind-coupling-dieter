@@ -7,8 +7,8 @@
 
 library(lucode)
 slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) {
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')
+  if (slurm) { 
+    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
   } else {
     library(remind)
   }
@@ -17,14 +17,14 @@ library(lusweave)
 
 
 ############################# BASIC CONFIGURATION #############################
-gdx_name     <- "fulldata.gdx"        # name of the gdx
+gdx_name     <- "fulldata.gdx"        # name of the gdx  
 
 if(!exists("source_include")) {
   #Define arguments that can be read from command line
-  outputdir <- "output/R17IH_SSP2_postIIASA-26_2016-12-23_16.03.23"     # path to the output folder
+  outputdir <- "output/R17IH_SSP2_postIIASA-26_2016-12-23_16.03.23"     # path to the output folder 
   # path to the output folder
   lucode::readArgs("outputdir","gdx_name")
-}
+} 
 
 gdx <- path(outputdir,gdx_name)
 ###############################################################################
@@ -37,3 +37,4 @@ reportFile <- path(outputdir, paste("LCOE_Plot_",scenNames,".pdf",sep=""))
 
 # run plot LCOE function
 plotLCOE(LCOE_path, gdx, fileName = reportFile)
+

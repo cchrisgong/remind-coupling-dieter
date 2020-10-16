@@ -9,13 +9,13 @@
 #' @description Create REMIND dashboard results for single runs
 #'
 #' @author Renato Rodrigues
-#'
+#' 
 
 library(lucode)
 library(rmarkdown)
 slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) {
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')
+  if (slurm) { 
+    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
   } else {
     library(remind)
   }
@@ -26,7 +26,7 @@ if(!exists("source_include")) {
   #Define arguments that can be read from command line
    outputdir <- NULL     # path to the output folder
    readArgs("outputdir")
-}
+} 
 
 scenario <- getScenNames(outputdir)
 reportfile <- path(getwd(),outputdir,paste0("REMIND_generic_",scenario,".mif"))
@@ -45,3 +45,4 @@ output_file <- path(getwd(),outputdir,paste0("REMIND_dashboard_",scenario,".html
 
 # generate dashboard for REMIND
 dashboard(gdx=gdx, statsFile=statsFile, regionMapping=regionMapping, hist=hist, reportfile=reportfile, output_file=output_file)
+

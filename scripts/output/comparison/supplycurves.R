@@ -5,8 +5,8 @@
 # |  REMIND License Exception, version 1.0 (see LICENSE file).
 # |  Contact: remind@pik-potsdam.de
 slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) {
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')
+  if (slurm) { 
+    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
   } else {
     library(remind)
   }
@@ -25,12 +25,12 @@ regions <- sort(getRegions(x$supplycurve))
 out<-swopen(template="david")
 
 for (year in years) {
-  title <- paste0(year)
+  title <- paste0(year) 
   dat <- gginput(x$supplycurve[regions,year,],scatter="type")
   dat$year<-factor(dat$year)
 
   p <- ggplot(dat, aes(x=.value.x,y=.value.y)) +
-    geom_line(aes(colour=scenario, linetype=curve)) + #geom_line(size=0.5) +
+    geom_line(aes(colour=scenario, linetype=curve)) + #geom_line(size=0.5) + 
     geom_point(data=gginput(x$rem_point[regions,year,],scatter = "variable"),aes(x=.value.x,y=.value.y,colour=scenario)) +
     geom_point(data=gginput(x$mag_point[regions,year,],scatter = "variable"),aes(x=.value.x,y=.value.y,colour=scenario),shape=5) +
     facet_wrap(~region) +
