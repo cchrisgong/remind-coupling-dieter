@@ -6,21 +6,21 @@
 # |  Contact: remind@pik-potsdam.de
 library(magclass)
 slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) { 
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
+  if (slurm) {
+    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')
   } else {
     library(remind)
   }
 library(lucode)
 library(methods)
 ############################# BASIC CONFIGURATION #############################
-gdx_name     <- "fulldata.gdx"        # name of the gdx  
+gdx_name     <- "fulldata.gdx"        # name of the gdx
 
 if(!exists("source_include")) {
   #Define arguments that can be read from command line
    outputdir <- "output/R17IH_SSP2_postIIASA-26_2016-12-23_16.03.23"     # path to the output folder
    readArgs("outputdir","gdx_name")
-} 
+}
 
 gdx      <- path(outputdir,gdx_name)
 scenario <- getScenNames(outputdir)
@@ -29,4 +29,4 @@ scenario <- getScenNames(outputdir)
 file_name <- path(outputdir,paste0("convergenceCheck_",scenario,".pdf"))
 
 # produce convergende pdf based on gdx information
-convergenceCheck(gdx,file=file_name) 
+convergenceCheck(gdx,file=file_name)

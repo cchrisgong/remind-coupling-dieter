@@ -12,4 +12,3 @@ install:
   - Rscript -e "if(!requireNamespace('gms')) devtools::install_github('pik-piam/gms')"
 script:
   - Rscript -e "null <- gms::codeCheck(strict=TRUE)"
-

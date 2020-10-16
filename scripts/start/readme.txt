@@ -25,15 +25,15 @@ start.R -------> submit(cfg) ----------------------------------------------> pre
 
 The procedure in detail:
 
-Rscript start.R -----> choose_slurmConfig()               [scripts/start/choose_slurmConfig.R] 
-                       configure_cfg(cfg, scenario, ...)  [start.R]                            
-                       submit(cfg)                        [scripts/start/submit.R]               
-                        - create output folder                                                                     
-                        - save cfg to runtitlte.RData                                                                     
-                        - copy scripts/start/prepare_and_run.R into results folder                                                                     
-                        - move runtitle.RData into results folder                                                                     
-                        - change to results folder                                                                       
-                        - send job to cluster: sbatch Rscript prepare_and_run.R ----->  prepare_and_run() [scripts/start/prepare_and_run.R]                                                                    
+Rscript start.R -----> choose_slurmConfig()               [scripts/start/choose_slurmConfig.R]
+                       configure_cfg(cfg, scenario, ...)  [start.R]
+                       submit(cfg)                        [scripts/start/submit.R]
+                        - create output folder
+                        - save cfg to runtitlte.RData
+                        - copy scripts/start/prepare_and_run.R into results folder
+                        - move runtitle.RData into results folder
+                        - change to results folder
+                        - send job to cluster: sbatch Rscript prepare_and_run.R ----->  prepare_and_run() [scripts/start/prepare_and_run.R]
                         - change to main folder                                          - load config.RData
                                                                                          - cd mainfolder
                                                                                          - prepare NDC [scripts/input/prepareNDC2018.R]
@@ -51,7 +51,3 @@ Rscript start.R -----> choose_slurmConfig()               [scripts/start/choose_
                                                                                          - start subsequent runs submit(cfg) [scripts/start/submit.R]
                                                                                          - reporting [output.R]
                                                                                          - cd resultsfolder
-                    
-                    
-
-

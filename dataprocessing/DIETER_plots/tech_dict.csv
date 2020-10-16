@@ -1,0 +1,34 @@
+dieter_name,report_name
+ror,Run-of-River
+nuc,Nuclear
+lig,Lignite
+hc,Hard coal
+CCGT,CCGT
+OCGT_eff,OCGT_eff
+OCGT_ineff,OCGT_ineff
+bio,Biomass
+Wind_on,Wind_on
+Wind_off,Wind_off
+Solar,Solar PV
+Sto1,Lithium-ion
+Sto2,Lead acid
+Sto3,Sodium-sulfur
+Sto4,Redox flow
+Sto5,Pumped hydro
+Sto6,Compressed air
+Sto7,Power-to-gas
+DSM_shift1,DSM_shift1
+DSM_shift2,DSM_shift2
+DSM_shift3,DSM_shift3
+DSM_shift4,DSM_shift4
+DSM_shift5,DSM_shift5
+DSM_curt1,DSM_curt1
+DSM_curt2,DSM_curt2
+DSM_curt3,DSM_curt3
+PR_up,PR_up
+PR_do,PR_do
+SR_up,SR_up
+SR_do,SR_do
+MR_up,MR_up
+MR_do,MR_do
+Electrolysis,Electrolysis

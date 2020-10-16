@@ -7,23 +7,23 @@
 
 library(magclass)
 slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) { 
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
+  if (slurm) {
+    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')
   } else {
     library(remind)
   }
 library(lucode)
 library(methods)
 ############################# BASIC CONFIGURATION #############################
-gdx_name     <- "fulldata.gdx"        # name of the gdx  
+gdx_name     <- "fulldata.gdx"        # name of the gdx
 gdx_ref_name <- "input_ref.gdx"       # name of the reference gdx (for policy cost calculation)
- 
+
 
 if(!exists("source_include")) {
   #Define arguments that can be read from command line
    outputdir <- "output/R17IH_SSP2_postIIASA-26_2016-12-23_16.03.23"     # path to the output folder
    readArgs("outputdir","gdx_name","gdx_ref_name")
-} 
+}
 
 gdx      <- path(outputdir,gdx_name)
 gdx_ref  <- path(outputdir,gdx_ref_name)
@@ -39,7 +39,7 @@ LCOE_reporting_file   <- path(outputdir,paste0("REMIND_LCOE_", scenario, ".mif")
 tmp <- try(convGDX2MIF(gdx,gdx_ref,file=remind_reporting_file,scenario=scenario)) # try to execute convGDX2MIF
 if(class(tmp)=="try-error") convGDX2MIF_fallback_for_coupling(gdx,file=remind_reporting_file,scenario=scenario)
 
-#  MAGICC code not working with REMIND-EU										   
+#  MAGICC code not working with REMIND-EU
 # generate MAGICC reporting and append to REMIND reporting
 #if (0 == nchar(Sys.getenv('MAGICC_BINARY'))) {
 #  warning('Can\'t find magicc executable under environment variable MAGICC_BINARY')
@@ -66,7 +66,3 @@ if(file.exists(file.path(outputdir, "EDGE-T"))){
 # LCOE code not compatible with aggregated regions (incompatbile with REMIND-EU)
 ## produce REMIND LCOE reporting *.mif based on gdx information
 #tmp <- try(convGDX2MIF_LCOE(gdx,gdx_ref,file=LCOE_reporting_file,scenario=scenario)) # execute convGDX2MIF_LCOE
-
-										
-															   
-														

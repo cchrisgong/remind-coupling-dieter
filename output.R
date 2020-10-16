@@ -25,7 +25,7 @@ library(lucode)
 if(!exists("source_include")) {
   # if this script is not being sourced by another script but called from the command line via Rscript read the command line arguments and let the user choose the slurm options
   readArgs("outputdir","output","comp","remind_dir")
-} 
+}
 
 #Setting relevant paths
 if(file.exists('/iplex/01/landuse')) { #run is performed on the cluster
@@ -51,7 +51,7 @@ get_line <- function(){
 
 choose_folder <- function(folder,title="Please choose a folder") {
   dirs <- NULL
-  
+
   # Detect all output folders containing fulldata.gdx
   # For coupled runs please use the outcommented text block below
 
@@ -61,7 +61,7 @@ choose_folder <- function(folder,title="Please choose a folder") {
   #runs <- findCoupledruns(folder)
   #dirs <- findIterations(runs,modelpath=folder,latest=TRUE)
   #dirs <- sub("./output/","",dirs)
-  
+
   dirs <- c("all",dirs)
   cat("\n\n",title,":\n\n")
   cat(paste(1:length(dirs), dirs, sep=": " ),sep="\n")
@@ -88,7 +88,7 @@ choose_folder <- function(folder,title="Please choose a folder") {
 		if(answer=="y"){
 			return(dirs[id+1])
 		} else choose_folder(folder,title)
-	# 
+	#
 	} else if(any(dirs[identifier] == "all")){
 		identifier <- 2:length(dirs)
 		return(dirs[identifier])
@@ -120,7 +120,7 @@ choose_mode <- function(title="Please choose the output mode") {
     comp<-TRUE
   } else {
     stop("This mode is invalid. Please choose a valid mode")
-  }  
+  }
   return(comp)
 }
 
@@ -154,11 +154,11 @@ if (comp==TRUE) {
       }
     }
   } else outputdirs <- outputdir
-  
-  #Set value source_include so that loaded scripts know, that they are 
+
+  #Set value source_include so that loaded scripts know, that they are
   #included as source (instead of a load from command line)
   source_include <- TRUE
-  
+
   # Execute output scripts over all choosen folders
   for(rout in output){
     name<-paste(rout,".R",sep="")
@@ -169,9 +169,9 @@ if (comp==TRUE) {
       rm(tmp.env)
       gc()
       if(!is.null(tmp.error)) warning("Script ",name," was stopped by an error and not executed properly!")
-    } 
+    }
   }
-  
+
   } else {
 
   # Select an output directory if not defined by readArgs
@@ -187,7 +187,7 @@ if (comp==TRUE) {
         last_iteration <- max(as.numeric(sub("magpie_","",grep("magpie_",list.dirs(path(remind_dir,temp[i],"data/results")),value=T))))
         outputdirs[i] <- path(remind_dir,temp[i],"data/results/",paste("magpie_",last_iteration,sep=""))
       }
-    } 
+    }
   } else outputdirs <- outputdir
 
   # define slurm class or direct execution
@@ -199,7 +199,7 @@ if (comp==TRUE) {
     # if this script is being sourced by another script exectue the output scripts directly without sending them to the cluster
     slurmConfig <- "direct"
   }
- 
+
   #Execute outputscripts for all choosen folders
   for (outputdir in outputdirs) {
 
@@ -207,7 +207,7 @@ if (comp==TRUE) {
     if(!exists("output")) {
       output <- choose_module("./scripts/output/single","Please choose the output module to be used for output generation")
     }
-    
+
     if(exists("cfg")) {
       title    <- cfg$title
       gms      <- cfg$gms
@@ -215,7 +215,7 @@ if (comp==TRUE) {
       revision <- cfg$revision
       magpie_folder <- cfg$magpie_folder
     }
-    
+
     # Get values of config if output.R is called standalone
     if(!exists("source_include")) {
       magpie_folder <- getwd()
@@ -236,17 +236,17 @@ if (comp==TRUE) {
         revision <- as.numeric(unlist(strsplit(grep("(cfg\\$|)revision +<-",l,value=TRUE),"<-[ \t]*"))[2])
       }
     }
-    
-    #Set value source_include so that loaded scripts know, that they are 
+
+    #Set value source_include so that loaded scripts know, that they are
     #included as source (instead of a load from command line)
     source_include <- TRUE
-   
+
     cat(paste("\nStarting output generation for",outputdir,"\n\n"))
-    
+
     ###################################################################################
     # Execute R scripts
     ###################################################################################
-    
+
     for(rout in output){
       name<-paste(rout,".R",sep="")
       if(file.exists(paste0("scripts/output/single/",name))){

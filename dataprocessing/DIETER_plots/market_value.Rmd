@@ -1,0 +1,257 @@
+---
+title: "market value"
+output: pdf_document
+---
+
+```{r}
+# import library
+summary(cars)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(data.table)
+library(xlsx)
+library(readxl)
+library(tibble)
+library(reshape2)
+library(gdx)
+library(quitte)
+library(gdxrrw)
+library(zoo)
+library(stringr)
+library(dygraphs)
+library(grid)
+library(plyr)
+library(ggpubr)
+library(ggthemes)
+library(gridExtra)
+library(cowplot)
+# theme_set(theme_pubr())
+library(lubridate)
+library(RColorBrewer)
+library("car")
+library(openxlsx)
+# library(ggalt)
+
+
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+setwd("~/DIETER/myFirstDIETER/dataprocessing")
+tech = "~/DIETER/myFirstDIETER/DIETER/results_mSS_exoWS_PtG-ONLY.gdx"
+
+for (pv_share_par in c("1", "10", "20", "30", "40", "50", "60")){
+  pv_share_par = 60
+  
+  # tech = "~/DIETER/myFirstDIETER/DIETER/results_mSS_exoWS.gdx"
+  price_Hrs0 = read.gdx(tech,"report_hours", colNames = c("model","region","variable","pv_share", "wind_on_share","wind_off_share","p2g_share","hour","value"), factors = FALSE)%>% filter(pv_share == pv_share_par) %>% 
+  filter(variable == "price") %>% 
+  mutate(hour = str_replace(hour, hour, str_sub(hour, 2, -1))) 
+  
+
+  # complete the table (zero entries which were not read by read.gdx is now filled in)
+  price_Hrs1 <- price_Hrs0 %>% group_by(region, variable, pv_share, wind_on_share, wind_off_share ) %>% 
+  complete(hour = paste0("",1:8760)) %>% 
+  replace(is.na(.), 0) %>%
+  ungroup(region, variable, pv_share, wind_on_share, wind_off_share) %>% 
+  mutate(hour = as.numeric(hour))
+
+  price_Hrs <- price_Hrs1  %>% mutate(hour = as.numeric(hour)) %>% arrange(hour)
+  
+  price_Hrs$DayNight <- ifelse(and(price_Hrs$hour%%24 >=7,price_Hrs$hour%%24 <19), "DAY", "NIGHT")
+  
+  generation_Hrs0= read.gdx(tech,"report_tech_hours",
+                            colNames = c("model","region","variable","pv_share","wind_on_share","wind_off_share","p2g_share","technology","hour","value"),
+                            factors = FALSE) %>%
+    filter(pv_share == pv_share_par) %>%
+    filter(variable == "generation renewable") %>%
+    select("hour","variable", "pv_share","wind_on_share", "technology", "value") %>%
+  mutate(hour = str_replace(hour, hour, str_sub(hour, 2, -1)))
+
+  generation_Hrs <- generation_Hrs0 %>% group_by(variable, pv_share, wind_on_share, technology ) %>%
+  complete(hour = paste0("", 1:8760)) %>%
+  replace(is.na(.), 0) %>%
+  ungroup(variable, pv_share, wind_on_share, technology)
+
+  gen_solar_Hrs <- generation_Hrs %>% filter(technology == "Solar" ) %>%  mutate(hour = as.numeric(hour)) %>% arrange(hour)
+  max_solargenhrs = max(gen_solar_Hrs$value)
+
+  gen_wind_Hrs <- generation_Hrs %>% filter(technology == "Wind_on" ) %>%  mutate(hour = as.numeric(hour)) %>% arrange(hour)
+  max_windgenhrs = max(gen_wind_Hrs$value)
+
+  price_Hrs$gen_wind <- gen_wind_Hrs$value
+  price_Hrs$gen_solar <- gen_solar_Hrs$value
+  
+  price_Hrs_plot <- price_Hrs  %>% arrange(desc(value)) 
+  price_Hrs_plot$sorted_x <- seq(1, 8760)
+  max_price <- max(price_Hrs_plot$value)
+  mean_price= mean(price_Hrs_plot$value)
+  
+  # theme_set(theme_bw())
+  # price_Hrs_plot$sorted_x <- factor(price_Hrs_plot$sorted_x, levels= unique(price_Hrs_plot$sorted_x), ordered=TRUE)
+  rainbow.pal <- rev(rainbow(100, start = 0.63, end = 0.62))
+  max_price_plot = 150
+  
+
+
+  p1<-ggplot(data = price_Hrs_plot) +
+    # geom_hline(yintercept = 0, color = "black", size = 0.9*linesize) +
+    # geom_line(data = price_Hrs_plot, aes(x = sorted_x, y = value ), size = 1*linesize, alpha = 0.9) +
+    geom_line(aes(x = sorted_x, y = value ), size = 1.2, alpha = 0.5, color = "red") +
+    coord_cartesian(expand = FALSE,  ylim = c(0, max_price_plot)) +
+    geom_col(aes(x = sorted_x, y = value, fill = hour ), position = "identity", width = 0.2) +
+    # +coord_cartesian(expand = FALSE,  ylim = c(0, 150))+
+     scale_fill_gradientn(colours  = rainbow.pal,
+                   limits = c(1, 8760),
+                   breaks = (c(1,7,13,19,23)+.3) * 8760 / 24,
+                   labels = c("Jan", "Apr", "Jul", "Oct", "Dec"),
+                   name = "") +
+    geom_point(aes(x = price_Hrs_plot$sorted_x, y = 0.9 * max_price_plot * gen_solar/max_solargenhrs), color = "blue", size = 1) +
+    geom_point(aes(x = price_Hrs_plot$sorted_x, y = 0.9 * max_price_plot * gen_wind/max_windgenhrs), color = "green", size = 1) +
+    annotate(geom = "text", x = 2000, y = 0.7 * max_price_plot, label = paste0("mean price = ",round(mean_price)), color = "purple",  size=15) +
+    annotate(geom = "text", x = 2000, y = 0.9 * max_price_plot , label = paste0("max wind generation =", round(max_windgenhrs)), color = "green",  size=15) +
+    annotate(geom = "text", x = 2000, y = 0.8 * max_price_plot , label = paste0("max solar generation =", round(max_solargenhrs)), color = "blue",  size=15) +
+    scale_y_continuous(sec.axis = sec_axis(~.*max_solargenhrs/(0.9 * max_price_plot), name = "GW")) +
+    theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+    xlab("hour") + ylab("electricity price")
+
+    # p2<-ggplot(data = price_Hrs_plot) +
+    # # geom_hline(yintercept = 0, color = "black", size = 0.9*linesize) +
+    # # geom_line(data = price_Hrs_plot, aes(x = sorted_x, y = value ), size = 1*linesize, alpha = 0.9) +
+    # geom_line(aes(x = sorted_x, y = value ), size = 1.2, alpha = 0.5, color = "red") +
+    # coord_cartesian(expand = FALSE,  ylim = c(0, max_price_plot)) +
+    # geom_col(aes(x = sorted_x, y = value, fill = DayNight,), position = "identity", width = 0.2) +
+    # scale_fill_brewer(palette="Set1")+
+    # geom_point(aes(x = price_Hrs_plot$sorted_x, y = 0.9 * max_price_plot * gen_solar/max_solargenhrs), color = "blue", size = 1) +
+    # geom_point(aes(x = price_Hrs_plot$sorted_x, y = 0.9 * max_price_plot * gen_wind/max_windgenhrs), color = "green", size = 1) +
+    # annotate(geom = "text", x = 2000, y = 0.7 * max_price_plot, label = paste0("mean price = ", round(mean_price)), color = "purple",  size=15) +
+    # annotate(geom = "text", x = 2000, y = 0.9 * max_price_plot, label = paste0("max wind generation =", round(max_windgenhrs)), color = "green",  size=15) +
+    # annotate(geom = "text", x = 2000, y = 0.8 * max_price_plot, label = paste0("max solar generation =", round(max_solargenhrs)), color = "blue",  size=15) +
+    # scale_y_continuous(sec.axis = sec_axis(~.*max_solargenhrs/(0.9*max_price_plot), name = "GW")) +
+    # theme(axis.text=element_text(size=10), axis.title=element_text(size= 10, face="bold")) +
+    # xlab("hour") + ylab("electricity price")
+
+    
+    # plot_grid(p1, p2, ncol = 2, nrow = 1)
+    # print(p1)
+
+    ggsave(filename = paste0("Duration_curve_pv = ", pv_share_par, "_PtG-ONLY.png"),  width = 25, height = 25, units = "in", dpi = 120)
+    
+}
+    
+```
+
+```{r}
+  setwd("~/DIETER/myFirstDIETER/dataprocessing")
+  tech = "~/DIETER/myFirstDIETER/DIETER/results_mSS_exoWS_PtG-ONLY.gdx"
+
+  pv_share_par = 60
+  wind_share_par = 60
+  price_Hrs0 = read.gdx(tech,"report_hours", colNames = c("model","region","variable","pv_share", "wind_on_share","wind_off_share","p2g_share","hour","value"), factors = FALSE)%>% filter(pv_share == pv_share_par) %>% 
+  filter(variable == "price") %>% 
+  mutate(hour = str_replace(hour, hour, str_sub(hour, 2, -1))) 
+
+    stoLoading_Hrs0 = read.gdx(tech,"report_tech_hours", colNames = c("model","region","variable","pv_share","wind_on_share","wind_off_share","p2g_share","technology","hour","value"),
+                            factors = FALSE) %>%
+    filter(pv_share == pv_share_par) %>%
+    filter(variable == "storage loading") %>%
+    filter(technology == "Sto7") %>%
+    select("hour","variable", "pv_share","wind_on_share", "technology", "value") %>%
+  mutate(hour = str_replace(hour, hour, str_sub(hour, 2, -1)))
+    
+  tech1 = "~/DIETER/myFirstDIETER/DIETER/results_mWS_exoSS_PtG-ONLY.gdx"
+   price_Hrs0 = read.gdx(tech1,"report_hours", colNames = c("region","variable","pv_share", "wind_on_share","wind_off_share","hour","value"), factors = FALSE)%>% filter(wind_on_share == wind_share_par) %>% 
+  filter(variable == "price") %>% 
+  mutate(hour = str_replace(hour, hour, str_sub(hour, 2, -1))) 
+   
+   stoLoading_Hrs0 = read.gdx(tech1,"report_tech_hours", colNames = c("region","variable","pv_share","wind_on_share","wind_off_share","technology","hour","value"),
+                            factors = FALSE) %>%
+    filter(wind_on_share == wind_share_par) %>%
+    filter(variable == "storage loading") %>%
+    filter(technology == "Sto7") %>%
+    select("hour","variable", "pv_share","wind_on_share", "technology", "value") %>%
+  mutate(hour = str_replace(hour, hour, str_sub(hour, 2, -1)))
+     
+  # complete the table (zero entries which were not read by read.gdx is now filled in)
+  price_Hrs <- price_Hrs0 %>% group_by(region, variable, pv_share, wind_on_share,wind_off_share ) %>% 
+  complete(hour = paste0("",1:8760)) %>% 
+  replace(is.na(.), 0) %>%
+  ungroup(region, variable, pv_share, wind_on_share, wind_off_share) %>% 
+  mutate(hour = as.numeric(hour))%>% mutate(hour = as.numeric(hour)) %>% arrange(hour)
+
+  price_Hrs$DayNight <- ifelse(and(price_Hrs$hour%%24 >=7,price_Hrs$hour%%24 <19), "DAY", "NIGHT")
+  
+  price_Hrs_plot <- price_Hrs  %>% arrange(desc(value)) 
+  price_Hrs_plot$sorted_x <- seq(1, 8760)
+  max_price <- max(price_Hrs_plot$value)
+  mean_price= mean(price_Hrs_plot$value)
+  
+
+  stoLoading_Hrs <- stoLoading_Hrs0 %>% group_by(variable, pv_share, wind_on_share, technology ) %>%
+  complete(hour = paste0("", 1:8760)) %>%
+  replace(is.na(.), 0) %>%
+  ungroup(variable, pv_share, wind_on_share, technology)
+
+  p2gCharging_Hrs <- stoLoading_Hrs %>% mutate(hour = as.numeric(hour)) %>% arrange(hour)
+  max_gp2gInhrs = max(p2gCharging_Hrs$value)
+
+  price_Hrs$gen_p2gIn <- p2gCharging_Hrs$value
+
+  price_Hrs_plot <- price_Hrs  %>% arrange(desc(value)) 
+  price_Hrs_plot$sorted_x <- seq(1, 8760)
+  max_price <- max(price_Hrs_plot$value)
+  mean_price= mean(price_Hrs_plot$value)
+  
+  rainbow.pal <- rev(rainbow(100, start = 0.63, end = 0.62))
+  max_price_plot = 140
+  
+  p1<-ggplot(data = price_Hrs_plot) +
+    geom_line(aes(x = sorted_x, y = value ), size = 1.2, alpha = 0.5, color = "red") +
+    coord_cartesian(expand = FALSE,  ylim = c(0, max_price_plot)) +
+    geom_col(aes(x = sorted_x, y = value, fill = hour ), position = "identity", width = 0.2) +
+     scale_fill_gradientn(colours  = rainbow.pal,
+                   limits = c(1, 8760),
+                   breaks = (c(1,7,13,19,23)+.3) * 8760 / 24,
+                   labels = c("Jan", "Apr", "Jul", "Oct", "Dec"),
+                   name = "") +
+    geom_point(aes(x = price_Hrs_plot$sorted_x, y = 0.9 * max_price_plot * gen_p2gIn/max_gp2gInhrs), color = "green", size = 5) +
+    annotate(geom = "text", x = 2000, y = 0.7 * max_price_plot, label = paste0("mean price = ",round(mean_price)), color = "purple",  size=15) +
+    annotate(geom = "text", x = 2000, y = 0.9 * max_price_plot , label = paste0("max P2G charging =", round(max_gp2gInhrs)), color = "green",  size=15) +
+    scale_y_continuous(sec.axis = sec_axis(~.*max_gp2gInhrs/(0.9 * max_price_plot), name = "GW")) +
+    theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+    xlab("hour") + ylab("electricity price")
+
+  ggsave(filename ="Duration_curve_ws=60_PtG-ONLY.png",  width = 25, height =25, units = "in", dpi = 120)
+  
+    # p2<-ggplot(data = price_Hrs_plot) +
+    # geom_line(aes(x = sorted_x, y = value ), size = 1.2, alpha = 0.5, color = "red") +
+    # coord_cartesian(expand = FALSE,  ylim = c(0, max_price_plot)) +
+    # geom_col(aes(x = sorted_x, y = value, fill = DayNight,), position = "identity", width = 0.2) +
+    # scale_fill_brewer(palette="Set1")+
+    # geom_point(aes(x = price_Hrs_plot$sorted_x, y = 0.9 * max_price_plot * gen_p2gIn/max_gp2gInhrs), color = "green", size = 5) +
+    # annotate(geom = "text", x = 2000, y = 0.7 * max_price_plot, label = paste0("mean price = ", round(mean_price)), color = "purple",  size=15) +
+    # annotate(geom = "text", x = 2000, y = 0.8 * max_price_plot, label = paste0("max P2G charging  =", round(max_gp2gInhrs)), color = "blue",  size=15) +
+    # scale_y_continuous(sec.axis = sec_axis(~.*max_gp2gInhrs/(0.9*max_price_plot), name = "GW")) +
+    # theme(axis.text=element_text(size=10), axis.title=element_text(size= 10, face="bold")) +
+    # xlab("hour") + ylab("electricity price")
+
+  
+    ggsave(filename ="Duration_curve_ws=60_PtG-ONLY_DAYNIGHT.png",  width = 25, height =25, units = "in", dpi = 120)
+    
+
+    
+```
+
+
+
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

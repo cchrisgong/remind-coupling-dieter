@@ -335,7 +335,7 @@ demandEJplotf = function(demandEJ, POP){
     ## calculate per capita demand
   POP = merge(POP, REMIND2ISO_MAPPING, all.x = TRUE, by = c("iso"))
   POP = POP[, .(pop = sum(value)), by = c("region", "year")]
-  
+
   demandEJcap = merge(demandEJ , POP, all.x = TRUE, by =c("year", "region"))
 
   ## calculate per capita values
@@ -454,7 +454,7 @@ demandkmplotf = function(demandkm, POP){
   demandkm[, aggr_mode := ifelse(sector %in% c("trn_freight", "trn_shipping_intl"), "Freight", aggr_mode)]
   demandkm[, aggr_mode := ifelse(sector %in% c("trn_aviation_intl"), "Pass. non LDV", aggr_mode)]
   demandkm[, aggr_mode := ifelse(subsector_L2 %in% c("trn_pass_road_bus", "HSR_tmp_subsector_L2", "Passenger Rail_tmp_subsector_L2", "Cycle_tmp_subsector_L2", "Walk_tmp_subsector_L2", "Domestic Aviation_tmp_subsector_L2", "Bus") | subsector_L1 %in% c("trn_pass_road_LDV_2W"), "Pass. non LDV", aggr_mode)]
-  
+
   demandkm[, veh := ifelse(grepl("Truck", vehicle_type) & vehicle_type != "Light Truck and SUV" | vehicle_type == "3W Rural", "Truck", NA)]
   demandkm[, veh := ifelse(grepl("Large|SUV|Midsize|Multipurpose Vehicle|Van|Light Truck and SUV", vehicle_type), "Large Cars", veh)]
   demandkm[, veh := ifelse(grepl("Subcompact|Compact|Mini|Three-Wheeler_tmp_vehicletype", vehicle_type), "Small Cars", veh)]
@@ -488,7 +488,7 @@ demandkmplotf = function(demandkm, POP){
   ## calculate per capita demand
   POP = merge(POP, REMIND2ISO_MAPPING, all.x = TRUE, by = c("iso"))
   POP = POP[, .(pop = sum(value)), by = c("region", "year")]
-  
+
   demandkmcap = merge(demandkm, POP, all.x = TRUE, by =c("year", "region"))
 
   ## calculate per capita values

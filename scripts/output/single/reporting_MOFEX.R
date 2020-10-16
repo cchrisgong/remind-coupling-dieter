@@ -7,8 +7,8 @@
 
 library(magclass)
 slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) { 
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
+  if (slurm) {
+    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')
   } else {
     library(remind)
   }
@@ -20,15 +20,15 @@ library(rlang)
 library(luscale)
 
 ############################# BASIC CONFIGURATION #############################
-gdx_name     <- "fulldata.gdx"        # name of the gdx  
+gdx_name     <- "fulldata.gdx"        # name of the gdx
 gdx_ref_name <- "input_ref.gdx"       # name of the reference gdx (for policy cost calculation)
- 
+
 
 if(!exists("source_include")) {
   #Define arguments that can be read from command line
    outputdir <- "output/R17IH_SSP2_postIIASA-26_2016-12-23_16.03.23"     # path to the output folder
    readArgs("outputdir","gdx_name","gdx_ref_name")
-} 
+}
 
 gdx      <- path(outputdir,gdx_name)
 gdx_ref  <- path(outputdir,gdx_ref_name)

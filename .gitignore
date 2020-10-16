@@ -16,6 +16,7 @@ input/
 !modules/29_CES_parameters/load/input
 # Ignore everything in "output" folders
 output/
+!scripts/output/
 
 # Ignore everything in "doc" folders, except for 3 specific files
 doc/

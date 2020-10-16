@@ -16,7 +16,7 @@ David Klein (<dklein@pik-potsdam.de>)
     + [Dynamic](#dynamic)
     + [Static](#static)
     + [The coupling scripts](#the-coupling-scripts)
-    
+
 # How to start coupled runs
 
 ### Clone the models
@@ -56,7 +56,7 @@ Direct the models to the snapshot you just created above by editing .Rprofile in
 # }
 ```
 
-### Configure start_bundle_coupled.R 
+### Configure start_bundle_coupled.R
 
 See comments in the head section of the file. Most importantly you need to provide the path to MAgPIE.
 

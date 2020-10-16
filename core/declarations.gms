@@ -22,10 +22,10 @@ pm_pvpRegi(ttot,all_regi,all_enty)                   "prices of traded commoditi
 
 p_pvpRegiBeforeStartYear(ttot,all_regi,all_enty)     "prices of traded commodities before start year - regional. only used for permit trade"
 pm_pricePerm(ttot)                                   "permit price in special case when the marginal is only found in box module"
-                                                  
+
 p_share(ttot,all_regi,all_in,all_in)                 "share of production factors"
 pm_share_trans(tall,all_regi)                        "transportation share"
-pm_gdp_gdx(tall,all_regi)                            "GDP path from gdx, updated iteratively."   
+pm_gdp_gdx(tall,all_regi)                            "GDP path from gdx, updated iteratively."
 p_inv_gdx(tall,all_regi)                            "macro-investments path from gdx, updated iteratively."
 pm_taxCO2eq(ttot,all_regi)                           "CO2 tax path in T$/GtC = $/kgC. To get $/tCO2, multiply with 272 [T$/GtC]"
 pm_taxCO2eqHist(ttot,all_regi)                       "Historic CO2 tax path in 2010 and 2015 (also in BAU!) in T$/GtC = $/kgC. To get $/tCO2, multiply with 272 [T$/GtC]"
@@ -60,7 +60,7 @@ o_totCO2emi_allYrs(ttot,iteration)                    "Global CO2 emissions over
 o_change_totCO2emi_peakBudgYr                         "Measure for how much the CO2 emissions change around the peakBudgYr"
 p_factorRescale_taxCO2(iteration)                     "Multiplicative factor for rescaling the CO2 price to reach the target"
 p_factorRescale_taxCO2_Funneled(iteration)            "Multiplicative factor for rescaling the CO2 price to reach the target - limited by an iteration-dependent funnel"
-o_taxCO2eq_Itr_1regi(ttot,iteration)                  "CO2 taxed in the last region, tracked over iterations for debugging" 
+o_taxCO2eq_Itr_1regi(ttot,iteration)                  "CO2 taxed in the last region, tracked over iterations for debugging"
 o_pkBudgYr_flipflop(iteration)                        "Counter that tracks if flipfloping of cm_peakBudgYr occured in the last iterations"
 o_taxCO2eq_afterPeakShiftLoop_Itr_1regi(ttot, iteration) "CO2 taxed in the last region, after the loop that shifts peakBudgYr, tracked over iterations for debugging"
 
@@ -142,8 +142,8 @@ pm_dataren(all_regi,char,rlf,all_te)                 "Array including both regio
 p_datapot(all_regi,char,rlf,all_enty)                "Total land area usable for the solar technologies PV and CSP. [km^2]"
 p_adj_seed_reg(tall,all_regi)                        "market capacity that can be built from 0 and gives v_adjFactor=1"
 p_adj_seed_te(ttot,all_regi,all_te)                                "technology-dependent multiplicative prefactor to the v_adjFactor seed value. Smaller means slower scale-up"
-*** appears in q_esm2macro and q_balFeForCes. This energy category is 0 in LAM, IND and AFR in 2005, but a value > 0 is needed for the calculation of CES parameters. 
-*** Accordingly, a value of sm_eps is inserted in pm_cesdata to allow calculation of the CES parameters. 
+*** appears in q_esm2macro and q_balFeForCes. This energy category is 0 in LAM, IND and AFR in 2005, but a value > 0 is needed for the calculation of CES parameters.
+*** Accordingly, a value of sm_eps is inserted in pm_cesdata to allow calculation of the CES parameters.
 p_datacs(all_regi,all_enty)                          "fossil energy that is not oxidized (=carbon stored)"
 pm_inco0_t(ttot,all_regi,all_te)                     "New inco0 that is time-dependent for some technologies. [T$/TW]"
 *LB* calculate parameter pm_tsu2opTimeYr for the eq q_transPe2se and q_cap;
@@ -158,12 +158,12 @@ p_capCum(tall, all_regi,all_te)                      "vm_capCum from input.gdx f
 pm_capCumForeign(ttot,all_regi,all_te)               "parameter for learning externality (cumulated capacity of other regions except regi)"
 pm_SolNonInfes(all_regi)                             "model status from last iteration. 1 means status 2 or 7, 0 for all other status codes"
 
-p_cintraw(all_enty)                                  "carbon intensity of fossils [GtC per TWa]" 
+p_cintraw(all_enty)                                  "carbon intensity of fossils [GtC per TWa]"
 
 p_CapFixFromRWfix(ttot,all_regi,all_te)              "parameter for fixing capacity variable to Real-World values in 2010/2015"
 p_deltaCapFromRWfix(ttot,all_regi,all_te)            "parameter with resulting deltacap values resulting from fixing capacity to real-world values in 2010/2015"
 
-p_priceSeel(ttot,all_regi)                           "parameter with electricity price from last iteration (unit: trUSD/TWa)"
+p_priceSeel(tall,all_regi)                           "parameter with electricity price from last iteration (unit: trUSD/TWa)"
 pm_calibrate_eff_scale(all_in,all_in,eff_scale_par)   "parameters for scaling efficiencies in CES calibration"
 /   /
 
@@ -197,8 +197,8 @@ o_INI_DirProdSeTe                                    "directly produced SE by te
 o_INI_TotalDirProdSe                                 "Total direct SE production in 2005 (from initialcap2)"
 o_INI_TotalCap                                       "Total electricity producing capacity in 2005 (from initialcap2)"
 o_INI_AvCapFac                                       "Average regional capacity factor of the power sector in 2005 (from initialcap2)"
-      
-o_iterationNumber                                    "output parameter to be able to display the iteration number"    
+
+o_iterationNumber                                    "output parameter to be able to display the iteration number"
 ***   Keep track of ESM numbers for output to see changes between iterations
 o_negitr_cumulative_peprod(iteration,entyPe)         "estimated production 2005-2100. 'estimated' because of different times step lengths around 2100 [ZJ]"
 o_negitr_cumulative_CO2_emineg_co2luc(iteration)     "estimated CO2 emissions from LUC 2005-2100. 'estimated' because of different times step lengths around 2100 [GtCO2]"
@@ -209,7 +209,7 @@ o_negitr_disc_cons_drInt_reg(iteration,all_regi)     "estimated discounted consu
 o_negitr_total_forc(iteration)                       "total forcing in 2100"
 
 ***----------------------------------------------------------------------------------------
-***------------------------------------------------trade module----------------------------                              
+***------------------------------------------------trade module----------------------------
 pm_ttot_val(ttot)                                    "value of ttot set element"
 p_tall_val(tall)                                     "value of tall set element"
 pm_ts(tall)                                          "(t_n+1 - t_n-1)/2 for a timestep t_n"
@@ -217,7 +217,7 @@ pm_dt(tall)                                          "difference to last timeste
 pm_interpolWeight_ttot_tall(tall)                    "weight for linear interpolation of ttot-dependent variables"
 pm_tall_2_ttot(tall,ttot)                            "mapping from tall to ttot"
 pm_ttot_2_tall(ttot,tall)                            "mapping from ttot to tall"
-                                                             
+
 p_share_seliq_s(ttot,all_regi)                       "share of liquids used for stationary sector (fehos). [0..1]"
 p_share_seh2_s(ttot,all_regi)                        "share of hydrogen used for stationary sector (feh2s). [0..1]"
 p_share_seel_s(ttot,all_regi)                        "Share of electricity used for stationary sector (feels). [0..1]"
@@ -299,7 +299,7 @@ vm_pebiolc_price(ttot,all_regi)                      "Bioenergy price according 
 v_costOM(ttot,all_regi)                              "o&m costs"
 v_costInv(ttot,all_regi)                             "investment costs"
 vm_costTeCapital(ttot,all_regi,all_te)               "investment costs"
-                                                                 
+
 vm_co2CCS(ttot,all_regi,all_enty,all_enty,all_te,rlf)       "all differenct ccs. [GtC/a]"
 
 vm_co2capture(ttot,all_regi,all_enty,all_enty,all_te,rlf)   "all captured CO2. [GtC/a]"
@@ -312,7 +312,7 @@ vm_capEarlyReti(tall,all_regi,all_te)                "fraction of early retired 
 vm_otherFEdemand(ttot,all_regi,all_enty)             "final energy demand from no transformation technologies (e.g. enhanced weathering)"
 
 vm_demSeOth(ttot,all_regi,all_enty,all_te)	         "other sety demand from certain technologies, have to calculated in additional equations [TWa]"
-vm_prodSeOth(ttot,all_regi,all_enty,all_te)	         "other sety production from certain technologies, have to be calculated in additional equations [TWa]"	
+vm_prodSeOth(ttot,all_regi,all_enty,all_te)	         "other sety production from certain technologies, have to be calculated in additional equations [TWa]"
 
 v_shGreenH2(ttot,all_regi)   "share of green hydrogen in all hydrogen by 2030 [0..1]"
 v_shBioTrans(ttot,all_regi)    "Share of biofuels in transport liquids from 2025 onwards. Value between 0 and 1."
@@ -411,7 +411,7 @@ q_shFeCes(ttot,all_regi,all_enty,all_in,all_teEs)         "Shares of final energ
 q_shGreenH2(ttot,all_regi)  "share of green hydrogen in all hydrogen"
 q_shBioTrans(ttot,all_regi)  "Define the share of biofuels in transport liquids from 2025 on."
 
-$IFTHEN.sehe_upper not "%cm_INNOPATHS_sehe_upper%" == "off" 
+$IFTHEN.sehe_upper not "%cm_INNOPATHS_sehe_upper%" == "off"
 q_heat_limit(ttot,all_regi)
 $ENDIF.sehe_upper
 
@@ -461,7 +461,7 @@ s_tgch4_2_pgc                                         "conversion factor 100-yr 
 sm_MtCH4_2_TWa                                        "Energy content of methane. MtCH4 --> TWa: 1 MtCH4 = 1.23 * 10^6 toe * 42 GJ/toe * 10^-9 EJ/GJ * 1 TWa/31.536 EJ = 0.001638 TWa (BP statistical review)"  /0.001638/
 
 sm_D2015_2_D2005                                      "Convert $2015 to $2005 by dividing by 1.2: 1/1.2 = 0.8333"      /0.8333/
-sm_DptCO2_2_TDpGtC                                    "Conversion multiplier to go from $/tCO2 to T$/GtC: 44/12/1000"     /0.00366667/ 
+sm_DptCO2_2_TDpGtC                                    "Conversion multiplier to go from $/tCO2 to T$/GtC: 44/12/1000"     /0.00366667/
 
 s_co2pipe_leakage                                     "Leakage rate of CO2 pipelines. Unit: [0..1]"
 s_tau_cement                                          "range of per capita investments for switching from short-term to long-term behavior in CO2 cement emissions"                / 12000 /
@@ -494,7 +494,7 @@ s_tgch4_2_pgc = s_gwpCH4 * (12/44) * 0.001;
 p_cintraw("pecoal") = 26.1 / s_zj_2_twa;
 p_cintraw("peoil")  = 20.0 / s_zj_2_twa;
 p_cintraw("pegas")  = 15.0 / s_zj_2_twa;
- 
+
 ***----------------------------------------------------------------------------------------
 ***                                   F I L E S
 ***----------------------------------------------------------------------------------------
@@ -511,8 +511,8 @@ magicc_sed_script.ap = 0;
 
 *** INNOPATHS emissions reporting
 
-Parameter 
-o_emissions(ttot,all_regi,all_enty) 
+Parameter
+o_emissions(ttot,all_regi,all_enty)
 o_emissions_bunkers(ttot,all_regi,all_enty)
 o_emissions_energy(ttot,all_regi,all_enty)
 o_emissions_energy_demand(ttot,all_regi,all_enty)
@@ -543,4 +543,3 @@ emi_conv(all_enty) / co2 3666.6666666666666666666666666667, ch4 28, n2o 416.4286
 ;
 
 *** EOF ./core/declarations.gms
-

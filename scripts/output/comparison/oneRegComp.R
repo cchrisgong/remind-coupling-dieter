@@ -6,8 +6,8 @@
 # |  Contact: remind@pik-potsdam.de
 
 slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) { 
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
+  if (slurm) {
+    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')
   } else {
     library(remind)
   }
@@ -15,7 +15,7 @@ library(magpie)
 library(luplot)
 
 ############################# BASIC CONFIGURATION #############################
-gdx_name <- "fulldata.gdx"        # name of the gdx   
+gdx_name <- "fulldata.gdx"        # name of the gdx
 
 if(!exists("source_include")) {
   #Define arguments that can be read from command line
@@ -25,7 +25,7 @@ if(!exists("source_include")) {
                   "C:/Documents and Settings/lavinia/My Documents/MEINS/MO/REMIND17/CO2-Kyoto_plot/output/rem4765_SSP2-ModTax-rem-8");
   # path to the output folder
    readArgs("outputdirs","gdx_name")
-} 
+}
 
 ###############################################################################
 
@@ -168,7 +168,3 @@ swtable(sw,collapseNames(tablePE[,,"PE|Nuclear (EJ/yr)"]),caption=paste("PE, Nuc
 
 swclose(sw,outfile="oneRegComp.pdf",clean_output=TRUE)
 ########################################################################
- 
-  
-  
-

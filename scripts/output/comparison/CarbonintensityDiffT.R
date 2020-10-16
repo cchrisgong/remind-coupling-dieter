@@ -11,14 +11,14 @@ library(lucode)
 library(gdx)
 library(magpie)
 slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) { 
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
+  if (slurm) {
+    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')
   } else {
     library(remind)
   }
 
 ############################# BASIC CONFIGURATION #############################
-gdx_name <- "fulldata.gdx"        # name of the gdx   
+gdx_name <- "fulldata.gdx"        # name of the gdx
 
 if(!exists("source_include")) {
   #Define arguments that can be read from command line
@@ -28,7 +28,7 @@ if(!exists("source_include")) {
                   "C:/Documents and Settings/lavinia/My Documents/MEINS/MO/REMIND17/CO2-Kyoto_plot/output/rem4765_SSP2-ModTax-rem-8");
   # path to the output folder
    readArgs("outputdirs","gdx_name")
-} 
+}
 
 ###############################################################################
 
@@ -53,23 +53,23 @@ ref_year  <- 2005  # refenence year for comparision
 ############### read and calculate data ################################
 emiCO2 <- read_all(gdx_path,readEmissions,emiengregi="co2",eminegregi="co2cement",as.list=FALSE)
 emiCO2 <- emiCO2* (44/12*1000)
-gdp    <- read_all(gdx_path,readGDPMER,as.list=FALSE) 
+gdp    <- read_all(gdx_path,readGDPMER,as.list=FALSE)
 CI <- emiCO2[,y_table,]/(gdp[,y_table,]*1000)
 CI_diff <- 100+((CI-setYears(CI[,ref_year,],NULL))/setYears(CI[,ref_year,],NULL)*100)
 
 ########################################################################
 
 ################## plot data ###########################################
-p1 <- magpie2ggplot2(CI[r_plot,y_plot,],geom='line',facet_x='Data1', 
+p1 <- magpie2ggplot2(CI[r_plot,y_plot,],geom='line',facet_x='Data1',
                      ylab='Carbon Intensity [Mt CO2/billion US$2005]',color='Region',
                      scales='free_y',show_grid=TRUE,ncol=2)
 print(p1)
-p2 <- magpie2ggplot2(CI_diff[r_plot,y_plot,],geom='line',facet_x='Data1', 
+p2 <- magpie2ggplot2(CI_diff[r_plot,y_plot,],geom='line',facet_x='Data1',
                      ylab='Carbon Intensity- Difference[%]',color='Region',
                      show_grid=TRUE,ncol=2)
 print(p2)
 y_plot <- c("y2005","y2010","y2015","y2020","y2025","y2030")
-p3 <- magpie2ggplot2(CI_diff[r_plot,y_plot,],geom='line',facet_x='Data1', 
+p3 <- magpie2ggplot2(CI_diff[r_plot,y_plot,],geom='line',facet_x='Data1',
                      ylab='Carbon Intensity- Difference[%]',color='Region',
                      ylim=c(0,150),show_grid=TRUE,ncol=2)
 print(p3)
@@ -91,7 +91,3 @@ for(sn in scenNames){
 }
 swclose(sw)
 ########################################################################
- 
-  
-  
-

@@ -11,14 +11,14 @@ library(lucode)
 library(gdx)
 library(magpie)
 slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) { 
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
+  if (slurm) {
+    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')
   } else {
     library(remind)
   }
 
 ############################# BASIC CONFIGURATION #############################
-gdx_name <- "fulldata.gdx"        # name of the gdx   
+gdx_name <- "fulldata.gdx"        # name of the gdx
 
 
 if(!exists("source_include")) {
@@ -26,7 +26,7 @@ if(!exists("source_include")) {
   outputdirs <- c("C:/Documents and Settings/lavinia/My Documents/MEINS/MO/REMIND17/codeCheck/output/rem5663_SSP5-OS-SPA5-rem-5");
   # path to the output folder
    readArgs("outputdirs","gdx_name")
-} 
+}
 
 ###############################################################################
 
@@ -62,16 +62,16 @@ print(p1)
 y_plot <- c("y2005","y2010","y2015","y2020","y2025","y2030","y2035","y2040","y2045","y2050","y2055","y2060","y2070")
 #y_plot <- c("y2005","y2010","y2015","y2020","y2025","y2030","y2035","y2040","y2045","y2050","y2055","y2060","y2070","y2080","y2090","y2100")
 
-p2 <- magpie2ggplot2(prCO2[r_plot,y_plot,],geom='line',facet_x='Data1', 
+p2 <- magpie2ggplot2(prCO2[r_plot,y_plot,],geom='line',facet_x='Data1',
                      ylab='CO2 Price[US$2005/t CO2]',color='Region',
                      scales='free_y',show_grid=TRUE,ncol=2)
 print(p2)
-p3 <- magpie2ggplot2(prCO2[r_plot,y_plot,],geom='line',facet_x='Data1', 
+p3 <- magpie2ggplot2(prCO2[r_plot,y_plot,],geom='line',facet_x='Data1',
                      ylab='CO2 Price[US$2005/t CO2]',color='Region',
                      show_grid=TRUE,ncol=2)
 print(p3)
 #y_plot <- c("y2005","y2010","y2015","y2020","y2025","y2030")
-p4 <- magpie2ggplot2(prCO2[r_plot,y_plot,],geom='line',facet_x='Data1', 
+p4 <- magpie2ggplot2(prCO2[r_plot,y_plot,],geom='line',facet_x='Data1',
                      ylab='CO2 Price[US$2005/t CO2]',color='Region',
                      scales='free_y',show_grid=TRUE,ncol=2)
 print(p4)
@@ -94,7 +94,3 @@ swtable(sw,table[,,sn],sn,digits=2,transpose=TRUE)
 }
 swclose(sw)
 ########################################################################
- 
-  
-  
-
