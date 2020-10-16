@@ -313,8 +313,11 @@ cm_flex_tax                 "switch for enabling flexibility tax"
 cm_DTcoup_capcon         "switch for capacity constraint"
 cm_flexMax_elh2             "switch for setting the maximum relative reduction of the electricity price electrolysis sees when flex. tax is enabled"
 cm_H2targets                "switches on capacity targets for electrolysis in NDC techpol following national Hydrogen Strategies"
+cm_PriceDurSlope_elh2       "slope of price duration curve of electrolysis"
+cm_FlexTaxFeedback          "switch deciding whether flexibility tax feedback on buildlings and industry electricity prices is on"
 cm_BioSupply_Adjust_EU      "factor for scaling sub-EU bioenergy supply curves"
 cm_BioImportTax_EU          "factor for EU bioenergy import tax"
+
 ;
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -463,15 +466,21 @@ $setGlobal c_regi_sensscen  all !! def = all
 
 cm_TaxConvCheck = 1; !! def 1, which means tax convergence check is on
 
-
-cm_biotrade_phaseout = 0; !! def 0
-cm_bioprod_histlim = -1; !! def -1
 cm_flex_tax = 0; !! def 0
 cm_flexMax_elh2 = 0.6; !! def 0.6
+																	  
+cm_biotrade_phaseout = 0; !! def 0
+cm_bioprod_histlim = -1; !! def -1	
+
 cm_H2targets = 0; !! def 0
+
+cm_PriceDurSlope_elh2 = 20; !! def 10
+cm_FlexTaxFeedback = 0; !! def 0
 
 cm_BioSupply_Adjust_EU = 2; !! def 1
 cm_BioImportTax_EU = 1; !! def 0.25
+
+
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ***                           YOU ARE IN THE WARNING ZONE (DON'T DO CHANGES HERE)
