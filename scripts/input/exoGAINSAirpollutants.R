@@ -10,8 +10,8 @@
 library(dplyr)
 library(luscale) # rename_dimnames
 slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) {
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')
+  if (slurm) { 
+    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
   } else {
     library(remind)
   }
@@ -110,7 +110,7 @@ ela[,,] <- tmp
 ##############################################################
 RA_limited <- RA / (setYears(RA[,2015,] +1E-10))
 RA_limited[RA_limited>5] <- 5
-
+          
 E <- ( ef_gains[,,ssp_scenario] / (setYears(ef_gains[,2015,ssp_scenario])+1E-10) + noef ) * setYears(emi_gains[,2015,ssp_scenario])  * ( RA_limited) ^ela
 
 # Calcualte emissions using different formula: for emisions that have no ef_gains
@@ -192,9 +192,9 @@ writeGDX(out,file="pm_emiAPexsolve.gdx",period_with_y = FALSE)
 #   p<-ggplot(data=dat, aes(x=Year, y=Value)) +  geom_line(aes(colour=Data2)) + facet_wrap(~Region,scales = "free_y")
 #   ggsave(filename=paste0("Regions_",sec,".png"),p,scale=1.5,width=32,height=18,unit="cm",dpi=150)
 # }
-#
+# 
 # stop()
-#
+# 
 # # Add missing Int. Shipping sector from extra ECLIPSE file
 # RA_ship <- setNames(rem_in["GLO",,"FE|Transport|Liquids (EJ/yr)"],NULL)
 # # calculate shippin emission the same way as gains emissions
@@ -202,7 +202,7 @@ writeGDX(out,file="pm_emiAPexsolve.gdx",period_with_y = FALSE)
 # E_rem <- add_columns(E_rem,addnm = getNames(ship_E,dim=1)) # filled with NA
 # gases <- getNames(E_rem,dim=2)
 # E_rem["GLO",,getNames(tmp)] <- ship_E[,,gases][,,ssp_scenario]
-#
+# 
 # # Add BC and NOx for missing Int. Aviation sector from extra file from Steve
 # RA_avi <- collapseNames(time_interpolate(rem_in["GLO",,"Final Energy|Transportation|Liquids (EJ/yr)"][,,scenario], interpolated_year=getYears(ef_gains), integrate_interpolated_years=TRUE, extrapolation_type="constant"))
 # # calculate aviation emission the same way as gains emissions

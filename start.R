@@ -43,17 +43,17 @@ get_line <- function(){
 
 choose_folder <- function(folder,title="Please choose a folder") {
   dirs <- NULL
-
+  
   # Detect all output folders containing fulldata.gdx
   # For coupled runs please use the outcommented text block below
 
   dirs <- sub("/(non_optimal|fulldata).gdx","",sub("./output/","",Sys.glob(c(file.path(folder,"*","non_optimal.gdx"),file.path(folder,"*","fulldata.gdx")))))
-
+  
   # DK: The following outcommented lines are specially made for listing results of coupled runs
   #runs <- findCoupledruns(folder)
   #dirs <- findIterations(runs,modelpath=folder,latest=TRUE)
   #dirs <- sub("./output/","",dirs)
-
+  
   dirs <- c("all",dirs)
   cat("\n\n",title,":\n\n")
   cat(paste(1:length(dirs), dirs, sep=": " ),sep="\n")
@@ -80,7 +80,7 @@ choose_folder <- function(folder,title="Please choose a folder") {
 		if(answer=="y"){
 			return(dirs[id+1])
 		} else choose_folder(folder,title)
-	#
+	# 
 	} else if(any(dirs[identifier] == "all")){
 		identifier <- 2:length(dirs)
 		return(dirs[identifier])
@@ -161,8 +161,8 @@ configure_cfg <- function(icfg, iscen, iscenarios, isettings) {
                  input_ref.gdx = isettings[iscen, "path_gdx_ref"],
                  input_bau.gdx = isettings[iscen, "path_gdx_bau"])
 
-    # Remove potential elements that contain ".gdx" and append gdxlist
-    icfg$files2export$start <- .setgdxcopy("\\.gdx", icfg$files2export$start, gdxlist)
+    # Remove potential elements that end with ".gdx" and append gdxlist
+    icfg$files2export$start <- .setgdxcopy("\\.gdx$", icfg$files2export$start, gdxlist)
 
     # add gdx information for subsequent runs
     icfg$subsequentruns        <- rownames(isettings[isettings$path_gdx_ref == iscen & !is.na(isettings$path_gdx_ref) & isettings$start == 1,])
@@ -199,7 +199,7 @@ if ('--restart' %in% argv) {
     submit(cfg, restart = TRUE)
     #cat(paste0("output/",outputdir,"/config.Rdata"),"\n")
   }
-
+  
 } else {
 
   # If testOneRegi was selected, set up a testOneRegi run.
@@ -261,7 +261,7 @@ if ('--restart' %in% argv) {
       start_now <- (substr(scenarios[scen,"path_gdx_ref"], nchar(scenarios[scen,"path_gdx_ref"])-3, nchar(scenarios[scen,"path_gdx_ref"])) == ".gdx"
                    | is.na(scenarios[scen,"path_gdx_ref"]))
     }
-
+    
     # save the cfg data for later start of subsequent runs (after preceding run finished)
     filename <- paste0(scen,".RData")
     cat("   Writing cfg to file",filename,"\n")
@@ -275,6 +275,6 @@ if ('--restart' %in% argv) {
     }
 
     if (!identical(cfg$subsequentruns,character(0))) cat("   Subsequent runs:",cfg$subsequentruns,"\n")
-
+    
   }
 }

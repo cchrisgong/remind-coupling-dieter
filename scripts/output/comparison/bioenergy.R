@@ -11,14 +11,14 @@ library(lucode)
 library(gdx)
 library(magpie)
 slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) {
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')
+  if (slurm) { 
+    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
   } else {
     library(remind)
   }
 
 ############################# BASIC CONFIGURATION #############################
-gdx_name <- "fulldata.gdx"        # name of the gdx
+gdx_name <- "fulldata.gdx"        # name of the gdx   
 
 if(!exists("source_include")) {
   #Define arguments that can be read from command line
@@ -26,7 +26,7 @@ if(!exists("source_include")) {
                   "C:/Documents and Settings/dklein/My Documents/0_SVN/0_B_remind_modular/output/SSP2-37/")
   # path to the output folder
    readArgs("outputdirs","gdx_name")
-}
+} 
 
 
 ##################### general plot settings ###################################

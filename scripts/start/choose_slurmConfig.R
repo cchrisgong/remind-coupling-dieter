@@ -16,9 +16,9 @@ get_line <- function(){
 }
 
 choose_slurmConfig <- function() {
-
+  
   slurm <- suppressWarnings(ifelse(system2("srun",stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) {
+  if (slurm) { 
     modes <- c(" 1: SLURM standby               12   nash H12             [recommended]",
                " 2: SLURM standby               13   nash H12 coupled",
                " 3: SLURM standby               16   nash H12+",
@@ -66,7 +66,7 @@ choose_slurmConfig <- function() {
                   "13" = "--qos=long --nodes=1 --tasks-per-node=1"      , # SLURM long     - task per node:  1 (negishi)
                   "14" = "--qos=medium --nodes=1 --tasks-per-node=12"   , # SLURM medium   - task per node: 12 (nash long calibration)
                   "15" = "--qos=medium --nodes=1 --tasks-per-node=16"   ) # SLURM medium   - task per node: 16 (nash long calibration)
-
+                  
     if(is.null(comp)) stop("This type is invalid. Please choose a valid type")
   } else {
     comp <- "direct"
@@ -75,43 +75,43 @@ choose_slurmConfig <- function() {
   return(comp)
 }
 
-# combine_slurmconfig takes two strings with SLURM parameters (e.g. "--qos=priority --time=03:30:00")
-# and combines them into one sting of SLURM parameters overwriting the parameters in "original"
+# combine_slurmconfig takes two strings with SLURM parameters (e.g. "--qos=priority --time=03:30:00") 
+# and combines them into one sting of SLURM parameters overwriting the parameters in "original" 
 # if they also exist in "update_with".
-
+ 
 combine_slurmConfig <- function (original, update_with) {
-
+  
   # trim whitespaces
   original <- trimws(original)
   update_with <- trimws(update_with)
-
+  
   # remove double whitespaces
   original <- gsub("\\s+"," ",original)
   update_with <- gsub("\\s+"," ",update_with)
-
+  
   # if user chose "direct" dont update any slurm commands
   if(update_with == "direct") return(update_with)
 
   # ignore original if it is "direct"
   if (original == "direct") original <- ""
-
+  
   # put RHS strings into vector
   v_update_with <- gsub("--.*=(.*)","\\1",unlist(strsplit(update_with,split=" ")))
   # name the vector using LHS strings
   names(v_update_with) <- gsub("--(.*)=.*","\\1",unlist(strsplit(update_with,split=" ")))
-
+  
   # put RHS strings into vector
   v_original <- gsub("--.*=(.*)","\\1",unlist(strsplit(original,split=" ")))
   # name the vector using LHS strings
   names(v_original) <- gsub("--(.*)=.*","\\1",unlist(strsplit(original,split=" ")))
-
+  
   # remove elements from "original" that are existing in "update_with"
   v_original <- v_original[!names(v_original) %in% "qos"]
-
+  
   combined <- c(v_update_with,v_original)
-
+  
   # concatenate SLURM command (insert "--" and "=")
   res <- paste(paste0("--",names(combined),"=",combined),collapse = " ")
-
+  
   return(res)
 }

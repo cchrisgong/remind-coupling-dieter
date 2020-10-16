@@ -10,7 +10,7 @@ sets
 learnte_dyn80(all_te)   "learnte for nash"
 /
         wind        "wind power converters"
-        spv         "solar photovoltaic"
+        spv         "solar photovoltaic" 
         csp         "concentrating solar power"
         storspv     "storage technology for spv"
         storwind    "storage technology for wind"
@@ -31,7 +31,7 @@ infes,surplus,nonopt,taxconv
 nash_sol_itr80  "nash iterations"
 /
     1*10
-/
+/    
 ;
 
 teLearn(learnte_dyn80)   = YES;
