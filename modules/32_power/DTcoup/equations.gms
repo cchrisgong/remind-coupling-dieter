@@ -132,23 +132,23 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
 ***---------------------------------------------------------------------------
 *** Operating reserve constraint
 ***---------------------------------------------------------------------------
-q32_operatingReserve(t,regi)$(t.val ge 2010)..
-***1 is the chosen load coefficient
-	vm_usableSe(t,regi,"seel")
-	=l=
-***Variable renewable coefficients could be expected to be negative because they are variable.
-***However they are modeled positive because storage conditions make variable renewables controllable.
-	sum(pe2se(enty,"seel",te)$(NOT teVRE(te)),
-		pm_data(regi,"flexibility",te) * vm_prodSe(t,regi,enty,"seel",te) )
-	+ sum(se2se(enty,"seel",te)$(NOT teVRE(te)),
-		pm_data(regi,"flexibility",te) * vm_prodSe(t,regi,enty,"seel",te) )
-	+ sum(pe2se(enty,"seel",teVRE),
-		pm_data(regi,"flexibility",teVRE) * (vm_prodSe(t,regi,enty,"seel",teVRE)-v32_storloss(t,regi,teVRE)) )
-	+
-	sum(pe2se(enty,"seel",teVRE),
-		sum(VRE2teStor(teVRE,teStor),
-			pm_data(regi,"flexibility",teStor) * (vm_prodSe(t,regi,enty,"seel",teVRE)-v32_storloss(t,regi,teVRE)) ) )
-;
+* q32_operatingReserve(t,regi)$(t.val ge 2010)..
+* ***1 is the chosen load coefficient
+* 	vm_usableSe(t,regi,"seel")
+* 	=l=
+* ***Variable renewable coefficients could be expected to be negative because they are variable.
+* ***However they are modeled positive because storage conditions make variable renewables controllable.
+* 	sum(pe2se(enty,"seel",te)$(NOT teVRE(te)),
+* 		pm_data(regi,"flexibility",te) * vm_prodSe(t,regi,enty,"seel",te) )
+* 	+ sum(se2se(enty,"seel",te)$(NOT teVRE(te)),
+* 		pm_data(regi,"flexibility",te) * vm_prodSe(t,regi,enty,"seel",te) )
+* 	+ sum(pe2se(enty,"seel",teVRE),
+* 		pm_data(regi,"flexibility",teVRE) * (vm_prodSe(t,regi,enty,"seel",teVRE)-v32_storloss(t,regi,teVRE)) )
+* 	+
+* 	sum(pe2se(enty,"seel",teVRE),
+* 		sum(VRE2teStor(teVRE,teStor),
+* 			pm_data(regi,"flexibility",teStor) * (vm_prodSe(t,regi,enty,"seel",teVRE)-v32_storloss(t,regi,teVRE)) ) )
+* ;
 
 ***---------------------------------------------------------------------------
 *** EMF27 limits on fluctuating renewables, only turned on for special EMF27 and AWP 2 scenarios, not for SSP
@@ -164,11 +164,24 @@ q32_limitSolarWind(t,regi)$( (cm_solwindenergyscen = 2) OR (cm_solwindenergyscen
 ***---------------------------------------------------------------------------
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
-q32_peakDemand_DT(tall, enty2)$(t_DT_32(tall) AND sameas(enty2,"seel")) ..
+q32_peakDemand_DT(tall, enty2)$(t_DT_32(tall) AND sameas(enty2,"seel") AND (cm_DTcoup_capcon = 1)) ..
 	sum(all_te$(DISPATCHte_32(all_te)), sum(rlf, vm_cap(tall,"DEU",all_te,rlf)))
 	=g=
-	p32_peakDemand_relFac(tall) * v32_seelDem(tall,"DEU",enty2) * 8760 * s32_iteration_ge_5 !! either NO (= 0) for iteration lt 5, or YES (= 1) otherwise
+* p32_peakDemand_relFac(tall,"DEU") * v32_seelDem(tall,"DEU",enty2) * 8760 * s32_iteration_ge_6 !! either NO (= 0) for iteration lt 5, or YES (= 1) otherwise
+	p32_peakDemand_relFac(tall,"DEU") * v32_seelDem(tall,"DEU",enty2) * 8760
 	;
+
+* q32_peakDemand_DT_testLHS(tall)$(t_DT_32(tall) AND (cm_DTcoup_capcon = 1)) ..
+* 	v32_peakDemand_DT_testLHS(tall)
+* 	=e=
+* 	sum(all_te$(DISPATCHte_32(all_te)), sum(rlf, vm_cap(tall,"DEU",all_te,rlf)))
+* 	;
+*
+* q32_peakDemand_DT_testRHS(tall,enty2)$(t_DT_32(tall) AND sameas(enty2,"seel") AND (cm_DTcoup_capcon = 1)) ..
+* 	v32_peakDemand_DT_testRHS(tall,enty2)
+* 	=e=
+* 	p32_peakDemand_relFac(tall,"DEU") * v32_seelDem(tall,"DEU",enty2) * 8760
+* 	;
 
 ***----------------------------------------------------------------------------
 *** FS: calculate flexibility adjustment used in flexibility tax for technologies with electricity input
@@ -186,6 +199,5 @@ q32_peakDemand_DT(tall, enty2)$(t_DT_32(tall) AND sameas(enty2,"seel")) ..
 * 	/ pm_eta_conv(tall,"DEU",teFlex)
 * ;
 *
-* $ENDIF.DTcoup
 
 $ENDIF.DTcoup

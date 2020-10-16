@@ -20,21 +20,97 @@ $offtext
 Parameters
 *=========== for loading remind output ===========
 vm_cap(reg, te_remind, grade) 
-remind_cap(yr,reg, te_remind, grade)
+remind_cap(yr, reg, te_remind, grade)
+*-------------------------
 v32_seelDem(reg, se_remind) 
 remind_totdemand(yr, reg, se_remind)
+*-------------------------
+*vm_capFac(yr, reg, te_remind)
+*remind_capFac(yr, reg, te_remind)
+*-------------------------
+q_balPe(yr,reg,pe_remind)
+remind_fuelcost(yr,reg,pe_remind)
+*-------------------------
+qm_budget(yr,reg)
+remind_budget(yr,reg)
+*------------------------------------
+*vm_demSe(yr, reg, se_remind, se_remind2, te_remind)
+*remind_seDem(yr, reg, se_remind, se_remind2, te_remind)
+*------------------------------------
+vm_prodSe(yr, reg, pe_remind, se_remind, te_remind)
+remind_prodSe(yr, reg, pe_remind, se_remind, te_remind)
+*------------------------------------
+*fraction of OM cost over investment cost
+pm_data(reg,char_remind,te_remind)
+remind_OMcost(reg,char_remind,te_remind)
+*------------------------------------
+*investment cost in REMIND already annualized
+vm_costTeCapital(yr, reg, te_remind)
+remind_CapCost(yr, reg, te_remind)
+*------------------------------------
+*plant lifetime from REMIND
+fm_dataglob(char_remind,te_remind)
+remind_lifetime(char_remind, te_remind)
+*------------------------------------
+*fuel conversion efficiency, pm_dataeta and pm_eta_conv have etas for different te
+pm_dataeta(yr,reg,te_remind)
+pm_eta_conv(yr,reg,te_remind)
+remind_eta1(yr,reg,te_remind)
+remind_eta2(yr,reg,te_remind)
+*-------------------------------------
+*for the purpose of comparing the decision remind and dieter make, use instead the cap. before remind's investment at the beginning of the year, not the end
+remind_pm_ts(yr)
+pm_ts(yr)
+remind_deltaCap(yr, reg, te_remind, grade)
+vm_deltaCap(yr, reg, te_remind, grade)
+remind_capEarlyReti(yr, reg, te_remind)
+remind_capEarlyReti2(yr_before, reg, te_remind)
+vm_capEarlyReti(yr, reg, te_remind)
+earlyRetiCap_reporting(yr, reg, te_remind)
+*-------------------------------------
+*for reporting REMIND
+remind_CF(yr,reg,te_remind)
+pm_cf(yr,reg,te_remind)
+*-------------------------------------
 remind_totdemand_inMWh
-P_RES(res)     Renewable technology built in MW
+sm_TWa_2_MWh Conversion factor between TWa and MWh /8760000000/
+*-------------------------------------
+remind_carboncontent(pe_remind, se_remind, te_remind, gas_remind)
+fm_dataemiglob(pe_remind, se_remind, te_remind, gas_remind)
+sm_c_2_co2 Conversion factor between weight of carbon to weight of CO2 /3.6667/
+sm_Gt_2_t Conversion factor between gigaton to ton /1e9/
+*----------------------------- capacity is exogenous from remind
+*P_RES(res)     Renewable technology built in MW
+*N_CON(ct)        Conventional technology ct built in MW
 *=========== for scaling dieter demand ===========
-dieter_OLDtotdem
+dieter_OLDtotdem   Old DIETER total demand
 demConvR       Remind to Dieter Demand Conversion Ratio which is the ratio between remind_totdem and dieter total net demand sum_h dem_h
+*=========== for scaling up wind =================
+DIETER_OLDWindOnCapfac Old average DIETER theoretical capfac of wind_on
 ;
+
 
 *remember to load sets first
 $gdxin fulldata.gdx
-$load  yr = t
+*$load  yr = t
 $load  remind_cap = vm_cap.l
+*$load  remind_capFac = vm_capFac.l
 $load  remind_totdemand = v32_seelDem.l
+*$load  remind_seDem = vm_demSe.l
+$load  remind_fuelcost = q_balPe.m
+$load  remind_budget = qm_budget.m
+$load  remind_OMcost = pm_data
+$load  remind_CapCost = vm_costTeCapital.l
+$load  remind_prodSe = vm_prodSe.l
+$load  remind_lifetime = fm_dataglob
+$load  remind_eta1 = pm_dataeta
+$load  remind_eta2 = pm_eta_conv
+$load  remind_pm_ts = pm_ts
+$load  remind_deltaCap = vm_deltaCap.l
+$load  remind_capEarlyReti = vm_capEarlyReti.l
+$load  remind_capEarlyReti2 = vm_capEarlyReti.l
+$load  remind_carboncontent = fm_dataemiglob
+$load  remind_CF = pm_cf
 $gdxin
 
 Parameters
@@ -65,7 +141,7 @@ Parameters
 
 *con_fuelprice(ct)        Fuel price conventionals in Euro per MWth
 *con_fuelprice_reg(ct,reg)        Fuel price conventionals in Euro per MWth for different regions
-con_CO2price             CO2 price /0/
+con_CO2price             CO2 price /25/
 
 *====== Renewables ======
 
@@ -75,6 +151,9 @@ c_fix_res(res)           Annual fixed costs per MW
 phi_min_res              Upload parameter: Minimum required renewables generation
 
 *--- Investment ---*
+c_i_ovnt(ct)             Investment costs: Overnight
+c_i_ovnt_res(res)        Investment costs: Overnight
+
 c_inv_overnight_res(res) Investment costs: Overnight
 inv_lifetime_res(res)    Investment costs: technical lifetime
 inv_recovery_res(res)    Investment costs: Recovery period
@@ -164,7 +243,7 @@ phi_reserves_pr                          ??? /0.05/
 parameter d_y_reg(year,reg,h)      "Demand hour h for cost minimization for different years and specific regions"
 /
 $ondelim
-$include "Load.csv"
+$include "Load_DEU.csv"
 $offdelim
 /;
 
@@ -191,17 +270,18 @@ $offdelim
 
 Table t_phi_res_y_reg(year,reg,h,res)      ""
 $ondelim
-$include "VRE_potential.csv"
+$include "VRE_potential_DEU.csv"
 $offdelim
 ;
+
 phi_res_y_reg(year,reg,h,res) = t_phi_res_y_reg(year,reg,h,res);
 
-parameter phi_ror(year,reg,h)      "Run-of-river availability in hour h"
-/
-$ondelim
-$include "Time_Data.csv"
-$offdelim
-/;
+*parameter phi_ror(year,reg,h)      "Run-of-river availability in hour h"
+*/
+*$ondelim
+*$include "Time_Data.csv"
+*$offdelim
+*/;
 
 parameter dsmdata_cu(all_dsm_cu,dsm_curt)      "Various Data for DSM"
 /
@@ -218,23 +298,20 @@ $offdelim
 /;
 
 
-parameter AC_demand(year,reg,h)      "AC Demand hour h for cost minimization for different years and specific regions"
-/
-$ondelim
-$include "AC_demand.csv"
-$offdelim
-/;
+*parameter AC_demand(year,reg,h)      "AC Demand hour h for cost minimization for different years and specific regions"
+*/
+*$ondelim
+*$include "AC_demand.csv"
+*$offdelim
+*/;
+*
 
-
-parameter phi_AC(year,reg,h)      "AC Demand profile hour h for cost minimization for different years and specific regions"
-/
-$ondelim
-$include "phi_AC.csv"
-$offdelim
-/;
-
-
-
+*parameter phi_AC(year,reg,h)      "AC Demand profile hour h for cost minimization for different years and specific regions"
+*/
+*$ondelim
+*$include "phi_AC.csv"
+*$offdelim
+*/;
 
 
 parameter stodata(all_storage,sto)      "Various Data for storage"
@@ -290,7 +367,7 @@ $offecho
 ;
 
 Parameters
-c_m_reg(ct,reg)          Marginal production costs for conventional plants including variable O and M costs
+c_m_reg(ct,reg)          Marginal production costs for conventional plants including variable O&M costs
 c_m(ct)                  Marginal production costs for current region
 c_i(ct)          Annualized investment costs by conventioanl plant per MW
 
@@ -303,13 +380,12 @@ c_i_dsm_cu(dsm_curt)     DSM: Investment costs load curtailment
 c_i_dsm_shift(dsm_shift) DSM: Investment costs load shifting
 ;
 
-c_m_reg(ct,reg) = con_fuelprice_reg(ct,reg)/cdata("eta_con",ct) + cdata("carbon_content",ct)/cdata("eta_con",ct)*con_CO2price + cdata("c_var_con",ct)   ;
-c_i(ct) = cdata("c_inv_overnight_con",ct)*( cdata("inv_interest_con",ct) * (1+cdata("inv_interest_con",ct))**(cdata("inv_lifetime_con",ct)) )
-                 / ( (1+cdata("inv_interest_con",ct))**(cdata("inv_lifetime_con",ct))-1 )       ;
-
-c_i_res(res) = rdata("c_inv_overnight_res",res)*(rdata("inv_interest_res",res) * (1+rdata("inv_interest_res",res))**(rdata("inv_lifetime_res",res)) )
-                 / ( (1+rdata("inv_interest_res",res))**(rdata("inv_lifetime_res",res))-1 )       ;
-
+*c_i(ct) = cdata("c_inv_overnight_con",ct)*( cdata("inv_interest_con",ct) * (1+cdata("inv_interest_con",ct))**(cdata("inv_lifetime_con",ct)) )
+*                 / ( (1+cdata("inv_interest_con",ct))**(cdata("inv_lifetime_con",ct))-1 )       ;
+*                 
+*c_i_res(res) = rdata("c_inv_overnight_res",res)*(rdata("inv_interest_res",res) * (1+rdata("inv_interest_res",res))**(rdata("inv_lifetime_res",res)) )
+*                 / ( (1+rdata("inv_interest_res",res))**(rdata("inv_lifetime_res",res))-1 )       ;
+*
 c_i_sto_e(sto) = stodata("c_inv_overnight_sto_e",sto)*( stodata("inv_interest_sto",sto) * (1+stodata("inv_interest_sto",sto))**(stodata("inv_lifetime_sto",sto)) )
                  / ( (1+stodata("inv_interest_sto",sto))**(stodata("inv_lifetime_sto",sto))-1 )       ;
 c_i_sto_p(sto) = stodata("c_inv_overnight_sto_p",sto)*( stodata("inv_interest_sto",sto) * (1+stodata("inv_interest_sto",sto))**(stodata("inv_lifetime_sto",sto)) )
@@ -320,12 +396,10 @@ c_i_dsm_cu(dsm_curt) = dsmdata_cu("c_inv_overnight_dsm_cu",dsm_curt)*( dsmdata_c
 c_i_dsm_shift(dsm_shift) = dsmdata_shift("c_inv_overnight_dsm_shift",dsm_shift)*( dsmdata_shift("inv_interest_dsm_shift",dsm_shift) * (1+dsmdata_shift("inv_recovery_dsm_shift",dsm_shift))**(dsmdata_shift("inv_recovery_dsm_shift",dsm_shift)) )
                  / ( (1+dsmdata_shift("inv_interest_dsm_shift",dsm_shift))**(dsmdata_shift("inv_recovery_dsm_shift",dsm_shift))-1 )       ;
 
+* Adjust investment costs on model's hourly basis ?
 
-
-* Adjust investment costs on model's hourly basis
-
-c_i(ct) = c_i(ct)*card(h)/8760 ;
-c_i_res(res) = c_i_res(res)*card(h)/8760 ;
+*c_i(ct) = c_i(ct)*card(h)/8760 ;
+*c_i_res(res) = c_i_res(res)*card(h)/8760 ;
 %second_hour%c_i_sto_e(sto) = c_i_sto_e(sto)*card(h)/8760 ;
 c_i_sto_p(sto) = c_i_sto_p(sto)*card(h)/8760 ;
 c_i_dsm_cu(dsm_curt) = c_i_dsm_cu(dsm_curt)*card(h)/8760 ;
@@ -339,16 +413,14 @@ dsmdata_shift("t_dur_dsm_shift",dsm_shift)$(ord(dsm_shift)=1 or ord(dsm_shift)=3
 $ontext
 $offtext
 
-cdata("c_fix_con",ct) = cdata("c_fix_con",ct)*card(h)/8760 ;
-rdata("c_fix_res",res) = rdata("c_fix_res",res)*card(h)/8760 ;
-stodata("c_fix_sto",sto) = stodata("c_fix_sto",sto)*card(h)/8760 ;
-dsmdata_cu("c_fix_dsm_cu",dsm_curt) = dsmdata_cu("c_fix_dsm_cu",dsm_curt)*card(h)/8760 ;
-dsmdata_shift("c_fix_dsm_shift",dsm_shift) = dsmdata_shift("c_fix_dsm_shift",dsm_shift)*card(h)/8760 ;
-
-cdata("m_con_e",'bio') = cdata("m_con_e",'bio')*card(h)/8760 ;
-
-*stodata("eta_sto_in",sto) = 0.5*stodata("eta_sto",sto);
-*stodata("eta_sto_out",sto) = 0.5*stodata("eta_sto",sto);
+*cdata("c_fix_con",ct) = cdata("c_fix_con",ct)*card(h)/8760 ;
+*rdata("c_fix_res",res) = rdata("c_fix_res",res)*card(h)/8760 ;
+*stodata("c_fix_sto",sto) = stodata("c_fix_sto",sto)*card(h)/8760 ;
+*dsmdata_cu("c_fix_dsm_cu",dsm_curt) = dsmdata_cu("c_fix_dsm_cu",dsm_curt)*card(h)/8760 ;
+*dsmdata_shift("c_fix_dsm_shift",dsm_shift) = dsmdata_shift("c_fix_dsm_shift",dsm_shift)*card(h)/8760 ;
+*
+*cdata("m_con_e",'bio') = cdata("m_con_e",'bio')*card(h)/8760 ;
+*
 
 parameter phi_mean_reserves_call, phi_mean_reserves_call_y ;
 phi_mean_reserves_call_y(year,reserves) = sum(h, phi_reserves_call_y(year,h,reserves) ) / card(h) + eps ;

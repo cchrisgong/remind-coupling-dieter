@@ -1,6 +1,6 @@
 mypath = "~/remind/dataprocessing/"
-# mydatapath = "~/remind/output/capfac19_uncoupl/"
-mydatapath = "~/remind/output/capfac19/"
+run_number = "oldbranch"
+mydatapath =  paste0("~/remind/output/",run_number,"/")
 # import library
 source(paste0(mypath, "library_import.R"))
 library(readr)
@@ -167,7 +167,7 @@ grid.newpage()
 p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
 grid.draw(p)
 
-ggsave(filename = paste0(mypath, "iter_xN_GEN_capFac19_", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, "iter_xN_GEN_capFac", run_number, "_", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
 
 
 }

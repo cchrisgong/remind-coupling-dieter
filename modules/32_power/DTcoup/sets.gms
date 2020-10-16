@@ -18,5 +18,5 @@ BIOte_32(all_te) "biomass to seel tech in REMIND" /biochp,bioigcc,bioigccc/
 
 NUCte_32(all_te) "nuclear to seel tech in REMIND" /tnrs,fnrs/
 
-DISPATCHte_32(all_te) "dispatchable technologies" /hydro,igcc,igccc,pc,pcc,pco,coalchp,
+DISPATCHte_32(all_te) "dispatchable technologies" /igcc,igccc,pc,pcc,pco,coalchp,
                                   ngcc,ngccc,gaschp,biochp,bioigcc,bioigccc,ngt,tnrs,fnrs/

@@ -13,10 +13,12 @@
 *' @authors Robert Pietzcker, Falko Ueckerdt, Renato Rodrigues, Chris Gong
 
 *####################### R SECTION START (PHASES) ##############################
+$Ifi "%phase%" == "sets" $include "./modules/32_power/DTcoup/sets.gms"
 $Ifi "%phase%" == "declarations" $include "./modules/32_power/DTcoup/declarations.gms"
 $Ifi "%phase%" == "datainput" $include "./modules/32_power/DTcoup/datainput.gms"
 $Ifi "%phase%" == "equations" $include "./modules/32_power/DTcoup/equations.gms"
 $Ifi "%phase%" == "bounds" $include "./modules/32_power/DTcoup/bounds.gms"
+$Ifi "%phase%" == "presolve" $include "./modules/32_power/DTcoup/presolve.gms"
 *######################## R SECTION END (PHASES) ###############################
 
 *** EOF ./modules/32_power/DTcoup/realization.gms

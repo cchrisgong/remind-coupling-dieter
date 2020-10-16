@@ -1,6 +1,6 @@
 mypath = "~/remind/dataprocessing/"
-mydatapath = "~/remind/output/capfac19/"
-# mydatapath = "~/remind/output/capfac19_uncoupl/"
+run_number = "oldbranch"
+mydatapath = paste0("~/remind/output/", run_number, "/")
 
 # import library
 source(paste0(mypath, "library_import.R"))
@@ -9,7 +9,7 @@ require(rmndt)
 
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
-#remind output iteration gdx files
+# remind output iteration gdx files
 files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
 sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
 
@@ -23,8 +23,9 @@ sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
 #dieter output iteration gdx files
 files_DT <- list.files(mydatapath, pattern="results_DIETER_i[0-9]+\\.gdx")
 sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 5, to = length(files_DT)*5, by = 5), ".gdx")
+# sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 2, to = length(files_DT), by = 1), ".gdx")
 
-year_toplot_list <- c(2015, 2025, 2035, 2050) 
+year_toplot_list <- c(2050,2070) 
 for(year_toplot in year_toplot_list){
 # year_toplot = 2035
 maxiter = 100
@@ -50,29 +51,39 @@ plot_DTte_names = c("combined cycle gas", "lignite", "solar", "wind", "biomass",
 plot_RMte_names = c("combined cycle gas", "coal", "solar", "wind", "biomass", "open cycle gas turbine", "hydro", "nuclear")
 mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "coal" = "#0c0c0c", "solar" = "#ffcc00", "wind" = "#337fff", "biomass" = "#005900", "open cycle gas turbine" = "#e51900", "hydro" =  "#191999", "nuclear" =  "#ff33ff", "hard coal" = "#808080")
 
-VARsubkey2_DT = "peakDem"
-TECHkey2_DT = "all_te"
+VARsubkey1_RM = "p32_peakDemand_relFac"
+VARsubkey2_RM = "v32_seelDem"
 
-get_DEMvariable_DT <- function(gdx){
-  # gdx = sorted_files_DT[[1]]
-  # vrdata <- gdx::readGDX(gdx, VARkey1_DT, squeeze = FALSE)
-  # df.vrdata0 <- as.quitte(vrdata)
-  # vrdata <- df.vrdata0 %>% 
-    vrdata <- read.gdx(gdx, VARkey1_DT, factor = FALSE)  %>% 
-    filter(X..1 == year_toplot) %>% 
-    filter(X..3 == TECHkey2_DT) %>%
-    filter(X..4 == VARsubkey2_DT) %>%
-    mutate(value = value/1e3)
+get_DEMvariable_RM <- function(gdx){
+  # gdx = sorted_files[[5]]
+  # vrdata1 <- read.gdx(gdx, VARsubkey1_RM, factor = FALSE)  %>% 
+  #   filter(tall == year_toplot) %>% 
+  #   mutate(relFac = value)
+  
+  vrdata2 <- read.gdx(gdx, VARsubkey2_RM, factor = FALSE)  %>% 
+    filter(tall == year_toplot) %>% 
+    filter(all_regi == REGIkey1) %>%
+    mutate(totDem = value) %>% 
+    select(tall,totDem)
+ 
+  # vrdata0 = list(vrdata1, vrdata2) %>%
+  #   reduce(full_join) 
+    
+  vrdata <- vrdata2 %>% 
+    mutate(value = totDem * 0.000155891 * 8760 * 1e3) 
+  
   return(vrdata)
 }
 
-vr1_DEM_DT <- lapply(sorted_files_DT, get_DEMvariable_DT)
-idx_DT <- 1:length(files_DT)
-for(id in idx_DT){
-  vr1_DEM_DT[[id]]$iter <- id * 5
-  vr1_DEM_DT[[id]]$model <- "coupled"
+vr1_DEM <- lapply(sorted_files, get_DEMvariable_RM)
+
+for(fname in files){
+  idx <- as.numeric(str_extract(fname, "[0-9]+"))
+  vr1_DEM[[idx]]$iter <- idx
+  vr1_DEM[[idx]]$model <- "REMIND"
 }
-vr1_DEM_DT <- rbindlist(vr1_DEM_DT) 
+
+vr1_DEM <- rbindlist(vr1_DEM)
 
 get_variable <- function(gdx){
   # gdx = sorted_files[[5]]
@@ -109,7 +120,7 @@ get_variable <- function(gdx){
 }
 
 get_variable_DT <- function(gdx){
-  # gdx = sorted_files_DT[[6]]
+  # gdx = sorted_files_DT[[1]]
   vrdata <- read.gdx(gdx, VARkey1_DT, factor = FALSE) %>% 
     filter(X..1 == year_toplot) %>% 
     dplyr::rename(all_te = X..3) %>% 
@@ -143,22 +154,27 @@ for(fname in files){
 }
 
 idx_DT <- 1:length(files_DT)
+# idx_DT <- 1:(length(files_DT)-1)
 for(id in idx_DT){
   vrN_DT[[id]]$iter <- id*5
+  # vrN_DT[[id]]$iter <- id+1
   vrN_DT[[id]]$model <- "DIETER"
 }
 
 vrN <- rbindlist(vrN)
 vrN_DT <- rbindlist(vrN_DT)
 
+# vrN <- vrN %>% 
+#   filter(!(all_te %in% c("solar", "wind", "open cycle gas turbine", "biomass")))
+
 p2<-ggplot() +
   geom_area(data = vrN_DT, aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5) +
-  geom_line(data = vr1_DEM_DT, aes(x = iter, y = value, color = X..4), size = 1.2, alpha = 1,linetype="dotted") +
+  geom_line(data = vr1_DEM, aes(x = iter, y = value), size = 1.2, alpha = 1,linetype="dotted") +
   scale_fill_manual(name = "Technology", values = mycolors)+
   scale_color_manual(values=c("black"))+
   theme(axis.text=element_text(size=14), axis.title=element_text(size= 14,face="bold")) +
   xlab("iteration") + ylab(paste0(VARkey1, "(GW)")) +
-  coord_cartesian(xlim = c(0, max(vr1_DEM_DT$iter)))+
+  coord_cartesian(xlim = c(0, max(vr1_DEM$iter)))+
   ggtitle(paste0("DIETER ", year_toplot))+
   theme(plot.title = element_text(size = 16, face = "bold"))+
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text=element_text(size=14)) +
@@ -167,13 +183,13 @@ p2<-ggplot() +
 
 p1<-ggplot() +
   geom_area(data = vrN, aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5) +
-  geom_line(data = vr1_DEM_DT, aes(x = iter, y = value, color = X..4), size = 1.2, alpha = 0.5,linetype="dotted") +
+  geom_line(data = vr1_DEM, aes(x = iter, y = value), size = 1.2, alpha = 0.5,linetype="dotted") +
   scale_fill_manual(name = "Technology", values = mycolors)+
   scale_color_manual(values=c("black"))+
-  theme(axis.text=element_text(size=14), axis.title=element_text(size= 14,face="bold")) +
+  theme(axis.text=element_text(size=14), axis.title=element_text(size= 14,face="bold")) + 
   xlab("iteration") + ylab(paste0(VARkey1, "(GW)")) +
   ggtitle(paste0("REMIND ", year_toplot))+
-  coord_cartesian(xlim = c(0, max(vr1_DEM_DT$iter)))+
+  coord_cartesian(xlim = c(0, max(vr1_DEM$iter)))+
   theme(plot.title = element_text(size = 16, face = "bold"))+
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text=element_text(size=14)) +
   theme(aspect.ratio = .5)
@@ -184,6 +200,6 @@ grid.newpage()
 p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
 grid.draw(p)
 
-ggsave(filename = paste0(mypath, "iter_xN_CAP_capfac19_", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
-
+ggsave(filename = paste0(mypath, "iter_xN_CAP_capfac", run_number, "_", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
+# ggsave(filename = paste0(mypath, "iter_xN_CAP_capfac", run_number, "_uncoupl", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
 }

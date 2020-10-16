@@ -61,7 +61,6 @@ p32_storageCap(te,char) = f32_storageCap(char,te);
 display p32_storageCap;
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-s32_iteration_ge_5 = 0;
-p32_peakDemand_relFac(tall)$(t_DT_32(tall)) = 0.000156;
+p32_peakDemand_relFac(tall,"DEU")$(t_DT_32(tall)) = 0;
 *p32_flex_multmk(tall,teFlex)$(t_DT_32(tall)) = 0.6;
 $ENDIF.DTcoup

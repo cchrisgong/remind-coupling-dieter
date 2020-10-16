@@ -1,3 +1,6 @@
+*,,
+*costs in EUR/Mwhth,,
+*,,
 c_fix_res,wind_on,30000
 c_fix_res,wind_off,80000
 c_fix_res,solar,25000
@@ -7,9 +10,9 @@ c_inv_overnight_res,solar,425000
 inv_lifetime_res,wind_on,25
 inv_lifetime_res,wind_off,25
 inv_lifetime_res,solar,25
-inv_interest_res,wind_on,0.07
-inv_interest_res,wind_off,0.07
-inv_interest_res,solar,0.07
+inv_interest_res,wind_on,0.06
+inv_interest_res,wind_off,0.06
+inv_interest_res,solar,0.06
 m_res,wind_on,10000000
 m_res,wind_off,32000
 m_res,solar,5000000
