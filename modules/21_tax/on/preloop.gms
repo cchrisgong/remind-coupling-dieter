@@ -142,13 +142,8 @@ v21_tau_bio.l(ttot) = 0;
 
 *** FS: initizalize flexibility tax
 vm_flexAdj.l(ttot,all_regi,all_te) = 0;
-<<<<<<< HEAD
 
 *** FS: set market price of good to non-zero to avoid division by zero in first iteration
 pm_pvp(ttot,"good")$(pm_pvp(ttot,"good") = 0) = sm_eps;
 
-
-
-=======
->>>>>>> 59dff7fa4d975284c94023e84efc4cebcbade030
 *** EOF ./modules/21_tax/on/preloop.gms
