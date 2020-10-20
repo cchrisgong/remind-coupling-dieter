@@ -12,6 +12,10 @@
 *.pdf
 *.png
 
+ignore DEITER tables
+dataprocessing/DIETER_plots/*.csv
+dataprocessing/*.csv
+
 # Ignore everything in "input" folders
 input/
 !modules/29_CES_parameters/load/input

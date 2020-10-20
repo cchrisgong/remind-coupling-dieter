@@ -8,7 +8,7 @@ options(scipen = 999) #disable scientific notation
 
 # IGNORE THE WARNING WHICH APPEARS AFTER EXECUTION OF THE FILE.. 
 
-myDIETERPLOT_path = "~/remind/dataprocessing/DIETER_plots/"
+myDIETERPLOT_path = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
 
 source(paste0(myDIETERPLOT_path, "library_import.R"))
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
@@ -68,7 +68,7 @@ gdxToQuitte_hourly <- function(mydatapath, gdxfile, run_number){
   replace(is.na(.), 0) %>%
   ungroup(model, year, variable, country,tech) %>% 
   mutate(MODEL = model, SCENARIO = paste0("baseline"),  REGION = country,
-         HOUR = hour, YEAR = year, TECH = as.vector(unlist(tech_dict[tech]))) %>%
+         HOUR = hour, YEAR = year, TECH = tech) %>%
   mutate(VARIABLE = variable, PERIOD = year,
          # UNIT = as.vector(unlist(unit_dict[variable])), 
          VALUE = round(value, digits = 4)) %>%
@@ -113,8 +113,8 @@ gdxToQuitte_annual <- function(mydatapath, gdxfile, run_number){
   # unique(variable_dict[rep_Tech$variable])
   # length(rep_Tech$variable)
   # length(variable_dict[rep_Tech$variable])
-  unique(rep_Tech$tech)
-  unique(tech_dict[rep_Tech$tech])
+  # unique(rep_Tech$tech)
+  # unique(tech_dict[rep_Tech$tech])
   
   out_t <- rep_Tech %>% 
     select(model, year, tech,variable, country,value) %>%

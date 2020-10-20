@@ -1,17 +1,15 @@
-# import library
-mypath = "~/remind/dataprocessing/"
-# run_number = "32_1iter_valid1"
-run_number = "oldbranch"
-mydatapath = paste0("~/remind/output/", run_number, "/")
+mypath = "~/remind-coupling-dieter/dataprocessing/"
+run_number = "capfac32_valid1"
+mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
-myDIETERPLOT_path = "~/remind/dataprocessing/DIETER_plots/"
+myDIETERPLOT_path = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
 
 source(paste0(mypath, "library_import.R"))
 source(paste0(myDIETERPLOT_path, "GDXtoQuitte.R"))
 library(readr)
 require(rmndt)
 
-iteration_toplot_list <- c(5,10,15,25,30)
+iteration_toplot_list <- c(5,10,15,20,25,30)
 
 #remind output iteration gdx files
 files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
@@ -29,14 +27,15 @@ for(fname in files_DT_rep){
 sorted_annual_report_DT <- paste0(myDIETERPLOT_path, "capfac", run_number, "_i", seq(from = 5, to = length(files_DT_rep)*5, by = 5), "_annualreport.csv")
 # sorted_annual_report_DT <- paste0(myDIETERPLOT_path, "capfac", run_number, "_i", seq(from = 2, to = length(files_DT_rep), by = 1), "_annualreport.csv")
 
-
+VARkey1 = "capacity"
 # VAR_report_key1_DT = c("Pre-investment capacities", "REMIND added capacities", "DIETER added capacities", "REMIND divestment")
 VAR_report_key1_DT = c("REMIND pre-investment capacities", "DIETER pre-investment capacities","REMIND added capacities (GW)", "DIETER added capacities (GW)", "REMIND divestment (GW)")
-TECH_report_keylst_DT = c("CCGT", "Lignite", "Solar PV", "Wind_on", "Biomass", "OCGT_eff", "Run-of-River", "Nuclear", "Hard coal")
+TECH_report_keylst_DT = c("CCGT", "lig", "Solar", "Wind_on", "bio", "OCGT_eff", "ror", "nuc", "hc")
 plot_DTte_names = c("combined cycle gas", "lignite", "solar", "wind", "biomass", "open cycle gas turbine", "hydro", "nuclear", "hard coal")
 mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "coal" = "#0c0c0c", "solar" = "#ffcc00", "wind" = "#337fff", "biomass" = "#005900", "open cycle gas turbine" = "#e51900", "hydro" =  "#191999", "nuclear" =  "#ff33ff", "hard coal" = "#808080")
 
 get_report_variable_DT <- function(iteration){
+  # iteration = 5
   cvs = sorted_annual_report_DT[[iteration/5]]
   annual_reportCSV = read.csv(cvs, sep = ';', header = T, stringsAsFactors = F)
   annual_reportQUITT <- as.quitte(annual_reportCSV) 

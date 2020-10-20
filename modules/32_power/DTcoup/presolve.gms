@@ -15,12 +15,16 @@ if( ((ord(iteration) ge 5) and ( mod(ord(iteration), 5) eq 0)),
 
     display$sleep(150) 'wait 150 seconds till DIETER is finished';
 
-    execute 'mergegdx.gms'
+    execute 'mergegdx.gms';
 
-*** The "logfile" part of put_utility logfile, is only there so we know
-*** which file GAMS is hijacking to inject a shell command, prob not necessary
+* .nr = 2 formats numbers in scientific notation (what we usually want for
+*   debugging, because small numbers get rounded to zero otherwise, although
+*   they are significant, e.g. for the calibration).  So there's a .nr = 1 up
+*   front to ensure "normal" numbers.
 
-* if ( (c_keep_iteration_gdxes eq 1) ,
+logfile.nr = 1;
+
+if ( (c_keep_iteration_gdxes eq 1) ,
 
     put_utility "shell" /
       "cp results_DIETER.gdx results_DIETER_i" iteration.val:0:0 ".gdx";
@@ -30,7 +34,9 @@ if( ((ord(iteration) ge 5) and ( mod(ord(iteration), 5) eq 0)),
 
     put_utility "shell" /
       "cp full_DIETER.gdx full_DIETER_i" iteration.val:0:0 ".gdx";
-* );
+
+);
+logfile.nr = 2;
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
     Execute_Loadpoint 'results_DIETER' report4RM;

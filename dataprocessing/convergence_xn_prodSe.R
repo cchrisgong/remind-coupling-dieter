@@ -1,6 +1,6 @@
-mypath = "~/remind/dataprocessing/"
-run_number = "oldbranch"
-mydatapath =  paste0("~/remind/output/",run_number,"/")
+mypath = "~/remind-coupling-dieter/dataprocessing/"
+run_number = "capfac32_valid1"
+mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 # import library
 source(paste0(mypath, "library_import.R"))
 library(readr)

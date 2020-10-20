@@ -1,6 +1,6 @@
-mypath = "~/remind/dataprocessing/"
-run_number = "oldbranch"
-mydatapath = paste0("~/remind/output/", run_number, "/")
+mypath = "~/remind-coupling-dieter/dataprocessing/"
+run_number = "capfac32_valid1"
+mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
 # import library
 source(paste0(mypath, "library_import.R"))
@@ -25,7 +25,7 @@ files_DT <- list.files(mydatapath, pattern="results_DIETER_i[0-9]+\\.gdx")
 sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 5, to = length(files_DT)*5, by = 5), ".gdx")
 # sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 2, to = length(files_DT), by = 1), ".gdx")
 
-year_toplot_list <- c(2050,2070) 
+year_toplot_list <- c(2030,2050,2070) 
 for(year_toplot in year_toplot_list){
 # year_toplot = 2035
 maxiter = 100

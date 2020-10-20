@@ -59,7 +59,7 @@ TECHVREkeylst <- c(TECHkeylst_solar, TECHkeylst_wind,TECHkeylst_hydro)
 TECH_NONVRE_keylst <- c(TECHkeylst_peakGas, TECHkeylst_nonPeakGas, TECHkeylst_coal, TECHkeylst_biomass, TECHkeylst_nuclear)
 
 iter_toplot = 1:length(sorted_files)
-iter_toplot2 = 1:length(sorted_files2)
+# iter_toplot2 = 1:length(sorted_files2)
 
 CapConstraintKey = "q32_peakDemand_DT"
   
