@@ -13,14 +13,14 @@ myDIETERPLOT_path = "~/remind/dataprocessing/DIETER_plots/"
 source(paste0(myDIETERPLOT_path, "library_import.R"))
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
-variable_units <- read.csv(paste0(myDIETERPLOT_path, "variable_dict.csv"), sep = ',', header = T, stringsAsFactors = F)
-variables <- unique(variable_units$dieter_name)
-variable_dict <- setNames(as.list(variable_units$report_name), variable_units$dieter_name)
-unit_dict <- setNames(as.list(variable_units$Units), variable_units$dieter_name)
+# variable_units <- read.csv(paste0(myDIETERPLOT_path, "variable_dict.csv"), sep = ',', header = T, stringsAsFactors = F)
+# variables <- unique(variable_units$dieter_name)
+# variable_dict <- setNames(as.list(variable_units$report_name), variable_units$dieter_name)
+# unit_dict <- setNames(as.list(variable_units$Units), variable_units$dieter_name)
 
 # CHECK IF THE SEPERATOR IS CORRECT!!!!!!!!!! sometimes it is changed from ; to , in Linux and windows
-tech_dictionary <- read.csv(paste0(myDIETERPLOT_path, "tech_dict.csv"), sep = ",", header = T, stringsAsFactors = F)
-tech_dict <- setNames(as.list(tech_dictionary$report_name), tech_dictionary$dieter_name)
+# tech_dictionary <- read.csv(paste0(myDIETERPLOT_path, "tech_dict.csv"), sep = ",", header = T, stringsAsFactors = F)
+# tech_dict <- setNames(as.list(tech_dictionary$report_name), tech_dictionary$dieter_name)
 # scenario_desc <- read.table("~/DIETER/myFirstParallelDIETER/dataprocessing/scenario_desc.csv", sep = ";", head = T, stringsAsFactors = F)
 
 gdxToQuitte_hourly <- function(mydatapath, gdxfile, run_number){
@@ -42,10 +42,11 @@ gdxToQuitte_hourly <- function(mydatapath, gdxfile, run_number){
     dplyr::ungroup(model, variable, year, country) %>%
     mutate(MODEL = model, SCENARIO = paste0("baseline"), REGION = country,
            HOUR = hour, TECH = "all Tech") %>% 
-    mutate(VARIABLE = as.vector(unlist(variable_dict[variable])), PERIOD = year,
-           UNIT = as.vector(unlist(unit_dict[variable])), VALUE = round(value, digits = 4)) %>%
+    mutate(VARIABLE = variable, PERIOD = year,
+           # UNIT = as.vector(unlist(unit_dict[variable])), 
+           VALUE = round(value, digits = 4)) %>%
     arrange(PERIOD) %>% 
-    select(MODEL, SCENARIO, PERIOD, HOUR, REGION, VARIABLE, TECH, VALUE, UNIT)
+    select(MODEL, SCENARIO, PERIOD, HOUR, REGION, VARIABLE, TECH, VALUE)
   
   ###################################################################
   rep_techHrs = read.gdx(gdxName = file, requestList = 'report_tech_hours', factors = FALSE)
@@ -68,10 +69,11 @@ gdxToQuitte_hourly <- function(mydatapath, gdxfile, run_number){
   ungroup(model, year, variable, country,tech) %>% 
   mutate(MODEL = model, SCENARIO = paste0("baseline"),  REGION = country,
          HOUR = hour, YEAR = year, TECH = as.vector(unlist(tech_dict[tech]))) %>%
-  mutate(VARIABLE = as.vector(unlist(variable_dict[variable])), PERIOD = year,
-         UNIT = as.vector(unlist(unit_dict[variable])), VALUE = round(value, digits = 4)) %>%
+  mutate(VARIABLE = variable, PERIOD = year,
+         # UNIT = as.vector(unlist(unit_dict[variable])), 
+         VALUE = round(value, digits = 4)) %>%
   arrange(YEAR) %>% 
-  select(MODEL, SCENARIO, PERIOD, HOUR, REGION, VARIABLE, TECH, VALUE, UNIT)
+  select(MODEL, SCENARIO, PERIOD, HOUR, REGION, VARIABLE, TECH, VALUE)
   
   #################################################################
   
@@ -96,10 +98,11 @@ gdxToQuitte_annual <- function(mydatapath, gdxfile, run_number){
     mutate(MODEL = model, SCENARIO = paste0("baseline"), 
            REGION = country, YEAR = year, VALUE = round(value, digits = 4), 
            TECH = "all Tech",
-           VARIABLE = as.vector(unlist(variable_dict[variable])),
-           UNIT = as.vector(unlist(unit_dict[variable])), PERIOD = "annual") %>%
+           VARIABLE = variable,
+           # UNIT = as.vector(unlist(unit_dict[variable])), 
+           PERIOD = "annual") %>%
     arrange(YEAR) %>% 
-    select(MODEL, SCENARIO, YEAR, REGION, PERIOD, VARIABLE, TECH, VALUE, UNIT)
+    select(MODEL, SCENARIO, YEAR, REGION, PERIOD, VARIABLE, TECH, VALUE)
   
   #################################################################
   rep_Tech = read.gdx(gdxName = file, requestList = 'report_tech', factors = FALSE)
@@ -129,12 +132,15 @@ gdxToQuitte_annual <- function(mydatapath, gdxfile, run_number){
     # filter(tech == "Solar") %>% 
     mutate(MODEL = model, SCENARIO = paste0("baseline"), 
            REGION = country, YEAR = year, VALUE = round(value, digits = 4), 
-           TECH = as.vector(unlist(tech_dict[tech])),
-           VARIABLE = as.vector(unlist(variable_dict[variable])),
-           UNIT = as.vector(unlist(unit_dict[variable])), PERIOD = "annual"
+           # TECH = as.vector(unlist(tech_dict[tech])),
+           TECH = tech,
+           # VARIABLE = as.vector(unlist(variable_dict[variable])),
+           VARIABLE = variable,
+           # UNIT = as.vector(unlist(unit_dict[variable])), 
+           PERIOD = "annual"
            ) %>%
     arrange(YEAR) %>%
-    select(MODEL, SCENARIO, YEAR, REGION, PERIOD, VARIABLE, TECH, VALUE, UNIT)
+    select(MODEL, SCENARIO, YEAR, REGION, PERIOD, VARIABLE, TECH, VALUE)
   
   #################################################################
   out_annual <- rbind(out_annual, out)

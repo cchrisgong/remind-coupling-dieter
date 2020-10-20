@@ -10,6 +10,7 @@
 *.un~
 *.swp
 *.pdf
+*.png
 
 # Ignore everything in "input" folders
 input/

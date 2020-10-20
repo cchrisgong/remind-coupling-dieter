@@ -1,9 +1,9 @@
 #for shared variable such as peak demand (one iteration series)
 
-mypath = "~/remind/dataprocessing/"
-run_number = "oldbranch"
-mydatapath = paste0("~/remind/output/", run_number,"/")
-mydatapath2 = "~/remind/output/capfac32_valid3/"
+mypath = "~/remind-coupling-dieter/dataprocessing/"
+run_number = "capfac32_valid1"
+mydatapath = paste0("~/remind-coupling-dieter/output/", run_number,"/")
+# mydatapath2 = "~/remind-coupling-dieter/output/capfac32_valid3/"
 
 # import library
 source(paste0(mypath, "library_import.R"))
@@ -26,8 +26,8 @@ sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
 # sorted_files = c(sorted_files_full, sorted_files_nonopt)
 # files = c(files_full, files_nonopt)
 
-files2 <- list.files(mydatapath2, pattern="fulldata_[0-9]+\\.gdx")
-sorted_files2 <- paste0(mydatapath2, "fulldata_", 1:length(files2), ".gdx")
+# files2 <- list.files(mydatapath2, pattern="fulldata_[0-9]+\\.gdx")
+# sorted_files2 <- paste0(mydatapath2, "fulldata_", 1:length(files2), ".gdx")
 
 # year_toplot = 2050
 maxiter = 100
@@ -117,7 +117,7 @@ get_PRICEvariable <- function(gdx){
 }
 
 vr1 <- lapply(sorted_files, get_PRICEvariable)
-vr1_2 <- lapply(sorted_files2, get_PRICEvariable)
+# vr1_2 <- lapply(sorted_files2, get_PRICEvariable)
 
 # print(vr1[[1]])
 
@@ -127,14 +127,14 @@ for(fname in files){
   vr1[[idx]]$model <- "coupled"
 }
 
-for(fname in files2){
-  idx <- as.numeric(str_extract(fname, "[0-9]+"))
-  vr1_2[[idx]]$iter <- idx
-  vr1_2[[idx]]$model <- "uncoupled"
-}
+# for(fname in files2){
+#   idx <- as.numeric(str_extract(fname, "[0-9]+"))
+#   vr1_2[[idx]]$iter <- idx
+#   vr1_2[[idx]]$model <- "uncoupled"
+# }
 
 vr1 <- rbindlist(vr1)
-vr1_2 <- rbindlist(vr1_2)
+# vr1_2 <- rbindlist(vr1_2)
 
 
 get_CAPFAC_variable <- function(iteration){
@@ -220,7 +220,7 @@ secAxisScale = 1/8.76
 p1<-ggplot() +
   geom_line(data = vr1, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
   geom_line(data = vr1_capcon, aes(x = iter, y = capcon*secAxisScale, color = model), size = 1.2, alpha = 0.5) +
-  geom_line(data = vr1_2, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
+  # geom_line(data = vr1_2, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
   scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0(CapConstraintKey, "(USD/kW)")))+
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
   xlab("iteration") + ylab(paste0(VARkey1, "(USD/MWh)"))  +
