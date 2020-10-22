@@ -15,7 +15,7 @@ if( ((ord(iteration) ge 5) and ( mod(ord(iteration), 5) eq 0)),
 
     display$sleep(150) 'wait 150 seconds till DIETER is finished';
 
-    execute './mergegdx.gms';
+    execute './mergegdx.sh';
 
 * .nr = 2 formats numbers in scientific notation (what we usually want for
 *   debugging, because small numbers get rounded to zero otherwise, although
