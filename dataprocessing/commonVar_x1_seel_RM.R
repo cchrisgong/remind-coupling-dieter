@@ -1,7 +1,7 @@
 #for shared variable such as peak demand (one iteration series)
 
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "capfac32_valid1"
+run_number = "debug_recreate"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number,"/")
 # mydatapath2 = "~/remind-coupling-dieter/output/capfac32_valid3/"
 

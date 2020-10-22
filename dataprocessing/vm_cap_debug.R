@@ -1,5 +1,6 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "capfac32_valid1"
+run_number = "debug_recreate"
+# run_number = "capfac32_valid1"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
 # import library
@@ -39,22 +40,28 @@ grade = "1"
 TECHkeylst <- c(TECHkeylst_peakGas, TECHkeylst_nonPeakGas, TECHkeylst_coal, TECHkeylst_solar, TECHkeylst_wind, TECHkeylst_hydro,TECHkeylst_biomass, TECHkeylst_nuclear)
 
 get_variable <- function(gdx, VARkey){
-  # gdx = sorted_files[[5]]
-  vrdata <- read.gdx(gdx, VARkey, factors = FALSE) %>% 
+  # gdx = sorted_files[[9]]
+  # VARkey = VARkey1
+  
+  vrdata <- read.gdx(gdx, VARkey, factors = FALSE,squeeze = FALSE) %>% 
     filter(tall %in% year_toplot_list) %>%
-    filter(all_regi == REGIkey1) %>%
-    filter(all_te %in% TECHkeylst) %>%
+    filter(all_regi == REGIkey1) %>% 
+    # filter(all_te %in% TECHkeylst_coal) %>%
+    # filter(all_te %in% TECHkeylst) %>%
+    filter(all_te %in% c("pc")) %>%
+    # filter(rlf == "1" ) %>% 
     # filter(rlf == grade) %>% 
     # mutate(value = value) %>% 
-    select(tall, all_te, value) 
+    filter(tall < 2110) 
 
     return(vrdata)
 }
 
 get_PM_TS <- function(gdx){
-  vrdata <- read.gdx(gdx, PM_TS_Key, factors = FALSE) %>% 
+  vrdata <- read.gdx(gdx, PM_TS_Key, factors = FALSE,squeeze = FALSE) %>% 
     filter(tall %in% year_toplot_list) %>%
-    dplyr::rename(pm_ts = value)
+    dplyr::rename(pm_ts = value) %>% 
+    filter(tall < 2110) 
   
   return(vrdata)
 }
@@ -71,17 +78,21 @@ for(fname in files){
   vm_deltacap[[idx]]$iter <- idx
   ER0[[idx]]$iter <- idx
   vrN_pm_ts[[idx]]$iter <- idx
-  
 }
+
+# ER0[[1]]
 
 vm_cap <- rbindlist(vm_cap)
 vm_cap1 <- vm_cap %>% 
+  filter(rlf == "1" ) %>% 
+  select(tall, all_te, value, iter) %>% 
   dplyr::rename(vm_cap = value)  %>% 
-  mutate(vm_cap = vm_cap*1e3)%>% 
-  filter(all_te %in% TECHkeylst_coal)
+  mutate(vm_cap = vm_cap*1e3)
 
 vm_deltacap <- rbindlist(vm_deltacap)
 vm_deltacap1 <- vm_deltacap %>% 
+  filter(rlf == "1" ) %>% 
+  select(tall, all_te, value, iter) %>% 
   dplyr::rename(vm_deltacap = value)  %>% 
   mutate(vm_deltacap = vm_deltacap*1e3)
 
@@ -89,28 +100,44 @@ vrN_pm_ts <- rbindlist(vrN_pm_ts)
 
 addedCap <- list(vrN_pm_ts, vm_deltacap1) %>% 
   reduce(full_join) %>% 
-  mutate(cap = round(vm_deltacap / 1e3 * pm_ts / 2 , 2)) %>% #cap: MW -> GW
+  mutate(cap = round(vm_deltacap * pm_ts / 2 , 2)) %>% 
   select(tall, iter, all_te, cap) %>% 
-  dplyr::rename("REMIND added capacities (GW)"= cap) %>% 
-  filter(all_te %in% TECHkeylst_coal)
+  dplyr::rename("REMIND added capacities (GW)"= cap)
+# %>% 
+  # filter(all_te %in% TECHkeylst_coal)
 
 ER <- rbindlist(ER0)
 
 ER1 <- ER %>% 
   dplyr::rename(ER = value) %>% 
-  filter(all_te %in% TECHkeylst_coal) 
+  # filter(all_te %in% TECHkeylst_coal) %>%
   # filter(all_te %in% c("pc")) %>% 
-  # filter(iter == 15)
+  group_by(tall) %>% 
+  arrange(all_te) %>% 
+  mutate(diff = ER - lag(ER, default = first(ER))) %>% 
+  ungroup(tall) %>% 
+  filter(tall > 2010)
+  
+Divestment = list(vm_cap1, ER1) %>%
+  reduce(full_join) %>% 
+  mutate(diff = diff * vm_cap / (1 - ER)) %>% 
+  dplyr::rename(divestment = diff) %>% 
+  filter(tall > 2010) %>% 
+  select(tall, all_te, divestment,iter)
 
 # earlyRetiCap_reporting("2010", reg, te_remind) = (remind_capEarlyReti("2010", reg, te_remind) - remind_capEarlyReti2("2005", reg, te_remind) ) * remind_cap("2010", reg, te_remind, "1") / (1 - remind_capEarlyReti("2010", reg, te_remind)) ;
 
-
-cap_table = list(vm_cap1, addedCap, ER1) %>%
+cap_table = list(vm_cap1, addedCap, Divestment,ER) %>%
   reduce(full_join) %>% 
-  # filter(all_te %in% TECHkeylst_peakGas)
-  filter(all_te %in% TECHkeylst_coal) %>% 
-# filter(all_te %in% c("ngcc"))
-  filter(iter == 15)
+  filter(tall > 2010) %>% 
+  dplyr::rename(ER = value)
 
-write.table(cap_table, paste0(mypath, "debug_table.csv"), sep = ";", row.names = F)
+# test_table = list(vm_cap1, addedCap, ER) %>%
+#   reduce(full_join) %>% 
+#   filter(tall > 2010) %>% 
+#   dplyr::rename(ER = value)
+
+cap_table <- cap_table[order(cap_table$all_te),]
+
+write.table(cap_table, paste0(mypath, "debug_table",run_number,".csv"), sep = ";", row.names = F)
 

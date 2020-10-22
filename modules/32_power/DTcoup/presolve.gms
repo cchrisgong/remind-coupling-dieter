@@ -11,11 +11,11 @@ $ifthen.calibrate %CES_parameters% == "load"
 
 if( ((ord(iteration) ge 5) and ( mod(ord(iteration), 5) eq 0)),
 * if( ((ord(iteration) ge 2) and ( mod(ord(iteration), 1) eq 0)),
-    execute 'DIETER_parallel.sh'
+    execute "./DIETER_parallel.sh";
 
     display$sleep(150) 'wait 150 seconds till DIETER is finished';
 
-    execute 'mergegdx.gms';
+    execute './mergegdx.gms';
 
 * .nr = 2 formats numbers in scientific notation (what we usually want for
 *   debugging, because small numbers get rounded to zero otherwise, although
@@ -52,6 +52,8 @@ p32_peakDemand_relFac(tall,"DEU")$(t_DT_32(tall)) = sum(gdxfile_32, report4RM(gd
 
 * switch on the capacity constraint
 cm_DTcoup_capcon = 1;
+
+* s32_iteration_ge_5 = 1;
 
 *p32_flex_multmk(tall,"elh2")$(t_DT_32(tall)) = sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "elh2", "mult_markup")$(t_DT_32(tall)));
 

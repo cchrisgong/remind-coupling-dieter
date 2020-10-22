@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "capfac32_valid1"
+run_number = "debug_recreate"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
 myDIETERPLOT_path = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
@@ -9,7 +9,7 @@ source(paste0(myDIETERPLOT_path, "GDXtoQuitte.R"))
 library(readr)
 require(rmndt)
 
-iteration_toplot_list <- c(5,10,15,20,25,30)
+iteration_toplot_list <- c(5,10,15,20,25,30,35)
 
 #remind output iteration gdx files
 files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")

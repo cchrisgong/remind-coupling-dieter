@@ -25,7 +25,9 @@ $ENDIF.DTcoup
 
 scalars
 s32_storlink                              "how strong is the influence of two similar renewable energies on each other's storage requirements (1= complete, 4= rather small)" /3/
-s32_iteration_ge_6                        "to control that only after iter 5 is capacity constraint from DIETER implemented"
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+s32_iteration_ge_5                        "to control that only after iter 5 is capacity constraint from DIETER implemented"
+$ENDIF.DTcoup
 ;
 
 positive variables
