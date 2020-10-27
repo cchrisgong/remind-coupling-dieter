@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "debug_recreate"
+run_number = "test"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
 myDIETERPLOT_path = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
