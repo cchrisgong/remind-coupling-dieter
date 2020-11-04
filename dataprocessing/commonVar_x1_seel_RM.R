@@ -1,7 +1,8 @@
 #for shared variable such as peak demand (one iteration series)
 
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "debug_recreate"
+run_number = "mrkup3"
+# run_number = "mrkup1_iter"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number,"/")
 # mydatapath2 = "~/remind-coupling-dieter/output/capfac32_valid3/"
 
@@ -34,6 +35,7 @@ maxiter = 100
 
 BUDGETkey1 = "qm_budget"
 VARkey1 = "q32_balSe"
+VARkey2 = "vm_flexAdj"
 # VARkey1 = "v32_seelDem"
 REGIkey1 = "DEU"
 sm_TWa_2_MWh = 8760000000
@@ -51,6 +53,9 @@ TECHkeylst_hydro = c("hydro")
 TECHkeylst_nuclear = c("tnrs")
 TECHkeylst_biomass = c("biochp", "bioigccc", "bioigcc")
 
+FLEX_tech = c(TECHkeylst_solar)
+
+
 plot_RMte_names = c("combined cycle gas", "coal", "solar", "wind", "biomass", "open cycle gas turbine", "hydro", "nuclear")
 plot_RMLCOEte_names = c("combined cycle gas", "lignite", "solar", "wind", "biomass", "open cycle gas turbine", "hydro", "nuclear")
 
@@ -64,7 +69,7 @@ iter_toplot = 1:length(sorted_files)
 CapConstraintKey = "q32_peakDemand_DT"
   
 get_CAPCONvariable <- function(gdx){
-  # gdx = sorted_files[[15]]
+  # gdx = sorted_files[[5]]
   budgetdata <- read.gdx(gdx, BUDGETkey1,field="m") %>% 
     # filter(ttot == year_toplot) %>%
     filter(all_regi == REGIkey1) %>% 
@@ -73,9 +78,8 @@ get_CAPCONvariable <- function(gdx){
     select(ttot, budget)
   
   capcondata <- read.gdx(gdx, CapConstraintKey,field="m") %>% 
-    # filter(tall == year_toplot) %>%
+    # filter(ttot == year_toplot) %>%
     mutate(m = -m) %>% 
-    dplyr::rename(ttot = tall) %>% 
     dplyr::rename(capcon = m)
   
   # transform from tr$2005/TW to $2015/kW
@@ -97,7 +101,7 @@ for(fname in files){
 vr1_capcon <- rbindlist(vr1_capcon)
 
 get_PRICEvariable <- function(gdx){
-  # gdx = sorted_files[[1]]
+  # gdx = sorted_files[[5]]
   budgetdata <- read.gdx(gdx, BUDGETkey1,field="m") %>% 
     # filter(ttot == year_toplot) %>%
     filter(all_regi == REGIkey1) %>% 
@@ -116,8 +120,26 @@ get_PRICEvariable <- function(gdx){
   return(vrdata)
 }
 
+get_MARKUPvariable <- function(gdx){
+  # gdx = sorted_files[[5]]
+  
+  vrdata0 <- read.gdx(gdx, VARkey2,field="l")  %>% 
+    filter(all_regi == REGIkey1) %>% 
+    filter(all_te %in% FLEX_tech) %>% 
+    dplyr::rename(ttot = tall)
+  
+  vrdata = list(vrdata0, budgetdata) %>%
+    reduce(left_join) %>%
+    mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2) # vm_flexAdj is proportional to pm_seeprice, which is already divided by budget
+  
+  return(vrdata)
+}
+
 vr1 <- lapply(sorted_files, get_PRICEvariable)
+
 # vr1_2 <- lapply(sorted_files2, get_PRICEvariable)
+
+vr1_mk <- lapply(sorted_files, get_MARKUPvariable)
 
 # print(vr1[[1]])
 
@@ -125,6 +147,8 @@ for(fname in files){
   idx <- as.numeric(str_extract(fname, "[0-9]+"))
   vr1[[idx]]$iter <- idx
   vr1[[idx]]$model <- "coupled"
+  vr1_mk[[idx]]$iter <- idx
+  vr1_mk[[idx]]$model <- "coupled"
 }
 
 # for(fname in files2){
@@ -135,7 +159,7 @@ for(fname in files){
 
 vr1 <- rbindlist(vr1)
 # vr1_2 <- rbindlist(vr1_2)
-
+vr1_mk <- rbindlist(vr1_mk)
 
 get_CAPFAC_variable <- function(iteration){
   # iteration = 15
@@ -250,5 +274,18 @@ p3<-ggplot() +
   coord_cartesian(ylim = c(-20,200))+
   facet_wrap(~ttot, nrow = 3)
 
-ggsave(filename = paste0(mypath, "iter_seelprice_wcapfac", run_number, "_RM.png"), p3, width = 28, height =15, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, "iter_seelprice_wcapfac_", run_number, "_RM.png"), p3, width = 28, height =15, units = "in", dpi = 120)
+
+
+p4<-ggplot() +
+  geom_line(data = vr1_mk, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
+  # geom_line(data = vr1_capcon, aes(x = iter, y = capcon*secAxisScale, color = model), size = 1.2, alpha = 0.5) +
+  # geom_line(data = vr1_2, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
+  scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0(CapConstraintKey, "(USD/kW)")))+
+  theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+  xlab("iteration") + ylab(paste0(VARkey1, "(USD/MWh)"))  +
+  coord_cartesian(ylim = c(-20,200))+
+  facet_wrap(~ttot, nrow = 3)
+
+ggsave(filename = paste0(mypath, "iter_markup_", run_number, "_RM.png"), p4, width = 28, height =15, units = "in", dpi = 120)
 

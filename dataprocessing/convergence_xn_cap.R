@@ -1,5 +1,6 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "capfac32_valid1"
+run_number = "mrkup3"
+# run_number = "mrkup1_iter"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
 # import library
@@ -25,10 +26,9 @@ files_DT <- list.files(mydatapath, pattern="results_DIETER_i[0-9]+\\.gdx")
 sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 5, to = length(files_DT)*5, by = 5), ".gdx")
 # sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 2, to = length(files_DT), by = 1), ".gdx")
 
-year_toplot_list <- c(2030,2050,2070) 
+year_toplot_list <- c(2030,2040,2050,2070) 
 for(year_toplot in year_toplot_list){
-# year_toplot = 2035
-maxiter = 100
+# year_toplot = 2050
 
 VARkey1 = "vm_cap"
 REGIkey1 = "DEU"
@@ -61,10 +61,11 @@ get_DEMvariable_RM <- function(gdx){
   #   mutate(relFac = value)
   
   vrdata2 <- read.gdx(gdx, VARsubkey2_RM, factor = FALSE)  %>% 
-    filter(tall == year_toplot) %>% 
+    filter(ttot == year_toplot) %>% 
     filter(all_regi == REGIkey1) %>%
     mutate(totDem = value) %>% 
-    select(tall,totDem)
+    select(ttot,totDem) %>% 
+    dplyr::rename(tall = ttot)
  
   # vrdata0 = list(vrdata1, vrdata2) %>%
   #   reduce(full_join) 
@@ -120,7 +121,7 @@ get_variable <- function(gdx){
 }
 
 get_variable_DT <- function(gdx){
-  # gdx = sorted_files_DT[[1]]
+  # gdx = sorted_files_DT[[2]]
   vrdata <- read.gdx(gdx, VARkey1_DT, factor = FALSE) %>% 
     filter(X..1 == year_toplot) %>% 
     dplyr::rename(all_te = X..3) %>% 
@@ -138,7 +139,7 @@ get_variable_DT <- function(gdx){
     mutate(all_te = str_replace(all_te, TECHkeylst_DT[[9]], plot_DTte_names[[9]])) 
   
   vrdata$all_te <- factor(vrdata$all_te, levels= c("solar", "wind", "combined cycle gas", "biomass", "open cycle gas turbine", "hydro", "nuclear", "lignite", "hard coal"))
-  
+    
     return(vrdata)
 }
 
@@ -180,7 +181,6 @@ p2<-ggplot() +
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text=element_text(size=14)) +
   theme(aspect.ratio = .5)
 
-
 p1<-ggplot() +
   geom_area(data = vrN, aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5) +
   geom_line(data = vr1_DEM, aes(x = iter, y = value), size = 1.2, alpha = 0.5,linetype="dotted") +
@@ -200,6 +200,7 @@ grid.newpage()
 p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
 grid.draw(p)
 
-ggsave(filename = paste0(mypath, "iter_xN_CAP_capfac", run_number, "_", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, "iter_xN_CAP_", run_number, "_", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
 # ggsave(filename = paste0(mypath, "iter_xN_CAP_capfac", run_number, "_uncoupl", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
 }
+

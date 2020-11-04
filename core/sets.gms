@@ -127,7 +127,7 @@ all_te          "all energy technologies, including from modules"
         igcc            "integrated coal gasification combined cycle"
         igccc           "integrated coal gasification combined cycle with capture"
         pc              "pulverised coal power plant"
-$ifthen setGlobal cm_ccsfosall        
+$ifthen setGlobal cm_ccsfosall
         pcc             "pulverised coal power plant with capture"
         pco             "pulverised coal power plant with oxyfuel capture"
 $endif
@@ -217,7 +217,7 @@ $endif
         gridspv         "grid between areas with high pv production and the rest"
         gridcsp         "grid between areas with high csp production and the rest"
         gridwind        "grid between areas with high wind production and the rest"
-*AJS* transport technologies (ESH2T etc..) are defined in the transport module. 
+*AJS* transport technologies (ESH2T etc..) are defined in the transport module.
  	apCarPeT        "Cars using final energy petrol (FEPET) to produce useful energy in form of petrol for transport (UEPET) "
     apCarDiT        "Vehicles using final energy diesel (FEDIE) to produce heavy-duty useful energy (uedit, e.g. freight, busses, planes, ships)."
     apcarDiEffT     "More efficient vehicles using final energy diesel (FEDIE) and electricity (FEELT) to produce heavy-duty useful energy (uedit, e.g. freight, busses, planes, ships)."
@@ -269,15 +269,15 @@ all_enty             "all types of quantities"
         pebiolc      "PE biomass lignocellulosic"
         pebios       "PE biomass sugar and starch"
         pebioil      "PE biomass sunflowers, palm oil, etc"
-		all_seliq	 "all to SE liquids" 
+		all_seliq	 "all to SE liquids"
 		seliqbio     "SE liquids from biomass (ex. ethanol)"
 		seliqfos     "SE liquids from fossil pe (ex. petrol and diesel)"
-        all_seso	 "all to SE solids" 
+        all_seso	 "all to SE solids"
 		sesobio      "SE solids from biomass"
 		sesofos      "SE solids from fossil pe"
         seel         "SE electricity"
         seh2         "SE hydrogen"
-        all_sega	 "all to SE gas" 
+        all_sega	 "all to SE gas"
 		segabio      "SE gas from biomass"
 		segafos      "SE gas from fossil pe"
         sehe         "SE district heating and heat pumps"
@@ -317,15 +317,15 @@ all_enty             "all types of quantities"
         ueelTt       "transport useful energy for electric trains"
 
         !! emissions
-        co2          "carbon dioxide emissions"  
+        co2          "carbon dioxide emissions"
         ch4          "methane emissions"
-        n2o          "n2o emissions from the energy system"		
+        n2o          "n2o emissions from the energy system"
         so2          "sulfur dioxide emissions"
         ch4coal    "fugitive emissions from coal mining"
         ch4gas     "fugitive emissions from gas production"
         ch4oil     "fugitive emissions from oil production"
-        ch4wstl    "ch4 emissions from solid waste disposal on land"	
-        ch4wsts    "ch4 emissions from waste water"		
+        ch4wstl    "ch4 emissions from solid waste disposal on land"
+        ch4wsts    "ch4 emissions from waste water"
         ch4rice    "ch4 emissions from rice cultivation (rice_ch4)"
         ch4animals "ch4 emissions from enteric fermentation of ruminants (ent_ferm_ch4)"
         ch4anmlwst "ch4 emissions from animal waste management(awms_ch4)"
@@ -337,16 +337,16 @@ all_enty             "all types of quantities"
         n2otrans   "n2o emissions from transport"
         n2oacid    "n2o emissions from acid production (only 2005 EDGAR data for calibration of n2oadac and n2onitac baselines)"
         n2oadac    "n2o emissions from adipic acid production"
-        n2onitac   "n2o emissions from nitric acid production"				
+        n2onitac   "n2o emissions from nitric acid production"
         n2ofert    "MAC for n2o emissions from fertilizer (starting with n2ofert)"
-        n2ofertin  "n2o emissions from Inorganic fertilizers (inorg_fert_n2o)"		
+        n2ofertin  "n2o emissions from Inorganic fertilizers (inorg_fert_n2o)"
         n2ofertcr  "n2o emissions from decay of crop residues (resid_n2o)"
         n2ofertsom "n2o emissions from soil organic matter loss (som_n2o)"
-        n2oanwst   "MAC for n2o emissions from animal waste (starting with n2oanwst)"	
-        n2oanwstc  "n2o emissions from manure applied to croplands (man_crop_n2o)"	
+        n2oanwst   "MAC for n2o emissions from animal waste (starting with n2oanwst)"
+        n2oanwstc  "n2o emissions from manure applied to croplands (man_crop_n2o)"
         n2oanwstm  "n2o emissions from animal waste management (awms_n2o)"
         n2oanwstp  "n2o emissions from manure excreted on pasture (man_past_n2o)"
-        n2oagwaste "n2o emissions from agricultural waste burning (no MAC available)"		
+        n2oagwaste "n2o emissions from agricultural waste burning (no MAC available)"
         n2owaste   "n2o emissions from waste (domestic sewage)"
         co2luc     "co2 emissions from land use change"
         co2cement_process  "co2 from cement production (only process emissions)"
@@ -392,8 +392,8 @@ all_enty             "all types of quantities"
         ueelt        "Useful Energy: ELectricity for Transport. Unit: TWa (not yet a real ES, only copied 1:1 from FE)"
 *** uegat   "Useful Energy: GAs for Transport. Unit: TWa (not yet a real ES, only copied 1:1 from FE)"
 *** ueh2t   "Useful Energy: H2 for Transport. Unit: TWa (not yet a real ES, only copied 1:1 from FE)"
-	
-	good         "Generic good"     
+
+	good         "Generic good"
          perm         "Carbon permit"
          peog         "aggregated oil and gas, only relevant for calibration because IEA only provides aggregated data"
 /
@@ -422,7 +422,7 @@ all_esty "energy services"
     ueshh2b  "buildings space heating hydrogen"
     ueshelb  "buildings space heating electricity resistance"
     ueshhpb  "buildings space heating electricity heat pump"
-    
+
     uecwhob  "buildings cooking and water heating liquids"
     uecwsob  "buildings cooking and water heating solids"
     uecwstb  "buildings cooking and water heating traditional solids"
@@ -445,9 +445,9 @@ all_sectorEmi     "all sectors with emissions"
 
 all_exogEmi     " all exogenous emission types"
 /       Aviation         "Exog emi from Aviation"
-        InternationalShipping "Ecog emi from Int. Shipping" 
+        InternationalShipping "Ecog emi from Int. Shipping"
         Waste            "Exogenous emissions from Waste treatment"
-        Agriculture      "Exogenous emissions from Agriculture" 
+        Agriculture      "Exogenous emissions from Agriculture"
         AgWasteBurning   "Exogenous emissions from Ag Waste Burning"
         ForestBurning    "Exogenous emissions from Forest Burning"
         GrasslandBurning "Exogenous emissions from Grassland Burning"
@@ -455,7 +455,7 @@ all_exogEmi     " all exogenous emission types"
 
 all_in   "all inputs and outputs of the CES function"
 /
-  inco                    "macroeconomic output"  
+  inco                    "macroeconomic output"
 
   lab                     "labour input"
   kap                     "capital input"
@@ -489,25 +489,25 @@ all_in   "all inputs and outputs of the CES function"
   feeli                   "industry use of electricity"
 
   fehcsob                 "buildings heating and cooking solids final energy"
-  fehcelb                 "buildings heating and cooking electricity final energy" 
+  fehcelb                 "buildings heating and cooking electricity final energy"
   fehcheb                 "buildings heating and cooking district heat final energy"
   fehcgab                 "buildings heating and cooking gas final energy"
   fehchob                 "buildings heating and cooking liquids final energy"
   fealelb                 "buildings appliances and light electricity final energy"
   fecwsob                 "buildings cooking and water heating solids final energy"
-  fecwelb                 "buildings cooking and water heating electricity final energy" 
-  fecwhpb                 "buildings cooking and water heating electricity heat pump final energy" 
+  fecwelb                 "buildings cooking and water heating electricity final energy"
+  fecwhpb                 "buildings cooking and water heating electricity heat pump final energy"
   fecwheb                 "buildings cooking and water heating district heat final energy"
   fecwgab                 "buildings cooking and water heating gas final energy"
   fecwhob                 "buildings cooking and water heating liquids final energy"
   fescelb                 "buildings space cooling electricity final energy"
   feshsob                 "buildings space heating solids final energy"
-  feshelb                 "buildings space heating electricity final energy" 
+  feshelb                 "buildings space heating electricity final energy"
   feshheb                 "buildings space heating district heat final energy"
   feshgab                 "buildings space heating gas final energy"
   feshhob                 "buildings space heating liquids final energy"
   feshhpb                 "buildings space heating electricity heat pump final energy"
-    
+
   esswb                   "buildings weatherization energy service"
   uehcb                   "buildings heating and cooking useful energy"
   uecwb                   "buildings cooking and water heating useful energy"
@@ -543,7 +543,7 @@ all_in   "all inputs and outputs of the CES function"
   kaphc                   "buildings capital stock insulation"
   kapsc                   "buildings capital stock space cooling"
   kapal                   "buildings capital stock appliances and light"
-    
+
   !! production factors of industry with subsectors
   ue_industry             "useful energy of industry sector"
 
@@ -556,7 +556,7 @@ all_in   "all inputs and outputs of the CES function"
   fega_cement             "gases energy use of cement production"
   feh2_cement             "hydrogen energy use of cement production"
   feel_cement             "electricity energy use of cement production"
- 
+
 
   ue_chemicals            "useful energy of chemicals production"
   en_chemicals            "energy use of chemicals production"
@@ -609,7 +609,7 @@ all_teEs                 "energy service technologies"
     te_eselt_frgt_sm "short-to-medium distance freight transport CES node"
     te_esh2t_frgt_sm "short-to-medium distance freight transport CES node"
     te_esgat_frgt_sm "short-to-medium distance freight transport CES node"
-    te_esdie_frgt_lo "long distance freight transport CES node" 
+    te_esdie_frgt_lo "long distance freight transport CES node"
 
 *** Buildings module
     te_ueshheb  "buildings space heating district heat"
@@ -620,7 +620,7 @@ all_teEs                 "energy service technologies"
     te_ueshh2b  "buildings space heating hydrogen"
     te_ueshelb  "buildings space heating electricity resistance"
     te_ueshhpb  "buildings space heating electricity heat pump"
-    
+
     te_uecwhob  "buildings cooking and water heating liquids"
     te_uecwsob  "buildings cooking and water heating solids"
     te_uecwstb  "buildings cooking and water heating traditional solids"
@@ -628,7 +628,7 @@ all_teEs                 "energy service technologies"
     te_uecwheb  "buildings cooking and water heating district heat"
     te_uecwh2b  "buildings cooking and water heating hydrogen"
     te_uecwelb  "buildings cooking and water heating electricity"
-    te_uecwhpb  "buildings cooking and water heating heat pump" 
+    te_uecwhpb  "buildings cooking and water heating heat pump"
 /
 
 teEs(all_teEs)           "ES technologies which are actually used (to be filled by module realizations)."
@@ -660,7 +660,7 @@ sets
         EUR_regi .(ENC,EWN,ECS,ESC,ECE,FRA,DEU,UKI,ESW)
         NEU_regi .(NES,NEN)
       /
- 
+
    iso "list of iso countries" /
        AFG,ALA,ALB,DZA,ASM,AND,AGO,AIA,ATA,ATG,
        ARG,ARM,ABW,AUS,AUT,AZE,BHS,BHR,BGD,BRB,
@@ -756,7 +756,7 @@ iso_regi "all iso countries and EU and greater China region" /  EUR,CHA,
        TUV,UGA,UKR,ARE,GBR,USA,UMI,URY,UZB,VUT,
        VEN,VNM,VGB,VIR,WLF,ESH,YEM,ZMB,ZWE /
 
-   map_iso_regi(iso_regi,all_regi) "mapping from iso countries to regions that represent country" 
+   map_iso_regi(iso_regi,all_regi) "mapping from iso countries to regions that represent country"
          /
        CHA . CHA
        DEU . DEU
@@ -879,7 +879,7 @@ module2realisation(modules,*) "mapping of modules and active realisations" /
 
 sets
 
-regi(all_regi)  "all regions used in the solution process"   
+regi(all_regi)  "all regions used in the solution process"
 
 *** region sets used for MAGICC
 RCP_regions_world_bunkers "five RCP regions plus total (world) and bunkers"
@@ -910,7 +910,7 @@ RCP_regions_world(RCP_regions_world_bunkers) "five RCP regions plus total (world
 ***   Miscellaneous sets
 ***-----------------------------------------------------------------------------
 ***-----------------------------------------------------------------------------
-Sets 
+Sets
   counter   "helper set to facilitate looping in defined order"   / 1 * 20 /
 ;
 
@@ -926,14 +926,14 @@ tall            "time index"
         1900*3000
         /
 
-*LB* Different time-steps are used for the flags cm_less_TS (default), test_TS, 
+*LB* Different time-steps are used for the flags cm_less_TS (default), test_TS,
 *** and END2110. If none of these flags is set, five year steps are used.
 *** test_TS: 2005,2010,2020,2030,2040,2050,2070,2090,2110,2130,2150
 *** cm_less_TS: 2005,2010,2015,2020,2025,2030,2035,2040,2045,2050,2055,2060,
 *** 2070,2080,2090,2100,2110,2130,2150
 *** END2110: 2005:5:2105,2120
-*AJS* Defining ttot as sum of t and tsu will give errors from compiler, so do 
-*** it manually instead: 
+*AJS* Defining ttot as sum of t and tsu will give errors from compiler, so do
+*** it manually instead:
 ttot(tall)      "time index with spin up"
 /
         1900, 1905, 1910, 1915, 1920, 1925,
@@ -981,7 +981,7 @@ opTime5(opTimeYr)            "actual life time of ??? in years - 5 years time st
 /
         1,6,11,16,21,26,31,36,41,46,51,56,61,66,71,76,81,86,91,96
 /
-t0(tall)   "start of modelling time, not optimization" /2005/    
+t0(tall)   "start of modelling time, not optimization" /2005/
 
 t_input_gdx(ttot)     "t loaded from input.gdx, used for t interpolation"
 t_interpolate(ttot)   "periods that need interpolation"
@@ -1023,7 +1023,7 @@ te(all_te)              "energy technologies"
         gash2           "gas to hydrogen"
         gash2c          "gas to hydrogen with carbon capture"
         gasftrec        "gas based fischer-tropsch recycle"
-        gasftcrec       "gas based fischer-tropsch with capture recycle"		
+        gasftcrec       "gas based fischer-tropsch with capture recycle"
         refliq          "refinery oil to SE liquids"
         dot             "diesel oil turbine"
         igcc            "integrated coal gasification combined cycle"
@@ -1111,7 +1111,7 @@ teAdj(all_te)           "technologies with adjustment costs on capacity addition
   gash2           "gas to hydrogen"
   gash2c          "gas to hydrogen with capture"
   gasftrec        "gas based fischer-tropsch recycle"
-  gasftcrec       "gas based fischer-tropsch with capture recycle"  
+  gasftcrec       "gas based fischer-tropsch with capture recycle"
   dot             "diesel oil turbine"
   igcc            "integrated coal gasification combined cycle"
   igccc           "integrated coal gasification combined cycle with capture"
@@ -1162,9 +1162,9 @@ $endif
   storspv         "storage technology for PV"
   storwind        "storage technology for wind"
   storcsp         "storage technology for CSP"
-  
+
   refliq          "refinery oil to SE liquids"
-  
+
   gridspv         "grid between areas with high pv production and the rest"
   gridcsp         "grid between areas with high csp production and the rest"
   gridwind        "grid between areas with high wind production and the rest"
@@ -1181,7 +1181,7 @@ teRLDCDisp(all_te)     "RLDC Dispatchable technologies that produce seel"
 teLearn(all_te)     "Learning technologies (investment costs can be reduced)"
 /
         wind        "wind power converters"
-        spv         "solar photovoltaic" 
+        spv         "solar photovoltaic"
         csp         "concentrating solar power"
         storspv     "storage technology for spv"
         storwind    "storage technology for wind"
@@ -1190,15 +1190,15 @@ teLearn(all_te)     "Learning technologies (investment costs can be reduced)"
 
 teNoLearn(all_te)   "Technologies without learning effect"
 
-teEtaIncr(all_te)       "Technologies with time variable efficiency parameter eta"   
+teEtaIncr(all_te)       "Technologies with time variable efficiency parameter eta"
 *RP* computationally the explicit build-time tracking for teEtaIncr is expensive. Therefore, I removed the heating plants, because there the efficiency is anyway high and doesn't have such a large influence
 /
-  pc    
-  igcc  
-  igccc 
-  ngcc  
-  ngccc 
-  ngt   
+  pc
+  igcc
+  igccc
+  ngcc
+  ngccc
+  ngt
   bioigcc
   bioigccc
 /
@@ -1208,7 +1208,7 @@ teEtaConst(all_te)      "Technologies with constant eta"
 teCCS(all_te)       "Technologies with CCS"
 /
   ngccc       "natural gas combined cycle with carbon capture"
-  gash2c      "gas to hydrogen with capture"     
+  gash2c      "gas to hydrogen with capture"
   igccc       "integrated coal gasification combined cycle with carbon capture"
 $ifthen setGlobal cm_ccsfosall
   pcc         "pulverized coal power plant with capture"
@@ -1306,7 +1306,7 @@ teGrid(all_te)      "grid between areas"
 teFosCCS(all_te)    "fossil technologies with CCS"
 /
         ngccc       "natural gas combined cycle with carbon capture"
-	gash2c      "gas to hydrogen with capture"     
+	gash2c      "gas to hydrogen with capture"
         gasftcrec       "gas based fischer-tropsch with capture recycle"
         igccc       "integrated coal gasification combined cycle with carbon capture"
 $ifthen setGlobal cm_ccsfosall
@@ -1358,16 +1358,16 @@ teNoTransform(all_te) "all technologies that do not transform energy but still h
 
        gridspv       "grid between areas with high pv production and the rest"
        gridcsp       "grid between areas with high csp production and the rest"
-       gridwind      "grid between areas with high wind production and the rest"   
+       gridwind      "grid between areas with high wind production and the rest"
 /
 teRegTechCosts(all_te) "all technologies for which we differantiate tech costs"
 /
        pc
-       igcc      
-       ngcc       
+       igcc
+       ngcc
        ngt
-       gaschp       
-       pcc       
+       gaschp
+       pcc
        pco
        igccc
        ngccc
@@ -1379,7 +1379,7 @@ teRegTechCosts(all_te) "all technologies for which we differantiate tech costs"
        hydro
        spv
        csp
-       wind      
+       wind
 /
 
 teFlex(all_te)       "all technologies which can benefit from flexibility tax"
@@ -1389,10 +1389,32 @@ elh2
 /
 
 
-teFlexTax(all_te)       "all technologies to which flexibility tax/subsidy applies"
+* teFlexTax(all_te)       "all technologies to which flexibility tax/subsidy applies"
+* /
+* elh2
+* tdels
+* /
+
+COUPte(all_te)       "all technologies to which markup coupling applies"
 /
-elh2
-tdels
+spv
+* wind
+* hydro
+* igcc
+* igccc
+* pc
+* pcc
+* pco
+* coalchp
+* ngcc
+* ngccc
+* gaschp
+* biochp
+* bioigcc
+* bioigccc
+* ngt
+* tnrs
+* fnrs
 /
 
 feForUe(all_enty)    "final energy types that are transformed into useful energys - is filled automatically from the content of fe2ue"
@@ -1442,16 +1464,16 @@ enty(all_enty)       "all types of quantities"
         fetf          "final energy transport fuels"
         feh2t         "final energy hydrogen transport"
         fegat         "final energy nat. gas for transport"
-	
-        co2          "carbon dioxide emissions"  
+
+        co2          "carbon dioxide emissions"
         ch4          "methane emissions"
         n2o          "n2o emissions from the energy system"
         so2          "sulfur dioxide emissions"
         ch4coal    "fugitive emissions from coal mining"
         ch4gas     "fugitive emissions from gas production"
         ch4oil     "fugitive emissions from oil production"
-        ch4wstl    "ch4 emissions from solid waste disposal on land"	
-        ch4wsts    "ch4 emissions from waste water"		
+        ch4wstl    "ch4 emissions from solid waste disposal on land"
+        ch4wsts    "ch4 emissions from waste water"
         ch4rice    "ch4 emissions from rice cultivation (rice_ch4)"
         ch4animals "ch4 emissions from enteric fermentation of ruminants (ent_ferm_ch4)"
         ch4anmlwst "ch4 emissions from animal waste management(awms_ch4)"
@@ -1463,16 +1485,16 @@ enty(all_enty)       "all types of quantities"
         n2otrans   "n2o emissions from transport"
         n2oacid    "n2o emissions from acid production (only 2005 EDGAR data for calibration of n2oadac and n2onitac baselines)"
         n2oadac    "n2o emissions from adipic acid production"
-        n2onitac   "n2o emissions from nitric acid production"				
+        n2onitac   "n2o emissions from nitric acid production"
         n2ofert    "MAC for n2o emissions from fertilizer (starting with n2ofert)"
-        n2ofertin  "n2o emissions from Inorganic fertilizers (inorg_fert_n2o)"		
+        n2ofertin  "n2o emissions from Inorganic fertilizers (inorg_fert_n2o)"
         n2ofertcr  "n2o emissions from decay of crop residues (resid_n2o)"
         n2ofertsom "n2o emissions from soil organic matter loss (som_n2o)"
-        n2oanwst   "MAC for n2o emissions from animal waste (starting with n2oanwst)"	
-        n2oanwstc  "n2o emissions from manure applied to croplands (man_crop_n2o)"	
+        n2oanwst   "MAC for n2o emissions from animal waste (starting with n2oanwst)"
+        n2oanwstc  "n2o emissions from manure applied to croplands (man_crop_n2o)"
         n2oanwstm  "n2o emissions from animal waste management (awms_n2o)"
-        n2oanwstp  "n2o emissions from manure excreted on pasture (man_past_n2o)"	
-        n2oagwaste "n2o emissions from agricultural waste burning (no MAC available)"		
+        n2oanwstp  "n2o emissions from manure excreted on pasture (man_past_n2o)"
+        n2oagwaste "n2o emissions from agricultural waste burning (no MAC available)"
         n2owaste   "n2o emissions from waste (domestic sewage)"
         co2luc     "co2 emissions from land use change"
         co2cement_process  "co2 from cement production (only process emissions)"
@@ -1488,7 +1510,7 @@ enty(all_enty)       "all types of quantities"
 *        tco2         "CCS related parameter during transportation of CO2"
         ico2         "CCS related parameter during injection of CO2"
 *        sco2         "CCS related parameter during storage of CO2 - monitoring ???"
-	good         "Generic good"     
+	good         "Generic good"
 	perm         "Carbon permit"
 
         !! emissions from industry sub-sectors
@@ -1619,7 +1641,7 @@ emiTe(all_enty)   "types of climate-relevant energy emissions for climate coupli
         n2o     "energy system n2o"
 /
 emiExog(all_enty)  "exogenous emissions"
-/ 
+/
         so2
         bc
         oc
@@ -1641,8 +1663,8 @@ emiMacSector(all_enty)  "types of climate-relevant non-energy emissions with mac
         ch4coal    "fugitive emissions from coal mining"
         ch4gas     "fugitive emissions from gas production"
         ch4oil     "fugitive emissions from oil production"
-        ch4wstl    "ch4 emissions from solid waste disposal on land"	
-        ch4wsts    "ch4 emissions from waste water"	
+        ch4wstl    "ch4 emissions from solid waste disposal on land"
+        ch4wsts    "ch4 emissions from waste water"
         ch4rice    "ch4 emissions from rice cultivation (rice_ch4)"
         ch4animals "ch4 emissions from enteric fermentation of ruminants (ent_ferm_ch4)"
         ch4anmlwst "ch4 emissions from animal waste management(awms_ch4)"
@@ -1653,14 +1675,14 @@ emiMacSector(all_enty)  "types of climate-relevant non-energy emissions with mac
         n2osavan   "n2o emissions from savannah burning (no MAC available)"
         n2otrans   "n2o emissions from transport"
         n2oadac    "n2o emissions from adipic acid production"
-        n2onitac   "n2o emissions from nitric acid production"				
+        n2onitac   "n2o emissions from nitric acid production"
         n2ofertin  "n2o emissions from Inorganic fertilizers (inorg_fert_n2o)"
         n2ofertcr  "n2o emissions from decay of crop residues (resid_n2o)"
         n2ofertsom "n2o emissions from soil organic matter loss (som_n2o)"
-        n2oanwstc  "n2o emissions from manure applied to croplands (man_crop_n2o)"	
+        n2oanwstc  "n2o emissions from manure applied to croplands (man_crop_n2o)"
         n2oanwstm  "n2o emissions from animal waste management (awms_n2o)"
         n2oanwstp  "n2o emissions from manure excreted on pasture (man_past_n2o)"
-        n2oagwaste "n2o emissions from agricultural waste burning (no MAC available)"		
+        n2oagwaste "n2o emissions from agricultural waste burning (no MAC available)"
         n2owaste   "n2o emissions from waste (domestic sewage)"
         co2luc     "co2 emissions from land use change"
         co2cement_process  "co2 from cement production (only process emissions)"
@@ -1671,16 +1693,16 @@ MacSector(all_enty)  "sectors for which mac curves exist. Some MACs are used for
         ch4coal    "coal mining"
         ch4gas     "gas production"
         ch4oil     "oil production"
-        ch4wstl    "solid waste disposal on land"	
-        ch4wsts    "waste water"	
+        ch4wstl    "solid waste disposal on land"
+        ch4wsts    "waste water"
         ch4rice    "rice cultivation"
         ch4animals "enteric fermentation of ruminants"
         ch4anmlwst "animal waste management"
         n2otrans   "transport"
         n2oadac    "adipic acid production"
-        n2onitac   "nitric acid production"				
+        n2onitac   "nitric acid production"
         n2ofert    "Inorganic fertilizers"
-        n2oanwst   "manure applied to croplands"	
+        n2oanwst   "manure applied to croplands"
         n2owaste   "waste (domestic sewage)"
         co2luc     "land use change"
         co2cement  "cement production (only process emissions)"
@@ -1694,7 +1716,7 @@ MacSectorMagpie(all_enty)  "land-use sectors for which mac curves exist in REMIN
         ch4animals "enteric fermentation of ruminants"
         ch4anmlwst "animal waste management"
         n2ofert    "Inorganic fertilizers"
-        n2oanwst   "manure applied to croplands"	
+        n2oanwst   "manure applied to croplands"
         co2luc     "land use change"
 /
 
@@ -1704,7 +1726,7 @@ emiMacMagpieN2O(all_enty)  "types of climate-relevant non-energy N2O emissions w
         n2ofertin  "n2o emissions from Inorganic fertilizers (inorg_fert_n2o)"
         n2ofertcr  "n2o emissions from decay of crop residues (resid_n2o)"
         n2ofertsom "n2o emissions from soil organic matter loss (som_n2o)"
-        n2oanwstc  "n2o emissions from manure applied to croplands (man_crop_n2o)"	
+        n2oanwstc  "n2o emissions from manure applied to croplands (man_crop_n2o)"
         n2oanwstm  "n2o emissions from animal waste management (awms_n2o)"
         n2oanwstp  "n2o emissions from manure excreted on pasture (man_past_n2o)"
 /
@@ -1712,11 +1734,11 @@ emiMacMagpieCH4(all_enty)  "types of climate-relevant non-energy CH4 emissions w
 /
         ch4rice    "ch4 emissions from rice cultivation (rice_ch4)"
         ch4animals "ch4 emissions from enteric fermentation of ruminants (ent_ferm_ch4)"
-        ch4anmlwst "ch4 emissions from animal waste management(awms_ch4)"	
+        ch4anmlwst "ch4 emissions from animal waste management(awms_ch4)"
 /
 emiMacMagpieCO2(all_enty)  "types of climate-relevant non-energy CH4 emissions with mac curve where baseline emissions come from MAgPIE only"
 /
-        co2luc     "co2 emissions from land use change"			
+        co2luc     "co2 emissions from land use change"
 /
 
 emiMacExo(all_enty)  "types of climate-relevant non-energy emissions with mac curve where baseline emissions are exogenous"
@@ -1724,13 +1746,13 @@ emiMacExoN2O(all_enty) "types of climate-relevant non-energy N2O emissions with 
 /
         n2oforest  "n2o emissions from forest burning (no MAC available)"
         n2osavan   "n2o emissions from savannah burning (no MAC available)"
-		n2oagwaste "n2o emissions from agricultural waste burning (no MAC available)"		
+		n2oagwaste "n2o emissions from agricultural waste burning (no MAC available)"
 /
 emiMacExoCH4(all_enty)  "types of climate-relevant non-energy CH4 emissions with mac curve where baseline emissions are exogenous"
 /
-        ch4agwaste "ch4 emissions from agricultural waste burning (no MAC available)"	
+        ch4agwaste "ch4 emissions from agricultural waste burning (no MAC available)"
         ch4forest  "ch4 emissions from forest burning (no MAC available)"
-        ch4savan   "ch4 emissions from savannah burning (no MAC available)"	
+        ch4savan   "ch4 emissions from savannah burning (no MAC available)"
 /
 
 emiFuEx(all_enty)   "fugitive emissions"
@@ -1820,7 +1842,7 @@ ppfEn2Sector(all_in,emi_sectors) "primary energy production factors mapping to s
 all_emiMkt         "emission markets"
 /	ETS     "ETS emission market"
 	ES      "Effort sharing emission market"
-	other	"other market configurations"	
+	other	"other market configurations"
 /
 
 sector2emiMkt(emi_sectors,all_emiMkt)
@@ -1836,40 +1858,40 @@ sector2emiMkt(emi_sectors,all_emiMkt)
 
 macSector2emiMkt(all_enty,all_emiMkt)
 /
-        ch4coal.ETS      
-        ch4gas.ETS       
-        ch4oil.ETS       
-        ch4wstl.ES       
-        ch4wsts.ES       
-        ch4rice.ES       
-        ch4animals.ES    
-        ch4anmlwst.ES    
-        ch4agwaste.ES    
-        ch4forest.other  
-        ch4savan.other   
-        n2oforest.other  
-        n2osavan.other   
-        n2otrans.ES      
-        n2oadac.ETS      
-        n2onitac.ETS     
-        n2ofertin.ES     
-        n2ofertcr.ES     
-        n2ofertsom.other 
-        n2oanwstc.ES     
-        n2oanwstm.ES     
-        n2oanwstp.ES     
-        n2oagwaste.ES    
-        n2owaste.ES      
-        co2luc.other     
-        co2cement_process.ETS 
+        ch4coal.ETS
+        ch4gas.ETS
+        ch4oil.ETS
+        ch4wstl.ES
+        ch4wsts.ES
+        ch4rice.ES
+        ch4animals.ES
+        ch4anmlwst.ES
+        ch4agwaste.ES
+        ch4forest.other
+        ch4savan.other
+        n2oforest.other
+        n2osavan.other
+        n2otrans.ES
+        n2oadac.ETS
+        n2onitac.ETS
+        n2ofertin.ES
+        n2ofertcr.ES
+        n2ofertsom.other
+        n2oanwstc.ES
+        n2oanwstm.ES
+        n2oanwstp.ES
+        n2oagwaste.ES
+        n2owaste.ES
+        co2luc.other
+        co2cement_process.ETS
 /
 ccsCo2(all_enty)    "only cco2 (???)"
 /
         cco2
 /
 rlf             "cost levels of fossil fuels"
-/ 
-      1*12 
+/
+      1*12
 /
 integ           "set of integers for looping etc"
 /
@@ -1967,12 +1989,12 @@ char            "characteristics of technologies"
   linconstela     "elastaticity of investment costs for linear growth constraint"
   limitGeopot        "geographical annual solar potential"
   luse            "land use factor of solar technologies"
-  capacity        "capacity of solar technologies" 
+  capacity        "capacity of solar technologies"
   constrTme       "Construction time in years, needed to calculate turn-key cost premium compared to overnight costs"
   tkpremused      "turn-key cost premium used in the model (with a discount rate of 3+ pure rate of time preference); in comparison to overnight costs)"
   lifetime        "average lifetime of a technology (integral under the omeg-curve). Unit: years"
   flexibility                        "representing ramping constraints or additional costs for partial load of technologies in power sector"
-  tech_stat       "technology status: how close a technology is to market readiness. Scale: 0-3, with 0 'I can go out and build a GW plant today' to 3 'Still some research necessary'" 
+  tech_stat       "technology status: how close a technology is to market readiness. Scale: 0-3, with 0 'I can go out and build a GW plant today' to 3 'Still some research necessary'"
   Xport           "imports"
   Mport           "exports"
   use             "financial trade costs for PE use [trl$US per TWa]"
@@ -1995,8 +2017,8 @@ charPeRe(char) "characteristics of renewables"
         maxprod    "maximum annual production"
 /
 s_statusTe   "technology status: how close a technology is to market readiness. Scale: 0-3, with 0 'I can go out and build a GW plant today' to 3 'Still some research necessary'"
-/ 
-      0 * 3 
+/
+      0 * 3
 /
 ;
 
@@ -2054,11 +2076,11 @@ sol_itr       "iterator for inner solution process within one Negishi iteration"
       1*10
 /
 
-iteration     "iterator for main (Negishi/Nash) iterations" 
-/    
+iteration     "iterator for main (Negishi/Nash) iterations"
+/
       1*200
 /
-steps         "iterator for MAC steps" 
+steps         "iterator for MAC steps"
 /
       1*801
 /
@@ -2399,7 +2421,7 @@ emiMacSector2emiMac(all_enty,all_enty)   "mapping of sub-emissions to their sum"
 /
 emiMac2mac(all_enty,all_enty)            "mapping of emission sources to MACs - caution: not all MACs exist, in that case they are zero"
 /
-        ch4coal.ch4coal 
+        ch4coal.ch4coal
         ch4gas.ch4gas
         ch4oil.ch4oil
         ch4wstl.ch4wstl
@@ -2438,7 +2460,7 @@ emiMac2sector(all_enty,emi_sectors,sector_types,all_enty)            "mapping of
         (n2owaste).waste.process.n2o
         (n2ofertin, n2ofertcr, n2ofertsom, n2oanwstc, n2oanwstm, n2oanwstp, n2oagwaste).agriculture.process.n2o
         (n2oforest, n2osavan).lulucf.process.n2o
-        
+
         (co2cement_process,co2cement,co2chemicals,co2steel).indst.process.co2
         (co2luc).lulucf.process.co2
 /
@@ -2605,7 +2627,7 @@ emiRCP2emiREMIND "mapping between emission types expected by MAGICC and provided
 /
 emiFgas2emiRCP(all_enty,emiRCP)   "match F-gases to MAGICC emissions"
 /
-    emiFgasCF4       . CF4 
+    emiFgasCF4       . CF4
     emiFgasC2F6      . C2F6
     emiFgasC6F14     . C6F14
     emiFgasHFC23     . HFC23
@@ -2644,7 +2666,7 @@ emiRCP2order "order of emission types expected by MAGICC"
     HFC245fa  . 22
     SF6       . 23
 /
-  
+
 emiRCP2unitsMagicc(emiRCP,unitsMagicc) "match units to emission types"
 /
     (FossilCO2,OtherCO2)  . GtC
@@ -2678,4 +2700,3 @@ alias(pe2se,pe2se2);
 alias(se2fe,se2fe2);
 
 *** EOF ./core/sets.gms
-

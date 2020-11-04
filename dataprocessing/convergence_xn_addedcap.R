@@ -1,5 +1,6 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "test"
+run_number = "mrkup3"
+# run_number = "mrkup1_iter"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
 myDIETERPLOT_path = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
@@ -9,7 +10,7 @@ source(paste0(myDIETERPLOT_path, "GDXtoQuitte.R"))
 library(readr)
 require(rmndt)
 
-iteration_toplot_list <- c(5,10,15,20,25,30,35)
+iteration_toplot_list <- c(5,25,40,60,70,90)
 
 #remind output iteration gdx files
 files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")

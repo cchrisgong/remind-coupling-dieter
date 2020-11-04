@@ -466,11 +466,11 @@ $setGlobal c_regi_sensscen  all !! def = all
 
 cm_TaxConvCheck = 1; !! def 1, which means tax convergence check is on
 
-cm_flex_tax = 0; !! def 0
+cm_flex_tax = 1; !! def 0
 cm_flexMax_elh2 = 0.6; !! def 0.6
-																	  
+
 cm_biotrade_phaseout = 0; !! def 0
-cm_bioprod_histlim = -1; !! def -1	
+cm_bioprod_histlim = -1; !! def -1
 
 cm_H2targets = 0; !! def 0
 
@@ -488,7 +488,6 @@ cm_BioImportTax_EU = 1; !! def 0.25
 *--------------------flags------------------------------------------------------------
 $setglobal cm_DTcoup  on         !! def = off
 cm_DTcoup_capcon =0;         !! def = 0
-cm_flex_tax = 0; !! def 0
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
 $setGlobal cm_nash_mode  parallel      !! def = parallel
 $setGlobal c_EARLYRETIRE       on         !! def = on

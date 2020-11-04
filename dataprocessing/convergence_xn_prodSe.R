@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "capfac32_valid1"
+run_number = "mrkup1"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 # import library
 source(paste0(mypath, "library_import.R"))
@@ -8,7 +8,7 @@ require(rmndt)
 
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
-#remind output iteration gdx files
+# remind output iteration gdx files
 files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
 sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
 
@@ -19,7 +19,7 @@ sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
 # sorted_files = c(sorted_files_full, sorted_files_nonopt)
 # files = c(files_full, files_nonopt)
 
-#dieter output iteration gdx files
+# dieter output iteration gdx files
 files_DT <- list.files(mydatapath, pattern="results_DIETER_i[0-9]+\\.gdx")
 sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 5, to = length(files_DT)*5, by = 5), ".gdx")
 
@@ -168,7 +168,6 @@ p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
 grid.draw(p)
 
 ggsave(filename = paste0(mypath, "iter_xN_GEN_capFac", run_number, "_", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
-
 
 }
 

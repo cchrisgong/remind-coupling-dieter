@@ -46,7 +46,6 @@ p32_storexp(regi,"spv")     = 1;
 p32_storexp(regi,"csp")     = 1;
 p32_storexp(regi,"wind")    = 1;
 
-
 ***parameter p32_gridexp(all_regi,all_te) - exponent that determines how grid requirement per kW increases with market share of wind and solar. 1 means specific marginal costs increase linearly
 p32_gridexp(regi,"spv")     = 1;
 p32_gridexp(regi,"csp")     = 1;
@@ -60,8 +59,9 @@ $include "./modules/32_power/IntC/input/f32_storageCap.prn"
 p32_storageCap(te,char) = f32_storageCap(char,te);
 display p32_storageCap;
 
+***CG is this needed?
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-p32_peakDemand_relFac(tall,"DEU")$(t_DT_32(tall)) = 0;
-*p32_flex_multmk(tall,teFlex)$(t_DT_32(tall)) = 0.6;
-s32_iteration_ge_5 = 0;
+p32_peakDemand_relFac(t,"DEU")$(tDT32(t)) = 0;
+p32_DIETERmkup(t,te)$(tDT32(t) AND COUPte(te)) = 0;
+* s32_iteration_ge_5 = 0;
 $ENDIF.DTcoup

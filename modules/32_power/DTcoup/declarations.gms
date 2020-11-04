@@ -16,17 +16,18 @@ parameters
 *   p32_capStor_DIET(tall,all_regi)       "storage cap from DIETER"
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-    report4RM(gdxfile_32,tall,all_regi,DIETER_te_32,DIETERvarname_32) "load report from DIETER"
-    p32_peakDemand_relFac(tall,all_regi)  "annual peak demand as a relative ratio of total annual power demand from DIETER"
-
-*    p32_flex_multmk(tall,all_te) "fractional parameter from DIETER that indicates the multiplicative price mark up of a flexible demand side technology"
+    report4RM(gdxfile32,ttot,all_regi,DIETERte32,DIETERvarname32) "load report from DIETER"
+    reportmk_4RM(gdxfile32,ttot,all_regi,DIETERte32,DIETERvarname32) "load markup report from DIETER"
+    p32_peakDemand_relFac(ttot,all_regi)  "annual peak demand as a relative ratio of total annual power demand from DIETER"
+    p32_DIETERmkup(ttot,all_te) "multiplicative factor from DIETER that indicates the multiplicative price mark up of technology"
 $ENDIF.DTcoup
 ;
 
 scalars
 s32_storlink                              "how strong is the influence of two similar renewable energies on each other's storage requirements (1= complete, 4= rather small)" /3/
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-s32_iteration_ge_5                        "to control that only after iter 5 is capacity constraint from DIETER implemented"
+* s32_iteration_ge_5                        "to control that only after iter 5 is capacity constraint from DIETER implemented"
+sm32_tmp                                  "iteration.val"
 $ENDIF.DTcoup
 ;
 
@@ -34,7 +35,7 @@ positive variables
     v32_shStor(ttot,all_regi,all_te)      "share of seel production from renewables that needs to be stored, range 0..1 [0,1]"
     v32_storloss(ttot,all_regi,all_te)    "total energy loss from storage for a given technology [TWa]"
     v32_shSeEl(ttot,all_regi,all_te)			"new share of electricity production in % [%]"
-    v32_seelDem(tall,all_regi,all_enty)   "total secondary electricity demand"
+    v32_seelDem(ttot,all_regi,all_enty)   "total secondary electricity demand"
 * v32_peakDemand_DT_testLHS(tall)
 * v32_peakDemand_DT_testRHS(tall, all_enty)
 ;
@@ -52,14 +53,15 @@ equations
     q32_storloss(ttot,all_regi,all_te)            "equation to calculate vm_storloss"
 *** disabling flexibility constraint q32_operatingReserve in coupled mode
 *   q32_operatingReserve(ttot,all_regi)  			    "operating reserve for necessary flexibility"
-    q32_limitSolarWind(tall,all_regi)           	"limits on fluctuating renewables, only turned on for special EMF27 scenarios"
+    q32_limitSolarWind(ttot,all_regi)           	"limits on fluctuating renewables, only turned on for special EMF27 scenarios"
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-q32_peakDemand_DT(tall, all_enty)                "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"
-* q32_peakDemand_DT_testLHS(tall)
-* q32_peakDemand_DT_testRHS(tall,all_enty)
+    q32_peakDemand_DT(ttot, all_enty)                 "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"
+*   q32_peakDemand_DT_testLHS(tall)
+*   q32_peakDemand_DT_testRHS(tall,all_enty)
 
-*q32_flexAdj(tall,all_regi,all_te)                "calculate flexibility used in flexibility tax for technologies with electricity input"
+    q32_mkup(ttot,all_regi,all_te)                    "calculate markup or markdown of generation technology value"
+*   q32_flexAdj(tall,all_regi,all_te)                "calculate flexibility used in flexibility tax for technologies with electricity input"
 $ENDIF.DTcoup
 *	  q32_h2turbVREcapfromTestor(tall,all_regi)     "calculate capacities of dummy seel<--h2 technology from storXXX technologies"
 *   q32_elh2VREcapfromTestor(tall,all_regi)       "calculate capacities of dummy seel-->h2 technology from storXXX technologies"

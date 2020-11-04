@@ -87,7 +87,7 @@ q32_limitCapTeChp(t,regi)..
 ;
 
 ***---------------------------------------------------------------------------
-*** Calculation of necessary grid installations for centralized renewables:
+*** Calculation of necessary grid instations for centralized renewables:
 ***---------------------------------------------------------------------------
 q32_limitCapTeGrid(t,regi)$( t.val ge 2015 ) ..
     vm_cap(t,regi,"gridwind",'1')       !! Technology is now parameterized to yield marginal costs of ~3.5$/MWh VRE electricity
@@ -164,41 +164,55 @@ q32_limitSolarWind(t,regi)$( (cm_solwindenergyscen = 2) OR (cm_solwindenergyscen
 ***---------------------------------------------------------------------------
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
-q32_peakDemand_DT(tall, enty2)$(t_DT_32(tall) AND sameas(enty2,"seel") AND (cm_DTcoup_capcon = 1)) ..
-* q32_peakDemand_DT(tall, enty2)$(t_DT_32(tall) AND sameas(enty2,"seel") )..
-	sum(all_te$(DISPATCHte_32(all_te)), sum(rlf, vm_cap(tall,"DEU",all_te,rlf)))
+q32_peakDemand_DT(t,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND cm_DTcoup_capcon = 1) ..
+* q32_peakDemand_DT(tall,"seel")$(ct_DT_32(tall)) ..
+	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,"DEU",te,rlf)))
 	=g=
-* p32_peakDemand_relFac(tall,"DEU") * v32_seelDem(tall,"DEU",enty2) * 8760 * s32_iteration_ge_5 !! either NO (= 0) for iteration lt 5, or YES (= 1) otherwise
-p32_peakDemand_relFac(tall,"DEU") * v32_seelDem(tall,"DEU",enty2) * 8760
+* p32_peakDemand_relFac(t,"DEU") * v32_seelDem(t,"DEU",enty2) * 8760 * s32_iteration_ge_5 !! either NO (= 0) for iteration lt 5, or YES (= 1) otherwise
+p32_peakDemand_relFac(t,"DEU") * v32_seelDem(t,"DEU",enty2) * 8760
 	;
 
-* q32_peakDemand_DT_testLHS(tall)$(t_DT_32(tall) AND (cm_DTcoup_capcon = 1)) ..
-* 	v32_peakDemand_DT_testLHS(tall)
+* q32_peakDemand_DT_testLHS(t)$(t_DT_32(t) AND (cm_DTcoup_capcon = 1)) ..
+* 	v32_peakDemand_DT_testLHS(t)
 * 	=e=
-* 	sum(all_te$(DISPATCHte_32(all_te)), sum(rlf, vm_cap(tall,"DEU",all_te,rlf)))
+* 	sum(te$(DISPATCHte_32(te)), sum(rlf, vm_cap(t,"DEU",te,rlf)))
 * 	;
 *
-* q32_peakDemand_DT_testRHS(tall,enty2)$(t_DT_32(tall) AND sameas(enty2,"seel") AND (cm_DTcoup_capcon = 1)) ..
-* 	v32_peakDemand_DT_testRHS(tall,enty2)
+* q32_peakDemand_DT_testRHS(t,enty2)$(t_DT_32(t) AND sameas(enty2,"seel") AND (cm_DTcoup_capcon = 1)) ..
+* 	v32_peakDemand_DT_testRHS(t,enty2)
 * 	=e=
-* 	p32_peakDemand_relFac(tall,"DEU") * v32_seelDem(tall,"DEU",enty2) * 8760
+* 	p32_peakDemand_relFac(t,"DEU") * v32_seelDem(t,"DEU",enty2) * 8760
 * 	;
 
 ***----------------------------------------------------------------------------
+*** CG: below is Felix's version for flexible demand like electrolysis hydrogen from IntC realization
 *** FS: calculate flexibility adjustment used in flexibility tax for technologies with electricity input
 ***----------------------------------------------------------------------------
-* $IFTHEN.DTcoup %cm_DTcoup% == "on"
-* *** calculate flexibility benefit or cost per unit output of flexibile or inflexibly technology
-* q32_flexAdj(tall,"DEU",teFlex)$(t_DT_32(tall))..
-* 	vm_flexAdj(tall,"DEU",teFlex)
+
+*** calculate flexibility benefit or cost per unit output of flexibile or inflexibly technology
+* q32_flexAdj(t,regi,teFlex)..
+* 	vm_flexAdj(t,regi,teFlex)
 * 	=e=
-* *** inflexible/flexible technology sees with increasing VRE share up to p32_flex_maxdiscount
+* *** linearly increase/decrease electricity price that inflexible/flexible technology sees with increasing VRE share up to p32_flex_maxdiscount
 * *** p32_flex_maxdiscount positive -> lower-than-average electricity price (flexible demand),
 * *** p32_flex_maxdiscount negative -> higher-than-average electricity price (inflexible demand)
-* 	( 1 - p32_flex_multmk(tall,teFlex) ) * p_priceSeel(tall,"DEU")
+* 	p32_flex_maxdiscount(regi,teFlex) * pm_priceSeel(t,regi) * sum(teVRE, v32_shSeEl(t,regi,teVRE)) / 100
 * *** convert to fuel cost for flexible technology (converts to cost per unit output)
-* 	/ pm_eta_conv(tall,"DEU",teFlex)
+* 	/ pm_eta_conv(t,regi,teFlex)
 * ;
-*
+
+***----------------------------------------------------------------------------
+*** CG: calculate markup adjustment used in flexibility tax for supply-side technologies
+***----------------------------------------------------------------------------
+*** calculate flexibility benefit or cost per unit output of flexibile or inflexibly technology
+q32_mkup(t,"DEU",te)$(tDT32(t) AND COUPte(te) AND (cm_DTcoup_capcon = 1))..
+	vm_flexAdj(t,"DEU",te)
+	=e=
+*** supply-side technology markup p32_DIETERmkup as a multiplicative factor
+*** of the wholesale electricity price of the last iteration
+*** p32_DIETERmkup < 1 -> market value lower than average electricity price (usually fluctuating VRE generation),
+*** p32_DIETERmkup > 1 -> market value higher than average electricity price (usually firm generation technologies)
+	(1 - p32_DIETERmkup(t,te)) * pm_priceSeel(t,"DEU")
+;
 
 $ENDIF.DTcoup

@@ -9,12 +9,20 @@ $ifthen.calibrate %CES_parameters% == "load"
 *
 *iteration happens at N=5, 10, 15, 20, ...; if (ord(iteration) ge 5) N starts at N= 4
 
-if( ((ord(iteration) ge 5) and ( mod(ord(iteration), 5) eq 0)),
+if( ((ord(iteration) ge 1) and ( mod(ord(iteration), 5) eq 0)),
 * if( ((ord(iteration) ge 2) and ( mod(ord(iteration), 1) eq 0)),
+
+sm32_tmp = iteration.val;
+display "iteration", sm32_tmp;
+
+*   switch on second coupling switch when coupling actually begins
+    cm_DTcoup_capcon = 1;
+
+*   alternative scalar switch
+*   s32_iteration_ge_5 = 1;
+
     execute "./DIETER_parallel.sh";
-
-    display$sleep(150) 'wait 150 seconds till DIETER is finished';
-
+    display$sleep(100) 'wait 100 seconds till DIETER is finished';
     execute './mergegdx.sh';
 
 * .nr = 2 formats numbers in scientific notation (what we usually want for
@@ -42,20 +50,28 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     Execute_Loadpoint 'results_DIETER' report4RM;
 *   ONLY pass on the disptachable capacity factors, since the VRE's capfac are treated differently in REMIND
 *   sum over gdxfile set removes this extra index that comes from gdxmerge algorithm
-    pm_cf(tall,"DEU",all_te)$(t_DT_32(tall) AND COALte_32(all_te)) = sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "coal", "capfac")$(t_DT_32(tall)));
-    pm_cf(tall,"DEU",all_te)$(t_DT_32(tall) AND NonPeakGASte_32(all_te)) = sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "CCGT", "capfac")$(t_DT_32(tall)));
-    pm_cf(tall,"DEU",all_te)$(t_DT_32(tall) AND BIOte_32(all_te)) = sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "bio", "capfac")$(t_DT_32(tall)));
-    pm_cf(tall,"DEU","ngt")$(t_DT_32(tall)) = sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "OCGT_eff", "capfac")$(t_DT_32(tall)));
-    pm_cf(tall,"DEU",all_te)$(t_DT_32(tall) AND NUCte_32(all_te)) = sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "nuc", "capfac")$(t_DT_32(tall)));
+    pm_cf(t,"DEU",te)$(tDT32(t) AND COALte32(te)) = sum(gdxfile32,report4RM(gdxfile32,t,"DEU","coal","capfac")$(tDT32(t)));
+    pm_cf(t,"DEU",te)$(tDT32(t) AND NonPeakGASte32(te)) = sum(gdxfile32,report4RM(gdxfile32,t,"DEU","CCGT","capfac")$(tDT32(t)));
+    pm_cf(t,"DEU",te)$(tDT32(t) AND BIOte32(te)) = sum(gdxfile32,report4RM(gdxfile32,t,"DEU","bio","capfac")$(tDT32(t)));
+    pm_cf(t,"DEU","ngt")$(tDT32(t)) = sum(gdxfile32, report4RM(gdxfile32,t,"DEU","OCGT_eff","capfac")$(tDT32(t)));
+    pm_cf(t,"DEU",te)$(tDT32(t) AND NUCte32(te)) = sum(gdxfile32,report4RM(gdxfile32,t,"DEU","nuc","capfac")$(tDT32(t)));
 
-p32_peakDemand_relFac(tall,"DEU")$(t_DT_32(tall)) = sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "all_te", "peakDem_relFac")$(t_DT_32(tall)));
+*   pass peak demand from DIETER to REMIND as a fraction of the total demand
+    p32_peakDemand_relFac(t,"DEU")$(tDT32(t)) = sum(gdxfile32, report4RM(gdxfile32,t,"DEU","all_te","peakDem_relFac")$(tDT32(t)));
 
-* switch on the capacity constraint
-cm_DTcoup_capcon = 1;
+*   flexible demand side tech (might be able to be replaced by the mkup implementation)
+*   p32_flex_multmk(t,"elh2")$(tDT32(t)) = sum(gdxfile32, report4RM(gdxfile32, t, "DEU", "elh2", "mult_markup")$(tDT32(t)));
 
-* s32_iteration_ge_5 = 1;
+    Execute_Loadpoint 'results_DIETER' reportmk_4RM;
 
-*p32_flex_multmk(tall,"elh2")$(t_DT_32(tall)) = sum(gdxfile_32, report4RM(gdxfile_32, tall, "DEU", "elh2", "mult_markup")$(t_DT_32(tall)));
+    p32_DIETERmkup(t,te)$(tDT32(t) AND BIOte32(te)) = sum(gdxfile32,reportmk_4RM(gdxfile32,t,"DEU","bio","mult_markup")$(tDT32(t)));
+    p32_DIETERmkup(t,te)$(tDT32(t) AND NonPeakGASte32(te)) = sum(gdxfile32,reportmk_4RM(gdxfile32,t,"DEU","CCGT","mult_markup")$(tDT32(t)));
+    p32_DIETERmkup(t,"ngt")$(tDT32(t)) = sum(gdxfile32,reportmk_4RM(gdxfile32,t,"DEU","OCGT_eff","mult_markup")$(tDT32(t)));
+    p32_DIETERmkup(t,te)$(tDT32(t) AND NUCte32(te)) = sum(gdxfile32,reportmk_4RM(gdxfile32,t,"DEU","nuc","mult_markup")$(tDT32(t)));
+    p32_DIETERmkup(t,te)$(tDT32(t) AND COALte32(te)) = sum(gdxfile32,reportmk_4RM(gdxfile32,t,"DEU","coal","mult_markup")$(tDT32(t)));
+    p32_DIETERmkup(t,"spv")$(tDT32(t)) = sum(gdxfile32,reportmk_4RM(gdxfile32,t,"DEU","Solar","mult_markup")$(tDT32(t)));
+    p32_DIETERmkup(t,"hydro")$(tDT32(t)) = sum(gdxfile32,reportmk_4RM(gdxfile32,t,"DEU","ror","mult_markup")$(tDT32(t)));
+    p32_DIETERmkup(t,"wind")$(tDT32(t)) = sum(gdxfile32,reportmk_4RM(gdxfile32,t,"DEU","Wind_on","mult_markup")$(tDT32(t)));
 
 $ENDIF.DTcoup
 

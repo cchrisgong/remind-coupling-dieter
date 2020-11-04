@@ -1,10 +1,11 @@
 #for revenue and market value, produces cvs table of marginal and annual average revenue and market value
 
-mypath = "~/remind/dataprocessing/"
+mypath = "~/remind-coupling-dieter/dataprocessing/"
 
 #fully coupled REMIND run (in validation mode, with capfac & capacity constraint)
-run_number_full = "oldbranch"
+# run_number_full = "oldbranch"
 # run_number_full = "32_valid1"
+run_number_full = "mrkup1"
 #partially coupled REMIND run (only with capfac, no capacity constraint)
 run_number_partial = "32_valid2"
 #uncoupled REMIND run
@@ -12,7 +13,7 @@ run_number_uncoupl = "32_valid3"
 
 # import library
 source(paste0(mypath, "library_import.R"))
-myDIETERPLOT_path = "~/remind/dataprocessing/DIETER_plots/"
+myDIETERPLOT_path = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
 source(paste0(myDIETERPLOT_path, "GDXtoQuitte.R"))
 library(readr)
 require(ggplot2)
@@ -29,7 +30,7 @@ run_number = run_number_full
 # run_number = run_number_partial
 # run_number = run_number_uncoupl
 
-mydatapath =  paste0("~/remind/output/", run_number, "/") 
+mydatapath =  paste0("~/remind-coupling-dieter/output/", run_number, "/") 
 #dieter output iteration gdx files
 files_DT_rep <- list.files(mydatapath, pattern="report_DIETER_i[0-9]+\\.gdx")
 sorted_files_DT_rep <- paste0(mydatapath, "report_DIETER_i", seq(from = 5, to = length(files_DT_rep)*5, by = 5), ".gdx")
@@ -64,7 +65,7 @@ VAR_report_key2_DT = c("REMIND CapFac (%)")
 VAR_report_key3_DT = c("DIETER avg CapFac (%)")
 
 # relevant cost parameters to be loaded from DIETER reporting
-VAR_report_key4_DT = c("Annualized investment cost","O&M cost","fuel cost (divided by eta)", "CO2 cost")
+VAR_report_key4_DT = c("annualized investment cost","O&M cost","fuel cost (divided by eta)", "CO2 cost")
 
 # |year|iter|tech|^ CF_REMIND|x LCOE_REMIND|^ MV_RM|x CF_DIETER|x LCOE_avg_DIETER|x LCOE_marg_DIETER|x MV_DT|^ Revenue_REMIND|x Revenue_avg_DIETER|
 # |x Revenue_marg_DIETER |^ Shadow_price| x Inv_REMIND| xInv_DIETER|run
@@ -140,7 +141,7 @@ TECH_NONVRE_keylst <- c(TECHkeylst_peakGas, TECHkeylst_nonPeakGas, TECHkeylst_co
 get_report_variable_DT <- function(iteration, varlist){
   # iteration = 15
   cvs = sorted_annual_report_DT[[iteration/5]]
-  # varlist =VAR_report_key1_DT
+  # varlist =VAR_report_key4_DT
   annual_reportCSV = read.csv(cvs, sep = ";", header = T, stringsAsFactors = F)
   annual_reportQUITT <- as.quitte(annual_reportCSV) 
   
@@ -181,7 +182,7 @@ vrN_rep$"DIETER Revenue marginal plant ($/MW)"[is.na(vrN_rep$"DIETER Revenue mar
 #============REMIND capacity constraint shadow price ===========================================================
 
 get_CAPCON <- function(iteration){
-  # iteration = 15
+  # iteration = 5
   gdx = sorted_files[[iteration]]
   
   budgetdata <- read.gdx(gdx, BUDGETkey1,field="m") %>% 
@@ -193,7 +194,7 @@ get_CAPCON <- function(iteration){
     select(period, budget)
   
   capcondata1 <- read.gdx(gdx, CapConstraintKey,field="m") %>% 
-    dplyr::rename(period = tall)  %>% 
+    dplyr::rename(period = ttot)  %>% 
     filter(period %in%year_toplot) %>%
     mutate(m = -m) %>% 
     dplyr::rename(cap_ShadowPrice = m)
@@ -486,7 +487,7 @@ vrN_GEN_4LCOE <- vrN_GEN %>%
 
 # investment adjustment cost
 get_InvAdjvariable <- function(iteration, years){
-  # years = year_total
+  years = year_total
   # iteration = 5
   
   gdx = sorted_files[[iteration]]
@@ -570,7 +571,7 @@ vrN_InvAdjcost_yrafter$period <- vrN_InvAdjcost$period
 
 RM_LCOE <- list(vrN_GEN_4LCOE, RMcost_bkdw3, vrN_InvAdjcost, vrN_InvAdjcost_yrbefore, vrN_InvAdjcost_yrafter, vrN_CAP0) %>% 
   reduce(full_join) %>% 
-  dplyr::rename(IC = "Annualized investment cost") %>% 
+  dplyr::rename(IC = "annualized investment cost") %>% 
   dplyr::rename(OM = "O&M cost") %>% 
   dplyr::rename(FC = "fuel cost (divided by eta)") %>% 
   dplyr::rename(CO2 = "CO2 cost") %>% 
@@ -610,7 +611,7 @@ vrN_CFgrade <- rbindlist(vrN_CFgrade)
 RM_LCOE_grade <- list(RMcost_bkdw3, vrN_CFgrade) %>% 
   reduce(full_join) %>% 
   replace(is.na(.), 0) %>% 
-  dplyr::rename(IC = "Annualized investment cost") %>% 
+  dplyr::rename(IC = "annualized investment cost") %>% 
   dplyr::rename(OM = "O&M cost") %>% 
   dplyr::rename(FC = "fuel cost (divided by eta)") %>% 
   dplyr::rename(CO2 = "CO2 cost") %>% 
@@ -671,7 +672,7 @@ reduce(right_join)
 ScreenCurve0 <- RMcost_bkdw3 %>% 
   filter(iter %in% iter_toplot_RM) %>% 
   replace(is.na(.), 0) %>% 
-  dplyr::rename(IC = "Annualized investment cost") %>% 
+  dplyr::rename(IC = "annualized investment cost") %>% 
   dplyr::rename(OM = "O&M cost") %>% 
   dplyr::rename(FC = "fuel cost (divided by eta)") %>% 
   dplyr::rename(CO2 = "CO2 cost") %>% 
@@ -819,5 +820,5 @@ vrN_final[,30] <- data.frame(lapply(vrN_final[,30], A) )
 
 vrN_final <- vrN_final[order(vrN_final$period),]
 vrN_final <- vrN_final[order(vrN_final$iter),]
-write.table(vrN_final, paste0(mypath, "validation_table_oldbranch_ocgt_allyears.xls"), sep = ";", row.names = F)
+write.table(vrN_final, paste0(mypath, "validation_table_", run_number_full, ".xls"), sep = ";", row.names = F)
 
