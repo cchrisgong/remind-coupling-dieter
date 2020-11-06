@@ -1,0 +1,26 @@
+*Parameter,Technology,
+c_m_dsm_cu,DSM_curt1,1
+c_m_dsm_cu,DSM_curt2,1500
+c_m_dsm_cu,DSM_curt3,8000
+c_fix_dsm_cu,DSM_curt1,1000
+c_fix_dsm_cu,DSM_curt2,1000
+c_fix_dsm_cu,DSM_curt3,1000
+c_inv_overnight_dsm_cu,DSM_curt1,10000
+c_inv_overnight_dsm_cu,DSM_curt2,10000
+c_inv_overnight_dsm_cu,DSM_curt3,10000
+inv_recovery_dsm_cu,DSM_curt1,22.5
+inv_recovery_dsm_cu,DSM_curt2,10
+inv_recovery_dsm_cu,DSM_curt3,10
+inv_interest_dsm_cu,DSM_curt1,0.04
+inv_interest_dsm_cu,DSM_curt2,0.04
+inv_interest_dsm_cu,DSM_curt3,0.04
+m_dsm_cu,DSM_curt1,6000
+m_dsm_cu,DSM_curt2,1600
+m_dsm_cu,DSM_curt3,5400
+t_dur_dsm_cu,DSM_curt1,6
+t_dur_dsm_cu,DSM_curt2,4
+t_dur_dsm_cu,DSM_curt3,4
+t_off_dsm_cu,DSM_curt1,24
+t_off_dsm_cu,DSM_curt2,24
+t_off_dsm_cu,DSM_curt3,24
+*Sources: Zerrahn, A. and W.-P. Schill, A greenfield model to evaluate long-run power storage requirements for high shares of renewables. DIW Discussion Paper 1457
