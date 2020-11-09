@@ -1,6 +1,6 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup3"
-# run_number = "mrkup1_iter"
+run_number = "mrkup5"
+# run_number = "mrkup5_iter"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
 myDIETERPLOT_path = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
@@ -10,7 +10,8 @@ source(paste0(myDIETERPLOT_path, "GDXtoQuitte.R"))
 library(readr)
 require(rmndt)
 
-iteration_toplot_list <- c(5,25,40,60,70,90)
+# iteration_toplot_list <- c(30,50,80,90,95,100)
+iteration_toplot_list <- c(15,30,50,65)
 
 #remind output iteration gdx files
 files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
@@ -20,9 +21,9 @@ files_DT_rep <- list.files(mydatapath, pattern="report_DIETER_i[0-9]+\\.gdx")
 sorted_files_DT_rep <- paste0(mydatapath, "report_DIETER_i", seq(from = 5, to = length(files_DT_rep)*5, by = 5), ".gdx")
 # sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 2, to = length(files_DT), by = 1), ".gdx")
 # 
-for(fname in files_DT_rep){
-  gdxToQuitte_annual(mydatapath, fname,run_number)
-}
+# for(fname in files_DT_rep){
+#   gdxToQuitte_annual(mydatapath, fname,run_number)
+# }
 
 #dieter output iteration gdx files
 sorted_annual_report_DT <- paste0(myDIETERPLOT_path, "capfac", run_number, "_i", seq(from = 5, to = length(files_DT_rep)*5, by = 5), "_annualreport.csv")
@@ -38,6 +39,7 @@ mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "coal" = 
 get_report_variable_DT <- function(iteration){
   # iteration = 5
   cvs = sorted_annual_report_DT[[iteration/5]]
+  # cvs = sorted_annual_report_DT[[iteration-1]]
   annual_reportCSV = read.csv(cvs, sep = ';', header = T, stringsAsFactors = F)
   annual_reportQUITT <- as.quitte(annual_reportCSV) 
   

@@ -9,8 +9,8 @@ $ifthen.calibrate %CES_parameters% == "load"
 *
 *iteration happens at N=5, 10, 15, 20, ...; if (ord(iteration) ge 5) N starts at N= 4
 
-if( ((ord(iteration) ge 1) and ( mod(ord(iteration), 5) eq 0)),
-* if( ((ord(iteration) ge 2) and ( mod(ord(iteration), 1) eq 0)),
+* if( ((ord(iteration) ge 1) and ( mod(ord(iteration), 5) eq 0)),
+if( ((ord(iteration) ge 2) and ( mod(ord(iteration), 1) eq 0)),
 
 sm32_tmp = iteration.val;
 display "iteration", sm32_tmp;

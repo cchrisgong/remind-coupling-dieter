@@ -1,8 +1,8 @@
 #for shared variable such as peak demand (one iteration series)
 
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup3"
-# run_number = "mrkup1_iter"
+run_number = "mrkup5_iter"
+# run_number = "mrkup5"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number,"/")
 # mydatapath2 = "~/remind-coupling-dieter/output/capfac32_valid3/"
 
@@ -15,7 +15,6 @@ require(rmndt)
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
 
-#dieter output iteration gdx files
 #remind output iteration gdx files
 files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
 sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
@@ -54,6 +53,8 @@ TECHkeylst_nuclear = c("tnrs")
 TECHkeylst_biomass = c("biochp", "bioigccc", "bioigcc")
 
 FLEX_tech = c(TECHkeylst_solar)
+
+mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "coal" = "#0c0c0c", "solar" = "#ffcc00", "wind" = "#337fff", "biomass" = "#005900", "open cycle gas turbine" = "#e51900", "hydro" =  "#191999", "nuclear" =  "#ff33ff", "hard coal" = "#808080", "coupled run seel price" = "#ff0000")
 
 
 plot_RMte_names = c("combined cycle gas", "coal", "solar", "wind", "biomass", "open cycle gas turbine", "hydro", "nuclear")
@@ -108,7 +109,7 @@ get_PRICEvariable <- function(gdx){
     mutate(m = -m) %>% 
     dplyr::rename(budget = m)
   
-  vrdata0 <- read.gdx(gdx, VARkey1,field="m") %>% 
+  vrdata0 <- read.gdx(gdx, VARkey1, field="m") %>% 
     # filter(ttot == year_toplot) %>%
     filter(all_regi == REGIkey1) 
   
@@ -122,6 +123,11 @@ get_PRICEvariable <- function(gdx){
 
 get_MARKUPvariable <- function(gdx){
   # gdx = sorted_files[[5]]
+  budgetdata <- read.gdx(gdx, BUDGETkey1,field="m") %>% 
+    # filter(ttot == year_toplot) %>%
+    filter(all_regi == REGIkey1) %>% 
+    mutate(m = -m) %>% 
+    dplyr::rename(budget = m)
   
   vrdata0 <- read.gdx(gdx, VARkey2,field="l")  %>% 
     filter(all_regi == REGIkey1) %>% 
@@ -146,9 +152,9 @@ vr1_mk <- lapply(sorted_files, get_MARKUPvariable)
 for(fname in files){
   idx <- as.numeric(str_extract(fname, "[0-9]+"))
   vr1[[idx]]$iter <- idx
-  vr1[[idx]]$model <- "coupled"
+  vr1[[idx]]$model <- "coupled run seel price"
   vr1_mk[[idx]]$iter <- idx
-  vr1_mk[[idx]]$model <- "coupled"
+  vr1_mk[[idx]]$model <- "coupled run markup"
 }
 
 # for(fname in files2){
@@ -269,6 +275,7 @@ p3<-ggplot() +
   geom_line(data = vr1, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
   geom_line(data = vr1_capfac_RM, aes(x = iter, y = value*100*secAxisScale, color = model), size = 1.2, alpha = 0.5) +
   scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0("CF", "(%)")))+
+  scale_color_manual(name = "model", values = mycolors)+
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
   xlab("iteration") + ylab(paste0(VARkey1, "(USD/MWh)"))  +
   coord_cartesian(ylim = c(-20,200))+
@@ -279,11 +286,8 @@ ggsave(filename = paste0(mypath, "iter_seelprice_wcapfac_", run_number, "_RM.png
 
 p4<-ggplot() +
   geom_line(data = vr1_mk, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
-  # geom_line(data = vr1_capcon, aes(x = iter, y = capcon*secAxisScale, color = model), size = 1.2, alpha = 0.5) +
-  # geom_line(data = vr1_2, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
-  scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0(CapConstraintKey, "(USD/kW)")))+
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
-  xlab("iteration") + ylab(paste0(VARkey1, "(USD/MWh)"))  +
+  xlab("iteration") + ylab(paste0("spv markup",  "(USD/MWh)"))  +
   coord_cartesian(ylim = c(-20,200))+
   facet_wrap(~ttot, nrow = 3)
 

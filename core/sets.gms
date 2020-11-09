@@ -1398,23 +1398,23 @@ elh2
 COUPte(all_te)       "all technologies to which markup coupling applies"
 /
 spv
-* wind
-* hydro
-* igcc
-* igccc
-* pc
-* pcc
-* pco
-* coalchp
-* ngcc
-* ngccc
-* gaschp
-* biochp
-* bioigcc
-* bioigccc
-* ngt
-* tnrs
-* fnrs
+wind
+hydro
+igcc
+igccc
+pc
+pcc
+pco
+coalchp
+ngcc
+ngccc
+gaschp
+biochp
+bioigcc
+bioigccc
+ngt
+tnrs
+fnrs
 /
 
 feForUe(all_enty)    "final energy types that are transformed into useful energys - is filled automatically from the content of fe2ue"

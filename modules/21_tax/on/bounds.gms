@@ -13,7 +13,7 @@ vm_flexAdj.fx(t,all_regi,all_te)$(COUPte(all_te) AND not SameAs(all_regi,"DEU"))
 *** set elh2 markups to 0 (Felix's input is read in in p80 from input.gdx)
 vm_flexAdj.fx(t,all_regi,all_te)$(teFlex(all_te)) = 0;
 *** set later years' markups to 2100's value
-vm_flexAdj.fx(t,all_regi,all_te)$(t.val ge 2110) = vm_flexAdj("2100",all_regi,all_te);
+vm_flexAdj.fx(t,all_regi,all_te)$(t.val ge 2110 AND COUPte(all_te)) = vm_flexAdj.l("2100",all_regi,all_te);
 
 sm21_tmp = iteration.val;
 display "vm_flexAdj", vm_flexAdj.l;

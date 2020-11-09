@@ -1,6 +1,6 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup3"
-# run_number = "mrkup1_iter"
+# run_number = "mrkup5"
+run_number = "mrkup5_iter"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
 # import library
@@ -23,10 +23,11 @@ sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
 
 #dieter output iteration gdx files
 files_DT <- list.files(mydatapath, pattern="results_DIETER_i[0-9]+\\.gdx")
-sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 5, to = length(files_DT)*5, by = 5), ".gdx")
-# sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 2, to = length(files_DT), by = 1), ".gdx")
+# sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 4, to = length(files_DT)*4, by = 4), ".gdx")
+# sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 5, to = length(files_DT)*5, by = 5), ".gdx")
+sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 2, to = length(files_DT)+1, by = 1), ".gdx")
 
-year_toplot_list <- c(2030,2040,2050,2070) 
+year_toplot_list <- c(2030,2040,2050,2055,2070,2080) 
 for(year_toplot in year_toplot_list){
 # year_toplot = 2050
 
@@ -88,7 +89,7 @@ vr1_DEM <- rbindlist(vr1_DEM)
 
 get_variable <- function(gdx){
   # gdx = sorted_files[[5]]
-  vrdata <- read.gdx(gdx, VARkey1, factors = FALSE) %>% 
+  vrdata <- read.gdx(gdx, VARkey1, factors = FALSE, squeeze = FALSE) %>% 
     filter(tall == year_toplot) %>%
     filter(all_regi == REGIkey1) %>%
     filter(all_te %in% TECHkeylst) %>%
@@ -122,7 +123,7 @@ get_variable <- function(gdx){
 
 get_variable_DT <- function(gdx){
   # gdx = sorted_files_DT[[2]]
-  vrdata <- read.gdx(gdx, VARkey1_DT, factor = FALSE) %>% 
+  vrdata <- read.gdx(gdx, VARkey1_DT, factor = FALSE, squeeze = FALSE) %>% 
     filter(X..1 == year_toplot) %>% 
     dplyr::rename(all_te = X..3) %>% 
     filter(all_te %in% TECHkeylst_DT) %>%
@@ -155,10 +156,10 @@ for(fname in files){
 }
 
 idx_DT <- 1:length(files_DT)
-# idx_DT <- 1:(length(files_DT)-1)
 for(id in idx_DT){
-  vrN_DT[[id]]$iter <- id*5
-  # vrN_DT[[id]]$iter <- id+1
+  # vrN_DT[[id]]$iter <- id*5
+  # vrN_DT[[id]]$iter <- id*4
+  vrN_DT[[id]]$iter <- id+1
   vrN_DT[[id]]$model <- "DIETER"
 }
 
@@ -175,7 +176,7 @@ p2<-ggplot() +
   scale_color_manual(values=c("black"))+
   theme(axis.text=element_text(size=14), axis.title=element_text(size= 14,face="bold")) +
   xlab("iteration") + ylab(paste0(VARkey1, "(GW)")) +
-  coord_cartesian(xlim = c(0, max(vr1_DEM$iter)))+
+  coord_cartesian(xlim = c(0, max(vrN_DT$iter)))+
   ggtitle(paste0("DIETER ", year_toplot))+
   theme(plot.title = element_text(size = 16, face = "bold"))+
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text=element_text(size=14)) +
@@ -184,13 +185,13 @@ p2<-ggplot() +
 p1<-ggplot() +
   geom_area(data = vrN, aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5) +
   geom_line(data = vr1_DEM, aes(x = iter, y = value), size = 1.2, alpha = 0.5,linetype="dotted") +
-  scale_fill_manual(name = "Technology", values = mycolors)+
+  scale_fill_manual(name = "Technology", values = mycolors) +
   scale_color_manual(values=c("black"))+
   theme(axis.text=element_text(size=14), axis.title=element_text(size= 14,face="bold")) + 
   xlab("iteration") + ylab(paste0(VARkey1, "(GW)")) +
   ggtitle(paste0("REMIND ", year_toplot))+
-  coord_cartesian(xlim = c(0, max(vr1_DEM$iter)))+
-  theme(plot.title = element_text(size = 16, face = "bold"))+
+  coord_cartesian(xlim = c(0, max(vrN_DT$iter))) +
+  theme(plot.title = element_text(size = 16, face = "bold")) +
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text=element_text(size=14)) +
   theme(aspect.ratio = .5)
 

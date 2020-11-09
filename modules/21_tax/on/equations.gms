@@ -209,7 +209,7 @@ q21_taxrevFlex(t,regi)$((t.val ge max(2010,cm_startyear)) AND (cm_DTcoup_capcon 
   sum(en2en(enty,enty2,te)$(COUPte(te)),
 *** vm_flexAdj is electricity price reduction/increases for flexible/inflexible technologies
 *** change sign such that flexible technologies get subsidy
-      - vm_flexAdj(t,regi,te) * vm_prodSe(t,regi,enty,enty2,te))
+      vm_flexAdj(t,regi,te) * vm_prodSe(t,regi,enty,enty2,te))
       - p21_taxrevFlex0(t,regi)
 ;
 
