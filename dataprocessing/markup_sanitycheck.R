@@ -2,8 +2,8 @@
 
 mypath = "~/remind-coupling-dieter/dataprocessing/"
 # run_number = "mrkup1_revise_4iter"
-run_number = "mrkup2_iter"
-run_number = "mrkup2"
+# run_number = "mrkup2_iter"
+run_number = "mrkup7"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number,"/")
 # mydatapath2 = "~/remind-coupling-dieter/output/capfac32_valid3/"
 
@@ -18,7 +18,11 @@ igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
 #remind output iteration gdx files
 files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
-sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
+sorted_files0 <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
+filenames0 <- paste0("fulldata_", 1:length(files), ".gdx")
+
+sorted_files <- sorted_files0[1:10]
+filenames <- filenames0[1:10]
 
 # files_full <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
 # sorted_files_full <- paste0(mydatapath, "fulldata_", 1:length(files_full), ".gdx")
@@ -35,6 +39,7 @@ SEELp_iter = "q32_balSe"
 SEELp_iterb4 = "pm_priceseel"
 
 MARKUP = "vm_flexAdj"
+CAP = "vm_cap"
 SEELdem = "v32_seelDem"
 PRODSE = "vm_prodSe"
 FLEX_TAX_conv = "v21_taxrevFlex"
@@ -56,7 +61,7 @@ TECHkeylst_hydro = c("hydro")
 TECHkeylst_nuclear = c("tnrs")
 TECHkeylst_biomass = c("biochp", "bioigccc", "bioigcc")
 
-FLEX_tech = c(TECHkeylst_solar)
+FLEX_tech = c(TECHkeylst_peakGas, TECHkeylst_solar, TECHkeylst_nonPeakGas,TECHkeylst_coal,TECHkeylst_wind,TECHkeylst_hydro,TECHkeylst_nuclear,TECHkeylst_biomass)
 
 mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "coal" = "#0c0c0c", "solar" = "#ffcc00", "wind" = "#337fff", "biomass" = "#005900", "open cycle gas turbine" = "#e51900", "hydro" =  "#191999", "nuclear" =  "#ff33ff", "hard coal" = "#808080", "coupled run seel price" = "#ff0000")
 
@@ -123,8 +128,9 @@ seeldem0 <- lapply(sorted_files, readVAR2, key = SEELdem)
 prodse0 <- lapply(sorted_files, readVAR3, key = PRODSE)
 flextax_c0 <- lapply(sorted_files, readVAR2, key = FLEX_TAX_conv)
 tot_tax0 <- lapply(sorted_files, readVAR2, key = Total_tax)
+vm_cap0 <- lapply(sorted_files, readVAR3, key = CAP)
 
-for(fname in files){
+for(fname in filenames){
   idx <- as.numeric(str_extract(fname, "[0-9]+"))
   budget0[[idx]]$iter <- idx
   seelprice_i0[[idx]]$iter <- idx
@@ -136,6 +142,7 @@ for(fname in files){
   flextax_c0[[idx]]$iter <- idx
   tot_tax0[[idx]]$iter <- idx
   mult_markup0[[idx]]$iter <- idx
+  vm_cap0[[idx]]$iter <- idx
 }
 
 budget1 <- rbindlist(budget0)
@@ -158,11 +165,15 @@ markup1 <- rbindlist(markup0)
 markup <-  markup1 %>% 
   dplyr::rename(markup = value)
 
-prodse <- rbindlist(prodse0)
+prodse1 <- rbindlist(prodse0)
+prodse <-  prodse1 %>% 
+  dplyr::rename(prodse = value)
+
+cap <- rbindlist(vm_cap0)
 
 flextax_i = list(markup, prodse) %>%
   reduce(left_join) %>%
-  mutate(value = - value * markup)
+  mutate(value = - prodse * markup)
 
 flex_tax_ib4 <- rbindlist(flex_tax_ib40) #this is the same as flextax_i because it is from postsolve
 flextax_c <- rbindlist(flextax_c0)

@@ -205,7 +205,7 @@ p32_peakDemand_relFac(t,"DEU") * v32_seelDem(t,"DEU",enty2) * 8760
 *** CG: calculate markup adjustment used in flexibility tax for supply-side technologies
 ***----------------------------------------------------------------------------
 *** calculate flexibility benefit or cost per unit output of flexibile or inflexibly technology
-q32_mkup(t,"DEU",te)$(tDT32(t) AND COUPte(te) AND (cm_DTcoup_capcon = 1))..
+q32_mkup(t,"DEU",te)$(tDT32(t) AND teDTCoupSupp(te) AND (cm_DTcoup_capcon = 1))..
 	vm_flexAdj(t,"DEU",te)
 	=e=
 *** supply-side technology markup p32_DIETERmkup as a multiplicative factor

@@ -43,6 +43,12 @@ if ( (c_keep_iteration_gdxes eq 1) ,
     put_utility "shell" /
       "cp full_DIETER.gdx full_DIETER_i" iteration.val:0:0 ".gdx";
 
+    put_utility "shell" /
+      "cp DIETER_v1.0.2_10.lst DIETER_v1.0.2_10_i" iteration.val:0:0 ".lst";
+    put_utility "shell" /
+      "cp DIETER_v1.0.2_11.lst DIETER_v1.0.2_11_i" iteration.val:0:0 ".lst";
+    put_utility "shell" /
+      "cp DIETER_v1.0.2_12.lst DIETER_v1.0.2_12_i" iteration.val:0:0 ".lst";
 );
 logfile.nr = 2;
 

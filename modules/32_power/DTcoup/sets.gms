@@ -1,8 +1,8 @@
 Sets
-gdxfile32 "gdx file names merged by mergegdx" /results_DIETER_y1*results_DIETER_y15/
+gdxfile32 "gdx file names merged by mergegdx" /results_DIETER_y1*results_DIETER_y18/
 
 ***DO NOT COUPLE 2005, otherwise will result in non-optimal - because REMIND has quite stringent constraint in 2005
-tDT32(ttot) "time points" /2010,2015,2020,2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090,2100/
+tDT32(ttot) "time points" /2010,2015,2020,2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090,2100,2110,2130,2150/
 
 * DIETER_te_stor "technologies for storage in DIETER" /Sto1*Sto7/
 

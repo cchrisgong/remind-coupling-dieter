@@ -1389,33 +1389,37 @@ elh2
 /
 
 
-* teFlexTax(all_te)       "all technologies to which flexibility tax/subsidy applies"
-* /
-* elh2
-* tdels
-* /
+teFlexTax(all_te)       "all technologies to which flexibility tax/subsidy applies"
+/
+elh2
+tdels
+/
 
-COUPte(all_te)       "all technologies to which markup coupling applies"
+teDTCoupSupp(all_te)       "all supply technologies to which markup coupling with DIETER applies"
 /
 spv
-wind
-hydro
-igcc
-igccc
-pc
-pcc
-pco
-coalchp
-ngcc
-ngccc
-gaschp
-biochp
-bioigcc
-bioigccc
-ngt
-tnrs
-fnrs
+* wind
+* hydro
+* igcc
+* igccc
+* pc
+* pcc
+* pco
+* coalchp
+* ngcc
+* ngccc
+* gaschp
+* biochp
+* bioigcc
+* bioigccc
+* ngt
+* tnrs
+* fnrs
 /
+
+* DTcoupDemte(all_te)       "all demand technologies to which markup coupling with DIETER applies"
+* /
+* /
 
 feForUe(all_enty)    "final energy types that are transformed into useful energys - is filled automatically from the content of fe2ue"
 ppfenFromUe(all_in)  "all ppfEn that are equivalent to UE - is filled automatically from the content of fe2ue"

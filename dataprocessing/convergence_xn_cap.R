@@ -1,6 +1,6 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
 # run_number = "mrkup5"
-run_number = "mrkup5_iter"
+run_number = "mrkup7"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
 # import library
@@ -10,9 +10,16 @@ require(rmndt)
 
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
+miniter = 10
+maxiter = 40
+
 # remind output iteration gdx files
-files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
-sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
+filenames0 <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
+sorted_files0 <- paste0(mydatapath, "fulldata_", 1:length(filenames0), ".gdx")
+files0 <- paste0("fulldata_", 1:length(filenames0), ".gdx")
+
+sorted_files <- sorted_files0[1:maxiter]
+files <- files0[1:maxiter]
 
 # files_full <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
 # sorted_files_full <- paste0(mydatapath, "fulldata_", 1:length(files_full), ".gdx")
@@ -22,12 +29,16 @@ sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
 # files = c(files_full, files_nonopt)
 
 #dieter output iteration gdx files
-files_DT <- list.files(mydatapath, pattern="results_DIETER_i[0-9]+\\.gdx")
+files_DT0 <- list.files(mydatapath, pattern="results_DIETER_i[0-9]+\\.gdx")
 # sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 4, to = length(files_DT)*4, by = 4), ".gdx")
 # sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 5, to = length(files_DT)*5, by = 5), ".gdx")
-sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 2, to = length(files_DT)+1, by = 1), ".gdx")
+sorted_files_DT0 <- paste0(mydatapath, "results_DIETER_i", seq(from = 2, to = length(files_DT)+1, by = 1), ".gdx")
+
+files_DT <- files_DT0[1:maxiter]
+sorted_files_DT <- sorted_files_DT0[1:maxiter]
 
 year_toplot_list <- c(2030,2040,2050,2055,2070,2080) 
+# year_toplot_list <- c(2050) 
 for(year_toplot in year_toplot_list){
 # year_toplot = 2050
 
@@ -157,9 +168,9 @@ for(fname in files){
 
 idx_DT <- 1:length(files_DT)
 for(id in idx_DT){
-  # vrN_DT[[id]]$iter <- id*5
-  # vrN_DT[[id]]$iter <- id*4
-  vrN_DT[[id]]$iter <- id+1
+  # vrN_DT[[id]]$iter <- id * 5
+  # vrN_DT[[id]]$iter <- id * 4
+  vrN_DT[[id]]$iter <- id + 1
   vrN_DT[[id]]$model <- "DIETER"
 }
 
@@ -171,7 +182,7 @@ vrN_DT <- rbindlist(vrN_DT)
 
 p2<-ggplot() +
   geom_area(data = vrN_DT, aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5) +
-  geom_line(data = vr1_DEM, aes(x = iter, y = value), size = 1.2, alpha = 1,linetype="dotted") +
+  geom_line(data = vr1_DEM, aes(x = iter+1, y = value), size = 1.2, alpha = 1,linetype="dotted") +
   scale_fill_manual(name = "Technology", values = mycolors)+
   scale_color_manual(values=c("black"))+
   theme(axis.text=element_text(size=14), axis.title=element_text(size= 14,face="bold")) +

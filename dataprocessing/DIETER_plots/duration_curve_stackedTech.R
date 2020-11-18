@@ -1,7 +1,7 @@
-mypath = "~/remind/dataprocessing/DIETER_plots/"
+mypath = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
 runnumber = "oldbranch"
 
-mydatapath = paste0("~/remind/output/", runnumber, "/")
+mydatapath = paste0("~/remind-coupling-dieter/output/", runnumber, "/")
 
 # import library
 

@@ -62,6 +62,6 @@ display p32_storageCap;
 ***CG is this needed?
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_peakDemand_relFac(t,"DEU")$(tDT32(t)) = 0;
-p32_DIETERmkup(t,te)$(tDT32(t) AND COUPte(te)) = 0;
+p32_DIETERmkup(t,te)$(tDT32(t) AND teDTCoupSupp(te)) = 0;
 * s32_iteration_ge_5 = 0;
 $ENDIF.DTcoup

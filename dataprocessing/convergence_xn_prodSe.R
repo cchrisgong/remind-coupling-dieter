@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup1"
+run_number = "mrkup7"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 # import library
 source(paste0(mypath, "library_import.R"))
@@ -8,9 +8,14 @@ require(rmndt)
 
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
+maxiter = 10
 # remind output iteration gdx files
-files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
-sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
+filenames0 <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
+sorted_files0 <- paste0(mydatapath, "fulldata_", 1:length(filenames0), ".gdx")
+files0 <- paste0("fulldata_", 1:length(filenames0), ".gdx")
+
+sorted_files <- sorted_files0[1:maxiter]
+files <- files0[1:maxiter]
 
 # files_full <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
 # sorted_files_full <- paste0(mydatapath, "fulldata_", 1:length(files_full), ".gdx")
@@ -19,11 +24,16 @@ sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
 # sorted_files = c(sorted_files_full, sorted_files_nonopt)
 # files = c(files_full, files_nonopt)
 
-# dieter output iteration gdx files
-files_DT <- list.files(mydatapath, pattern="results_DIETER_i[0-9]+\\.gdx")
-sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 5, to = length(files_DT)*5, by = 5), ".gdx")
+#dieter output iteration gdx files
+files_DT0 <- list.files(mydatapath, pattern="results_DIETER_i[0-9]+\\.gdx")
+# sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 4, to = length(files_DT)*4, by = 4), ".gdx")
+# sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 5, to = length(files_DT)*5, by = 5), ".gdx")
+sorted_files_DT0 <- paste0(mydatapath, "results_DIETER_i", seq(from = 2, to = length(files_DT)+1, by = 1), ".gdx")
 
-year_toplot_list <- c(2015, 2025, 2035, 2050) 
+files_DT <- files_DT0[1:maxiter]
+sorted_files_DT <- sorted_files_DT0[1:maxiter]
+
+year_toplot_list <- c(2030,2040,2050,2055,2060,2070,2080) 
 for(year_toplot in year_toplot_list){
   
 # year_toplot = 2035
@@ -59,7 +69,7 @@ mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "coal" = 
 
 get_variable <- function(gdx){
   # gdx = sorted_files[[30]]
-  vrdata <- read.gdx(gdx, VARkey1, factors = FALSE) %>% 
+  vrdata <- read.gdx(gdx, VARkey1, factors = FALSE, squeeze = FALSE) %>% 
     filter(tall == year_toplot) %>%
     filter(all_regi == REGIkey1) %>%
     filter(all_te %in% TECHkeylst) %>% 
@@ -94,7 +104,7 @@ get_variable <- function(gdx){
 
 get_variable_DT <- function(gdx){
   # gdx = sorted_files_DT[[6]]
-  vrdata <- gdx::readGDX(gdx, VARkey1_DT, squeeze = FALSE)
+  vrdata <- gdx::readGDX(gdx, VARkey1_DT, squeeze = FALSE, squeeze = FALSE)
   df.vrdata0 <- as.quitte(vrdata)
   vrdata <- df.vrdata0 %>% 
     filter(period == year_toplot) %>% 
@@ -134,7 +144,8 @@ for(fname in files){
 
 idx_DT <- 1:length(files_DT)
 for(id in idx_DT){
-  vrN_DT[[id]]$iter <- id*5
+  # vrN_DT[[id]]$iter <- id*5
+  vrN_DT[[id]]$iter <- id+1
   vrN_DT[[id]]$model <- "DIETER"
 }
 
@@ -167,7 +178,7 @@ grid.newpage()
 p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
 grid.draw(p)
 
-ggsave(filename = paste0(mypath, "iter_xN_GEN_capFac", run_number, "_", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, "iter_xN_GEN_", run_number, "_", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
 
 }
 

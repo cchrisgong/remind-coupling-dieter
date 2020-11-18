@@ -25,7 +25,7 @@ igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
 gdxToQuitte_hourly <- function(mydatapath, gdxfile, run_number){
   file = paste0(mydatapath, gdxfile)
-  file = paste0(mydatapath, "report_DIETER_i30.gdx")
+  # file = paste0(mydatapath, "report_DIETER_i30.gdx")
   out_hourly <- NULL
   
   ######################################################################################################################## 
@@ -82,7 +82,7 @@ gdxToQuitte_hourly <- function(mydatapath, gdxfile, run_number){
   
   idx <- as.numeric(str_extract(gdxfile, "[0-9]+"))
   
-  write.table(out_hourly, paste0(myDIETERPLOT_path, "capfac", run_number, "_i", idx, "_hourlyreport.csv"), sep = ";", row.names = F)
+  write.table(out_hourly, paste0(myDIETERPLOT_path, run_number, "_i", idx, "_hourlyreport.csv"), sep = ";", row.names = F)
   print(paste0("csv table saved to", myDIETERPLOT_path))
 }
 
@@ -148,7 +148,7 @@ gdxToQuitte_annual <- function(mydatapath, gdxfile, run_number){
 
   idx <- as.numeric(str_extract(gdxfile, "[0-9]+"))  
   
-  write.table(out_annual, paste0(myDIETERPLOT_path, "capfac", run_number, "_i", idx, "_annualreport.csv"), sep = ";", row.names = F)
+  write.table(out_annual, paste0(myDIETERPLOT_path, run_number, "_i", idx, "_annualreport.csv"), sep = ";", row.names = F)
   
   print(paste0("csv table saved to", myDIETERPLOT_path))
   
