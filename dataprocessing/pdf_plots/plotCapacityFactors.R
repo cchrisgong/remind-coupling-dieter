@@ -64,8 +64,6 @@ for (i in 1:length(remind.files)){
 
 # Data preparation (DIETER) -----------------------------------------------
 
-dieter.iter.step <- floor(length(remind.files)/length(dieter.files))
-
 out.dieter <- NULL
 for (i in 1:length(dieter.files)){
   dieter.data <- paste0(remind.dieter.path, scenario.name, dieter.files[i]) %>% 
@@ -73,9 +71,11 @@ for (i in 1:length(dieter.files)){
     select(X..1, X..3, X..4, value) %>% 
     rename(tall = X..1, technology=X..3, var=X..4, capfac=value) %>%
     mutate(tall = as.numeric(tall)) %>% 
+    filter(tall %in% report.periods) %>% 
     filter(var == "capfac") %>% 
     select(-var) %>%
     filter(!technology %in% dieter.tech.exclude) %>% 
+    filter(!technology %in% c("lig", "hc")) %>% 
     revalue.levels(technology = dieter.tech.mapping) %>% 
     mutate(iteration = dieter.iter.step*i) %>% 
     mutate(model = "DIETER")
