@@ -65,12 +65,16 @@ color.mapping <- c("CCGT" = "#999959", "Lignite" = "#0c0c0c", "Coal (Lig + HC)" 
 
 report.output.file <- paste0(remind.dieter.path, scenario.name, "REMIND-DIETER_report.pdf")
 
+remind.files <- paste0(remind.dieter.path, scenario.name) %>% 
+  list.files(pattern="fulldata_[0-9]+\\.gdx") %>% 
+  str_sort(numeric=TRUE)
+
 dieter.files <- paste0(remind.dieter.path, scenario.name) %>% 
   list.files(pattern="results_DIETER_i[0-9]+\\.gdx") %>% 
   str_sort(numeric=TRUE)
 
-remind.files <- paste0(remind.dieter.path, scenario.name) %>% 
-  list.files(pattern="fulldata_[0-9]+\\.gdx") %>% 
+dieter.files.report <- paste0(remind.dieter.path, scenario.name) %>% 
+  list.files(pattern="report_DIETER_i[0-9]+\\.gdx") %>% 
   str_sort(numeric=TRUE)
 
 # Determine iteration step of DIETER

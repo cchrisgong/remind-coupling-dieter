@@ -13,7 +13,7 @@ for (i in 1:length(remind.files)){
     revalue.levels(all_te = remind.tech.mapping) %>%
     mutate(all_te = factor(all_te, levels=rev(unique(remind.tech.mapping)))) %>%
     group_by(tall, all_te) %>% 
-    summarise(generation = 1e3*8760*sum(value)) %>% # TWa -> GWh 
+    summarise(generation = 8760*sum(value)) %>% # TWa ->TWh 
     ungroup() %>% 
     mutate(iteration = i)
   
@@ -32,7 +32,7 @@ for (i in 1:length(dieter.files)){
     mutate(tall = as.numeric(tall)) %>% 
     filter(tall %in% report.periods) %>% 
     filter(var == "generation") %>% 
-    mutate(generation = value/1e3) %>% # MWh -> GWh
+    mutate(generation = value/1e6) %>% # MWh -> TWh
     select(-var) %>%
     filter(!technology %in% dieter.tech.exclude) %>% 
     revalue.levels(technology = dieter.tech.mapping) %>% 
@@ -60,7 +60,7 @@ for(t.rep in report.periods){
     scale_fill_manual(name = "Technology", values = color.mapping) + 
     coord_cartesian(xlim = c(0, max(plot.remind$iteration))) +
     xlab("Iteration") + 
-    ylab("Generation [GWh]") + 
+    ylab("Generation [TWh]") + 
     ggtitle("REMIND")
   
   p2 <- ggplot() +
@@ -68,7 +68,7 @@ for(t.rep in report.periods){
     scale_fill_manual(name = "Technology", values = color.mapping) + 
     coord_cartesian(xlim = c(0, max(plot.remind$iteration))) +
     xlab("Iteration") + 
-    ylab("Generation [GWh]") + 
+    ylab("Generation [TWh]") + 
     ggtitle("DIETER")
   
   grid.newpage()
@@ -90,14 +90,14 @@ p1 <- ggplot() +
   geom_area(data=plot.remind, aes(x=tall, y=generation, fill=all_te), alpha=0.5) + 
   scale_fill_manual(name = "Technology", values = color.mapping) +
   xlab("Time") + 
-  ylab("Generation [GWh]") + 
+  ylab("Generation [TWh]") + 
   ggtitle("REMIND")
   
 p2 <- ggplot() + 
   geom_area(data=plot.dieter, aes(x=tall, y=generation, fill=technology), alpha=0.5) +  
   scale_fill_manual(name = "Technology", values = color.mapping) + 
   xlab("Time") + 
-  ylab("Generation [GWh]") + 
+  ylab("Generation [TWh]") + 
   ggtitle("DIETER")
 
 grid.newpage()
