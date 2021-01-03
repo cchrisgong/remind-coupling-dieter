@@ -1,6 +1,6 @@
 # Data preparation (REMIND) -----------------------------------------------
 
-out.remind <- NULL
+out.remind.capfac <- NULL
 for (i in 1:length(remind.files)){
   
   # Capacity factor for non-VRE ---------------------------------------------
@@ -57,30 +57,28 @@ for (i in 1:length(remind.files)){
     summarise(capfac = sum(generation)/sum(cap)) %>% 
     mutate(iteration = i)
   
-  out.remind <- rbind(out.remind, remind.data.nonVRE, remind.data.VRE) %>% 
+  out.remind.capfac <- rbind(out.remind.capfac, remind.data.nonVRE, remind.data.VRE) %>% 
     mutate(model = "REMIND")
 }
 
 
 # Data preparation (DIETER) -----------------------------------------------
 
-out.dieter <- NULL
+out.dieter.capfac <- NULL
 for (i in 1:length(dieter.files)){
   dieter.data <- paste0(remind.dieter.path, scenario.name, dieter.files[i]) %>% 
     read.gdx("report4RM", squeeze=F) %>% 
     select(X..1, X..3, X..4, value) %>% 
-    rename(tall = X..1, technology=X..3, var=X..4, capfac=value) %>%
+    rename(tall = X..1, technology=X..3, var=X..4) %>%
     mutate(tall = as.numeric(tall)) %>% 
     filter(tall %in% report.periods) %>% 
     filter(var == "capfac") %>% 
-    select(-var) %>%
     filter(!technology %in% dieter.tech.exclude) %>% 
-    filter(!technology %in% c("lig", "hc")) %>% 
     revalue.levels(technology = dieter.tech.mapping) %>% 
     mutate(iteration = dieter.iter.step*i) %>% 
     mutate(model = "DIETER")
   
-  out.dieter <- rbind(out.dieter, dieter.data)
+  out.dieter.capfac <- rbind(out.dieter.capfac, dieter.data)
 }
 
 
@@ -89,17 +87,20 @@ for (i in 1:length(dieter.files)){
 swlatex(sw, paste0("\\section{Capacity factors}"))
 
 for(t.rep in report.periods){
-  plot.remind <- out.remind %>% 
+  plot.remind <- out.remind.capfac %>% 
     filter(tall == t.rep)
   
-  plot.dieter <- out.dieter %>% 
-    filter(tall == t.rep)
+  plot.dieter <- out.dieter.capfac %>% 
+    filter(tall == t.rep) %>% 
+    filter(!technology %in% c("Lignite", "Hard coal"))
   
   swlatex(sw, paste0("\\subsection{Capacity factors in ", t.rep, "}"))
   
   p <- ggplot() + 
     geom_line(data=plot.remind, aes(x=iteration, y=capfac, color=model)) + 
-    geom_point(data=plot.dieter, aes(x=iteration, y=capfac, color=model)) +
+    geom_point(data=plot.dieter, aes(x=iteration, y=value, color=model)) +
+    xlab("Iteration") + 
+    ylab("Capacity factor") + 
     facet_wrap(~technology, nrow=3)
   
   swfigure(sw,print,p)
@@ -108,11 +109,13 @@ for(t.rep in report.periods){
 
 swlatex(sw, "\\subsection{Capacity factors over time (last iteration)}")
 
-plot.remind <- out.remind %>% 
+plot.remind <- out.remind.capfac %>% 
   filter(iteration == length(remind.files))
 
 p <- ggplot(plot.remind, aes(x=tall, y=capfac)) +
-  geom_line() + facet_wrap(~technology, nrow=3)
+  geom_line() + facet_wrap(~technology, nrow=3) +
+  xlab("Time") + 
+  ylab("Capacity factor")
 
 swfigure(sw,print,p)
 
