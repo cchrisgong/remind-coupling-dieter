@@ -85,6 +85,7 @@ plot.dieter.mv <- out.dieter.mv %>%
 
 plot.dieter.capfac <- out.dieter.capfac %>% 
   filter(iteration == max(iteration)) %>% 
+  filter(tall %in% report.periods) %>% 
   filter(!technology == "Coal (Lig + HC)")
 
 p <- ggplot() + 

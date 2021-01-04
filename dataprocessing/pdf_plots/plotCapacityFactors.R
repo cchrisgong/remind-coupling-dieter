@@ -22,7 +22,7 @@ for (i in 1:length(remind.files)){
   remind.data.nonVRE <- rbind(remind.vm_capFac, remind.vm_cap) %>% 
     spread(variable, value) %>%
     filter(all_regi == "DEU") %>% 
-    filter(tall %in% report.periods) %>% 
+    filter(tall %in% report.periods.long) %>% 
     filter(all_te %in% names(remind.nonvre.mapping)) %>% 
     mutate(technology = all_te) %>% 
     revalue.levels(technology = remind.nonvre.mapping) %>% 
@@ -49,7 +49,7 @@ for (i in 1:length(remind.files)){
   # Join pm_dataren with vm_capDistr and calculate VRE CFs
   remind.data.VRE <- left_join(remind.pm_dataren, remind.vm_capDistr) %>% 
     filter(all_regi == "DEU") %>% 
-    filter(tall %in% report.periods) %>%
+    filter(tall %in% report.periods.long) %>%
     rename(technology = all_te) %>% 
     revalue.levels(technology = remind.vre.mapping) %>% 
     mutate(generation = cap * capfac) %>% 
@@ -71,7 +71,7 @@ for (i in 1:length(dieter.files)){
     select(X..1, X..3, X..4, value) %>% 
     rename(tall = X..1, technology=X..3, var=X..4) %>%
     mutate(tall = as.numeric(tall)) %>% 
-    filter(tall %in% report.periods) %>% 
+    filter(tall %in% report.periods.long) %>% 
     filter(var == "capfac") %>% 
     filter(!technology %in% dieter.tech.exclude) %>% 
     revalue.levels(technology = dieter.tech.mapping) %>% 

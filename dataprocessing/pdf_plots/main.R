@@ -16,6 +16,7 @@ library(gridExtra)
 remind.dieter.path <- "C:/Users/adrianod/Documents/PhD/Modelling/remind-dieter/output/"
 scenario.name <- "REMIND-EU_xx_ref_FEmed_2020-11-16_18.14.29/"
 report.periods <- seq(2015,2050,5)
+report.periods.long <- c(seq(2015,2060,5), seq(2070,2100,10))
 #report.path <- "C:/Users/adrianod/Documents/PhD/Modelling/remind-dieter/report/"
 
 remind.nonvre.mapping <- c(coalchp = "Coal (Lig + HC)",
@@ -60,6 +61,7 @@ color.mapping <- c("CCGT" = "#999959", "Lignite" = "#0c0c0c", "Coal (Lig + HC)" 
                    "OCGT" = "#e51900", "Hydro" =  "#191999", "Nuclear" =  "#ff33ff",
                    "Hard coal" = "#808080")
 
+sm_TWa_2_MWh <- 8.76E9
 
 # Directories -------------------------------------------------------------
 
@@ -134,15 +136,14 @@ source("./plotLCOEs.R")
 
 # Price: Secondary electricity --------------------------------------------
 
-
+source("./plotSeelPrice.R")
 
 # Price: Peak demand ------------------------------------------------------
 
-
-# Price: Demand -----------------------------------------------------------
-
+source("./plotPeakDemandPrice.R")
 
 # RLDCs -------------------------------------------------------------------
+
 
 
 # Price duration curves ---------------------------------------------------
