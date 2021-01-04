@@ -10,6 +10,7 @@
 
 *** Fix capacity factors to the standard value from data
 vm_capFac.fx(t,regi,te) = pm_cf(t,regi,te);
+* vm_capFac.fx(t,regi,te) = pm_cf_linear(t,regi,te);
 
 *** Lower bounds on VRE use (more than 0.01% of electricity demand) after 2015 to prevent the model from overlooking solar and wind
 loop(regi,

@@ -1,8 +1,8 @@
 #for shared variable such as peak demand (one iteration series)
 
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-# run_number = "mrkup5_iter"
-run_number = "mrkup7"
+run_number = "mrkup18"
+# run_number = "mrkup14_uncoupl"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number,"/")
 # mydatapath2 = "~/remind-coupling-dieter/output/capfac32_valid3/"
 
@@ -12,10 +12,11 @@ library(readr)
 require(ggplot2)
 require(lusweave)
 require(rmndt)
+library(ggallin)
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
-miniter = 10
-maxiter = 40
+miniter = 1
+maxiter = 36
 #remind output iteration gdx files
 files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
 sorted_files0 <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
@@ -41,7 +42,9 @@ BUDGETkey1 = "qm_budget"
 VARkey1 = "q32_balSe"
 VARkey2 = "vm_flexAdj"
 VARkey3 = "v21_taxrevMrkup"
-PARkey1 = "p32_DIETERmkup"
+PARkey1 = "v32_shSeEl"
+PARkey2 = "p21_taxrevMrkup0" #reference tax markup of the last iteration
+VARkey4 = "v21_taxrevMrkup" # total_markup_tax
 # VARkey1 = "v32_seelDem"
 REGIkey1 = "DEU"
 sm_TWa_2_MWh = 8760000000
@@ -61,10 +64,11 @@ TECHkeylst_hydro = c("hydro")
 TECHkeylst_nuclear = c("tnrs")
 TECHkeylst_biomass = c("biochp", "bioigccc", "bioigcc")
 
-FLEX_tech = c(TECHkeylst_peakGas, TECHkeylst_solar, TECHkeylst_nonPeakGas,TECHkeylst_coal,TECHkeylst_wind,TECHkeylst_hydro,TECHkeylst_nuclear,TECHkeylst_biomass)
+# FLEX_tech = c(TECHkeylst_peakGas, TECHkeylst_solar, TECHkeylst_nonPeakGas,TECHkeylst_coal,TECHkeylst_wind,TECHkeylst_hydro,TECHkeylst_nuclear,TECHkeylst_biomass)
 
+FLEX_tech = c(TECHkeylst_solar)
 
-mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "coal" = "#0c0c0c", "solar" = "#ffcc00", "wind" = "#337fff", "biomass" = "#005900", "open cycle gas turbine" = "#e51900", "hydro" =  "#191999", "nuclear" =  "#ff33ff", "hard coal" = "#808080", "coupled run seel price" = "#ff0000")
+mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "coal" = "#0c0c0c", "solar" = "#ffcc00", "wind" = "#337fff", "biomass" = "#005900", "open cycle gas turbine" = "#e51900", "hydro" =  "#191999", "nuclear" =  "#ff33ff", "hard coal" = "#808080", "coupled run seel price" = "#ff0000","uncoupled run seel price" = "#ff0000")
 
 plot_RMte_names = c("combined cycle gas", "coal", "solar", "wind", "biomass", "open cycle gas turbine", "hydro", "nuclear")
 plot_RMLCOEte_names = c("combined cycle gas", "lignite", "solar", "wind", "biomass", "open cycle gas turbine", "hydro", "nuclear")
@@ -75,30 +79,30 @@ TECH_NONVRE_keylst <- c(TECHkeylst_peakGas, TECHkeylst_nonPeakGas, TECHkeylst_co
 
 iter_toplot = 1:length(sorted_files)
 # iter_toplot2 = 1:length(sorted_files2)
-
+# 
 CapConstraintKey = "q32_peakDemand_DT"
-  
+
 get_CAPCONvariable <- function(gdx){
   # gdx = sorted_files[[5]]
-  budgetdata <- read.gdx(gdx, BUDGETkey1,field="m") %>% 
+  budgetdata <- read.gdx(gdx, BUDGETkey1,field="m", squeeze = FALSE) %>%
     # filter(ttot == year_toplot) %>%
-    filter(all_regi == REGIkey1) %>% 
-    mutate(m = -m) %>% 
-    dplyr::rename(budget = m)  %>% 
+    filter(all_regi == REGIkey1) %>%
+    mutate(m = -m) %>%
+    dplyr::rename(budget = m)  %>%
     select(ttot, budget)
-  
-  capcondata <- read.gdx(gdx, CapConstraintKey,field="m") %>% 
+
+  capcondata <- read.gdx(gdx, CapConstraintKey,field="m") %>%
     # filter(ttot == year_toplot) %>%
-    mutate(m = -m) %>% 
+    mutate(m = -m) %>%
     dplyr::rename(capcon = m)
-  
+
   # transform from tr$2005/TW to $2015/kW
   vrdata = list(capcondata, budgetdata) %>%
     reduce(full_join) %>%
-    select(ttot, capcon, budget) %>% 
-    replace(is.na(.), 0) %>% 
-    mutate(capcon= capcon/ budget * 1e12 / 1e9 * 1.2) 
-  
+    select(ttot, capcon, budget) %>%
+    replace(is.na(.), 0) %>%
+    mutate(capcon= capcon/ budget * 1e12 / 1e9 * 1.2)
+
   return(vrdata)
 }
 
@@ -112,13 +116,13 @@ vr1_capcon <- rbindlist(vr1_capcon)
 
 get_PRICEvariable <- function(gdx){
   # gdx = sorted_files[[5]]
-  budgetdata <- read.gdx(gdx, BUDGETkey1,field="m") %>% 
+  budgetdata <- read.gdx(gdx, BUDGETkey1,field="m", squeeze = FALSE) %>% 
     # filter(ttot == year_toplot) %>%
     filter(all_regi == REGIkey1) %>% 
     mutate(m = -m) %>% 
     dplyr::rename(budget = m)
   
-  vrdata0 <- read.gdx(gdx, VARkey1, field="m") %>% 
+  vrdata0 <- read.gdx(gdx, VARkey1, field="m", squeeze = FALSE) %>% 
     # filter(ttot == year_toplot) %>%
     filter(all_regi == REGIkey1) 
   
@@ -132,13 +136,13 @@ get_PRICEvariable <- function(gdx){
 
 get_MARKUPvariable <- function(gdx){
   # gdx = sorted_files[[5]]
-  budgetdata <- read.gdx(gdx, BUDGETkey1,field="m") %>% 
+  budgetdata <- read.gdx(gdx,BUDGETkey1,field="m", squeeze = FALSE) %>% 
     # filter(ttot == year_toplot) %>%
     filter(all_regi == REGIkey1) %>% 
     mutate(m = -m) %>% 
     dplyr::rename(budget = m)
   
-  vrdata0 <- read.gdx(gdx, VARkey2,field="l")  %>% 
+  vrdata0 <- read.gdx(gdx,VARkey2,field="l", squeeze = FALSE)  %>% 
     filter(all_regi == REGIkey1) %>% 
     filter(all_te %in% FLEX_tech) %>% 
     dplyr::rename(ttot = tall)
@@ -173,8 +177,9 @@ get_MARKUPvariable <- function(gdx){
 
 get_MRKUP_FACTOR <- function(gdx){
   # gdx = sorted_files[[5]]
-  vrdata <- read.gdx(gdx, PARkey1)  %>% 
+  vrdata <- read.gdx(gdx, PARkey1,field="l")  %>% 
     filter(all_te %in% FLEX_tech) %>% 
+    filter(all_regi == REGIkey1) %>% 
     mutate(all_te = str_replace(all_te, TECHkeylst_biomass[[1]], plot_RMte_names[[5]])) %>% 
     mutate(all_te = str_replace(all_te, TECHkeylst_biomass[[2]], plot_RMte_names[[5]])) %>% 
     mutate(all_te = str_replace(all_te, TECHkeylst_biomass[[3]], plot_RMte_names[[5]])) %>% 
@@ -194,7 +199,46 @@ get_MRKUP_FACTOR <- function(gdx){
     mutate(all_te = str_replace(all_te, TECHkeylst_hydro[[1]], plot_RMte_names[[7]])) %>% 
     dplyr::group_by(ttot, all_te) %>%
     dplyr::summarise( value = mean(value), .groups = "keep" ) %>% 
-    dplyr::ungroup(ttot, all_te)
+    dplyr::ungroup(ttot, all_te) %>% 
+    mutate(mkfac = 1.1 - value / 100)
+  
+  return(vrdata)
+}
+
+readVAR1 <- function(gdx, key){
+  # gdx = sorted_files[[5]]
+  # key = VARkey4
+  budgetdata <- read.gdx(gdx, BUDGETkey1,field="m",squeeze = F) %>% 
+    filter(all_regi == REGIkey1) %>% 
+    mutate(m = -m) %>% 
+    dplyr::rename(budget = m)
+  
+  vrdata0 <- read.gdx(gdx, key) %>% 
+    filter(all_regi == REGIkey1) 
+  
+  vrdata = list(vrdata0, budgetdata) %>%
+    reduce(full_join) %>%
+    mutate(value = value / budget * 1e12 / sm_TWa_2_MWh * 1.2) 
+  
+  return(vrdata)
+}
+
+readPAR1 <- function(gdx, key){
+  # gdx = sorted_files[[22]]
+  # key = "p21_taxrevMrkup0"
+
+  budgetdata <- read.gdx(gdx, BUDGETkey1, field="m", squeeze = F) %>% 
+    filter(all_regi == REGIkey1) %>% 
+    mutate(m = -m) %>% 
+    dplyr::rename(budget = m)
+  
+  vrdata0 <- read.gdx(gdx, key, squeeze = F) %>% 
+    filter(all_regi == REGIkey1) 
+  
+  vrdata = list(vrdata0, budgetdata) %>%
+    reduce(full_join) %>%
+    replace(is.na(.), 0) %>%
+    mutate(value = value / budget * 1e12 / sm_TWa_2_MWh * 1.2) 
   
   return(vrdata)
 }
@@ -205,17 +249,24 @@ vr1_pr <- lapply(sorted_files, get_PRICEvariable)
 
 vr1_mk <- lapply(sorted_files, get_MARKUPvariable)
 
-vr1_mkft <- lapply(sorted_files, get_MRKUP_FACTOR) 
+vr1_mkft <- lapply(sorted_files, get_MRKUP_FACTOR)
 # print(vr1[[1]])
+
+vr1_taxrev <- lapply(sorted_files, readVAR1, key = VARkey4)
+vr1_reference_mrkup_lastiter <- lapply(sorted_files, readPAR1, key = PARkey2)
 
 for(fname in filenames){
   idx <- as.numeric(str_extract(fname, "[0-9]+"))
   vr1_pr[[idx]]$iter <- idx
-  vr1_pr[[idx]]$model <- "coupled run seel price"
+  vr1_pr[[idx]]$model <- "uncoupled run seel price"
   vr1_mk[[idx]]$iter <- idx
-  vr1_mk[[idx]]$model <- "coupled run markup"
+  vr1_mk[[idx]]$model <- "uncoupled run markup"
   vr1_mkft[[idx]]$iter <- idx
-  vr1_mkft[[idx]]$model <- "coupled run markup factor"
+  vr1_mkft[[idx]]$model <- "uncoupled run markup factor"
+  vr1_taxrev[[idx]]$iter <- idx
+  vr1_taxrev[[idx]]$model <- "total markup tax"
+  vr1_reference_mrkup_lastiter[[idx]]$iter <- idx
+  vr1_reference_mrkup_lastiter[[idx]]$model <- "reference markup from last iteration"
 }
 
 # for(fname in files2){
@@ -232,16 +283,19 @@ vr1_mkft <- rbindlist(vr1_mkft)
 vr1_pr2 <-  vr1_pr %>% 
   filter(iter >1) %>% 
   filter(ttot >2005) %>% 
-  filter(ttot <2110) %>% 
+  filter(ttot <2160) %>% 
   select(ttot,iter,value)
 
-vr1_mkft2 <-  vr1_mkft %>% 
-  dplyr::rename(mkft = value) %>% 
-  select(ttot,all_te,iter,mkft)
+vr1_mkft2 <-  vr1_mkft %>%
+  dplyr::rename(solarshare = value) %>%
+  select(ttot,all_te,iter,mkfac, solarshare)
   
 vr1_MV_RM <- list(vr1_pr2, vr1_mkft2) %>%
-  reduce(full_join) %>% 
-  mutate(mv_remind = mkft*value)
+  reduce(full_join) %>%
+  mutate(mv_remind = mkfac*value)
+
+vr1_taxrev <- rbindlist(vr1_taxrev)
+vr1_reference_mrkup_lastiter<- rbindlist(vr1_reference_mrkup_lastiter)
 
 get_CAPFAC_variable <- function(iteration){
   # iteration = 15
@@ -340,25 +394,25 @@ secAxisScale = 1/8.76
 
 p1<-ggplot() +
   geom_line(data = vr1_pr, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
-  geom_line(data = vr1_capcon, aes(x = iter, y = capcon*secAxisScale, color = model), size = 1.2, alpha = 0.5) +
+  # geom_line(data = vr1_capcon, aes(x = iter, y = capcon*secAxisScale, color = model), size = 1.2, alpha = 0.5) +
   # geom_line(data = vr1_2, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
-  scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0(CapConstraintKey, "(USD/kW)")))+
-  theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+  scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0("capacity constraint (USD/kW)")))+
+  theme(axis.text=element_text(size=20), axis.title=element_text(size=20,face="bold")) +
   xlab("iteration") + ylab(paste0(VARkey1, "(USD/MWh)"))  +
   coord_cartesian(ylim = c(-20,200))+
   facet_wrap(~ttot, nrow = 3)
-  
-ggsave(filename = paste0(mypath, "iter_seelprice_", run_number, "_RM.png"),  p1, width = 28, height =15, units = "in", dpi = 120)
+
+ggsave(filename = paste0(mypath, run_number, "iter_seelprice", "_RM.png"),  p1, width = 28, height =15, units = "in", dpi = 120)
 
 p2<-ggplot() +
   geom_line(data = vr1_capcon, aes(x = iter, y = capcon, color = model), size = 1.2, alpha = 0.5) +
-  theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+  theme(axis.text=element_text(size=20), axis.title=element_text(size=20,face="bold")) +
   xlab("iteration") + scale_y_continuous(name = paste0(CapConstraintKey, "(USD/kW)"))+
   # xlab("iteration") + scale_y_continuous(trans='log10', name = paste0(CapConstraintKey, "(USD/kW)"))+
   coord_cartesian(ylim = c(0.001,200))+
   facet_wrap(~ttot, nrow = 3)
 
-ggsave(filename = paste0(mypath, "iter_capconShadow_", run_number,"_RM.png"), p2, width = 28, height =15, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, run_number, "iter_capconShadow","_RM.png"), p2, width = 28, height =15, units = "in", dpi = 120)
 
 
 secAxisScale = 2
@@ -368,23 +422,23 @@ p3<-ggplot() +
   geom_line(data = vr1_capfac_RM, aes(x = iter, y = value*100*secAxisScale, color = model), size = 1.2, alpha = 0.5) +
   scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0("CF", "(%)")))+
   scale_color_manual(name = "model", values = mycolors)+
-  theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+  theme(axis.text=element_text(size=20), axis.title=element_text(size=20,face="bold")) +
   xlab("iteration") + ylab(paste0(VARkey1, "(USD/MWh)"))  +
   coord_cartesian(ylim = c(-20,200))+
   facet_wrap(~ttot, nrow = 3)
 
-ggsave(filename = paste0(mypath, "iter_seelprice_wcapfac_", run_number, "_RM.png"), p3, width = 28, height =15, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, run_number, "iter_seelprice_wcapfac", "_RM.png"), p3, width = 28, height =15, units = "in", dpi = 120)
 
 
 p4<-ggplot() +
   geom_line(data = vr1_mk, aes(x = iter, y = value, color = all_te), size = 1.2, alpha = 0.5) +
-  theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+  theme(axis.text=element_text(size=20), axis.title=element_text(size=20,face="bold")) +
   xlab("iteration") + ylab(paste0("absolute markup",  "(USD/MWh)"))  +
   scale_color_manual(name = "tech", values = mycolors)+
-  coord_cartesian(ylim = c(-200,200))+
+  coord_cartesian(ylim = c(-20,20))+
   facet_wrap(~ttot, nrow = 3)
 
-ggsave(filename = paste0(mypath, "iter_markup_", run_number, "_RM.png"), p4, width = 28, height =15, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, run_number, "iter_markup", "_RM.png"), p4, width = 28, height =15, units = "in", dpi = 120)
 
 
 # secAxisScale = 1/10
@@ -392,28 +446,59 @@ ggsave(filename = paste0(mypath, "iter_markup_", run_number, "_RM.png"), p4, wid
 p5<-ggplot() +
   geom_line(data = vr1_pr, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
   geom_line(data = vr1_DEM, aes(x = iter, y = value, color =legend), size = 1.2, alpha = 0.5) +
-  theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+  theme(axis.text=element_text(size=20), axis.title=element_text(size=20,face="bold")) +
   scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0("total demand", "(TWh)")))+
   xlab("iteration") + ylab(paste0("wholesale electricity price",  "(USD/MWh)"))  +
   coord_cartesian(ylim = c(-20,500))+
   facet_wrap(~ttot, nrow = 3)
 
-ggsave(filename = paste0(mypath, "iter_price_dem_", run_number, "_RM.png"), p5, width = 28, height =15, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, run_number, "iter_price_dem", "_RM.png"), p5, width = 28, height =15, units = "in", dpi = 120)
 
 p6<-ggplot() +
-  geom_line(data = vr1_mkft, aes(x = iter, y = value, color = all_te), size = 1.2, alpha = 0.5) +
-  theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
-  xlab("iteration") + ylab(paste0("markup factor = MarketValue(DIETER)/Elec.Price(DIETER)"))  +
+  geom_line(data = vr1_mkft2, aes(x = iter, y = mkfac, color = all_te), size = 1.2, alpha = 0.5) +
+  theme(axis.text=element_text(size=20), axis.title=element_text(size=20,face="bold")) +
+  xlab("iteration") + ylab(paste0("markup factor = MarketValue(REMIND)/Elec.Price(REMIND)"))  +
+  # xlab("iteration") + ylab(paste0("markup factor = MarketValue(DIETER)/Elec.Price(DIETER)"))  +
   coord_cartesian(ylim = c(0,5))+
   facet_wrap(~ttot, nrow = 3)
 
-ggsave(filename = paste0(mypath, "iter_value_factor_", run_number, "_DT.png"), p6, width = 28, height =15, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, run_number, "iter_value_factor", "_DT.png"), p6, width = 28, height =15, units = "in", dpi = 120)
 
 p7<-ggplot() +
   geom_line(data = vr1_MV_RM, aes(x = iter, y = mv_remind, color = all_te), size = 1.2, alpha = 0.5) +
-  theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+  theme(axis.text=element_text(size=20), axis.title=element_text(size=20,face="bold")) +
   xlab("iteration") + ylab(paste0("Market.Value(REMIND)"))  +
   coord_cartesian(ylim = c(-40,350))+
   facet_wrap(~ttot, nrow = 3)
 
-ggsave(filename = paste0(mypath, "iter_market_value_", run_number, "_RM.png"), p7, width = 28, height =15, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, run_number, "iter_market_value", "_RM.png"), p7, width = 28, height =15, units = "in", dpi = 120)
+
+p8<-ggplot() +
+  geom_line(data = vr1_taxrev, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
+  theme(axis.text=element_text(size=20), axis.title=element_text(size= 20,face="bold")) +
+  xlab("iteration") + ylab(paste0("Total tax markup (REMIND) = markup - reference markup from last iteration"))  +
+  coord_cartesian(ylim = c(-50,50))+
+  scale_y_continuous(trans=ssqrt_trans)+
+  facet_wrap(~ttot, nrow = 3)
+
+ggsave(filename = paste0(mypath, run_number, "iter_total_taxrev_markup", "_RM.png"), p8, width = 28, height =15, units = "in", dpi = 120)
+
+p9<-ggplot() +
+  geom_line(data = vr1_reference_mrkup_lastiter, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
+  theme(axis.text=element_text(size=20), axis.title=element_text(size= 20,face="bold")) +
+  xlab("iteration") + ylab(paste0("reference markup from last iteration (REMIND)"))  +
+  coord_cartesian(ylim = c(-50,200))+
+  # scale_y_continuous(trans=ssqrt_trans)+
+  facet_wrap(~ttot, nrow = 3)
+
+ggsave(filename = paste0(mypath, run_number, "iter_reference_markup_lastiter", "_RM.png"), p9, width = 28, height =15, units = "in", dpi = 120)
+
+p10<-ggplot() +
+  geom_line(data = vr1_mkft2, aes(x = iter, y = solarshare), size = 1.2, alpha = 0.5) +
+  theme(axis.text=element_text(size=20), axis.title=element_text(size= 20,face="bold")) +
+  xlab("iteration") + ylab(paste0("solar share (%)"))  +
+  coord_cartesian(ylim = c(0,80))+
+  # scale_y_continuous(trans=ssqrt_trans)+
+  facet_wrap(~ttot, nrow = 3)
+
+ggsave(filename = paste0(mypath, run_number, "iter_solarshare", "_RM.png"), p10, width = 28, height =15, units = "in", dpi = 120)

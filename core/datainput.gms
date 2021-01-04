@@ -405,6 +405,8 @@ pm_cf(ttot,regi,"apcardieffH2t") = 1;
 pm_cf(ttot,regi,"h2turbVRE") = 0.15;
 pm_cf(ttot,regi,"elh2VRE") = 0.6;
 
+pm_cf_linear(ttot,regi,te) =  pm_cf(ttot,regi,te);
+
 table p_earlyreti_adjRate(all_regi,all_te)  "extra retirement rate for technologies in countries with relatively old fleet"
 $ondelim
 $include "./core/input/p_earlyRetirementAdjFactor.cs3r"
@@ -765,7 +767,7 @@ loop(ttot$(ttot.val ge 2005),
 *RP: for comparison of different technologies:
 *** pm_conv_cap_2_MioLDV <- 650  # The world has slightly below 800million cars in 2005 (IEA TECO2), so with a global vm_cap of 1.2, this gives ~650
 *** ==> 1TW power plant ~ 650 million LDV
-  
+
   p_adj_coeff(ttot,regi,te)                = 0.2;
   p_adj_coeff(ttot,regi,"coaltr")          = 0.1;
   p_adj_coeff(ttot,regi,"tnrs")            = 1.0;
@@ -792,7 +794,7 @@ loop(ttot$(ttot.val ge 2005),
 $ifthen not "%cm_INNOPATHS_adj_seed_cont%" == "off"
   parameter p_new_adj_seed(all_te) / %cm_INNOPATHS_adj_seed% , %cm_INNOPATHS_adj_seed_cont% /;
   p_adj_seed_te(ttot,regi,te)$p_new_adj_seed(te)=p_new_adj_seed(te);
-$elseif not "%cm_INNOPATHS_adj_seed%" == "off" 
+$elseif not "%cm_INNOPATHS_adj_seed%" == "off"
   parameter p_new_adj_seed(all_te) / %cm_INNOPATHS_adj_seed% /;
   p_adj_seed_te(ttot,regi,te)$p_new_adj_seed(te)=p_new_adj_seed(te);
 $endif
@@ -800,7 +802,7 @@ $endif
 $ifthen not "%cm_INNOPATHS_adj_coeff_cont%" == "off"
   parameter p_new_adj_coeff(all_te) / %cm_INNOPATHS_adj_coeff% , %cm_INNOPATHS_adj_coeff_cont% /;
   p_adj_coeff(t,regi,te)$p_new_adj_coeff(te)=p_new_adj_coeff(te);
-$elseif not "%cm_INNOPATHS_adj_coeff%" == "off" 
+$elseif not "%cm_INNOPATHS_adj_coeff%" == "off"
   parameter p_new_adj_coeff(all_te) / %cm_INNOPATHS_adj_coeff% /;
   p_adj_coeff(t,regi,te)$p_new_adj_coeff(te)=p_new_adj_coeff(te);
 $endif
@@ -811,7 +813,7 @@ $if not "%cm_INNOPATHS_adj_coeff_multiplier%" == "off"  p_adj_coeff(ttot,regi,te
 
 p_adj_coeff(ttot,regi,te)            = 25 * p_adj_coeff(ttot,regi,te);  !! Rescaling all adjustment cost coefficients
 
-p_adj_coeff_Orig(ttot,regi,te)    = p_adj_coeff(ttot,regi,te);  
+p_adj_coeff_Orig(ttot,regi,te)    = p_adj_coeff(ttot,regi,te);
 p_adj_seed_te_Orig(ttot,regi,te)  = p_adj_seed_te(ttot,regi,te);
 
 p_adj_coeff_glob(te)        = 0.0;
@@ -1232,7 +1234,7 @@ loop(te,
 o_reached_until2150pricepath(iteration) = 0;
 
 *** ---- FE demand trajectories for calibration -------------------------------
-*** also used for limiting secondary steel demand in baseline and policy 
+*** also used for limiting secondary steel demand in baseline and policy
 *** scenarios
 Parameter
   pm_fedemand   "final energy demand"
@@ -1244,10 +1246,10 @@ $offdelim
 ;
 
 $ifthen.subsectors "%industry%" == "subsectors"   !! industry
-*** Limit secondary steel production to 90 %.  This might be slightly off due 
+*** Limit secondary steel production to 90 %.  This might be slightly off due
 *** to rounding in the mrremind package.
 if (9 lt smax((t,regi,all_GDPscen)$(
-                           pm_fedemand(t,regi,all_GDPscen,"ue_steel_primary") ), 
+                           pm_fedemand(t,regi,all_GDPscen,"ue_steel_primary") ),
            pm_fedemand(t,regi,all_GDPscen,"ue_steel_secondary")
          / pm_fedemand(t,regi,all_GDPscen,"ue_steel_primary")
          ),
@@ -1259,20 +1261,20 @@ if (9 lt smax((t,regi,all_GDPscen)$(
                            pm_fedemand(t,regi,all_GDPscen,"ue_steel_primary") ),
     if (9 lt ( pm_fedemand(t,regi,all_GDPscen,"ue_steel_secondary")
              / pm_fedemand(t,regi,all_GDPscen,"ue_steel_primary")),
-  
+
       put t.tl, " ", regi.tl, " ", all_GDPscen.tl, ": ";
       put @20 "(", pm_fedemand(t,regi,all_GDPscen,"ue_steel_primary"), ",";
       put pm_fedemand(t,regi,all_GDPscen,"ue_steel_secondary"), ") -> ";
-  
+
       pm_fedemand(t,regi,all_GDPscen,"ue_steel_primary")
       = 0.1
       * ( pm_fedemand(t,regi,all_GDPscen,"ue_steel_primary")
         + pm_fedemand(t,regi,all_GDPscen,"ue_steel_secondary")
         );
-  
+
       pm_fedemand(t,regi,all_GDPscen,"ue_steel_secondary")
       = 9 * pm_fedemand(t,regi,all_GDPscen,"ue_steel_primary");
-  
+
       put "(", pm_fedemand(t,regi,all_GDPscen,"ue_steel_primary"), ",";
       put pm_fedemand(t,regi,all_GDPscen,"ue_steel_secondary"), ")" /;
     );
@@ -1284,4 +1286,3 @@ if (9 lt smax((t,regi,all_GDPscen)$(
 $endif.subsectors
 
 *** EOF ./core/datainput.gms
-

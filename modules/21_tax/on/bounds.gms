@@ -8,6 +8,8 @@
 *cb no taxes in 2005, fix budget equation term to zero
 vm_taxrev.fx("2005",regi) = 0;
 
+* vm_flexAdj.fx(t,all_regi,all_te) = 0;
+
 *** CG: set non-DEU spv markups to 0
 vm_flexAdj.fx(t,all_regi,all_te)$(teDTCoupSupp(all_te) AND not SameAs(all_regi,"DEU")) = 0;
 *** CG: set elh2 markups to 0 (Felix's input is read in in p80 from input.gdx), later this line can be removed

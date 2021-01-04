@@ -1,9 +1,9 @@
 #for shared variable such as peak demand (one iteration series)
 
-mypath = "~/remind/dataprocessing/"
-run_number = 19
-mydatapath =  paste0("~/remind/output/capfac", run_number, "/")
-mydatapath2 =  paste0("~/remind/output/capfac", run_number, "_uncoupl/")
+mypath = "~/remind-coupling-dieter/dataprocessing/"
+run_number = "32_valid1_test"
+mydatapath =  paste0("~/remind-coupling-dieter/output/capfac", run_number, "/")
+# mydatapath2 =  paste0("~/remind-coupling-dieter/output/capfac", run_number, "_uncoupl/")
 
 # import library
 source(paste0(mypath, "library_import.R"))
@@ -14,11 +14,21 @@ require(rmndt)
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
 #dieter output iteration gdx files
+maxiter = 30
+
+filenames0 <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
+sorted_files0 <- paste0(mydatapath, "fulldata_", 1:length(filenames0), ".gdx")
+files0 <- paste0("fulldata_", 1:length(filenames0), ".gdx")
+
+sorted_files <- sorted_files0[1:maxiter]
+files <- files0[1:maxiter]
+
+
 files_DT <- list.files(mydatapath, pattern="results_DIETER_i[0-9]+\\.gdx")
 sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 5, to = length(files_DT)*5, by = 5), ".gdx")
 
-files_DT2 <- list.files(mydatapath2, pattern="results_DIETER_i[0-9]+\\.gdx")
-sorted_files_DT2 <- paste0(mydatapath2, "results_DIETER_i", seq(from = 5, to = length(files_DT2)*5, by = 5), ".gdx")
+# files_DT2 <- list.files(mydatapath2, pattern="results_DIETER_i[0-9]+\\.gdx")
+# sorted_files_DT2 <- paste0(mydatapath2, "results_DIETER_i", seq(from = 5, to = length(files_DT2)*5, by = 5), ".gdx")
 
 year_toplot_list <- c(2015, 2025, 2035, 2050) 
 for(year_toplot in year_toplot_list){
@@ -145,27 +155,27 @@ get_variable_DT <- function(gdx){
 }
 
 vr1_DT <- lapply(sorted_files_DT, get_variable_DT)
-vr1_DT2 <- lapply(sorted_files_DT2, get_variable_DT)
+# vr1_DT2 <- lapply(sorted_files_DT2, get_variable_DT)
 
 idx_DT <- 1:length(files_DT)
-idx_DT2 <- 1:length(files_DT2)
+# idx_DT2 <- 1:length(files_DT2)
 
 for(id in idx_DT){
   vr1_DT[[id]]$iter <- id * 5
   vr1_DT[[id]]$model <- "coupled"
 }
 
-for(id in idx_DT2){
-  vr1_DT2[[id]]$iter <- id * 5
-  vr1_DT2[[id]]$model <- "uncoupled"
-}
+# for(id in idx_DT2){
+  # vr1_DT2[[id]]$iter <- id * 5
+  # vr1_DT2[[id]]$model <- "uncoupled"
+# }
 
 vr1_DT <- rbindlist(vr1_DT)
-vr1_DT2 <- rbindlist(vr1_DT2)
+# vr1_DT2 <- rbindlist(vr1_DT2)
 
 p1<-ggplot() +
   geom_line(data = vr1_DT, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
-  geom_line(data = vr1_DT2, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
+  # geom_line(data = vr1_DT2, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
   geom_line(data = vr1, aes(x = iter, y = value, color = model), size = 1.2, alpha = 0.5) +
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
   xlab("iteration") + ylab(paste0(VARsubkey1_DT)) +

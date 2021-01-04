@@ -82,6 +82,13 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 $ENDIF.DTcoup
 
 );
+
+* p32_peakDemand_relFac(t,"DEU")$(tDT32(t)) = 0.000155891;
+*
+* *** calculate CF for dispatchable from solar pv share
+* pm_cf_linear(tDT32,"DEU",DISPATCHte32_2) = pm_cf(tDT32,"DEU",DISPATCHte32_2) * ( 1 - 0.5 * v32_shSeEl.l(tDT32,"DEU","spv") / 100);
+
+
 $endif.calibrate
 
 *** EOF ./modules/32_power/DTcoup/presolve.gms

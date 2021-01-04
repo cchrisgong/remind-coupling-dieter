@@ -3,7 +3,7 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
 # run_number = "mrkup1_revise_4iter"
 # run_number = "mrkup2_iter"
-run_number = "mrkup7"
+run_number = "mrkup9"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number,"/")
 # mydatapath2 = "~/remind-coupling-dieter/output/capfac32_valid3/"
 
@@ -21,8 +21,8 @@ files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
 sorted_files0 <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
 filenames0 <- paste0("fulldata_", 1:length(files), ".gdx")
 
-sorted_files <- sorted_files0[1:10]
-filenames <- filenames0[1:10]
+sorted_files <- sorted_files0[1:5]
+filenames <- filenames0[1:5]
 
 # files_full <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
 # sorted_files_full <- paste0(mydatapath, "fulldata_", 1:length(files_full), ".gdx")
@@ -31,7 +31,7 @@ filenames <- filenames0[1:10]
 # sorted_files = c(sorted_files_full, sorted_files_nonopt)
 # files = c(files_full, files_nonopt)
 
-year_toplot = 2050
+year_toplot = 2055
 
 BUDGETkey1 = "qm_budget"
 SEELp_iter = "q32_balSe"

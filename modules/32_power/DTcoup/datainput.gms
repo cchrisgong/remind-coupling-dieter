@@ -59,9 +59,10 @@ $include "./modules/32_power/IntC/input/f32_storageCap.prn"
 p32_storageCap(te,char) = f32_storageCap(char,te);
 display p32_storageCap;
 
-***CG is this needed?
+p32_flex_maxdiscount_spv = 0.1;
+
+***CG
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_peakDemand_relFac(t,"DEU")$(tDT32(t)) = 0;
 p32_DIETERmkup(t,te)$(tDT32(t) AND teDTCoupSupp(te)) = 0;
-* s32_iteration_ge_5 = 0;
 $ENDIF.DTcoup

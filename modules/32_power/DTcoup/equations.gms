@@ -204,7 +204,6 @@ p32_peakDemand_relFac(t,"DEU") * v32_seelDem(t,"DEU",enty2) * 8760
 ***----------------------------------------------------------------------------
 *** CG: calculate markup adjustment used in flexibility tax for supply-side technologies
 ***----------------------------------------------------------------------------
-*** calculate flexibility benefit or cost per unit output of flexibile or inflexibly technology
 q32_mkup(t,"DEU",te)$(tDT32(t) AND teDTCoupSupp(te) AND (cm_DTcoup_capcon = 1))..
 	vm_flexAdj(t,"DEU",te)
 	=e=
@@ -215,4 +214,32 @@ q32_mkup(t,"DEU",te)$(tDT32(t) AND teDTCoupSupp(te) AND (cm_DTcoup_capcon = 1)).
 	(1 - p32_DIETERmkup(t,te)) * pm_priceSeel(t,"DEU")
 ;
 
+*** calculate markup adjustment from solar share (a linear relation)
+* q32_mkup_noCOUP(t,"DEU",te)$(tDT32(t) AND teDTCoupSupp(te) AND (cm_DTcoup_capcon = 1))..
+* 	vm_flexAdj(t,"DEU",te)
+* 	=e=
+* *** linearly increase/decrease electricity price that inflexible/flexible technology sees with increasing VRE share up to p32_flex_maxdiscount
+* *** p32_flex_maxdiscount positive -> lower-than-average electricity price (flexible demand),
+* *** p32_flex_maxdiscount negative -> higher-than-average electricity price (inflexible demand)
+* 	(v32_shSeEl(t,"DEU","spv") / 100 - p32_flex_maxdiscount_spv) * pm_priceSeel(t,"DEU")
+* ;
+
 $ENDIF.DTcoup
+
+* q32_peakDemand_DT(t,enty2)$(tDT32(t) AND sameas(enty2,"seel")) ..
+* * q32_peakDemand_DT(tall,"seel")$(ct_DT_32(tall)) ..
+* 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,"DEU",te,rlf)))
+* 	=g=
+* * p32_peakDemand_relFac(t,"DEU") * v32_seelDem(t,"DEU",enty2) * 8760 * s32_iteration_ge_5 !! either NO (= 0) for iteration lt 5, or YES (= 1) otherwise
+* p32_peakDemand_relFac(t,"DEU") * v32_seelDem(t,"DEU",enty2) * 8760
+* 	;
+*
+* *** calculate markup adjustment from solar pv share
+* q32_mkup_noCOUP(t,"DEU",te)$(tDT32(t) AND teDTCoupSupp(te))..
+* 	vm_flexAdj(t,"DEU",te)
+* 	=e=
+* *** linearly increase/decrease electricity price that inflexible/flexible technology sees with increasing VRE share up to p32_flex_maxdiscount
+* *** p32_flex_maxdiscount positive -> lower-than-average electricity price (flexible demand),
+* *** p32_flex_maxdiscount negative -> higher-than-average electricity price (inflexible demand)
+* 	(v32_shSeEl(t,"DEU","spv") / 100 - p32_flex_maxdiscount_spv) * pm_priceSeel(t,"DEU")
+* ;

@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup7"
+run_number = "mrkup10"
 # run_number = "mrkup5_iter"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
@@ -11,7 +11,7 @@ library(readr)
 require(rmndt)
 
 # iteration_toplot_list <- c(30,50,80,90,95,100)
-iteration_toplot_list <- c(10,25,50,70,99)
+iteration_toplot_list <- c(10,25,37)
 
 
 #remind output iteration gdx files
@@ -20,9 +20,9 @@ sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
 #dieter output iteration gdx files
 files_DT_rep <- list.files(mydatapath, pattern="report_DIETER_i[0-9]+\\.gdx")
 
-# for(fname in files_DT_rep){
-#   gdxToQuitte_annual(mydatapath, fname,run_number)
-# }
+for(fname in files_DT_rep){
+  gdxToQuitte_annual(mydatapath, fname,run_number)
+}
 
 #dieter output iteration gdx files
 # sorted_annual_report_DT <- paste0(myDIETERPLOT_path, run_number, "_i", seq(from = 5, to = length(files_DT_rep)*5, by = 5), "_annualreport.csv")
