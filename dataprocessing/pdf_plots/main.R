@@ -142,12 +142,15 @@ source("./plotSeelPrice.R")
 
 source("./plotPeakDemandPrice.R")
 
-# RLDCs -------------------------------------------------------------------
+# (Residual) load duration curves -----------------------------------------
 
-
+source("./plotRLDCs.R")  # Attention: computationally heavy for standard PC
 
 # Price duration curves ---------------------------------------------------
 
+
+
+# Markups -----------------------------------------------------------------
 
 
 
