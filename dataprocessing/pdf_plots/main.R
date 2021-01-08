@@ -144,14 +144,17 @@ source("./plotPeakDemandPrice.R")
 
 # (Residual) load duration curves -----------------------------------------
 
-source("./plotRLDCs.R")  # Attention: computationally heavy for standard PC
+source("./plotRLDCs.R")  # Attention: computationally heavy on standard PC
 
 # Price duration curves ---------------------------------------------------
 
+source("./plotPriceDurationCurve.R")
 
+# (Inverse) screening curves ----------------------------------------------
+
+source("./plotInverseScreeningCurve.R")
 
 # Markups -----------------------------------------------------------------
-
 
 
 
