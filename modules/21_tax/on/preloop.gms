@@ -144,6 +144,7 @@ v21_tau_bio.l(ttot) = 0;
 vm_flexAdj.l(ttot,all_regi,all_te) = 0;
 v21_taxrevFlex.l(ttot,all_regi) = 0;
 
+*** CG: display
 display "vm_flexAdj", vm_flexAdj.l;
 Display "end of preloop tax chris";
 

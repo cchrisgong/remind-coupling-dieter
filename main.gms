@@ -488,7 +488,7 @@ $setGlobal cm_demTcomplex  fromEDGET !! def = temporary_trend
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *--------------------flags------------------------------------------------------------
 $setglobal cm_DTcoup  on         !! def = off
-cm_DTcoup_capcon = 1;         !! def = 0
+cm_DTcoup_capcon = 0;         !! def = 0
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
 $setGlobal cm_nash_mode  parallel      !! def = parallel
 $setGlobal c_EARLYRETIRE       on         !! def = on

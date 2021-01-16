@@ -24,15 +24,6 @@ q32_balSe(t,regi,enty2)$(sameas(enty2,"seel"))..
 	+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! don't use in 2005 because this demand is not contained in 05_initialCap
 ;
 
-q32_seelDem(t,regi,enty2)$(sameas(enty2,"seel"))..
-	v32_seelDem(t,regi,enty2)
-  =e=
-    sum(se2fe(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
-	+ sum(se2se(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
-	+ sum(teVRE, v32_storloss(t,regi,teVRE) )
-	+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! don't use in 2005 because this demand is not contained in 05_initialCap
-;
-
 q32_usableSe(t,regi,entySe)$(sameas(entySe,"seel"))..
 	vm_usableSe(t,regi,entySe)
 	=e=
@@ -169,7 +160,7 @@ q32_peakDemand_DT(t,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND cm_DTcoup_capc
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,"DEU",te,rlf)))
 	=g=
 * p32_peakDemand_relFac(t,"DEU") * v32_seelDem(t,"DEU",enty2) * 8760 * s32_iteration_ge_5 !! either NO (= 0) for iteration lt 5, or YES (= 1) otherwise
-p32_peakDemand_relFac(t,"DEU") * v32_seelDem(t,"DEU",enty2) * 8760
+p32_peakDemand_relFac(t,"DEU") * p32_seelDem(t,"DEU",enty2) * 8760
 	;
 
 * q32_peakDemand_DT_testLHS(t)$(t_DT_32(t) AND (cm_DTcoup_capcon = 1)) ..

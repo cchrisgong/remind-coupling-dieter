@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup12"
+run_number = "mrkup19"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 # import library
 source(paste0(mypath, "library_import.R"))
@@ -8,7 +8,7 @@ require(rmndt)
 
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
-maxiter = 15
+maxiter = 37
 # remind output iteration gdx files
 filenames0 <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
 sorted_files0 <- paste0(mydatapath, "fulldata_", 1:length(filenames0), ".gdx")
@@ -24,14 +24,14 @@ files <- files0[1:maxiter]
 # sorted_files = c(sorted_files_full, sorted_files_nonopt)
 # files = c(files_full, files_nonopt)
 # 
-# #dieter output iteration gdx files
-# files_DT0 <- list.files(mydatapath, pattern="results_DIETER_i[0-9]+\\.gdx")
-# # sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 4, to = length(files_DT)*4, by = 4), ".gdx")
-# # sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 5, to = length(files_DT)*5, by = 5), ".gdx")
-# sorted_files_DT0 <- paste0(mydatapath, "results_DIETER_i", seq(from = 2, to = length(files_DT0)+1, by = 1), ".gdx")
-# 
-# files_DT <- files_DT0[1:maxiter]
-# sorted_files_DT <- sorted_files_DT0[1:maxiter]
+#dieter output iteration gdx files
+files_DT0 <- list.files(mydatapath, pattern="results_DIETER_i[0-9]+\\.gdx")
+# sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 4, to = length(files_DT)*4, by = 4), ".gdx")
+# sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 5, to = length(files_DT)*5, by = 5), ".gdx")
+sorted_files_DT0 <- paste0(mydatapath, "results_DIETER_i", seq(from = 2, to = length(files_DT0)+1, by = 1), ".gdx")
+
+files_DT <- files_DT0[1:maxiter]
+sorted_files_DT <- sorted_files_DT0[1:maxiter]
 
 year_toplot_list <- c(2030,2040,2050,2055,2060,2070,2080) 
 for(year_toplot in year_toplot_list){
@@ -134,7 +134,7 @@ get_variable_DT <- function(gdx){
 vrN <- lapply(sorted_files, get_variable)
 # print(vrN[[1]])
 
-# vrN_DT <- lapply(sorted_files_DT, get_variable_DT)
+vrN_DT <- lapply(sorted_files_DT, get_variable_DT)
 
 for(fname in files){
   idx <- as.numeric(str_extract(fname, "[0-9]+"))
@@ -142,15 +142,15 @@ for(fname in files){
   vrN[[idx]]$model <- "REMIND"
 }
 
-# idx_DT <- 1:length(files_DT)
-# for(id in idx_DT){
-#   # vrN_DT[[id]]$iter <- id*5
-#   vrN_DT[[id]]$iter <- id+1
-#   vrN_DT[[id]]$model <- "DIETER"
-# }
+idx_DT <- 1:length(files_DT)
+for(id in idx_DT){
+  # vrN_DT[[id]]$iter <- id*5
+  vrN_DT[[id]]$iter <- id+1
+  vrN_DT[[id]]$model <- "DIETER"
+}
 
 vrN <- rbindlist(vrN)
-# vrN_DT <- rbindlist(vrN_DT)
+vrN_DT <- rbindlist(vrN_DT)
   
 p1<-ggplot() +
   geom_area(data = vrN, aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5, stat = "identity") +
@@ -163,22 +163,22 @@ p1<-ggplot() +
   theme(aspect.ratio = .5)
 
 # 
-# p2<-ggplot() +
-#   geom_area(data = vrN_DT, aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5) +
-#   scale_fill_manual(name = "Technology", values = mycolors)+
-#   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
-#   xlab("iteration") + ylab(paste0(VARsubkey1_DT, "(TWh)")) +
-#   coord_cartesian(ylim = c(0,1.5e3), xlim = c(0, max(vrN$iter)))+
-#   ggtitle(paste0("DIETER", year_toplot))+
-#   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank()) +
-#   theme(aspect.ratio = .5)
+p2<-ggplot() +
+  geom_area(data = vrN_DT, aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5) +
+  scale_fill_manual(name = "Technology", values = mycolors)+
+  theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+  xlab("iteration") + ylab(paste0(VARsubkey1_DT, "(TWh)")) +
+  coord_cartesian(ylim = c(0,1.5e3), xlim = c(0, max(vrN$iter)))+
+  ggtitle(paste0("DIETER", year_toplot))+
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank()) +
+  theme(aspect.ratio = .5)
 
-# library(grid)
-# grid.newpage()
-# p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
-# grid.draw(p)
+library(grid)
+grid.newpage()
+p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
+grid.draw(p)
 
-ggsave(filename = paste0(mypath, "iter_xN_GEN_", run_number, "_", year_toplot, ".png"),  p1,  width = 12, height =16, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, "iter_xN_GEN_", run_number, "_", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
 
 }
 

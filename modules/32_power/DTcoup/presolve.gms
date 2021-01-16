@@ -4,7 +4,7 @@
 *** |  AGPL-3.0, you are granted additional permissions described in the
 *** |  REMIND License Exception, version 1.0 (see LICENSE file).
 *** |  Contact: remind@pik-potsdam.de
-*** SOF ./modules/32_power/DTcoup/preloop.gms
+*** SOF ./modules/32_power/DTcoup/presolve.gms
 $ifthen.calibrate %CES_parameters% == "load"
 *
 *iteration happens at N=5, 10, 15, 20, ...; if (ord(iteration) ge 5) N starts at N= 4
@@ -53,6 +53,7 @@ if ( (c_keep_iteration_gdxes eq 1) ,
 logfile.nr = 2;
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
+
     Execute_Loadpoint 'results_DIETER' report4RM;
 *   ONLY pass on the disptachable capacity factors, since the VRE's capfac are treated differently in REMIND
 *   sum over gdxfile set removes this extra index that comes from gdxmerge algorithm

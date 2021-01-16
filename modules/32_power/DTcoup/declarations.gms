@@ -15,7 +15,7 @@ parameters
     p32_storageCap(all_te,char)           "multiplicative factor between dummy seel<-->h2 technologies and storXXX technologies"
 *   p32_capStor_DIET(tall,all_regi)       "storage cap from DIETER"
     p32_flex_maxdiscount_spv              "maximum electricity price of solar at high VRE shares"
-
+    p32_seelDem                           "total secondary electricity demand"
 
 p32_peakDemand_relFac(ttot,all_regi)  "annual peak demand as a relative ratio of total annual power demand from DIETER"
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
@@ -35,14 +35,12 @@ positive variables
     v32_shStor(ttot,all_regi,all_te)      "share of seel production from renewables that needs to be stored, range 0..1 [0,1]"
     v32_storloss(ttot,all_regi,all_te)    "total energy loss from storage for a given technology [TWa]"
     v32_shSeEl(ttot,all_regi,all_te)			"new share of electricity production in % [%]"
-    v32_seelDem(ttot,all_regi,all_enty)   "total secondary electricity demand"
 * v32_peakDemand_DT_testLHS(tall)
 * v32_peakDemand_DT_testRHS(tall, all_enty)
 ;
 
 equations
     q32_balSe(ttot,all_regi,all_enty)			        "balance equation for electricity secondary energy"
-    q32_seelDem(ttot, all_regi, all_enty)         "total secondary electricity demand"
     q32_usableSe(ttot,all_regi,all_enty)			    "calculate usable se before se2se and MP/XP (without storage)"
     q32_usableSeTe(ttot,all_regi,entySe,all_te)   "calculate usable se produced by one technology (vm_usableSeTe)"
 *   q32_limitCapTeStor(ttot,all_regi,teStor)		  "calculate the storage capacity required by vm_storloss"
@@ -57,7 +55,7 @@ equations
 
     q32_limitSolarWind(ttot,all_regi)           	"limits on fluctuating renewables, only turned on for special EMF27 scenarios"
 
-    q32_mkup_noCOUP(ttot,all_regi,all_te)           "calculate markup or markdown of generation technology value without DIETER coupling (FS's implementation)"
+*   q32_mkup_noCOUP(ttot,all_regi,all_te)           "calculate markup or markdown of generation technology value without DIETER coupling (FS's implementation)"
 *   q32_peakDemand_DT(ttot, all_enty)             "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"

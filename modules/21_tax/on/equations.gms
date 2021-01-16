@@ -44,14 +44,13 @@
     + v21_implicitDiscRate(t,regi)
     + sum(emiMkt, v21_taxemiMkt(t,regi,emiMkt))
 * + v21_taxrevFlex(t,regi)$(cm_flex_tax eq 1) OR (cm_DTcoup_capcon = 1)
-* + v21_taxrevMrkup(t,regi)$(cm_DTcoup_capcon = 0)
-    + v21_taxrevMrkup(t,regi)
+* + v21_taxrevMrkup(t,regi)$(cm_DTcoup_capcon = 1)
++ v21_taxrevMrkup(t,regi)
     + v21_taxrevBioImport(t,regi)
 $ifthen.implicitFEEffTarget not "%cm_implicitFEEffTarget%" == "off"
     + vm_taxrevimplicitFEEffTarget(t,regi)
 $endif.implicitFEEffTarget
  ;
-
 
 ***---------------------------------------------------------------------------
 *'  Calculation of greenhouse gas taxes: tax rate (combination of 3 components) times ghg emissions
@@ -218,7 +217,7 @@ q21_taxemiMkt(t,regi,emiMkt)$(t.val ge max(2010,cm_startyear))..
 ***---------------------------------------------------------------------------
 *'  CG: Calculation of tax/subsidy on technologies with inflexible/flexible electricity input
 ***---------------------------------------------------------------------------
-* q21_taxrevMrkup(t,regi)$((t.val ge max(2010,cm_startyear)) AND (cm_DTcoup_capcon = 0))..
+* q21_taxrevMrkup(t,regi)$((t.val ge max(2010,cm_startyear)) AND (cm_DTcoup_capcon = 1))..
 q21_taxrevMrkup(t,regi)$((t.val ge max(2010,cm_startyear)))..
   v21_taxrevMrkup(t,regi)
   =e=

@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup10"
+run_number = "mrkup19"
 # run_number = "mrkup5_iter"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
@@ -20,9 +20,9 @@ sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
 #dieter output iteration gdx files
 files_DT_rep <- list.files(mydatapath, pattern="report_DIETER_i[0-9]+\\.gdx")
 
-for(fname in files_DT_rep){
-  gdxToQuitte_annual(mydatapath, fname,run_number)
-}
+# for(fname in files_DT_rep){
+#   gdxToQuitte_annual(mydatapath, fname,run_number)
+# }
 
 #dieter output iteration gdx files
 # sorted_annual_report_DT <- paste0(myDIETERPLOT_path, run_number, "_i", seq(from = 5, to = length(files_DT_rep)*5, by = 5), "_annualreport.csv")
@@ -67,7 +67,8 @@ vrN_rep_DTlist  <- lapply(iteration_toplot_list, get_report_variable_DT)
 vrN_rep_DT0 <- rbindlist(vrN_rep_DTlist)
 
 for(iteration in iteration_toplot_list){
-  
+
+  # iteration = 10
 RM_preInvest <- vrN_rep_DT0 %>% 
   filter(variable == "REMIND pre-investment capacities") %>% 
   filter(iter == iteration) %>% 
@@ -76,7 +77,7 @@ RM_preInvest <- vrN_rep_DT0 %>%
   select(period, tech, variable, value, iter, model) 
 
 DT_preInvest <- vrN_rep_DT0 %>% 
-  filter(variable == "DIETER pre-investment capacities") %>% 
+  filter(variable == "REMIND pre-investment capacities") %>% 
   filter(iter == iteration) %>% 
   mutate(model = "DIETER") %>% 
   mutate(variable = "Pre-investment capacities") %>% 

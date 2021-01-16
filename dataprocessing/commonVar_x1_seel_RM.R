@@ -1,7 +1,7 @@
 #for shared variable such as peak demand (one iteration series)
 
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup18"
+run_number = "mrkup19"
 # run_number = "mrkup14_uncoupl"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number,"/")
 # mydatapath2 = "~/remind-coupling-dieter/output/capfac32_valid3/"
@@ -16,7 +16,7 @@ library(ggallin)
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
 miniter = 1
-maxiter = 36
+maxiter = 37
 #remind output iteration gdx files
 files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
 sorted_files0 <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
@@ -74,6 +74,8 @@ plot_RMte_names = c("combined cycle gas", "coal", "solar", "wind", "biomass", "o
 plot_RMLCOEte_names = c("combined cycle gas", "lignite", "solar", "wind", "biomass", "open cycle gas turbine", "hydro", "nuclear")
 
 TECHkeylst <- c(TECHkeylst_peakGas, TECHkeylst_nonPeakGas, TECHkeylst_coal, TECHkeylst_solar, TECHkeylst_wind, TECHkeylst_hydro, TECHkeylst_biomass, TECHkeylst_nuclear)
+
+
 TECHVREkeylst <- c(TECHkeylst_solar, TECHkeylst_wind,TECHkeylst_hydro)
 TECH_NONVRE_keylst <- c(TECHkeylst_peakGas, TECHkeylst_nonPeakGas, TECHkeylst_coal, TECHkeylst_biomass, TECHkeylst_nuclear)
 
@@ -435,10 +437,24 @@ p4<-ggplot() +
   theme(axis.text=element_text(size=20), axis.title=element_text(size=20,face="bold")) +
   xlab("iteration") + ylab(paste0("absolute markup",  "(USD/MWh)"))  +
   scale_color_manual(name = "tech", values = mycolors)+
-  coord_cartesian(ylim = c(-20,20))+
+  coord_cartesian(ylim = c(-100,20))+
   facet_wrap(~ttot, nrow = 3)
 
 ggsave(filename = paste0(mypath, run_number, "iter_markup", "_RM.png"), p4, width = 28, height =15, units = "in", dpi = 120)
+
+vr1_mk2 <- vr1_mk %>% 
+  filter(iter %in% c(10,20,30,36))
+
+p4b<-ggplot() +
+  geom_line(data = vr1_mk2, aes(x = ttot, y = value, color = all_te), size = 1.2, alpha = 0.5) +
+  theme(axis.text=element_text(size=20), axis.title=element_text(size=20,face="bold")) +
+  xlab("iteration") + ylab(paste0("absolute markup",  "(USD/MWh)"))  +
+  scale_color_manual(name = "tech", values = mycolors)+
+  coord_cartesian(ylim = c(-100,20))+
+  facet_wrap(~iter, nrow = 3)
+
+ggsave(filename = paste0(mypath, run_number, "iter_markup_timeseries", "_RM.png"), p4b, width = 28, height =15, units = "in", dpi = 120)
+
 
 
 # secAxisScale = 1/10
