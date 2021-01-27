@@ -4,7 +4,7 @@ out.remind <- NULL
 for (i in 1:length(remind.files)){
   
   # Read in vm_prodSe (generation)
-  remind.vm_prodSe <- paste0(remind.dieter.path, scenario.name, remind.files[i]) %>%  
+  remind.vm_prodSe <- file.path(outputdir, remind.files[i]) %>%  
     read.gdx("vm_prodSe", field="l", squeeze=F) %>% 
     filter(all_enty.1 == "seel") %>% 
     filter(all_regi == "DEU") %>% 
@@ -25,7 +25,7 @@ for (i in 1:length(remind.files)){
 
 out.dieter <- NULL
 for (i in 1:length(dieter.files)){
-  dieter.data <- paste0(remind.dieter.path, scenario.name, dieter.files[i]) %>% 
+  dieter.data <- file.path(outputdir, dieter.files[i]) %>% 
     read.gdx("report4RM", squeeze=F) %>% 
     select(X..1, X..3, X..4, value) %>% 
     rename(tall = X..1, technology=X..3, var=X..4) %>%

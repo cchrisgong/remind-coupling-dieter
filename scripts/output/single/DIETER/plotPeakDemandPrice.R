@@ -2,13 +2,13 @@
 
 out.remind.peakdem <- NULL
 for (i in 1:length(remind.files)){
-  remind.q32_peakDemand_DT <- paste0(remind.dieter.path, scenario.name, remind.files[i]) %>% 
+  remind.q32_peakDemand_DT <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("q32_peakDemand_DT", field="m", squeeze=F) %>% 
     select(!all_enty) %>% 
     filter(tall %in% report.periods.long) %>% 
     rename(q32_peakDemand_DT.m = m)
 
-  remind.qm_budget <- paste0(remind.dieter.path, scenario.name, remind.files[i]) %>% 
+  remind.qm_budget <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("qm_budget", field="m", squeeze=F) %>% 
     filter(all_regi == "DEU") %>%
     select(!all_regi) %>%  

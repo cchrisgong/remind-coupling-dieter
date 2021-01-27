@@ -5,7 +5,7 @@ out.remind.dem <- NULL
 for (i in 1:length(remind.files)){
   
   # Read in vm_cap (capacity)
-  remind.vm_cap <- paste0(remind.dieter.path, scenario.name, remind.files[i]) %>%  
+  remind.vm_cap <- file.path(outputdir, remind.files[i]) %>%  
     read.gdx("vm_cap", field="l", squeeze=F) %>% 
     filter(rlf == 1) %>% 
     select(-rlf) %>%
@@ -20,7 +20,7 @@ for (i in 1:length(remind.files)){
     mutate(iteration = i)
   
   # Read in v32_seelDem (total secondary electricity demand)
-  remind.v32_seelDem <- paste0(remind.dieter.path, scenario.name, remind.files[i]) %>% 
+  remind.v32_seelDem <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("v32_seelDem", field="l", squeeze=F) %>% 
     filter(all_regi == "DEU") %>%
     filter(tall %in% report.periods) %>% 
@@ -36,7 +36,7 @@ for (i in 1:length(remind.files)){
 
 out.dieter <- NULL
 for (i in 1:length(dieter.files)){
-  dieter.data <- paste0(remind.dieter.path, scenario.name, dieter.files[i]) %>% 
+  dieter.data <- file.path(outputdir, dieter.files[i]) %>% 
     read.gdx("report4RM", squeeze=F) %>% 
     select(X..1, X..3, X..4, value) %>% 
     rename(tall = X..1, technology=X..3, var=X..4) %>%

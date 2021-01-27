@@ -12,12 +12,9 @@ library(gridExtra)
 
 # Configurations ----------------------------------------------------------
 
-# Make sure paths end on /
-remind.dieter.path <- "C:/Users/adrianod/Documents/PhD/Modelling/remind-dieter/output/"
-scenario.name <- "REMIND-EU_xx_ref_FEmed_2020-11-16_18.14.29/"
+dieter.scripts.folder <- "./scripts/output/single/DIETER"
 report.periods <- seq(2015,2050,5)
 report.periods.long <- c(seq(2015,2060,5), seq(2070,2100,10))
-#report.path <- "C:/Users/adrianod/Documents/PhD/Modelling/remind-dieter/report/"
 
 remind.nonvre.mapping <- c(coalchp = "Coal (Lig + HC)",
                            igcc = "Coal (Lig + HC)",
@@ -65,23 +62,19 @@ sm_TWa_2_MWh <- 8.76E9
 
 # Directories -------------------------------------------------------------
 
-report.output.file <- paste0(remind.dieter.path, scenario.name, "REMIND-DIETER_report.pdf")
+report.output.file <- file.path(outputdir, "REMIND-DIETER_validation_,", temp, ".pdf")
 
-remind.files <- paste0(remind.dieter.path, scenario.name) %>% 
-  list.files(pattern="fulldata_[0-9]+\\.gdx") %>% 
+remind.files <-  list.files(outputdir, pattern="fulldata_[0-9]+\\.gdx") %>% 
   str_sort(numeric=TRUE)
 
-dieter.files <- paste0(remind.dieter.path, scenario.name) %>% 
-  list.files(pattern="results_DIETER_i[0-9]+\\.gdx") %>% 
+dieter.files <- list.files(outputdir, pattern="results_DIETER_i[0-9]+\\.gdx") %>% 
   str_sort(numeric=TRUE)
 
-dieter.files.report <- paste0(remind.dieter.path, scenario.name) %>% 
-  list.files(pattern="report_DIETER_i[0-9]+\\.gdx") %>% 
+dieter.files.report <- list.files(outputdir, pattern="report_DIETER_i[0-9]+\\.gdx") %>% 
   str_sort(numeric=TRUE)
 
 # Determine iteration step of DIETER
 dieter.iter.step <- floor(length(remind.files)/length(dieter.files))
-
 
 # LaTeX configurations ----------------------------------------------------
 
@@ -116,43 +109,43 @@ swlatex(sw,"\\tableofcontents\\newpage")
 
 # Capacity factors --------------------------------------------------------
 
-source("./plotCapacityFactors.R")
+source(file.path(dieter.scripts.folder, "plotCapacityFactors.R"))
 
 # Capacities --------------------------------------------------------------
 
-source("./plotCapacities.R")
+source(file.path(dieter.scripts.folder, "plotCapacities.R"))
 
 # Generation --------------------------------------------------------------
 
-source("./plotGeneration.R")
+source(file.path(dieter.scripts.folder, "plotGeneration.R"))
 
 # Added capacities --------------------------------------------------------
 
-source("./plotAddedCapacities.R")
+source(file.path(dieter.scripts.folder, "plotAddedCapacities.R"))
 
 # LCOEs -------------------------------------------------------------------
 
-source("./plotLCOEs.R")
+source(file.path(dieter.scripts.folder, "plotLCOEs.R"))
 
 # Price: Secondary electricity --------------------------------------------
 
-source("./plotSeelPrice.R")
+source(file.path(dieter.scripts.folder, "plotSeelPrice.R"))
 
 # Price: Peak demand ------------------------------------------------------
 
-source("./plotPeakDemandPrice.R")
+source(file.path(dieter.scripts.folder, "plotPeakDemandPrice.R"))
 
 # (Residual) load duration curves -----------------------------------------
 
-source("./plotRLDCs.R")  # Attention: computationally heavy on standard PC
+source(file.path(dieter.scripts.folder, "plotRLDCs.R"))  # Attention: computationally heavy on standard PC
 
 # Price duration curves ---------------------------------------------------
 
-source("./plotPriceDurationCurve.R")
+source(file.path(dieter.scripts.folder, "plotPriceDurationCurve.R"))
 
 # (Inverse) screening curves ----------------------------------------------
 
-source("./plotInverseScreeningCurve.R")
+source(file.path(dieter.scripts.folder, "plotInverseScreeningCurve.R"))
 
 # Markups -----------------------------------------------------------------
 

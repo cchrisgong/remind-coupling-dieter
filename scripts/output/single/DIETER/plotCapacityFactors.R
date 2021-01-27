@@ -6,13 +6,13 @@ for (i in 1:length(remind.files)){
   # Capacity factor for non-VRE ---------------------------------------------
   
   # Read in vm_capFac
-  remind.vm_capFac <- paste0(remind.dieter.path, scenario.name, remind.files[i]) %>% 
+  remind.vm_capFac <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("vm_capFac", field="l", squeeze=F) %>% 
     rename(tall = ttot) %>% 
     mutate(variable = "vm_capFac")
   
   # Read in vm_cap
-  remind.vm_cap <- paste0(remind.dieter.path, scenario.name, remind.files[i]) %>%  
+  remind.vm_cap <- file.path(outputdir, remind.files[i]) %>%  
     read.gdx("vm_cap", field="l", squeeze=F) %>% 
     filter(rlf == 1) %>% 
     select(-rlf) %>% 
@@ -34,7 +34,7 @@ for (i in 1:length(remind.files)){
   # Capacity factor for VRE -------------------------------------------------
   
   # Read in pm_dataren with VRE capacity factors over grades
-  remind.pm_dataren <- paste0(remind.dieter.path, scenario.name, remind.files[i]) %>% 
+  remind.pm_dataren <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("pm_dataren", squeeze=F) %>% 
     filter(all_te %in% names(remind.vre.mapping)) %>% 
     filter(char == "nur") %>% 
@@ -42,7 +42,7 @@ for (i in 1:length(remind.files)){
     rename(capfac = value)
   
   # Read in vm_capDistr with VRE capacity distribution over grades
-  remind.vm_capDistr <- paste0(remind.dieter.path, scenario.name, remind.files[i]) %>% 
+  remind.vm_capDistr <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("vm_capDistr", field="l", squeeze=F) %>% 
     rename(cap = value)
   
@@ -66,7 +66,7 @@ for (i in 1:length(remind.files)){
 
 out.dieter.capfac <- NULL
 for (i in 1:length(dieter.files)){
-  dieter.data <- paste0(remind.dieter.path, scenario.name, dieter.files[i]) %>% 
+  dieter.data <- file.path(outputdir, dieter.files[i]) %>% 
     read.gdx("report4RM", squeeze=F) %>% 
     select(X..1, X..3, X..4, value) %>% 
     rename(tall = X..1, technology=X..3, var=X..4) %>%

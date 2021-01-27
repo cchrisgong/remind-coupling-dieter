@@ -19,7 +19,7 @@ out.dieter.rldc <- NULL
 for (i in 1:length(dieter.files.report)){
   # Read in demand(hour)
   dieter.report_hours <-
-    paste0(remind.dieter.path, scenario.name, dieter.files.report[i]) %>%
+    file.path(outputdir, dieter.files.report[i]) %>%
     read.gdx("report_hours", squeeze = F) %>%
     rename(tall = X..2, var = X..4, hour = X..5) %>%
     select(!c(X., X..1, X..3)) %>%
@@ -37,7 +37,7 @@ for (i in 1:length(dieter.files.report)){
   
   # Read in generation(hour,tech)
   dieter.report_tech_hours <-
-    paste0(remind.dieter.path, scenario.name, dieter.files.report[i]) %>%
+    file.path(outputdir, dieter.files.report[i]) %>%
     read.gdx("report_tech_hours", squeeze = F) %>%
     rename(tall = X..2, var = X..4, technology = X..5, hour = X..6) %>%
     select(!c(X., X..1, X..3)) %>%

@@ -2,7 +2,7 @@
 
 out.remind.seel <- NULL
 for (i in 1:length(remind.files)){
-  remind.q32_balSe <- paste0(remind.dieter.path, scenario.name, remind.files[i]) %>% 
+  remind.q32_balSe <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("q32_balSe", field="m", squeeze=F) %>% 
     filter(all_regi == "DEU") %>%
     select(!all_regi) %>% 
@@ -11,7 +11,7 @@ for (i in 1:length(remind.files)){
     rename(tall = ttot) %>% 
     rename(q32_balSe.m = m)
   
-  remind.qm_budget <- paste0(remind.dieter.path, scenario.name, remind.files[i]) %>% 
+  remind.qm_budget <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("qm_budget", field="m", squeeze=F) %>% 
     filter(all_regi == "DEU") %>%
     select(!all_regi) %>%  

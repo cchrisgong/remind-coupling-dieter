@@ -11,7 +11,7 @@ out.dieter <- NULL
 # Loop over DIETER iterations
 for (i in 1:length(dieter.files.report)){
   dieter.report_tech <-
-    paste0(remind.dieter.path, scenario.name, dieter.files.report[i]) %>%
+    file.path(outputdir, dieter.files.report[i]) %>%
     read.gdx("report_tech", squeeze = F) %>%
     rename(tall = X..2, var = X..4, technology = X..5) %>%
     select(!c(X., X..1, X..3)) %>%
@@ -23,7 +23,7 @@ for (i in 1:length(dieter.files.report)){
     replace_na(list(CO2=0, FC=0))
 
   dieter.report_tech_hours <-
-    paste0(remind.dieter.path, scenario.name, dieter.files.report[i]) %>%
+    file.path(outputdir, dieter.files.report[i]) %>%
     read.gdx("report_tech_hours", squeeze = F) %>%
     rename(tall = X..2, var = X..4, technology = X..5, hour = X..6) %>%
     filter(var=="generation") %>% 

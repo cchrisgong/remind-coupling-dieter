@@ -8,7 +8,7 @@ dieter.report.vars <- c(dieter.report.lcoe.kW, dieter.report.lcoe.MWh, dieter.re
 
 out.dieter.report <- NULL
 for (i in 1:length(dieter.files.report)){
-  dieter.data <- paste0(remind.dieter.path, scenario.name, dieter.files.report[i]) %>% 
+  dieter.data <- file.path(outputdir, dieter.files.report[i]) %>% 
     read.gdx("report_tech", squeeze=F) %>% 
     rename(model=X..1, tall = X..2, var=X..4, technology=X..5) %>%
     filter(var %in% dieter.report.vars) %>% 
