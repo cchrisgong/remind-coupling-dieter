@@ -14,7 +14,10 @@ dieter.scripts.folder <- "./scripts/output/single/DIETER"
 
 ## Run DIETER output
 if(cfg$gms$power == "DTcoup"){
-  cat("Starting DIETER output")
-  cat(getwd())
-  source(file.path(dieter.scripts.folder, "main.R"))
+  # Source function
+  dieterenv <- new.env()
+  #sys.source(file.path(dieter.scripts.folder, "DIETERValidationPlots.R"), envir = dieterenv)
+  source(file.path(dieter.scripts.folder, "DIETERValidationPlots.R"))
+  # Call function
+  DIETERValidationPlots(outputdir = outputdir, title = temp, dieter.scripts.folder = dieter.scripts.folder)
 }
