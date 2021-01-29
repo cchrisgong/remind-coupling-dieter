@@ -8,7 +8,7 @@ for (i in 1:length(remind.files)){
     read.gdx("q32_balSe", field="m", squeeze=F) %>% 
     filter(all_regi == "DEU") %>%
     select(!all_regi) %>% 
-    filter(ttot %in% report.periods.long) %>% 
+    filter(ttot %in% report.periods) %>% 
     select(!all_enty) %>%
     rename(tall = ttot) %>% 
     rename(q32_balSe.m = m)
@@ -17,7 +17,7 @@ for (i in 1:length(remind.files)){
     read.gdx("qm_budget", field="m", squeeze=F) %>% 
     filter(all_regi == "DEU") %>%
     select(!all_regi) %>%  
-    filter(ttot %in% report.periods.long) %>% 
+    filter(ttot %in% report.periods) %>% 
     rename(tall = ttot) %>% 
     rename(qm_budget.m = m)
   

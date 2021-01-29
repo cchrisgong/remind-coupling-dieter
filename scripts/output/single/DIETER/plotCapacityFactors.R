@@ -24,7 +24,7 @@ for (i in 1:length(remind.files)){
   remind.data.nonVRE <- rbind(remind.vm_capFac, remind.vm_cap) %>% 
     spread(variable, value) %>%
     filter(all_regi == "DEU") %>% 
-    filter(tall %in% report.periods.long) %>% 
+    filter(tall %in% report.periods) %>% 
     filter(all_te %in% names(remind.nonvre.mapping)) %>% 
     mutate(technology = all_te) %>% 
     revalue.levels(technology = remind.nonvre.mapping) %>% 
@@ -51,7 +51,7 @@ for (i in 1:length(remind.files)){
   # Join pm_dataren with vm_capDistr and calculate VRE CFs
   remind.data.VRE <- left_join(remind.pm_dataren, remind.vm_capDistr) %>% 
     filter(all_regi == "DEU") %>% 
-    filter(tall %in% report.periods.long) %>%
+    filter(tall %in% report.periods) %>%
     rename(technology = all_te) %>% 
     revalue.levels(technology = remind.vre.mapping) %>% 
     mutate(generation = cap * capfac) %>% 
@@ -71,7 +71,7 @@ for (i in 1:length(dieter.files)){
   dieter.data <- file.path(outputdir, dieter.files[i]) %>% 
     read.gdx("report4RM", squeeze=F, colNames=c("file", "tall", "all_regi", "technology", "var", "value")) %>% 
     select(!c(file, all_regi)) %>% 
-    filter(tall %in% report.periods.long) %>% 
+    filter(tall %in% report.periods) %>% 
     mutate(tall = as.numeric(as.character(tall))) %>%
     filter(var == "capfac") %>% 
     filter(!technology %in% dieter.tech.exclude) %>% 

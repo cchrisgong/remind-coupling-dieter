@@ -14,8 +14,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
 
   # Configurations ----------------------------------------------------------
 
-  report.periods <- seq(2015, 2050, 5)
-  report.periods.long <- c(seq(2015, 2060, 5), seq(2070, 2100, 10))
+  report.periods <- c(seq(2015, 2060, 5), seq(2070, 2100, 10))
 
   remind.nonvre.mapping <- c(coalchp = "Coal (Lig + HC)",
                            igcc = "Coal (Lig + HC)",
