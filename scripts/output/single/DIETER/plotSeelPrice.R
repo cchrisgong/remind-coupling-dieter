@@ -1,5 +1,7 @@
 # Data preparation --------------------------------------------------------
 
+cat("Plot Seel price \n")
+
 out.remind.seel <- NULL
 for (i in 1:length(remind.files)){
   remind.q32_balSe <- file.path(outputdir, remind.files[i]) %>% 

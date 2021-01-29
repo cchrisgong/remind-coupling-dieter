@@ -1,6 +1,6 @@
 # Main function for REMIND-DIETER plots
 
-DIETERValidationPlots <- function(outputdir, title, dieter.scripts.folder) {
+DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
 
   # Load libraries ----------------------------------------------------------
 
@@ -63,19 +63,24 @@ DIETERValidationPlots <- function(outputdir, title, dieter.scripts.folder) {
 
   # Directories -------------------------------------------------------------
 
-  report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_", title, ".pdf"))
-
+  report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_", str_sub(outputdir, start=8), ".pdf"))
+  
   remind.files <- list.files(outputdir, pattern = "fulldata_[0-9]+\\.gdx") %>%
   str_sort(numeric = TRUE)
+  cat(paste0("REMIND files: ", length(remind.files), "\n"))
 
   dieter.files <- list.files(outputdir, pattern = "results_DIETER_i[0-9]+\\.gdx") %>%
   str_sort(numeric = TRUE)
+  cat(paste0("DIETER files: ", length(dieter.files), "\n"))
 
   dieter.files.report <- list.files(outputdir, pattern = "report_DIETER_i[0-9]+\\.gdx") %>%
   str_sort(numeric = TRUE)
+  cat(paste0("DIETER report files: ", length(dieter.files.report), "\n"))
 
+  
   # Determine iteration step of DIETER
   dieter.iter.step <- floor(length(remind.files) / length(dieter.files))
+  cat(paste0("DIETER iter step: ", dieter.iter.step, "\n"))
 
   # LaTeX configurations ----------------------------------------------------
 

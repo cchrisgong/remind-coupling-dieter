@@ -1,5 +1,7 @@
 # Data preparation (REMIND) -----------------------------------------------
 
+cat("Plot capacities \n")
+
 out.remind.cap <- NULL
 out.remind.dem <- NULL
 for (i in 1:length(remind.files)){
@@ -40,8 +42,8 @@ for (i in 1:length(dieter.files)){
     read.gdx("report4RM", squeeze=F) %>% 
     select(X..1, X..3, X..4, value) %>% 
     rename(tall = X..1, technology=X..3, var=X..4) %>%
-    mutate(tall = as.numeric(tall)) %>% 
     filter(tall %in% report.periods) %>% 
+    mutate(tall = as.numeric(as.character(tall))) %>% 
     filter(var == "capacity") %>% 
     mutate(capacity = value/1e3) %>% # DIETER capacity is in MW
     select(-var) %>%

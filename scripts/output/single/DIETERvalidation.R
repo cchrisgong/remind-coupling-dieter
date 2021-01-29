@@ -5,10 +5,16 @@
 # |  REMIND License Exception, version 1.0 (see LICENSE file).
 # |  Contact: remind@pik-potsdam.de
 
-#if(!exists("source_include")) {
-  ## Define arguments that can be read from command line
-#  readArgs("outputdir")
-#}
+require(lucode)
+
+cat("DIETERvalidation.R called \n")
+if(!exists("source_include")) {
+  readArgs("outputdir")
+}
+cat("ReadArgs processed \n")
+
+load(file.path(outputdir, "config.Rdata"))
+cat("cfg loaded \n")
 
 dieter.scripts.folder <- "./scripts/output/single/DIETER"
 
@@ -19,5 +25,5 @@ if(cfg$gms$power == "DTcoup"){
   #sys.source(file.path(dieter.scripts.folder, "DIETERValidationPlots.R"), envir = dieterenv)
   source(file.path(dieter.scripts.folder, "DIETERValidationPlots.R"))
   # Call function
-  DIETERValidationPlots(outputdir = outputdir, title = temp, dieter.scripts.folder = dieter.scripts.folder)
+  DIETERValidationPlots(outputdir = outputdir, dieter.scripts.folder = dieter.scripts.folder)
 }

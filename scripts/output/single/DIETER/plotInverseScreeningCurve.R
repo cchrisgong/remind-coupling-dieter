@@ -1,5 +1,7 @@
 # Data preparation --------------------------------------------------------
 
+cat("Plot inverse screening curve \n")
+
 dieter.report.lcoe.kW <- c("annualized investment cost", "O&M cost")
 dieter.report.lcoe.MWh <- c("fuel cost (divided by eta)", "CO2 cost")
 dieter.report.vars <- c(dieter.report.lcoe.kW, dieter.report.lcoe.MWh)

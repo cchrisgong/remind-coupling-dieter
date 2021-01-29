@@ -1,5 +1,7 @@
 # Data preparation (REMIND) -----------------------------------------------
 
+cat("Plot generation \n")
+
 out.remind <- NULL
 for (i in 1:length(remind.files)){
   
@@ -29,7 +31,7 @@ for (i in 1:length(dieter.files)){
     read.gdx("report4RM", squeeze=F) %>% 
     select(X..1, X..3, X..4, value) %>% 
     rename(tall = X..1, technology=X..3, var=X..4) %>%
-    mutate(tall = as.numeric(tall)) %>% 
+    mutate(tall = as.numeric(as.character(tall))) %>% 
     filter(tall %in% report.periods) %>% 
     filter(var == "generation") %>% 
     mutate(generation = value/1e6) %>% # MWh -> TWh

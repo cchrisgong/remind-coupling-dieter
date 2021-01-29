@@ -1,5 +1,7 @@
 # Data preparation --------------------------------------------------------
 
+cat("Plot price duration curve \n")
+
 # Initialise output files
 out.dieter <- NULL
 

@@ -1,5 +1,7 @@
 # Data preparation --------------------------------------------------------
 
+cat("Plot RLDCs \n")
+
 # Order of technologies in RLDC plot
 rldc.order <-
   c("Nuclear",
@@ -43,6 +45,7 @@ for (i in 1:length(dieter.files.report)){
     select(!c(X., X..1, X..3)) %>%
     revalue.levels(technology = dieter.tech.mapping) %>%
     mutate(hour = as.numeric(substring(hour, 2))) %>%
+    mutate(technology = as.character(technology)) %>% 
     mutate(technology = case_when(  # Make curtailment a separate "technology"
       var == "curtailment of fluct res" ~ paste0(technology, "_curtailed"),
       TRUE ~ technology

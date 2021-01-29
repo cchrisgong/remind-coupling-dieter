@@ -1,5 +1,7 @@
 # Data preparation --------------------------------------------------------
 
+cat("Plot peak demand price \n")
+
 out.remind.peakdem <- NULL
 for (i in 1:length(remind.files)){
   remind.q32_peakDemand_DT <- file.path(outputdir, remind.files[i]) %>% 

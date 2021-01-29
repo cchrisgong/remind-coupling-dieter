@@ -1,5 +1,7 @@
 # Data preparation --------------------------------------------------------
 
+cat("Plot added capacities \n")
+
 dieter.report.cap <- c("DIETER pre-investment capacities","REMIND pre-investment capacities")
 dieter.report.addcap <- c("DIETER added capacities (GW)", "REMIND added capacities (GW)")
 dieter.report.divest <- c("REMIND divestment (GW)")
@@ -36,12 +38,12 @@ for(iter.rep in 1:length(dieter.files.report)){
   plot.dieter <- out.dieter.report %>%
     filter(model == "DIETER") %>% 
     filter(iteration == iter.rep*dieter.iter.step) %>% 
-    mutate(tall = as.numeric(tall) - 1)  # Shift for dodged plot
+    mutate(tall = as.numeric(as.character(tall)) - 1)  # Shift for dodged plot
   
   plot.remind <- out.dieter.report %>% 
     filter(model == "REMIND") %>% 
     filter(iteration == iter.rep*dieter.iter.step) %>% 
-    mutate(tall = as.numeric(tall) + 1) %>%  # Shift for dodged plot
+    mutate(tall = as.numeric(as.character(tall)) + 1) %>%  # Shift for dodged plot
     mutate(value = ifelse(variable == "Divestment", -value, value))  # Divestment has negative value
   
   p <- ggplot() +

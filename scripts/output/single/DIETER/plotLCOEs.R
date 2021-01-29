@@ -1,5 +1,7 @@
 # Data preparation --------------------------------------------------------
 
+cat("Plot LCOEs \n")
+
 dieter.report.lcoe.kW <- c("annualized investment cost", "O&M cost")
 dieter.report.lcoe.MWh <- c("fuel cost (divided by eta)", "CO2 cost")
 dieter.report.mv <- "DIETER Market value ($/MWh)"
@@ -77,11 +79,11 @@ swlatex(sw, paste0("\\subsection{LCOEs over time (last iteration)}"))
 
 plot.dieter.lcoe <- out.dieter.lcoe %>% 
   filter(iteration == max(iteration)) %>% 
-  mutate(tall = as.numeric(tall))
+  mutate(tall = as.numeric(as.character(tall)))
 
 plot.dieter.mv <- out.dieter.mv %>% 
   filter(iteration == max(iteration)) %>% 
-  mutate(tall = as.numeric(tall))
+  mutate(tall = as.numeric(as.character(tall)))
 
 plot.dieter.capfac <- out.dieter.capfac %>% 
   filter(iteration == max(iteration)) %>% 
