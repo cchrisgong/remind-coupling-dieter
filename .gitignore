@@ -12,13 +12,15 @@
 *.pdf
 *.png
 
-ignore DEITER tables
+# Ignore DIETER folder because of seperate repo
+scripts/iterative/DIETER/
+
+# ignore DEITER tables
 dataprocessing/DIETER_plots/*.csv
 dataprocessing/*.csv
 dataprocessing/*.xls
 dataprocessing/*.xls#
 dataprocessing/*.csv#
-
 # Ignore everything in "input" folders
 input/
 !modules/29_CES_parameters/load/input
