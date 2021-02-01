@@ -125,7 +125,7 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
 ***---------------------------------------------------------------------------
 * q32_operatingReserve(t,regi)$(t.val ge 2010)..
 * ***1 is the chosen load coefficient
-* 	vm_usableSe(t,regi,"seel")
+* 	vm_usableSe(t,regi,"seel")for 1 and 2
 * 	=l=
 * ***Variable renewable coefficients could be expected to be negative because they are variable.
 * ***However they are modeled positive because storage conditions make variable renewables controllable.
@@ -156,24 +156,11 @@ q32_limitSolarWind(t,regi)$( (cm_solwindenergyscen = 2) OR (cm_solwindenergyscen
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
 q32_peakDemand_DT(t,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND cm_DTcoup_capcon = 1) ..
-* q32_peakDemand_DT(tall,"seel")$(ct_DT_32(tall)) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,"DEU",te,rlf)))
 	=g=
 * p32_peakDemand_relFac(t,"DEU") * v32_seelDem(t,"DEU",enty2) * 8760 * s32_iteration_ge_5 !! either NO (= 0) for iteration lt 5, or YES (= 1) otherwise
 p32_peakDemand_relFac(t,"DEU") * p32_seelDem(t,"DEU",enty2) * 8760
 	;
-
-* q32_peakDemand_DT_testLHS(t)$(t_DT_32(t) AND (cm_DTcoup_capcon = 1)) ..
-* 	v32_peakDemand_DT_testLHS(t)
-* 	=e=
-* 	sum(te$(DISPATCHte_32(te)), sum(rlf, vm_cap(t,"DEU",te,rlf)))
-* 	;
-*
-* q32_peakDemand_DT_testRHS(t,enty2)$(t_DT_32(t) AND sameas(enty2,"seel") AND (cm_DTcoup_capcon = 1)) ..
-* 	v32_peakDemand_DT_testRHS(t,enty2)
-* 	=e=
-* 	p32_peakDemand_relFac(t,"DEU") * v32_seelDem(t,"DEU",enty2) * 8760
-* 	;
 
 ***----------------------------------------------------------------------------
 *** CG: below is Felix's version for flexible demand like electrolysis hydrogen from IntC realization
@@ -198,11 +185,16 @@ p32_peakDemand_relFac(t,"DEU") * p32_seelDem(t,"DEU",enty2) * 8760
 q32_mkup(t,"DEU",te)$(tDT32(t) AND teDTCoupSupp(te) AND (cm_DTcoup_capcon = 1))..
 	vm_flexAdj(t,"DEU",te)
 	=e=
-*** supply-side technology markup p32_DIETERmkup as a multiplicative factor
+*** supply-side technology markup p32_DIETER_VF as a multiplicative factor
 *** of the wholesale electricity price of the last iteration
-*** p32_DIETERmkup < 1 -> market value lower than average electricity price (usually fluctuating VRE generation),
-*** p32_DIETERmkup > 1 -> market value higher than average electricity price (usually firm generation technologies)
-	(1 - p32_DIETERmkup(t,te)) * pm_priceSeel(t,"DEU")
+*** p32_DIETER_VF < 1 -> market value lower than average electricity price (usually fluctuating VRE generation),
+*** p32_DIETER_VF > 1 -> market value higher than average electricity price (usually firm generation technologies)
+** prefactor depends on difference between gen share of DIETER and current REMIND iter
+(1 - p32_DIETER_VF(t,te) * ( 1 - (v32_shSeEl(t,"DEU","spv")/ 100 - p32_DIETER_shSeEl(t,"DEU",te)/ 100)  ) ) * pm_priceSeel(t,"DEU")
+** prefactor depends on difference between gen share of last and current REMIND iter
+* (1 - p32_DIETER_VF(t,te) * ( 1 - (v32_shSeEl(t,"DEU","spv")/ 100  - p32_shSeEl(t,"DEU",te)/ 100 )  ) ) * pm_priceSeel(t,"DEU")
+** prefactor depends on difference between cap of last and current REMIND iter
+* (1 - p32_DIETER_VF(t,te) * ( 1 - (1 - p32_deltaCap(t,"DEU",te,"1")/vm_deltaCap(t,"DEU","spv","1") )  ) ) * pm_priceSeel(t,"DEU")
 ;
 
 *** calculate markup adjustment from solar share (a linear relation)

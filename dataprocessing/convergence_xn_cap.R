@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup19"
+run_number = "mrkup30"
 # run_number = "mrkup14_uncoupl"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
@@ -10,8 +10,7 @@ require(rmndt)
 
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
-miniter = 1
-maxiter = 37
+maxiter = 35
 
 # remind output iteration gdx files
 filenames0 <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
@@ -37,8 +36,8 @@ sorted_files_DT0 <- paste0(mydatapath, "results_DIETER_i", seq(from = 2, to = le
 files_DT <- files_DT0[1:maxiter]
 sorted_files_DT <- sorted_files_DT0[1:maxiter]
 
-year_toplot_list <- c(2050,2070)
-# year_toplot_list <- c(2025)
+# year_toplot_list <- c(2035,2045)
+year_toplot_list <- c(2020,2030,2040,2050,2060,2070,2080)
 
 iter_toplot = 1:length(sorted_files)
 
@@ -68,17 +67,18 @@ plot_RMte_names = c("combined cycle gas", "coal", "solar", "wind", "biomass", "o
 mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "coal" = "#0c0c0c", "solar" = "#ffcc00", "wind" = "#337fff", "biomass" = "#005900", "open cycle gas turbine" = "#e51900", "hydro" =  "#191999", "nuclear" =  "#ff33ff", "hard coal" = "#808080")
 
 VARsubkey1_RM = "p32_peakDemand_relFac"
-VARsubkey2_RM = "v32_seelDem"
+VARsubkey2_RM = "p32_seelDem"
 
 get_DEMvariable_RM <- function(gdx){
-  # gdx = sorted_files[[5]]
+  # gdx = sorted_files[[2]]
   # vrdata1 <- read.gdx(gdx, VARsubkey1_RM, factor = FALSE)  %>% 
   #   filter(tall == year_toplot) %>% 
   #   mutate(relFac = value)
   
-  vrdata2 <- read.gdx(gdx, VARsubkey2_RM, factor = FALSE)  %>% 
+  vrdata2 <- read.gdx(gdx, VARsubkey2_RM, factor = FALSE) %>% 
     filter(ttot == year_toplot) %>% 
     filter(all_regi == REGIkey1) %>%
+    filter(all_enty == "seel") %>%
     mutate(totDem = value) %>% 
     select(ttot,totDem) %>% 
     dplyr::rename(tall = ttot)
@@ -266,7 +266,7 @@ secAxisScale = 2
 
 p2<-ggplot() +
   geom_area(data = vrN_DT, aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5) +
-  # geom_line(data = vr1_DEM, aes(x = iter+1, y = value), size = 1.2, alpha = 1,linetype="dotted") +
+  geom_line(data = vr1_DEM, aes(x = iter+1, y = value), size = 1.2, alpha = 1,linetype="dotted") +
   geom_line(data = vr1_capfac_RM, aes(x = iter, y = value*100*secAxisScale, color = model), size = 1.2, alpha = 0.5) +
   scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0("CF", "(%)")))+
   scale_fill_manual(name = "Technology", values = mycolors)+
@@ -282,7 +282,7 @@ p2<-ggplot() +
 
 p1<-ggplot() +
   geom_area(data = vrN, aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5) +
-  # geom_line(data = vr1_DEM, aes(x = iter, y = value), size = 1.2, alpha = 0.5,linetype="dotted") +
+  geom_line(data = vr1_DEM, aes(x = iter, y = value), size = 1.2, alpha = 0.5,linetype="dotted") +
   geom_line(data = vr1_capfac_RM, aes(x = iter+1, y = value*100*secAxisScale, color = model), size = 1.2, alpha = 0.5) +
   scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0("CF", "(%)")))+
   scale_fill_manual(name = "Technology", values = mycolors) +

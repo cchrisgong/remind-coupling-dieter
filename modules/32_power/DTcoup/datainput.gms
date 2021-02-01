@@ -63,7 +63,11 @@ p32_flex_maxdiscount_spv = 0.1;
 
 ***CG
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-p32_peakDemand_relFac(t,"DEU")$(tDT32(t)) = 0;
-p32_DIETERmkup(t,te)$(tDT32(t) AND teDTCoupSupp(te)) = 0;
-p32_seelDem(t,regi,enty2) = 0;
+p32_peakDemand_relFac(t,regi) = 0;
+p32_DIETER_VF(t,te) = 0;
+p32_seelDem(t,regi,enty) = 0;
+p32_shSeEl(t,regi,te) = 0;
+p32_DIETER_shSeEl(t,regi,te) = 0;
+p32_deltaCap(t,regi,te,rlf) = 0;
+p32_marketValue_spv(t) = 0;
 $ENDIF.DTcoup

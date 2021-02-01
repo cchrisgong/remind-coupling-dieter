@@ -30,21 +30,21 @@ else
 *RR*Added correction factor to match fossil supply and internal region energy demand in the initial year if necessary
 *SB*190514 Made the correction factor for insufficient imports conditional on the fossil module realization
 
-*** Mports fixing for fossils in the initial year 
+*** Mports fixing for fossils in the initial year
 loop( regi,
     loop (enty$peFos(enty),
 *** if imports minus exports is higher than initial year demand there is a surplus of pe in the region. Correction -> set imports to 80% of the region pe demand plus Xports in the initial year
         if ( (pm_EN_demand_from_initialcap2(regi,enty) < (1-pm_costsPEtradeMp(regi,enty))*pm_IO_trade("2005",regi,enty,"Mport") -  pm_IO_trade("2005",regi,enty,"Xport")),     !!region has more available pe through trade than it needs
             p24_Mport2005correct(regi,enty) = (pm_EN_demand_from_initialcap2(regi,enty) + pm_IO_trade("2005",regi,enty,"Xport")) - pm_IO_trade("2005",regi,enty,"Mport");
         );
-*** if internal region production (plus trade) is not enough to provide the energy demand. Correction ->  set imports to the difference between region energy demand (pm_EN_demand_from_initialcap2) and the internal production (pm_ffPolyCumEx(regi,enty,"max")) plus the trade balance (Mports-Xports) 
+*** if internal region production (plus trade) is not enough to provide the energy demand. Correction ->  set imports to the difference between region energy demand (pm_EN_demand_from_initialcap2) and the internal production (pm_ffPolyCumEx(regi,enty,"max")) plus the trade balance (Mports-Xports)
 $IFTHEN.fossil_realization "%fossil%" == "timeDepGrades"
         if ( pm_prodIni(regi,enty) + (1-pm_costsPEtradeMp(regi,enty))*(pm_IO_trade("2005",regi,enty,"Mport")+ p24_Mport2005correct(regi,enty)) -  pm_IO_trade("2005",regi,enty,"Xport") < pm_EN_demand_from_initialcap2(regi,enty),     !!region has a unbalance
             p24_Mport2005correct(regi,enty) = pm_EN_demand_from_initialcap2(regi,enty)  - ((1-pm_costsPEtradeMp(regi,enty))*pm_IO_trade("2005",regi,enty,"Mport") -  pm_IO_trade("2005",regi,enty,"Xport")) - pm_prodIni(regi,enty) ;  !! SB: use pm_prodIni as an analog for pm_ffPolyCumEx(regi,enty,"max"), which does not exist in timeDepGrades
         );
 $ELSEIF.fossil_realization "%fossil%" == "grades2poly"
         if ( (pm_ffPolyCumEx(regi,enty,"max") / (5*4)) + (1-pm_costsPEtradeMp(regi,enty))*(pm_IO_trade("2005",regi,enty,"Mport")+ p24_Mport2005correct(regi,enty)) -  pm_IO_trade("2005",regi,enty,"Xport") < pm_EN_demand_from_initialcap2(regi,enty),     !!region has a unbalance
-            p24_Mport2005correct(regi,enty) = pm_EN_demand_from_initialcap2(regi,enty)  - ((1-pm_costsPEtradeMp(regi,enty))*pm_IO_trade("2005",regi,enty,"Mport") -  pm_IO_trade("2005",regi,enty,"Xport")) - pm_ffPolyCumEx(regi,enty,"max") / (5*4) ;  !!pm_ffPolyCumEx(regi,enty,"max") is a 5 years value, so we dived by 5 to get the annual value and additionally we assume that if all the extraction is made in the first years, this would take a t least 4 time steps to completely exhaust the resources 
+            p24_Mport2005correct(regi,enty) = pm_EN_demand_from_initialcap2(regi,enty)  - ((1-pm_costsPEtradeMp(regi,enty))*pm_IO_trade("2005",regi,enty,"Mport") -  pm_IO_trade("2005",regi,enty,"Xport")) - pm_ffPolyCumEx(regi,enty,"max") / (5*4) ;  !!pm_ffPolyCumEx(regi,enty,"max") is a 5 years value, so we dived by 5 to get the annual value and additionally we assume that if all the extraction is made in the first years, this would take a t least 4 time steps to completely exhaust the resources
         );
 $ENDIF.fossil_realization
     );
@@ -63,7 +63,7 @@ loop( regi,
             vm_Xport.fx(t0(tall),regi,peFos(enty)) = pm_IO_trade(t0,regi,enty,"Xport") ;
         );
     );
-); 
+);
 
 *** if region has no internal resources, demand must be entirely provided by trade (Switzerland problem). Correction ->  set imports free, exports zero. Warning: if the region is big enough this could cause a trade unbalance. The first best solution would be to calculate the exact imports amount needed and add extra exports to other countries to compensate for this exact amount.
 loop( regi,
@@ -103,6 +103,9 @@ loop( regi$regi_group("EUR_regi",regi),
 			vm_Xport.up(ttot,regi,peFos) = 1.5 * pm_IO_trade(ttot,regi,peFos,"Xport");
 			vm_Mport.lo(ttot,regi,peFos) = 0.5 * pm_IO_trade(ttot,regi,peFos,"Mport");
 			vm_Mport.up(ttot,regi,peFos) = 1.5 * pm_IO_trade(ttot,regi,peFos,"Mport");
+
+* vm_Mport.lo(ttot,"DEU",peFos) = 1e-6;
+* vm_Mport.up(ttot,"DEU",peFos) = 1e10;
 		);
 	);
 );
@@ -118,7 +121,7 @@ loop(regi,
 
 *** FS: constrain biomass imports in EU subregions from cm_startyear or 2020 onwards to a quarter of 2015 PE bioenergy demand
 if ( cm_biotrade_phaseout eq 1,
-	vm_Mport.up(t,regi,"pebiolc")$(t.val ge cm_startyear AND t.val gt 2015 AND regi_group("EUR_regi",regi)) = 
+	vm_Mport.up(t,regi,"pebiolc")$(t.val ge cm_startyear AND t.val gt 2015 AND regi_group("EUR_regi",regi)) =
       pm_demPeBio("2015",regi)$(regi_group("EUR_regi",regi))/4;
 );
 

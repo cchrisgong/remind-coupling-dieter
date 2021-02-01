@@ -8,7 +8,7 @@ tDT32(ttot) "time points" /2010,2015,2020,2025,2030,2035,2040,2045,2050,2055,206
 
 DIETERte32 "technologies in DIETER" /coal,hc,lig,nuc,CCGT,OCGT_eff,bio,Wind_on,Solar,ror,all_te,elh2/
 
-DIETERvarname32 "DIETER name" /capfac,peakDem_relFac,peakDem,mult_markup/
+DIETERvarname32 "DIETER name" /capfac,peakDem_relFac,peakDem,valuefactor,gen_share/
 
 COALte32(all_te) "coal to seel tech in REMIND" /igcc,igccc,pc,pcc,pco,coalchp/
 

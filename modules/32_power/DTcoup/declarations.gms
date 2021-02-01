@@ -15,14 +15,18 @@ parameters
     p32_storageCap(all_te,char)           "multiplicative factor between dummy seel<-->h2 technologies and storXXX technologies"
 *   p32_capStor_DIET(tall,all_regi)       "storage cap from DIETER"
     p32_flex_maxdiscount_spv              "maximum electricity price of solar at high VRE shares"
-    p32_seelDem                           "total secondary electricity demand"
+    p32_seelDem(ttot,all_regi,all_enty)   "total secondary electricity demand"
+    p32_shSeEl(ttot,all_regi,all_te)      "generation share of the last iteration"
+    p32_deltaCap(ttot,all_regi,all_te,rlf)"capacity of the last iteration"
+    p32_marketValue_spv(ttot)                "spv market value seen by REMIND"
+    p32_peakDemand_relFac(ttot,all_regi)  "annual peak demand as a relative ratio of total annual power demand from DIETER"
 
-p32_peakDemand_relFac(ttot,all_regi)  "annual peak demand as a relative ratio of total annual power demand from DIETER"
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
     report4RM(gdxfile32,ttot,all_regi,DIETERte32,DIETERvarname32)    "load report from DIETER"
     reportmk_4RM(gdxfile32,ttot,all_regi,DIETERte32,DIETERvarname32) "load markup report from DIETER"
     p32_peakDemand_relFac(ttot,all_regi)  "annual peak demand as a relative ratio of total annual power demand from DIETER"
-    p32_DIETERmkup(ttot,all_te)           "multiplicative value factor from DIETER that indicates the multiplicative price mark up of technology"
+    p32_DIETER_VF(ttot,all_te)            "multiplicative value factor from DIETER that indicates the multiplicative price mark up of technology"
+    p32_DIETER_shSeEl(ttot,all_regi,all_te) "generation share of technology from DIETER"
 $ENDIF.DTcoup
 ;
 
