@@ -43,9 +43,9 @@
     - vm_costSubsidizeLearning(t,regi)
     + v21_implicitDiscRate(t,regi)
     + sum(emiMkt, v21_taxemiMkt(t,regi,emiMkt))
-* + v21_taxrevFlex(t,regi)$(cm_flex_tax eq 1) OR (cm_DTcoup_capcon = 1)
-* + v21_taxrevMrkup(t,regi)$(cm_DTcoup_capcon = 1)
-    + v21_taxrevMrkup(t,regi)
+* + v21_taxrevFlex(t,regi)$(cm_flex_tax eq 1)
+    + v21_taxrevMrkup(t,regi)$(cm_DTcoup_capcon = 1)
+* + v21_taxrevMrkup(t,regi)
     + v21_taxrevBioImport(t,regi)
 $ifthen.implicitFEEffTarget not "%cm_implicitFEEffTarget%" == "off"
     + vm_taxrevimplicitFEEffTarget(t,regi)
@@ -215,16 +215,16 @@ q21_taxemiMkt(t,regi,emiMkt)$(t.val ge max(2010,cm_startyear))..
 * ;
 
 ***---------------------------------------------------------------------------
-*'  CG: Calculation of tax/subsidy on technologies with inflexible/flexible electricity input
+*'  CG: Calculation of tax/subsidy on technologies with variable/firm electricity onput
 ***---------------------------------------------------------------------------
-* q21_taxrevMrkup(t,regi)$((t.val ge max(2010,cm_startyear)) AND (cm_DTcoup_capcon = 1))..
-q21_taxrevMrkup(t,regi)$((t.val ge max(2010,cm_startyear)))..
+q21_taxrevMrkup(t,regi)$((t.val ge max(2010,cm_startyear)) AND (cm_DTcoup_capcon = 1))..
+* q21_taxrevMrkup(t,regi)$((t.val ge max(2010,cm_startyear)))..
   v21_taxrevMrkup(t,regi)
   =e=
   sum(en2en(enty,enty2,te)$(teDTcoupSupp(te)),
-*** vm_flexAdj is electricity price reduction/increases for flexible/inflexible technologies
-*** change sign such that flexible technologies get subsidy
-      vm_flexAdj(t,regi,te) * vm_prodSe(t,regi,enty,enty2,te))
+*** vm_Mrkup is electricity price reduction/increases for variable/firm technologies
+*** variable supply technologies get tax, firm technologies get subsidy
+      - vm_Mrkup(t,regi,te) * vm_prodSe(t,regi,enty,enty2,te))
       - p21_taxrevMrkup0(t,regi)
 ;
 

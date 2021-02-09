@@ -166,6 +166,7 @@ p_CapFixFromRWfix(ttot,all_regi,all_te)              "parameter for fixing capac
 p_deltaCapFromRWfix(ttot,all_regi,all_te)            "parameter with resulting deltacap values resulting from fixing capacity to real-world values in 2010/2015"
 
 pm_priceSeel(ttot,all_regi)                           "parameter with electricity price from last iteration (unit: trUSD/TWa)"
+pm_adjCostInv(ttot,all_regi,all_te)                   "adjustment cost to technology investment"
 pm_calibrate_eff_scale(all_in,all_in,eff_scale_par)   "parameters for scaling efficiencies in CES calibration"
 /   /
 
@@ -267,6 +268,7 @@ v_emiTeDetailMkt(tall,all_regi,all_enty,all_enty,all_te,all_enty,all_emiMkt)
 vm_emiTeMkt(tall,all_regi,all_enty,all_emiMkt)
 vm_emiAllMkt(tall,all_regi,all_enty,all_emiMkt)
 vm_flexAdj(tall,all_regi,all_te)			         "flexibility adjustment used for flexibility subsidy (tax) to emulate price changes of technologies which see lower-than-average (higher-than-average) elec. prices [trUSD/TWa]"
+vm_Mrkup(tall,all_regi,all_te)                  "markup adjustment used for subsidy (tax) to emulate market value of power generation technologies produces either below or above annual average elec. prices [trUSD/TWa]"
 ;
 
 ***----------------------------------------------------------------------------------------

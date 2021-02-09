@@ -59,7 +59,7 @@ $include "./modules/32_power/IntC/input/f32_storageCap.prn"
 p32_storageCap(te,char) = f32_storageCap(char,te);
 display p32_storageCap;
 
-p32_flex_maxdiscount_spv = 0.1;
+p32_minVF_spv = 0.1;
 
 ***CG
 $IFTHEN.DTcoup %cm_DTcoup% == "on"

@@ -14,7 +14,7 @@ parameters
     f32_storageCap(char, all_te)          "multiplicative factor between dummy seel<-->h2 technologies and storXXX technologies"
     p32_storageCap(all_te,char)           "multiplicative factor between dummy seel<-->h2 technologies and storXXX technologies"
 *   p32_capStor_DIET(tall,all_regi)       "storage cap from DIETER"
-    p32_flex_maxdiscount_spv              "maximum electricity price of solar at high VRE shares"
+    p32_minVF_spv                         "value factor of solar at 100% VRE shares"
     p32_seelDem(ttot,all_regi,all_enty)   "total secondary electricity demand"
     p32_shSeEl(ttot,all_regi,all_te)      "generation share of the last iteration"
     p32_deltaCap(ttot,all_regi,all_te,rlf)"capacity of the last iteration"

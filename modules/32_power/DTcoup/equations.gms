@@ -10,6 +10,7 @@
 q32_balSe(t,regi,enty2)$(sameas(enty2,"seel"))..
 	sum(pe2se(enty,enty2,te), vm_prodSe(t,regi,enty,enty2,te) )
 	+ sum(se2se(enty,enty2,te), vm_prodSe(t,regi,enty,enty2,te) )
+*** co-production terms
 	+ sum(pc2te(enty,entySE(enty3),te,enty2),
 		pm_prodCouple(regi,enty,enty3,te,enty2) * vm_prodSe(t,regi,enty,enty3,te) )
 	+ sum(pc2te(enty4,entyFE(enty5),te,enty2),
@@ -120,26 +121,6 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
 	* vm_usableSeTe(t,regi,"seel",teVRE)
 ;
 
-***---------------------------------------------------------------------------
-*** Operating reserve constraint
-***---------------------------------------------------------------------------
-* q32_operatingReserve(t,regi)$(t.val ge 2010)..
-* ***1 is the chosen load coefficient
-* 	vm_usableSe(t,regi,"seel")for 1 and 2
-* 	=l=
-* ***Variable renewable coefficients could be expected to be negative because they are variable.
-* ***However they are modeled positive because storage conditions make variable renewables controllable.
-* 	sum(pe2se(enty,"seel",te)$(NOT teVRE(te)),
-* 		pm_data(regi,"flexibility",te) * vm_prodSe(t,regi,enty,"seel",te) )
-* 	+ sum(se2se(enty,"seel",te)$(NOT teVRE(te)),
-* 		pm_data(regi,"flexibility",te) * vm_prodSe(t,regi,enty,"seel",te) )
-* 	+ sum(pe2se(enty,"seel",teVRE),
-* 		pm_data(regi,"flexibility",teVRE) * (vm_prodSe(t,regi,enty,"seel",teVRE)-v32_storloss(t,regi,teVRE)) )
-* 	+
-* 	sum(pe2se(enty,"seel",teVRE),
-* 		sum(VRE2teStor(teVRE,teStor),
-* 			pm_data(regi,"flexibility",teStor) * (vm_prodSe(t,regi,enty,"seel",teVRE)-v32_storloss(t,regi,teVRE)) ) )
-* ;
 
 ***---------------------------------------------------------------------------
 *** EMF27 limits on fluctuating renewables, only turned on for special EMF27 and AWP 2 scenarios, not for SSP
@@ -158,54 +139,24 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 q32_peakDemand_DT(t,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND cm_DTcoup_capcon = 1) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,"DEU",te,rlf)))
 	=g=
-* p32_peakDemand_relFac(t,"DEU") * v32_seelDem(t,"DEU",enty2) * 8760 * s32_iteration_ge_5 !! either NO (= 0) for iteration lt 5, or YES (= 1) otherwise
 p32_peakDemand_relFac(t,"DEU") * p32_seelDem(t,"DEU",enty2) * 8760
 	;
-
-***----------------------------------------------------------------------------
-*** CG: below is Felix's version for flexible demand like electrolysis hydrogen from IntC realization
-*** FS: calculate flexibility adjustment used in flexibility tax for technologies with electricity input
-***----------------------------------------------------------------------------
-
-*** calculate flexibility benefit or cost per unit output of flexibile or inflexibly technology
-* q32_flexAdj(t,regi,teFlex)..
-* 	vm_flexAdj(t,regi,teFlex)
-* 	=e=
-* *** linearly increase/decrease electricity price that inflexible/flexible technology sees with increasing VRE share up to p32_flex_maxdiscount
-* *** p32_flex_maxdiscount positive -> lower-than-average electricity price (flexible demand),
-* *** p32_flex_maxdiscount negative -> higher-than-average electricity price (inflexible demand)
-* 	p32_flex_maxdiscount(regi,teFlex) * pm_priceSeel(t,regi) * sum(teVRE, v32_shSeEl(t,regi,teVRE)) / 100
-* *** convert to fuel cost for flexible technology (converts to cost per unit output)
-* 	/ pm_eta_conv(t,regi,teFlex)
-* ;
 
 ***----------------------------------------------------------------------------
 *** CG: calculate markup adjustment used in flexibility tax for supply-side technologies
 ***----------------------------------------------------------------------------
 q32_mkup(t,"DEU",te)$(tDT32(t) AND teDTCoupSupp(te) AND (cm_DTcoup_capcon = 1))..
-	vm_flexAdj(t,"DEU",te)
+	vm_Mrkup(t,"DEU",te)
 	=e=
 *** supply-side technology markup p32_DIETER_VF as a multiplicative factor
 *** of the wholesale electricity price of the last iteration
 *** p32_DIETER_VF < 1 -> market value lower than average electricity price (usually fluctuating VRE generation),
 *** p32_DIETER_VF > 1 -> market value higher than average electricity price (usually firm generation technologies)
 ** prefactor depends on difference between gen share of DIETER and current REMIND iter
-(1 - p32_DIETER_VF(t,te) * ( 1 - (v32_shSeEl(t,"DEU","spv")/ 100 - p32_DIETER_shSeEl(t,"DEU",te)/ 100)  ) ) * pm_priceSeel(t,"DEU")
+* (p32_DIETER_VF(t,te) * ( 1 - (v32_shSeEl(t,"DEU","spv")/ 100 - p32_DIETER_shSeEl(t,"DEU",te)/ 100) ) - 1 ) * pm_priceSeel(t,"DEU")
 ** prefactor depends on difference between gen share of last and current REMIND iter
-* (1 - p32_DIETER_VF(t,te) * ( 1 - (v32_shSeEl(t,"DEU","spv")/ 100  - p32_shSeEl(t,"DEU",te)/ 100 )  ) ) * pm_priceSeel(t,"DEU")
-** prefactor depends on difference between cap of last and current REMIND iter
-* (1 - p32_DIETER_VF(t,te) * ( 1 - (1 - p32_deltaCap(t,"DEU",te,"1")/vm_deltaCap(t,"DEU","spv","1") )  ) ) * pm_priceSeel(t,"DEU")
+  (p32_DIETER_VF(t,te) * ( 1 - (v32_shSeEl(t,"DEU","spv")/ 100 - p32_shSeEl(t,"DEU",te)/ 100 ) ) - 1 ) * pm_priceSeel(t,"DEU")
 ;
-
-*** calculate markup adjustment from solar share (a linear relation)
-* q32_mkup_noCOUP(t,"DEU",te)$(tDT32(t) AND teDTCoupSupp(te) AND (cm_DTcoup_capcon = 1))..
-* 	vm_flexAdj(t,"DEU",te)
-* 	=e=
-* *** linearly increase/decrease electricity price that inflexible/flexible technology sees with increasing VRE share up to p32_flex_maxdiscount
-* *** p32_flex_maxdiscount positive -> lower-than-average electricity price (flexible demand),
-* *** p32_flex_maxdiscount negative -> higher-than-average electricity price (inflexible demand)
-* 	(v32_shSeEl(t,"DEU","spv") / 100 - p32_flex_maxdiscount_spv) * pm_priceSeel(t,"DEU")
-* ;
 
 $ENDIF.DTcoup
 
@@ -221,8 +172,9 @@ $ENDIF.DTcoup
 * q32_mkup_noCOUP(t,"DEU",te)$(tDT32(t) AND teDTCoupSupp(te))..
 * 	vm_flexAdj(t,"DEU",te)
 * 	=e=
-* *** linearly increase/decrease electricity price that inflexible/flexible technology sees with increasing VRE share up to p32_flex_maxdiscount
-* *** p32_flex_maxdiscount positive -> lower-than-average electricity price (flexible demand),
-* *** p32_flex_maxdiscount negative -> higher-than-average electricity price (inflexible demand)
-* 	(v32_shSeEl(t,"DEU","spv") / 100 - p32_flex_maxdiscount_spv) * pm_priceSeel(t,"DEU")
+* *** linearly increase/decrease electricity price that inflexible/flexible technology sees with increasing VRE share up to p32_minVF_spv
+* *** p32_minVF_spv positive -> lower-than-average electricity price (flexible demand),
+* *** p32_minVF_spv negative -> higher-than-average electricity price (inflexible demand)
+** 	( (1 + p32_minVF_spv - v32_shSeEl(t,"DEU","spv") / 100) - 1) * pm_priceSeel(t,"DEU")
+* 	(p32_minVF_spv - v32_shSeEl(t,"DEU","spv") / 100) * pm_priceSeel(t,"DEU")
 * ;

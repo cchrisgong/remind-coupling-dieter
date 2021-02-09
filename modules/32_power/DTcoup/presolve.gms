@@ -22,7 +22,7 @@ display "iteration", sm32_tmp;
 *   s32_iteration_ge_5 = 1;
 
     execute "./DIETER_parallel.sh";
-    display$sleep(60) 'wait 100 seconds till DIETER is finished';
+    display$sleep(100) 'wait 100 seconds till DIETER is finished';
     execute './mergegdx.sh';
 
 * .nr = 2 formats numbers in scientific notation (what we usually want for

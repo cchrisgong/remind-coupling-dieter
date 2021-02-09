@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup30"
+run_number = "mrkup35"
 # run_number = "mrkup14_uncoupl"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
@@ -10,7 +10,7 @@ require(rmndt)
 
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
-maxiter = 35
+maxiter = 14
 
 # remind output iteration gdx files
 filenames0 <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")

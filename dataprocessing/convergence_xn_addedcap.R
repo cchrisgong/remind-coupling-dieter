@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup19"
+run_number = "mrkup26"
 # run_number = "mrkup5_iter"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
@@ -11,7 +11,7 @@ library(readr)
 require(rmndt)
 
 # iteration_toplot_list <- c(30,50,80,90,95,100)
-iteration_toplot_list <- c(10,25,37)
+iteration_toplot_list <- c(10,15,24)
 
 
 #remind output iteration gdx files
@@ -20,9 +20,9 @@ sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
 #dieter output iteration gdx files
 files_DT_rep <- list.files(mydatapath, pattern="report_DIETER_i[0-9]+\\.gdx")
 
-# for(fname in files_DT_rep){
-#   gdxToQuitte_annual(mydatapath, fname,run_number)
-# }
+for(fname in files_DT_rep){
+  gdxToQuitte_annual(mydatapath, fname,run_number)
+}
 
 #dieter output iteration gdx files
 # sorted_annual_report_DT <- paste0(myDIETERPLOT_path, run_number, "_i", seq(from = 5, to = length(files_DT_rep)*5, by = 5), "_annualreport.csv")
@@ -30,7 +30,7 @@ sorted_annual_report_DT <- paste0(myDIETERPLOT_path, run_number, "_i", seq(from 
 
 VARkey1 = "capacity"
 # VAR_report_key1_DT = c("Pre-investment capacities", "REMIND added capacities", "DIETER added capacities", "REMIND divestment")
-VAR_report_key1_DT = c("REMIND pre-investment capacities", "DIETER pre-investment capacities","REMIND added capacities (GW)", "DIETER added capacities (GW)", "REMIND divestment (GW)")
+VAR_report_key1_DT = c("REMIND pre-investment capacities (GW)", "DIETER pre-investment capacities (GW)","REMIND added capacities (GW)", "DIETER added capacities (GW)", "REMIND divestment (GW)")
 TECH_report_keylst_DT = c("CCGT", "lig", "Solar", "Wind_on", "bio", "OCGT_eff", "ror", "nuc", "hc")
 plot_DTte_names = c("combined cycle gas", "lignite", "solar", "wind", "biomass", "open cycle gas turbine", "hydro", "nuclear", "hard coal")
 mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "coal" = "#0c0c0c", "solar" = "#ffcc00", "wind" = "#337fff", "biomass" = "#005900", "open cycle gas turbine" = "#e51900", "hydro" =  "#191999", "nuclear" =  "#ff33ff", "hard coal" = "#808080")
@@ -70,14 +70,14 @@ for(iteration in iteration_toplot_list){
 
   # iteration = 10
 RM_preInvest <- vrN_rep_DT0 %>% 
-  filter(variable == "REMIND pre-investment capacities") %>% 
+  filter(variable == "REMIND pre-investment capacities (GW)") %>% 
   filter(iter == iteration) %>% 
   mutate(model = "REMIND") %>% 
   mutate(variable = "Pre-investment capacities") %>% 
   select(period, tech, variable, value, iter, model) 
 
 DT_preInvest <- vrN_rep_DT0 %>% 
-  filter(variable == "REMIND pre-investment capacities") %>% 
+  filter(variable == "REMIND pre-investment capacities (GW)") %>% 
   filter(iter == iteration) %>% 
   mutate(model = "DIETER") %>% 
   mutate(variable = "Pre-investment capacities") %>% 

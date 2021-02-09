@@ -9,15 +9,15 @@
 vm_taxrev.fx("2005",regi) = 0;
 
 *** CG: set non-DEU spv markups to 0
-vm_flexAdj.fx(t,all_regi,all_te)$(teDTCoupSupp(all_te) AND not SameAs(all_regi,"DEU")) = 0;
+vm_Mrkup.fx(t,all_regi,all_te)$(teDTCoupSupp(all_te) AND not SameAs(all_regi,"DEU")) = 0;
 *** CG: set elh2 markups to 0 (Felix's input is read in in p80 from input.gdx), later this line can be removed
-vm_flexAdj.fx(t,all_regi,all_te)$(teFlex(all_te)) = 0;
-*** CG: set later years' markups to 2100's value
-* vm_flexAdj.fx(t,all_regi,all_te)$(t.val ge 2110 AND teDTCoupSupp(all_te)) = vm_flexAdj.l("2100",all_regi,all_te);
-*** CG:
+vm_Mrkup.fx(t,all_regi,all_te)$(teFlex(all_te)) = 0;
+
+*** CG dislay:
 sm21_tmp = iteration.val;
-display "vm_flexAdj", vm_flexAdj.l;
+display "vm_Mrkup", vm_Mrkup.l;
 display "iteration", sm21_tmp;
 Display "end of bound tax chris";
-* Display iteration.val;
+
+
 *** EOF ./modules/21_tax/on/bounds.gms

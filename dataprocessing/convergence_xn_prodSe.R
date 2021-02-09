@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup19"
+run_number = "mrkup33"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 # import library
 source(paste0(mypath, "library_import.R"))
@@ -8,7 +8,7 @@ require(rmndt)
 
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
-maxiter = 37
+maxiter = 39
 # remind output iteration gdx files
 filenames0 <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
 sorted_files0 <- paste0(mydatapath, "fulldata_", 1:length(filenames0), ".gdx")

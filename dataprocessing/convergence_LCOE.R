@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup30"
+run_number = "mrkup34"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 # import library
 source(paste0(mypath, "library_import.R"))
@@ -12,7 +12,7 @@ library(readr)
 require(ggplot2)
 require(lusweave)
 
-maxiter = 35
+maxiter = 36
 
 mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "coal" = "#0c0c0c", "solar" = "#ffcc00", "wind" = "#337fff", "biomass" = "#005900", "open cycle gas turbine" = "#e51900", "hydro" =  "#191999", "nuclear" =  "#ff33ff", "hard coal" = "#808080", "coupled run seel price" = "#ff0000","uncoupled run seel price" = "#ff0000")
 TECH_report_keylst_DT = c("coal", "CCGT", "lig", "Solar", "Wind_on", "bio", "OCGT_eff", "ror", "nuc", "hc")
@@ -40,9 +40,6 @@ TECH_report_toplot = c("solar", "wind")
 # year_toplot_list <- c(2050,2070) 
 year_toplot <- c(2010,2015,2020,2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090,2100) 
 
-# for(year_toplot in year_toplot_list){
-  # year_toplot = 2030
-  
   get_report_variable_DT <- function(iteration, varlist){
     # iteration = 15
     # varlist =VAR_report_key4_DT
@@ -103,5 +100,34 @@ p<-ggplot() +
 ggsave(filename = paste0(mypath, run_number, "_fuelcost",".png"), width = 16, height =10, units = "in", dpi = 120)
 print(paste0("figures saved to", mypath))
 
-# }
+for (itera in c(10,20,30,35)){
+  vrN_cost <- rbindlist(vrN_cost_bkdw) %>% 
+    filter(iter == itera)
+  
+  p<-ggplot() +
+    geom_line(data = vrN_cost, aes(x = period, y = value, color = tech), size = 1.2, alpha = 0.5) +
+    scale_color_manual(name = "tech", values = mycolors)+
+    theme(axis.text=element_text(size=20), axis.title=element_text(size=20,face="bold")) +
+    xlab("year") + 
+    # coord_cartesian(ylim = c(24,27))+
+    facet_wrap(~variable, nrow = 3, scales = "free")
+  
+  ggsave(filename = paste0(mypath, run_number, "_i",itera,"LCOE_timeseries.png"), width = 16, height =10, units = "in", dpi = 120)
+}
 
+for (perio in c(2020,2030,2040,2055)){
+  vrN_cost2 <- rbindlist(vrN_cost_bkdw)%>% 
+    filter(period == perio)
+  
+  p<-ggplot() +
+    geom_line(data = vrN_cost2, aes(x = iter, y = value, color = tech), size = 1.2, alpha = 0.5) +
+    scale_color_manual(name = "tech", values = mycolors)+
+    theme(axis.text=element_text(size=20), axis.title=element_text(size=20,face="bold")) +
+    xlab("iteration") +
+    # coord_cartesian(ylim = c(24,27))+
+    facet_wrap(~variable, nrow = 3, scales = "free")
+  
+  ggsave(filename = paste0(mypath, run_number, "_yr",perio, "_LCOE.png"), width = 16, height =10, units = "in", dpi = 120)
+  print(paste0("figures saved to", mypath))
+  
+}

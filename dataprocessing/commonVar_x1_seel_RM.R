@@ -1,8 +1,8 @@
 #for shared variable such as peak demand (one iteration series)
 
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup21"
-# run_number = "mrkup14_uncoupl"
+run_number = "mrkup34"
+# run_number = "mrkup14_uncoul"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number,"/")
 # mydatapath2 = "~/remind-coupling-dieter/output/capfac32_valid3/"
 
@@ -36,6 +36,29 @@ filenames <- filenames0[1:maxiter]
 # sorted_files2 <- paste0(mydatapath2, "fulldata_", 1:length(files2), ".gdx")
 
 # year_toplot = 2050
+remind.nonvre.mapping <- c(coalchp = "Coal (Lig + HC)",
+                           igcc = "Coal (Lig + HC)",
+                           igccc = "Coal (Lig + HC)",
+                           pcc = "Coal (Lig + HC)",
+                           pco = "Coal (Lig + HC)",
+                           pc = "Coal (Lig + HC)",
+                           tnrs = "Nuclear",
+                           ngt = "OCGT",
+                           ngcc = "CCGT",
+                           ngccc = "CCGT",
+                           gaschp = "CCGT",
+                           biochp = "Biomass",
+                           bioigcc = "Biomass",
+                           bioigccc = "Biomass",
+                           NULL)
+
+
+remind.vre.mapping <- c(hydro = "Hydro",
+                        wind = "Wind",
+                        spv = "Solar",
+                        NULL)
+
+remind.tech.mapping <- c(remind.nonvre.mapping, remind.vre.mapping)
 
 
 BUDGETkey1 = "qm_budget"
@@ -46,6 +69,8 @@ VARkey3 = "v21_taxrevMrkup"
 PARkey1 = "v32_shSeEl"
 PARkey2 = "p21_taxrevMrkup0" #reference tax markup of the last iteration
 PARkey3 = "p32_marketValue_spv"
+PARkey4 = "pm_adjCostInv"
+
 VARkey4 = "v21_taxrevMrkup" # total_markup_tax
 REGIkey1 = "DEU"
 sm_TWa_2_MWh = 8760000000
@@ -75,7 +100,6 @@ plot_RMte_names = c("combined cycle gas", "coal", "solar", "wind", "biomass", "o
 plot_RMLCOEte_names = c("combined cycle gas", "lignite", "solar", "wind", "biomass", "open cycle gas turbine", "hydro", "nuclear")
 
 TECHkeylst <- c(TECHkeylst_peakGas, TECHkeylst_nonPeakGas, TECHkeylst_coal, TECHkeylst_solar, TECHkeylst_wind, TECHkeylst_hydro, TECHkeylst_biomass, TECHkeylst_nuclear)
-
 
 TECHVREkeylst <- c(TECHkeylst_solar, TECHkeylst_wind,TECHkeylst_hydro)
 TECH_NONVRE_keylst <- c(TECHkeylst_peakGas, TECHkeylst_nonPeakGas, TECHkeylst_coal, TECHkeylst_biomass, TECHkeylst_nuclear)
@@ -134,23 +158,8 @@ get_MARKUPvariable <- function(gdx){
   vrdata = list(vrdata0, budgetdata) %>%
     reduce(left_join) %>%
     mutate(value = - value * 1e12 / sm_TWa_2_MWh * 1.2) %>%  # vm_flexAdj is proportional to pm_seeprice, which is already divided by budget
-    mutate(all_te = str_replace(all_te, TECHkeylst_biomass[[1]], plot_RMte_names[[5]])) %>% 
-    mutate(all_te = str_replace(all_te, TECHkeylst_biomass[[2]], plot_RMte_names[[5]])) %>% 
-    mutate(all_te = str_replace(all_te, TECHkeylst_biomass[[3]], plot_RMte_names[[5]])) %>% 
-    mutate(all_te = str_replace(all_te, TECHkeylst_nonPeakGas[[1]], plot_RMte_names[[1]])) %>% 
-    mutate(all_te = str_replace(all_te, TECHkeylst_nonPeakGas[[2]], plot_RMte_names[[1]])) %>% 
-    mutate(all_te = str_replace(all_te, TECHkeylst_nonPeakGas[[3]], plot_RMte_names[[1]])) %>% 
-    mutate(all_te = str_replace(all_te, TECHkeylst_coal[[1]], plot_RMte_names[[2]])) %>% 
-    mutate(all_te = str_replace(all_te, TECHkeylst_coal[[2]], plot_RMte_names[[2]])) %>% 
-    mutate(all_te = str_replace(all_te, TECHkeylst_coal[[3]], plot_RMte_names[[2]])) %>% 
-    mutate(all_te = str_replace(all_te, TECHkeylst_coal[[4]], plot_RMte_names[[2]])) %>% 
-    mutate(all_te = str_replace(all_te, TECHkeylst_coal[[5]], plot_RMte_names[[2]])) %>% 
-    mutate(all_te = str_replace(all_te, TECHkeylst_coal[[6]], plot_RMte_names[[2]])) %>% 
-    mutate(all_te = str_replace(all_te, TECHkeylst_nuclear[[1]], plot_RMte_names[[8]])) %>%
-    mutate(all_te = str_replace(all_te, TECHkeylst_peakGas[[1]], plot_RMte_names[[6]])) %>% 
-    mutate(all_te = str_replace(all_te, TECHkeylst_solar[[1]], plot_RMte_names[[3]])) %>% 
-    mutate(all_te = str_replace(all_te, TECHkeylst_wind[[1]], plot_RMte_names[[4]])) %>%
-    mutate(all_te = str_replace(all_te, TECHkeylst_hydro[[1]], plot_RMte_names[[7]])) %>% 
+    filter(all_te %in% names(remind.tech.mapping)) %>% 
+    revalue.levels(all_te = remind.tech.mapping) %>%
     select(ttot,all_te,value) %>% 
     dplyr::group_by(ttot,all_te) %>%
     dplyr::summarise( value = mean(value), .groups = "keep" ) %>% 
@@ -167,6 +176,36 @@ get_MRKT_VALUE <- function(gdx){
     mutate(marketvalue = marketvalue * 1e12 / sm_TWa_2_MWh * 1.2) %>% 
     filter(ttot >2005) %>% 
     filter(ttot <2160) 
+  
+  return(vrdata)
+}
+
+get_ADJ_COST <- function(gdx){
+  gdx = sorted_files[[5]]
+  
+  budgetdata <- read.gdx(gdx, BUDGETkey1, field="m", squeeze = FALSE) %>%
+    # filter(ttot == year_toplot) %>%
+    filter(all_regi == REGIkey1) %>%
+    mutate(m = -m) %>%
+    dplyr::rename(budget = m)  %>%
+    select(ttot, budget)
+  
+  adjcost <- read.gdx(gdx, PARkey4) %>% 
+    filter(all_te %in% names(remind.tech.mapping)) %>% 
+    filter(all_regi == REGIkey1) %>%
+    revalue.levels(all_te = remind.tech.mapping) %>%
+    mutate(adjCost = value) %>%
+    select(ttot, all_regi, all_te, adjCost) %>% 
+    dplyr::group_by(ttot, all_regi, all_te) %>%
+    dplyr::summarise( adjCost = mean(adjCost), .groups = "keep" ) %>% 
+    dplyr::ungroup(ttot, all_regi, all_te)
+  
+  vrdata = list(adjcost, budgetdata) %>%
+    reduce(full_join) %>%
+    select(ttot, all_te, adjCost, budget) %>%
+    mutate(adjCost = adjCost / budget * 1e12 / sm_TWa_2_MWh * 1.2) %>% 
+    filter(ttot > 2005) %>% 
+    select(ttot, all_te, adjCost) 
   
   return(vrdata)
 }
