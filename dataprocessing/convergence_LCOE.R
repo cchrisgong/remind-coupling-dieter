@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup34"
+run_number = "mrkup33"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 # import library
 source(paste0(mypath, "library_import.R"))
@@ -12,7 +12,7 @@ library(readr)
 require(ggplot2)
 require(lusweave)
 
-maxiter = 36
+maxiter = 39
 
 mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "coal" = "#0c0c0c", "solar" = "#ffcc00", "wind" = "#337fff", "biomass" = "#005900", "open cycle gas turbine" = "#e51900", "hydro" =  "#191999", "nuclear" =  "#ff33ff", "hard coal" = "#808080", "coupled run seel price" = "#ff0000","uncoupled run seel price" = "#ff0000")
 TECH_report_keylst_DT = c("coal", "CCGT", "lig", "Solar", "Wind_on", "bio", "OCGT_eff", "ror", "nuc", "hc")
@@ -22,9 +22,9 @@ files_DT_rep <- list.files(mydatapath, pattern="report_DIETER_i[0-9]+\\.gdx")
 # sorted_files_DT_rep <- paste0(mydatapath, "report_DIETER_i", seq(from = 5, to = length(files_DT_rep)*5, by = 5), ".gdx")
 sorted_files_DT <- paste0(mydatapath, "report_DIETER_i", seq(from = 2, to = length(files_DT_rep), by = 1), ".gdx")
 
-for(fname in files_DT_rep){
-gdxToQuitte_annual(mydatapath, fname, run_number)
-}
+# for(fname in files_DT_rep){
+# gdxToQuitte_annual(mydatapath, fname, run_number)
+# }
 
 # sorted_annual_report_DT <- paste0(myDIETERPLOT_path, run_number, "_i", seq(from = 5, to = length(files_DT_rep)*5, by = 5), "_annualreport.csv")
 sorted_annual_report_DT <- paste0(myDIETERPLOT_path, run_number, "_i", seq(from = 2, to = length(files_DT_rep), by = 1), "_annualreport.csv")
@@ -75,6 +75,9 @@ vrN_cost_bkdw  <- lapply(iter_toplot, get_report_variable_DT, varlist=VAR_report
   
 vrN_cost <- rbindlist(vrN_cost_bkdw) %>% 
   filter(iter %in% c(10,20,30,35))
+
+# fuel_cost <- vrN_cost %>% 
+#   filter(variable == "fuel cost (divided by eta)")
 
 p<-ggplot() +
   geom_line(data = vrN_cost, aes(x = period, y = value, color = tech), size = 1.2, alpha = 0.5) +

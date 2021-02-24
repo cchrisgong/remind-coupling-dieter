@@ -1,7 +1,7 @@
 #for shared variable such as peak demand (one iteration series)
 
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup34"
+run_number = "mrkup33"
 # run_number = "mrkup14_uncoul"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number,"/")
 # mydatapath2 = "~/remind-coupling-dieter/output/capfac32_valid3/"
@@ -16,7 +16,7 @@ library(ggallin)
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
 miniter = 1
-maxiter = 36
+maxiter = 39
 #remind output iteration gdx files
 files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
 sorted_files0 <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
@@ -66,6 +66,7 @@ VARkey1 = "q32_balSe"
 VARkey2 = "vm_flexAdj"
 VARkey3 = "v21_taxrevMrkup"
 
+
 PARkey1 = "v32_shSeEl"
 PARkey2 = "p21_taxrevMrkup0" #reference tax markup of the last iteration
 PARkey3 = "p32_marketValue_spv"
@@ -74,6 +75,10 @@ PARkey4 = "pm_adjCostInv"
 VARkey4 = "v21_taxrevMrkup" # total_markup_tax
 REGIkey1 = "DEU"
 sm_TWa_2_MWh = 8760000000
+
+VARkey5 = "q_balPe"
+
+VARkey6 = "vm_demPe"
 
 CFkey1 = "vm_capFac"
 CFkey2 = "pm_dataren"
@@ -94,7 +99,7 @@ TECHkeylst_biomass = c("biochp", "bioigccc", "bioigcc")
 
 FLEX_tech = c(TECHkeylst_solar)
 
-mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "coal" = "#0c0c0c", "solar" = "#ffcc00", "wind" = "#337fff", "biomass" = "#005900", "open cycle gas turbine" = "#e51900", "hydro" =  "#191999", "nuclear" =  "#ff33ff", "hard coal" = "#808080", "coupled run seel price" = "#ff0000","uncoupled run seel price" = "#ff0000")
+mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "coal" = "#0c0c0c", "Solar" = "#ffcc00", "Wind" = "#337fff", "biomass" = "#005900", "open cycle gas turbine" = "#e51900", "Hydro" =  "#191999", "nuclear" =  "#ff33ff", "hard coal" = "#808080", "coupled run seel price" = "#ff0000","uncoupled run seel price" = "#ff0000")
 
 plot_RMte_names = c("combined cycle gas", "coal", "solar", "wind", "biomass", "open cycle gas turbine", "hydro", "nuclear")
 plot_RMLCOEte_names = c("combined cycle gas", "lignite", "solar", "wind", "biomass", "open cycle gas turbine", "hydro", "nuclear")
@@ -181,7 +186,7 @@ get_MRKT_VALUE <- function(gdx){
 }
 
 get_ADJ_COST <- function(gdx){
-  gdx = sorted_files[[5]]
+  # gdx = sorted_files[[5]]
   
   budgetdata <- read.gdx(gdx, BUDGETkey1, field="m", squeeze = FALSE) %>%
     # filter(ttot == year_toplot) %>%
@@ -240,6 +245,25 @@ get_PRICEvariable <- function(gdx){
   return(vrdata)
 }
 
+get_PEPRICEvariable <- function(gdx){
+  # gdx = sorted_files[[5]]
+
+    vrdata_price <- read.gdx(gdx, VARkey5, field="m", squeeze = FALSE) %>% 
+    filter(all_regi == REGIkey1) %>% 
+      filter(all_enty %in% c("pecoal", "pegas")) 
+    
+    vrdata_dem <- read.gdx(gdx,VARkey6,field="l", squeeze = FALSE)  %>% 
+      filter(all_regi == REGIkey1) %>% 
+      filter(all_enty %in% c("pecoal", "pegas")) 
+
+    vrdata_prod <- read.gdx(gdx, "vm_prodPe",field="l", squeeze = FALSE)  %>% 
+      filter(all_regi == REGIkey1) %>% 
+      filter(all_enty %in% c("pecoal", "pegas")) 
+    
+    
+    return(vrdata0)
+}
+
 get_BUDGET <- function(gdx){
   # gdx = sorted_files[[10]]
   budgetdata <- read.gdx(gdx, BUDGETkey1,field="m", squeeze = FALSE) %>% 
@@ -257,10 +281,12 @@ readVAR1 <- function(gdx, key){
   budgetdata <- read.gdx(gdx, BUDGETkey1,field="m",squeeze = F) %>% 
     filter(all_regi == REGIkey1) %>% 
     mutate(m = -m) %>% 
-    dplyr::rename(budget = m)
+    dplyr::rename(budget = m) %>% 
+    filter(ttot > 2005)
   
   vrdata0 <- read.gdx(gdx, key) %>% 
-    filter(all_regi == REGIkey1) 
+    filter(all_regi == REGIkey1) %>% 
+    filter(ttot > 2005)
   
   vrdata = list(vrdata0, budgetdata) %>%
     reduce(full_join) %>%
@@ -309,11 +335,11 @@ vr1_reference_mrkup_lastiter <- lapply(sorted_files, readPAR1, key = PARkey2)
 for(fname in filenames){
   idx <- as.numeric(str_extract(fname, "[0-9]+"))
   vr1_pr[[idx]]$iter <- idx
-  vr1_pr[[idx]]$model <- "uncoupled run seel price"
+  vr1_pr[[idx]]$model <- "seel price"
   vr1_mk[[idx]]$iter <- idx
-  vr1_mk[[idx]]$model <- "uncoupled run markup"
+  vr1_mk[[idx]]$model <- "markup"
   vr1_mv[[idx]]$iter <- idx
-  vr1_mv[[idx]]$model <- "uncoupled run market value"
+  vr1_mv[[idx]]$model <- "market value"
   vr1_mv[[idx]]$all_te <- "solar"
   vr1_bg[[idx]]$iter <- idx
   vr1_bg[[idx]]$model <- "budget"
@@ -505,12 +531,11 @@ p4b<-ggplot() +
   theme(axis.text=element_text(size=20), axis.title=element_text(size=20,face="bold")) +
   xlab("iteration") + ylab(paste0("absolute markup",  "(USD/MWh)"))  +
   scale_color_manual(name = "tech", values = mycolors)+
-  coord_cartesian(ylim = c(-100,20))+
+  # coord_cartesian(ylim = c(-100,20))+
   facet_wrap(~iter, nrow = 3)
+# print(p4b)
 
 ggsave(filename = paste0(mypath, run_number, "iter_markup_timeseries", "_RM.png"), p4b, width = 28, height =15, units = "in", dpi = 120)
-
-
 
 # secAxisScale = 1/10
 
@@ -574,7 +599,7 @@ p10<-ggplot() +
 
 ggsave(filename = paste0(mypath, run_number, "iter_solarshare", "_RM.png"), p10, width = 28, height =15, units = "in", dpi = 120)
 
-p4b<-ggplot() +
+p4b<-ggplot() + 
   geom_line(data = vr1_bg, aes(x = ttot, y = budget), size = 1.2, alpha = 0.5) +
   theme(axis.text=element_text(size=20), axis.title=element_text(size=20,face="bold")) +
   xlab("iteration") + ylab(paste0("budget", "(USD/MWh)"))  +
