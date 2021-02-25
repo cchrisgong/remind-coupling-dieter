@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -7,13 +7,13 @@
 *** SOF ./modules/35_transport/complex/equations.gms
 
 *'  Transportation Final Energy Balance
-q35_demFeTrans(ttot,regi,entyFe,emiMkt)$((ttot.val ge cm_startyear) AND (entyFe2Sector(entyFe,"trans")) AND (sameas(emiMkt,"ES") OR sameas(emiMkt,"other"))) ..
+q35_demFeTrans(ttot,regi,entyFe,emiMkt)$((ttot.val ge cm_startyear) AND (entyFe2Sector(entyFe,"trans"))) ..
   sum((entySe,te)$se2fe(entySe,entyFe,te), 
     vm_demFeSector(ttot,regi,entySe,entyFe,"trans",emiMkt)
   ) 
   =e=
   (
-    sum(fe2ue(entyFe,entyUe,te), v_demFe(ttot,regi,entyFe,entyUe,te) )
+    sum(fe2ue(entyFe,entyUe,te), v35_demFe(ttot,regi,entyFe,entyUe,te) )
     - 
     sum(pc2te(entyFE2,entyUe,te,entyFE),                        !! couple production from FE to ES for heavy duty vehicles
 		  pm_prodCouple(regi,entyFE2,entyUe,te,entyFE) * vm_prodUe(ttot,regi,entyFE2,entyUe,te)
@@ -30,7 +30,7 @@ q35_demFeTrans(ttot,regi,entyFe,emiMkt)$((ttot.val ge cm_startyear) AND (entyFe2
 
 *** Transformation from final energy to useful energy
 q35_transFe2Ue(t,regi,fe2ue(entyFe,entyUe,te))..
-    pm_eta_conv(t,regi,te) * v_demFe(t,regi,entyFe,entyUe,te)
+    pm_eta_conv(t,regi,te) * v35_demFe(t,regi,entyFe,entyUe,te)
     =e=
     vm_prodUe(t,regi,entyFe,entyUe,te);
 

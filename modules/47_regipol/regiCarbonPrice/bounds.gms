@@ -10,7 +10,6 @@ $IFTHEN.NucRegiPol not "%cm_NucRegiPol%" == "off"
 
 ***Germany Nuclear phase-out
 *** DEU Nuclear capacity phase out
-    vm_capEarlyReti.up(ttot,regi,"tnrs")$(sameas(regi,"DEU")) = 1; !! allow early retirement for tnrs
     vm_cap.fx("2015",regi,"tnrs","1")$((cm_startyear le 2015) and (sameas(regi,"DEU"))) = 10.8/1000; 
     vm_cap.fx("2020",regi,"tnrs","1")$((cm_startyear le 2020) and (sameas(regi,"DEU"))) = 7.8/1000;
     vm_cap.up(t,regi,"tnrs","1")$((t.val ge 2025) and (t.val ge cm_startyear) and (sameas(regi,"DEU"))) = 1E-6;
@@ -23,13 +22,13 @@ $ENDIF.NucRegiPol
 $IFTHEN.proNucRegiPol not "%cm_proNucRegiPol%" == "off" 
 ***Pro nuclear countries tend to keep nuclear production by political decision
 ***assuming France would keep at least 80% of its 2015 nuclear capacity in the future
-vm_cap.lo(t,"FRA","tnrs","1")$(t.val ge cm_startyear) = 0.8*p_histCap("2015","FRA","tnrs");
+vm_cap.lo(t,"FRA","tnrs","1")$(t.val ge cm_startyear) = 0.8*pm_histCap("2015","FRA","tnrs");
 ***assuming Czech Republic would keep at least its 2015 nuclear capacity in the future (CZE corresponds to 61.8% of nuclear capacity of ECE in 2015)
-vm_cap.lo(t,"ECE","tnrs","1")$(t.val ge cm_startyear) = 0.618*p_histCap("2015","ECE","tnrs");
+vm_cap.lo(t,"ECE","tnrs","1")$(t.val ge cm_startyear) = 0.618*pm_histCap("2015","ECE","tnrs");
 ***assuming Finland would keep at least its 2015 nuclear capacity in the future (FIN corresponds to 21.6% of nuclear capacity of ENC in 2015)
-vm_cap.lo(t,"ENC","tnrs","1")$(t.val ge cm_startyear) = 0.216*p_histCap("2015","ENC","tnrs");
+vm_cap.lo(t,"ENC","tnrs","1")$(t.val ge cm_startyear) = 0.216*pm_histCap("2015","ENC","tnrs");
 ***assuming Romania would keep at least its 2015 nuclear capacity in the future (ROU corresponds to 22.1% of nuclear capacity of ECS in 2015)
-vm_cap.lo(t,"ECS","tnrs","1")$(t.val ge cm_startyear) = 0.221*p_histCap("2015","ECS","tnrs");
+vm_cap.lo(t,"ECS","tnrs","1")$(t.val ge cm_startyear) = 0.221*pm_histCap("2015","ECS","tnrs");
 $ENDIF.proNucRegiPol 
 
 $IFTHEN.CCSinvestment not "%cm_CCSRegiPol%" == "off" 
@@ -44,9 +43,8 @@ $ENDIF.CCSinvestment
 $IFTHEN.CoalRegiPol not "%cm_CoalRegiPol%" == "off" 
 
 ***UK Coal capacity phase-out
-    vm_capEarlyReti.up(ttot,regi,"pc")$(sameas(regi,"UKI")) = 1; !! allow early retirement for pc
-    vm_cap.fx("2020",regi,"pc","1")$((cm_startyear le 2020) and (sameas(regi,"UKI"))) = 1.3/1000; !!2019 capacity = 7TWh, capacity factor = 0.6 ->  ~1.35GW -> Assuming no new capacity -> average 2018-2022 = ~ 1GW
-    vm_cap.fx(t,regi,"pc","1")$((t.val ge 2025) and (t.val ge cm_startyear) and (sameas(regi,"UKI"))) = 1E-6;
+    vm_cap.up("2020",regi,"pc","1")$((cm_startyear le 2020) and (sameas(regi,"UKI"))) = 1.3/1000; !!2019 capacity = 7TWh, capacity factor = 0.6 ->  ~1.35GW -> Assuming no new capacity -> average 2018-2022 = ~ 1GW
+    vm_cap.up(t,regi,"pc","1")$((t.val ge 2025) and (t.val ge cm_startyear) and (sameas(regi,"UKI"))) = 1E-6;
 
 $ENDIF.CoalRegiPol  
 

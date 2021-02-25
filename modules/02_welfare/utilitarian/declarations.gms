@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -37,8 +37,8 @@ positive variables
 vm_forcOs(ttot)                                   "Forcing overshoot"
 
 $IFTHEN.INCONV_bioSwitch "%cm_INCONV_PENALTY_bioSwitch%" == "on"
-v_NegInconvPenFeBioSwitch(ttot,all_regi,all_enty,all_enty,emi_sectors,all_emiMkt) "Negative inconvenience penalty in the welfare function for bio/fossil shares switch between sectors"
-v_PosInconvPenFeBioSwitch(ttot,all_regi,all_enty,all_enty,emi_sectors,all_emiMkt) "Positive inconvenience penalty in the welfare function for bio/fossil shares switch between sectors"
+v02_NegInconvPenFeBioSwitch(ttot,all_regi,all_enty,all_enty,emi_sectors) "Negative inconvenience penalty in the welfare function for bio/fossil shares switch between sectors"
+v02_PosInconvPenFeBioSwitch(ttot,all_regi,all_enty,all_enty,emi_sectors) "Positive inconvenience penalty in the welfare function for bio/fossil shares switch between sectors"
 $ENDIF.INCONV_bioSwitch
 ;
 
@@ -55,7 +55,7 @@ q02_inconvPenCoalSolids(ttot,all_regi)            "Calculate the inconvenience p
 $endif.inconv
 
 $IFTHEN.INCONV_bioSwitch "%cm_INCONV_PENALTY_bioSwitch%" == "on"
-q_inconvPenFeBioSwitch(ttot,all_regi,all_enty,all_enty,emi_sectors,all_emiMkt)  "Calculate the inconvenience penalty to avoid switching shares on buildings, transport and industry biomass use if costs are relatively close (seLiqbio, sesobio, segabio)"
+q02_inconvPenFeBioSwitch(ttot,all_regi,all_enty,all_enty,all_te,emi_sectors)  "Calculate the inconvenience penalty to avoid switching shares on buildings, transport and industry biomass use if costs are relatively close (seLiqbio, sesobio, segabio)"
 $ENDIF.INCONV_bioSwitch
 
 ;

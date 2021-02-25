@@ -180,6 +180,8 @@ In both cases, you can choose from the list of available model scenarios, for wh
 
 Now, the selected scripts are executed. After completion, the results are written in the respective folder of the run (combination of **model title** name and the **current date** inside the **output** folder of the model).
 
+One recommended script for comparison of different scenarios is compareScenarios. How to create new plots is described in the tutorial 8_Advanced_AnalysingModelOutputs.Rmd. 
+
 
 7. Analysis of outputs with the remind package
 ===============================================
@@ -195,8 +197,8 @@ setwd("/path/to/your/remind/model/folder")
 Then, load the package and call the help pages:
 
 ``` r
-library(remind)
-?remind
+library(remind2)
+?remind2
 ```
 
 You can click on the index and search for interesting functions. All functions used to generate the reporting start with "reporting*.R".

@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -472,6 +472,7 @@ all_in   "all inputs and outputs of the CES function"
 
   enb                     "buildings energy use"
   enhb                    "buildings heat energy use"
+  enhgab                  "buildings heat gaseous energy use (fegab and feh2b)"  
   fesob                   "buildings use of solid energy carriers"
   fehob                   "buildings use of liquid energy carriers"
   fegab                   "buildings use of gaseous energy carriers"
@@ -481,6 +482,7 @@ all_in   "all inputs and outputs of the CES function"
 
   eni                     "industry energy use"
   enhi                    "industry heat energy use"
+  enhgai                  "industry heat gaseous energy use (fegab and feh2b)" 
   fesoi                   "industry use of solid energy carriers"
   fehoi                   "industry use of liquid energy carriers"
   fegai                   "industry use of gaseous energy carriers"
@@ -651,116 +653,120 @@ teEs(all_teEs)           "ES technologies which are actually used (to be filled 
 
 sets
 
-   all_regi "all regions" /CAZ,CHA,DEU,ECE,ECS,ENC,ESC,ESW,EWN,FRA,IND,JPN,LAM,MEA,NEN,NES,OAS,REF,SSA,UKI,USA/
+   all_regi "all regions" /LAM,OAS,SSA,EUR,NEU,MEA,REF,CAZ,CHA,IND,JPN,USA/
 
-   ext_regi "extended regions list (includes subsets of H12 regions)" / EUR_regi,NEU_regi,CAZ,CHA,DEU,ECE,ECS,ENC,ESC,ESW,EWN,FRA,IND,JPN,LAM,MEA,NEN,NES,OAS,REF,SSA,UKI,USA /
+   ext_regi "extended regions list (includes subsets of H12 regions)" / LAM_regi,OAS_regi,SSA_regi,EUR_regi,NEU_regi,MEA_regi,REF_regi,CAZ_regi,CHA_regi,IND_regi,JPN_regi,USA_regi,LAM,OAS,SSA,EUR,NEU,MEA,REF,CAZ,CHA,IND,JPN,USA /
 
    regi_group(ext_regi,all_regi) "region groups (regions that together corresponds to a H12 region)"
       /
-        EUR_regi .(ENC,EWN,ECS,ESC,ECE,FRA,DEU,UKI,ESW)
-        NEU_regi .(NES,NEN)
+        LAM_regi .(LAM)
+        OAS_regi .(OAS)
+        SSA_regi .(SSA)
+        EUR_regi .(EUR)
+        NEU_regi .(NEU)
+        MEA_regi .(MEA)
+        REF_regi .(REF)
+        CAZ_regi .(CAZ)
+        CHA_regi .(CHA)
+        IND_regi .(IND)
+        JPN_regi .(JPN)
+        USA_regi .(USA)
       /
  
    iso "list of iso countries" /
-       AFG,ALA,ALB,DZA,ASM,AND,AGO,AIA,ATA,ATG,
-       ARG,ARM,ABW,AUS,AUT,AZE,BHS,BHR,BGD,BRB,
-       BLR,BEL,BLZ,BEN,BMU,BTN,BOL,BES,BIH,BWA,
-       BVT,BRA,IOT,BRN,BGR,BFA,BDI,KHM,CMR,CAN,
-       CPV,CYM,CAF,TCD,CHL,CHN,CXR,CCK,COL,COM,
-       COG,COD,COK,CRI,CIV,HRV,CUB,CUW,CYP,CZE,
-       DNK,DJI,DMA,DOM,ECU,EGY,SLV,GNQ,ERI,EST,
-       ETH,FLK,FRO,FJI,FIN,FRA,GUF,PYF,ATF,GAB,
-       GMB,GEO,DEU,GHA,GIB,GRC,GRL,GRD,GLP,GUM,
-       GTM,GGY,GIN,GNB,GUY,HTI,HMD,VAT,HND,HKG,
-       HUN,ISL,IND,IDN,IRN,IRQ,IRL,IMN,ISR,ITA,
-       JAM,JPN,JEY,JOR,KAZ,KEN,KIR,PRK,KOR,KWT,
-       KGZ,LAO,LVA,LBN,LSO,LBR,LBY,LIE,LTU,LUX,
-       MAC,MKD,MDG,MWI,MYS,MDV,MLI,MLT,MHL,MTQ,
-       MRT,MUS,MYT,MEX,FSM,MDA,MCO,MNG,MNE,MSR,
-       MAR,MOZ,MMR,NAM,NRU,NPL,NLD,NCL,NZL,NIC,
-       NER,NGA,NIU,NFK,MNP,NOR,OMN,PAK,PLW,PSE,
-       PAN,PNG,PRY,PER,PHL,PCN,POL,PRT,PRI,QAT,
-       REU,ROU,RUS,RWA,BLM,SHN,KNA,LCA,MAF,SPM,
-       VCT,WSM,SMR,STP,SAU,SEN,SRB,SYC,SLE,SGP,
-       SXM,SVK,SVN,SLB,SOM,ZAF,SGS,SSD,ESP,LKA,
-       SDN,SUR,SJM,SWZ,SWE,CHE,SYR,TWN,TJK,TZA,
-       THA,TLS,TGO,TKL,TON,TTO,TUN,TUR,TKM,TCA,
-       TUV,UGA,UKR,ARE,GBR,USA,UMI,URY,UZB,VUT,
-       VEN,VNM,VGB,VIR,WLF,ESH,YEM,ZMB,ZWE /
+       ABW,AFG,AGO,AIA,ALA,ALB,AND,ARE,ARG,ARM,
+       ASM,ATA,ATF,ATG,AUS,AUT,AZE,BDI,BEL,BEN,
+       BES,BFA,BGD,BGR,BHR,BHS,BIH,BLM,BLR,BLZ,
+       BMU,BOL,BRA,BRB,BRN,BTN,BVT,BWA,CAF,CAN,
+       CCK,CHN,CHE,CHL,CIV,CMR,COD,COG,COK,COL,
+       COM,CPV,CRI,CUB,CUW,CXR,CYM,CYP,CZE,DEU,
+       DJI,DMA,DNK,DOM,DZA,ECU,EGY,ERI,ESH,ESP,
+       EST,ETH,FIN,FJI,FLK,FRA,FRO,FSM,GAB,GBR,
+       GEO,GGY,GHA,GIB,GIN,GLP,GMB,GNB,GNQ,GRC,
+       GRD,GRL,GTM,GUF,GUM,GUY,HKG,HMD,HND,HRV,
+       HTI,HUN,IDN,IMN,IND,IOT,IRL,IRN,IRQ,ISL,
+       ISR,ITA,JAM,JEY,JOR,JPN,KAZ,KEN,KGZ,KHM,
+       KIR,KNA,KOR,KWT,LAO,LBN,LBR,LBY,LCA,LIE,
+       LKA,LSO,LTU,LUX,LVA,MAC,MAF,MAR,MCO,MDA,
+       MDG,MDV,MEX,MHL,MKD,MLI,MLT,MMR,MNE,MNG,
+       MNP,MOZ,MRT,MSR,MTQ,MUS,MWI,MYS,MYT,NAM,
+       NCL,NER,NFK,NGA,NIC,NIU,NLD,NOR,NPL,NRU,
+       NZL,OMN,PAK,PAN,PCN,PER,PHL,PLW,PNG,POL,
+       PRI,PRK,PRT,PRY,PSE,PYF,QAT,REU,ROU,RUS,
+       RWA,SAU,SDN,SEN,SGP,SGS,SHN,SJM,SLB,SLE,
+       SLV,SMR,SOM,SPM,SRB,SSD,STP,SUR,SVK,SVN,
+       SWE,SWZ,SXM,SYC,SYR,TCA,TCD,TGO,THA,TJK,
+       TKL,TKM,TLS,TON,TTO,TUN,TUR,TUV,TWN,TZA,
+       UGA,UKR,UMI,URY,USA,UZB,VAT,VCT,VEN,VGB,
+       VIR,VNM,VUT,WLF,WSM,YEM,ZAF,ZMB,ZWE /
 
    regi2iso(all_regi,iso) "mapping regions to iso countries"
       /
-       CAZ . (AUS,CAN,HMD,NZL,SPM)
-       CHA . (CHN,HKG,MAC,TWN)
-       DEU . (DEU)
-       ECE . (CZE,EST,LVA,LTU,POL,SVK)
-       ECS . (BGR,HRV,HUN,ROU,SVN)
-       ENC . (ALA,DNK,FRO,FIN,SWE)
-       ESC . (CYP,GRC,ITA,MLT)
-       ESW . (PRT,ESP)
-       EWN . (AUT,BEL,LUX,NLD)
-       FRA . (FRA)
-       IND . (IND)
-       JPN . (JPN)
-       LAM . (AIA,ATA,ATG,ARG,ABW,BHS,BRB,BLZ,BMU,BOL)
-       LAM . (BES,BVT,BRA,CYM,CHL,COL,CRI,CUB,CUW,DMA)
-       LAM . (DOM,ECU,SLV,FLK,GUF,GRD,GLP,GTM,GUY,HTI)
-       LAM . (HND,JAM,MTQ,MEX,MSR,NIC,PAN,PRY,PER,PRI)
-       LAM . (BLM,KNA,LCA,MAF,VCT,SXM,SGS,SUR,TTO,TCA)
-       LAM . (URY,VEN,VGB,VIR)
-       MEA . (DZA,BHR,EGY,IRN,IRQ,ISR,JOR,KWT,LBN,LBY)
-       MEA . (MAR,OMN,PSE,QAT,SAU,SDN,SYR,TUN,ARE,ESH)
+       LAM . (ABW,AIA,ARG,ATA,ATG,BES,BHS,BLM,BLZ,BMU)
+       LAM . (BOL,BRA,BRB,BVT,CHL,COL,CRI,CUB,CUW,CYM)
+       LAM . (DMA,DOM,ECU,FLK,GLP,GRD,GTM,GUF,GUY,HND)
+       LAM . (HTI,JAM,KNA,LCA,MAF,MEX,MSR,MTQ,NIC,PAN)
+       LAM . (PER,PRI,PRY,SGS,SLV,SUR,SXM,TCA,TTO,URY)
+       LAM . (VCT,VEN,VGB,VIR)
+       OAS . (AFG,ASM,ATF,BGD,BRN,BTN,CCK,COK,CXR,FJI)
+       OAS . (FSM,GUM,IDN,IOT,KHM,KIR,KOR,LAO,LKA,MDV)
+       OAS . (MHL,MMR,MNG,MNP,MYS,NCL,NFK,NIU,NPL,NRU)
+       OAS . (PAK,PCN,PHL,PLW,PNG,PRK,PYF,SGP,SLB,THA)
+       OAS . (TKL,TLS,TON,TUV,UMI,VNM,VUT,WLF,WSM)
+       SSA . (AGO,BDI,BEN,BFA,BWA,CAF,CIV,CMR,COD,COG)
+       SSA . (COM,CPV,DJI,ERI,ETH,GAB,GHA,GIN,GMB,GNB)
+       SSA . (GNQ,KEN,LBR,LSO,MDG,MLI,MOZ,MRT,MUS,MWI)
+       SSA . (MYT,NAM,NER,NGA,REU,RWA,SEN,SHN,SLE,SOM)
+       SSA . (SSD,STP,SWZ,SYC,TCD,TGO,TZA,UGA,ZAF,ZMB)
+       SSA . (ZWE)
+       EUR . (ALA,AUT,BEL,BGR,CYP,CZE,DEU,DNK,ESP,EST)
+       EUR . (FIN,FRA,FRO,GBR,GGY,GIB,GRC,HRV,HUN,IMN)
+       EUR . (IRL,ITA,JEY,LTU,LUX,LVA,MLT,NLD,POL,PRT)
+       EUR . (ROU,SVK,SVN,SWE)
+       NEU . (ALB,AND,BIH,CHE,GRL,ISL,LIE,MCO,MKD,MNE)
+       NEU . (NOR,SJM,SMR,SRB,TUR,VAT)
+       MEA . (ARE,BHR,DZA,EGY,ESH,IRN,IRQ,ISR,JOR,KWT)
+       MEA . (LBN,LBY,MAR,OMN,PSE,QAT,SAU,SDN,SYR,TUN)
        MEA . (YEM)
-       NEN . (GRL,ISL,LIE,NOR,SJM,CHE)
-       NES . (ALB,AND,BIH,VAT,MKD,MCO,MNE,SMR,SRB,TUR)
-       OAS . (AFG,ASM,BGD,BTN,IOT,BRN,KHM,CXR,CCK,COK)
-       OAS . (FJI,PYF,ATF,GUM,IDN,KIR,PRK,KOR,LAO,MYS)
-       OAS . (MDV,MHL,FSM,MNG,MMR,NRU,NPL,NCL,NIU,NFK)
-       OAS . (MNP,PAK,PLW,PNG,PHL,PCN,WSM,SGP,SLB,LKA)
-       OAS . (THA,TLS,TKL,TON,TUV,UMI,VUT,VNM,WLF)
        REF . (ARM,AZE,BLR,GEO,KAZ,KGZ,MDA,RUS,TJK,TKM)
        REF . (UKR,UZB)
-       SSA . (AGO,BEN,BWA,BFA,BDI,CMR,CPV,CAF,TCD,COM)
-       SSA . (COG,COD,CIV,DJI,GNQ,ERI,ETH,GAB,GMB,GHA)
-       SSA . (GIN,GNB,KEN,LSO,LBR,MDG,MWI,MLI,MRT,MUS)
-       SSA . (MYT,MOZ,NAM,NER,NGA,REU,RWA,SHN,STP,SEN)
-       SSA . (SYC,SLE,SOM,ZAF,SSD,SWZ,TZA,TGO,UGA,ZMB)
-       SSA . (ZWE)
-       UKI . (GIB,GGY,IRL,IMN,JEY,GBR)
+       CAZ . (AUS,CAN,HMD,NZL,SPM)
+       CHA . (CHN,HKG,MAC,TWN)
+       IND . (IND)
+       JPN . (JPN)
        USA . (USA)
       /
 iso_regi "all iso countries and EU and greater China region" /  EUR,CHA,
-       AFG,ALA,ALB,DZA,ASM,AND,AGO,AIA,ATA,ATG,
-       ARG,ARM,ABW,AUS,AUT,AZE,BHS,BHR,BGD,BRB,
-       BLR,BEL,BLZ,BEN,BMU,BTN,BOL,BES,BIH,BWA,
-       BVT,BRA,IOT,BRN,BGR,BFA,BDI,KHM,CMR,CAN,
-       CPV,CYM,CAF,TCD,CHL,CHN,CXR,CCK,COL,COM,
-       COG,COD,COK,CRI,CIV,HRV,CUB,CUW,CYP,CZE,
-       DNK,DJI,DMA,DOM,ECU,EGY,SLV,GNQ,ERI,EST,
-       ETH,FLK,FRO,FJI,FIN,FRA,GUF,PYF,ATF,GAB,
-       GMB,GEO,DEU,GHA,GIB,GRC,GRL,GRD,GLP,GUM,
-       GTM,GGY,GIN,GNB,GUY,HTI,HMD,VAT,HND,HKG,
-       HUN,ISL,IND,IDN,IRN,IRQ,IRL,IMN,ISR,ITA,
-       JAM,JPN,JEY,JOR,KAZ,KEN,KIR,PRK,KOR,KWT,
-       KGZ,LAO,LVA,LBN,LSO,LBR,LBY,LIE,LTU,LUX,
-       MAC,MKD,MDG,MWI,MYS,MDV,MLI,MLT,MHL,MTQ,
-       MRT,MUS,MYT,MEX,FSM,MDA,MCO,MNG,MNE,MSR,
-       MAR,MOZ,MMR,NAM,NRU,NPL,NLD,NCL,NZL,NIC,
-       NER,NGA,NIU,NFK,MNP,NOR,OMN,PAK,PLW,PSE,
-       PAN,PNG,PRY,PER,PHL,PCN,POL,PRT,PRI,QAT,
-       REU,ROU,RUS,RWA,BLM,SHN,KNA,LCA,MAF,SPM,
-       VCT,WSM,SMR,STP,SAU,SEN,SRB,SYC,SLE,SGP,
-       SXM,SVK,SVN,SLB,SOM,ZAF,SGS,SSD,ESP,LKA,
-       SDN,SUR,SJM,SWZ,SWE,CHE,SYR,TWN,TJK,TZA,
-       THA,TLS,TGO,TKL,TON,TTO,TUN,TUR,TKM,TCA,
-       TUV,UGA,UKR,ARE,GBR,USA,UMI,URY,UZB,VUT,
-       VEN,VNM,VGB,VIR,WLF,ESH,YEM,ZMB,ZWE /
+       ABW,AFG,AGO,AIA,ALA,ALB,AND,ARE,ARG,ARM,
+       ASM,ATA,ATF,ATG,AUS,AUT,AZE,BDI,BEL,BEN,
+       BES,BFA,BGD,BGR,BHR,BHS,BIH,BLM,BLR,BLZ,
+       BMU,BOL,BRA,BRB,BRN,BTN,BVT,BWA,CAF,CAN,
+       CCK,CHN,CHE,CHL,CIV,CMR,COD,COG,COK,COL,
+       COM,CPV,CRI,CUB,CUW,CXR,CYM,CYP,CZE,DEU,
+       DJI,DMA,DNK,DOM,DZA,ECU,EGY,ERI,ESH,ESP,
+       EST,ETH,FIN,FJI,FLK,FRA,FRO,FSM,GAB,GBR,
+       GEO,GGY,GHA,GIB,GIN,GLP,GMB,GNB,GNQ,GRC,
+       GRD,GRL,GTM,GUF,GUM,GUY,HKG,HMD,HND,HRV,
+       HTI,HUN,IDN,IMN,IND,IOT,IRL,IRN,IRQ,ISL,
+       ISR,ITA,JAM,JEY,JOR,JPN,KAZ,KEN,KGZ,KHM,
+       KIR,KNA,KOR,KWT,LAO,LBN,LBR,LBY,LCA,LIE,
+       LKA,LSO,LTU,LUX,LVA,MAC,MAF,MAR,MCO,MDA,
+       MDG,MDV,MEX,MHL,MKD,MLI,MLT,MMR,MNE,MNG,
+       MNP,MOZ,MRT,MSR,MTQ,MUS,MWI,MYS,MYT,NAM,
+       NCL,NER,NFK,NGA,NIC,NIU,NLD,NOR,NPL,NRU,
+       NZL,OMN,PAK,PAN,PCN,PER,PHL,PLW,PNG,POL,
+       PRI,PRK,PRT,PRY,PSE,PYF,QAT,REU,ROU,RUS,
+       RWA,SAU,SDN,SEN,SGP,SGS,SHN,SJM,SLB,SLE,
+       SLV,SMR,SOM,SPM,SRB,SSD,STP,SUR,SVK,SVN,
+       SWE,SWZ,SXM,SYC,SYR,TCA,TCD,TGO,THA,TJK,
+       TKL,TKM,TLS,TON,TTO,TUN,TUR,TUV,TWN,TZA,
+       UGA,UKR,UMI,URY,USA,UZB,VAT,VCT,VEN,VGB,
+       VIR,VNM,VUT,WLF,WSM,YEM,ZAF,ZMB,ZWE /
 
    map_iso_regi(iso_regi,all_regi) "mapping from iso countries to regions that represent country" 
          /
+       EUR . EUR
        CHA . CHA
-       DEU . DEU
-       FRA . FRA
        IND . IND
        JPN . JPN
        USA . USA
@@ -792,6 +798,15 @@ $ELSE.RegScenSens
   set regi_sensscen(all_regi) "regions which regional sensitivity parameters apply to" / %c_regi_sensscen% /;
 $ENDIF.RegScenSens
 
+*** definition of set of regions that use alternative FE emission factors from umweltbundesamt
+$ifthen.altFeEmiFac not "%cm_altFeEmiFac%" == "off" 
+set
+  altFeEmiFac_regi(ext_regi)  "set of regions that use alternative FE emission factors from umweltbundesamt" 
+  /
+    %cm_altFeEmiFac%
+  /
+;
+$endif.altFeEmiFac 
 
 ***###############################################################################
 ***######################## R SECTION START (MODULES) ###############################
@@ -1186,6 +1201,8 @@ teLearn(all_te)     "Learning technologies (investment costs can be reduced)"
         storspv     "storage technology for spv"
         storwind    "storage technology for wind"
         storcsp     "storage technology for csp"
+        dac         "direct air capture"
+        elh2        "hydrogen elecrolysis"
 /
 
 teNoLearn(all_te)   "Technologies without learning effect"
@@ -1389,7 +1406,7 @@ elh2
 /
 
 
-teFlexTax(all_te)       "all technologies to which flexibility tax/subsidy applies"
+teFlexTax(all_te)       "all technologies to which flexibility tax/subsidy applies, flexible technologies are those in teFlex, inflexible technologies those which are not in teFlex"
 /
 elh2
 tdels
@@ -1823,7 +1840,7 @@ all_emiMkt         "emission markets"
 	other	"other market configurations"	
 /
 
-sector2emiMkt(emi_sectors,all_emiMkt)
+sector2emiMkt(emi_sectors,all_emiMkt)  "mapping sectors to emission markets"
 /
         indst.ETS
         indst.ES
@@ -1834,7 +1851,7 @@ sector2emiMkt(emi_sectors,all_emiMkt)
 /
 
 
-macSector2emiMkt(all_enty,all_emiMkt)
+macSector2emiMkt(all_enty,all_emiMkt)  "mapping mac sectors to emission markets"
 /
         ch4coal.ETS      
         ch4gas.ETS       
@@ -2012,17 +2029,6 @@ Sets
   //
   fe_tax_subEs(all_in,all_esty) "correspondence between tax and subsidy input data resolution and model sectoral resolution. For FE which takes the pathway III to the CES "
   //
-  cesParameter   "parameters of the CES functions and for calibration"
-  /
-    quantity   "quantity of CES function input/output"
-    price      "price of CES function input/output"
-    eff        "baseyear efficiency of CES function input/output"
-    effgr      "multiplicative efficiency growth of CES function input/output"
-    rho        "CES function elasticity parameter rho = 1 - (1 / sigma)"
-    xi         "baseyear income share of CES function input/output"
-    offset_quantity "quantity offset for the CES tree if the quantity is null"
-    compl_coef    "coefficients for the perfectly complementary factors"
-  /
 
 
 ***-------------------------------------------------------------------------------

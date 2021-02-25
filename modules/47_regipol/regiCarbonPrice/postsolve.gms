@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -92,7 +92,7 @@ $ENDIF.emiMktETS
 
 $IFTHEN.emiMktES not "%cm_emiMktES%" == "off" 
 
-	loop((regi)$p47_emiTargetES("2030",regi),
+	loop((regi)$pm_emiTargetES("2030",regi),
 
 *** Removing the economy wide co2 tax parameters for regions within the ES
 		pm_taxCO2eq(ttot,regi) = 0;
@@ -101,20 +101,20 @@ $IFTHEN.emiMktES not "%cm_emiMktES%" == "off"
 		
 ***  calculating the ES CO2 tax rescale factor
 		if(iteration.val lt 15,
-			p47_emiRescaleCo2TaxES("2020",regi)$((cm_startyear le 2020) AND (p47_emiTargetES("2020",regi))) = max(0.1, ( v47_emiTargetMkt.l("2020",regi,"ES","%cm_emiMktES_type%")/p47_emiTargetES("2020",regi) ) )** 2;
-			p47_emiRescaleCo2TaxES("2030",regi)$((cm_startyear le 2030) AND (p47_emiTargetES("2030",regi))) = max(0.1, ( v47_emiTargetMkt.l("2030",regi,"ES","%cm_emiMktES_type%")/p47_emiTargetES("2030",regi) ) )** 2;
+			p47_emiRescaleCo2TaxES("2020",regi)$((cm_startyear le 2020) AND (pm_emiTargetES("2020",regi))) = max(0.1, ( v47_emiTargetMkt.l("2020",regi,"ES","%cm_emiMktES_type%")/pm_emiTargetES("2020",regi) ) )** 2;
+			p47_emiRescaleCo2TaxES("2030",regi)$((cm_startyear le 2030) AND (pm_emiTargetES("2030",regi))) = max(0.1, ( v47_emiTargetMkt.l("2030",regi,"ES","%cm_emiMktES_type%")/pm_emiTargetES("2030",regi) ) )** 2;
 		else
-			p47_emiRescaleCo2TaxES("2020",regi)$((cm_startyear le 2020) AND (p47_emiTargetES("2020",regi))) = max(0.1, ( v47_emiTargetMkt.l("2020",regi,"ES","%cm_emiMktES_type%")/p47_emiTargetES("2020",regi) ) );
-			p47_emiRescaleCo2TaxES("2030",regi)$((cm_startyear le 2030) AND (p47_emiTargetES("2030",regi))) = max(0.1, ( v47_emiTargetMkt.l("2030",regi,"ES","%cm_emiMktES_type%")/p47_emiTargetES("2030",regi) ) );
+			p47_emiRescaleCo2TaxES("2020",regi)$((cm_startyear le 2020) AND (pm_emiTargetES("2020",regi))) = max(0.1, ( v47_emiTargetMkt.l("2020",regi,"ES","%cm_emiMktES_type%")/pm_emiTargetES("2020",regi) ) );
+			p47_emiRescaleCo2TaxES("2030",regi)$((cm_startyear le 2030) AND (pm_emiTargetES("2030",regi))) = max(0.1, ( v47_emiTargetMkt.l("2030",regi,"ES","%cm_emiMktES_type%")/pm_emiTargetES("2030",regi) ) );
 		);
 
 $IFTHEN.emiMktES2050 not "%cm_emiMktES2050%" == "off"
 $IFTHEN.emiMktES2050_2 not "%cm_emiMktES2050%" == "linear"
 
 		if(iteration.val lt 15,
-			p47_emiRescaleCo2TaxES("2050",regi)$(p47_emiTargetES("2050",regi)) = max(0.1, ( v47_emiTargetMkt.l("2050",regi,"ES","%cm_emiMktES_type%")/p47_emiTargetES("2050",regi) ) )** 2;
+			p47_emiRescaleCo2TaxES("2050",regi)$(pm_emiTargetES("2050",regi)) = max(0.1, ( v47_emiTargetMkt.l("2050",regi,"ES","%cm_emiMktES_type%")/pm_emiTargetES("2050",regi) ) )** 2;
 		else
-			p47_emiRescaleCo2TaxES("2050",regi)$(p47_emiTargetES("2050",regi)) = max(0.1, ( v47_emiTargetMkt.l("2050",regi,"ES","%cm_emiMktES_type%")/p47_emiTargetES("2050",regi) ) );
+			p47_emiRescaleCo2TaxES("2050",regi)$(pm_emiTargetES("2050",regi)) = max(0.1, ( v47_emiTargetMkt.l("2050",regi,"ES","%cm_emiMktES_type%")/pm_emiTargetES("2050",regi) ) );
 		);
 
 $ENDIF.emiMktES2050_2
@@ -123,20 +123,20 @@ $ENDIF.emiMktES2050
 $IFTHEN.emiMktEScoop not "%cm_emiMktEScoop%" == "off"
 *** alternative cooperative ES solution: calculating the ES CO2 tax rescale factor
 		if(iteration.val lt 15,
-			p47_emiRescaleCo2TaxES("2020",regi)$((cm_startyear le 2020) AND (p47_emiTargetES("2020",regi))) = max(0.1, ( sum(regi2$regi_group("EUR_regi",regi2),v47_emiTargetMkt.l("2020",regi2,"ES","%cm_emiMktES_type%"))/sum(regi2$regi_group("EUR_regi",regi2),p47_emiTargetES("2020",regi2)) ) )** 2;
-			p47_emiRescaleCo2TaxES("2030",regi)$((cm_startyear le 2030) AND (p47_emiTargetES("2030",regi))) = max(0.1, ( sum(regi2$regi_group("EUR_regi",regi2),v47_emiTargetMkt.l("2030",regi2,"ES","%cm_emiMktES_type%"))/sum(regi2$regi_group("EUR_regi",regi2),p47_emiTargetES("2030",regi2)) ) )** 2;
+			p47_emiRescaleCo2TaxES("2020",regi)$((cm_startyear le 2020) AND (pm_emiTargetES("2020",regi))) = max(0.1, ( sum(regi2$regi_group("EUR_regi",regi2),v47_emiTargetMkt.l("2020",regi2,"ES","%cm_emiMktES_type%"))/sum(regi2$regi_group("EUR_regi",regi2),pm_emiTargetES("2020",regi2)) ) )** 2;
+			p47_emiRescaleCo2TaxES("2030",regi)$((cm_startyear le 2030) AND (pm_emiTargetES("2030",regi))) = max(0.1, ( sum(regi2$regi_group("EUR_regi",regi2),v47_emiTargetMkt.l("2030",regi2,"ES","%cm_emiMktES_type%"))/sum(regi2$regi_group("EUR_regi",regi2),pm_emiTargetES("2030",regi2)) ) )** 2;
 		else
-			p47_emiRescaleCo2TaxES("2020",regi)$((cm_startyear le 2020) AND (p47_emiTargetES("2020",regi))) = max(0.1, ( sum(regi2$regi_group("EUR_regi",regi2),v47_emiTargetMkt.l("2020",regi2,"ES","%cm_emiMktES_type%"))/sum(regi2$regi_group("EUR_regi",regi2),p47_emiTargetES("2020",regi2)) ) );
-			p47_emiRescaleCo2TaxES("2030",regi)$((cm_startyear le 2030) AND (p47_emiTargetES("2030",regi))) = max(0.1, ( sum(regi2$regi_group("EUR_regi",regi2),v47_emiTargetMkt.l("2030",regi2,"ES","%cm_emiMktES_type%"))/sum(regi2$regi_group("EUR_regi",regi2),p47_emiTargetES("2030",regi2)) ) );
+			p47_emiRescaleCo2TaxES("2020",regi)$((cm_startyear le 2020) AND (pm_emiTargetES("2020",regi))) = max(0.1, ( sum(regi2$regi_group("EUR_regi",regi2),v47_emiTargetMkt.l("2020",regi2,"ES","%cm_emiMktES_type%"))/sum(regi2$regi_group("EUR_regi",regi2),pm_emiTargetES("2020",regi2)) ) );
+			p47_emiRescaleCo2TaxES("2030",regi)$((cm_startyear le 2030) AND (pm_emiTargetES("2030",regi))) = max(0.1, ( sum(regi2$regi_group("EUR_regi",regi2),v47_emiTargetMkt.l("2030",regi2,"ES","%cm_emiMktES_type%"))/sum(regi2$regi_group("EUR_regi",regi2),pm_emiTargetES("2030",regi2)) ) );
 		);
 
 $IFTHEN.emiMktES2050 not "%cm_emiMktES2050%" == "off"
 $IFTHEN.emiMktES2050_2 NOT "%cm_emiMktES2050%" == "linear"
 
 		if(iteration.val lt 15,
-			p47_emiRescaleCo2TaxES("2050",regi)$(p47_emiTargetES("2050",regi)) = max(0.1, ( sum(regi2$regi_group("EUR_regi",regi2),v47_emiTargetMkt.l("2050",regi2,"ES","%cm_emiMktES_type%"))/sum(regi2$regi_group("EUR_regi",regi2),p47_emiTargetES("2050",regi)) ) )** 2;
+			p47_emiRescaleCo2TaxES("2050",regi)$(pm_emiTargetES("2050",regi)) = max(0.1, ( sum(regi2$regi_group("EUR_regi",regi2),v47_emiTargetMkt.l("2050",regi2,"ES","%cm_emiMktES_type%"))/sum(regi2$regi_group("EUR_regi",regi2),pm_emiTargetES("2050",regi)) ) )** 2;
 		else
-			p47_emiRescaleCo2TaxES("2050",regi)$(p47_emiTargetES("2050",regi)) = max(0.1, ( sum(regi2$regi_group("EUR_regi",regi2),v47_emiTargetMkt.l("2050",regi2,"ES","%cm_emiMktES_type%"))/sum(regi2$regi_group("EUR_regi",regi2),p47_emiTargetES("2050",regi)) ) );
+			p47_emiRescaleCo2TaxES("2050",regi)$(pm_emiTargetES("2050",regi)) = max(0.1, ( sum(regi2$regi_group("EUR_regi",regi2),v47_emiTargetMkt.l("2050",regi2,"ES","%cm_emiMktES_type%"))/sum(regi2$regi_group("EUR_regi",regi2),pm_emiTargetES("2050",regi)) ) );
 		);
 
 $ENDIF.emiMktES2050_2
@@ -156,19 +156,19 @@ $ENDIF.emiMktEScoop
 		pm_taxemiMkt("2015",regi,"ES") = 0;
 
 $IFTHEN.emiMktES2020price "%cm_emiMktES2020price%" == "target"
-		pm_taxemiMkt("2020",regi,"ES")$(p47_emiRescaleCo2TaxES("2020",regi) AND p47_emiTargetES("2020",regi)) = max(1* sm_DptCO2_2_TDpGtC, pm_taxemiMkt_iteration(iteration,"2020",regi,"ES") * p47_emiRescaleCo2TaxES("2020",regi));
+		pm_taxemiMkt("2020",regi,"ES")$(p47_emiRescaleCo2TaxES("2020",regi) AND pm_emiTargetES("2020",regi)) = max(1* sm_DptCO2_2_TDpGtC, pm_taxemiMkt_iteration(iteration,"2020",regi,"ES") * p47_emiRescaleCo2TaxES("2020",regi));
 $ELSEIF.emiMktES2020price not "%cm_emiMktES2020price%" == "off"
 		pm_taxemiMkt("2020",regi,"ES") = %cm_emiMktES2020price%*sm_DptCO2_2_TDpGtC;
 $ENDIF.emiMktES2020price
 
-***		pm_taxemiMkt(t,regi,"ES")$((t.val lt 2020) AND (t.val ge cm_startyear) AND (p47_emiTargetES("2020",regi))) = pm_taxemiMkt("2020",regi,"ES")*1.05**(t.val-2020); !! pre 2020: decrease at 5% p.a.
+***		pm_taxemiMkt(t,regi,"ES")$((t.val lt 2020) AND (t.val ge cm_startyear) AND (pm_emiTargetES("2020",regi))) = pm_taxemiMkt("2020",regi,"ES")*1.05**(t.val-2020); !! pre 2020: decrease at 5% p.a.
 ***		!! ES only until 2020 (for bau purposes)
-***		pm_taxemiMkt(t,regi,"ES")$((t.val gt 2020) AND (NOT (p47_emiTargetES("2030",regi))))  = pm_taxemiMkt("2020",regi,"ES")*1.0125**(t.val-2020); !! post 2020 in case of 2020 only ES: increase at 1.25% p.a.
+***		pm_taxemiMkt(t,regi,"ES")$((t.val gt 2020) AND (NOT (pm_emiTargetES("2030",regi))))  = pm_taxemiMkt("2020",regi,"ES")*1.0125**(t.val-2020); !! post 2020 in case of 2020 only ES: increase at 1.25% p.a.
 		!! ES up to 2030
-		pm_taxemiMkt("2030",regi,"ES")$(p47_emiRescaleCo2TaxES("2030",regi) AND p47_emiTargetES("2030",regi)) = max(1* sm_DptCO2_2_TDpGtC, pm_taxemiMkt_iteration(iteration,"2030",regi,"ES") * p47_emiRescaleCo2TaxES("2030",regi));
-***		pm_taxemiMkt(t,regi,"ES")$((t.val gt 2020) AND (t.val lt 2030) AND (t.val ge cm_startyear) AND (p47_emiTargetES("2030",regi)) ) = max(1* sm_DptCO2_2_TDpGtC, pm_taxemiMkt("2030",regi,"ES")*(1.05**(t.val-2030))); !! pre 2030: decrease at 5% p.a.
+		pm_taxemiMkt("2030",regi,"ES")$(p47_emiRescaleCo2TaxES("2030",regi) AND pm_emiTargetES("2030",regi)) = max(1* sm_DptCO2_2_TDpGtC, pm_taxemiMkt_iteration(iteration,"2030",regi,"ES") * p47_emiRescaleCo2TaxES("2030",regi));
+***		pm_taxemiMkt(t,regi,"ES")$((t.val gt 2020) AND (t.val lt 2030) AND (t.val ge cm_startyear) AND (pm_emiTargetES("2030",regi)) ) = max(1* sm_DptCO2_2_TDpGtC, pm_taxemiMkt("2030",regi,"ES")*(1.05**(t.val-2030))); !! pre 2030: decrease at 5% p.a.
 		pm_taxemiMkt(t,regi,"ES")$(p47_emiRescaleCo2TaxES("2030",regi) AND (t.val gt 2020) AND (t.val lt 2030) AND (t.val ge cm_startyear)) = max(1* sm_DptCO2_2_TDpGtC, pm_taxemiMkt("2020",regi,"ES") + (pm_taxemiMkt("2030",regi,"ES")-pm_taxemiMkt("2020",regi,"ES"))/2) ;
-***		pm_taxemiMkt(t,regi,"ES")$((t.val gt 2030) AND (p47_emiTargetES("2030",regi)) )  = pm_taxemiMkt("2030",regi,"ES")*1.0125**(t.val-2030); !! post 2030: increase at 1.25% p.a.
+***		pm_taxemiMkt(t,regi,"ES")$((t.val gt 2030) AND (pm_emiTargetES("2030",regi)) )  = pm_taxemiMkt("2030",regi,"ES")*1.0125**(t.val-2030); !! post 2030: increase at 1.25% p.a.
 
 $IFTHEN.emiMktES2050 "%cm_emiMktES2050%" == "linear"
 
@@ -177,14 +177,14 @@ $IFTHEN.emiMktES2050 "%cm_emiMktES2050%" == "linear"
 
 $ELSEIF.emiMktES2050 not "%cm_emiMktES2050%" == "off"
 		
-		pm_taxemiMkt("2050",regi,"ES")$(p47_emiRescaleCo2TaxES("2030",regi) AND p47_emiTargetES("2050",regi)) = max(1* sm_DptCO2_2_TDpGtC, pm_taxemiMkt_iteration(iteration,"2050",regi,"ES") * p47_emiRescaleCo2TaxES("2050",regi));
-		pm_taxemiMkt(t,regi,"ES")$(p47_emiRescaleCo2TaxES("2030",regi) AND (p47_emiTargetES("2050",regi)) AND (t.val gt 2030) AND (t.val lt 2050)) = pm_taxemiMkt("2030",regi,"ES") + ((t.val-2030)/(2050-2030))*(pm_taxemiMkt("2050",regi,"ES")-pm_taxemiMkt("2030",regi,"ES")) ;
-***		pm_taxemiMkt(t,regi,"ES")$((p47_emiTargetES("2050",regi)) AND (t.val gt 2030) AND (t.val le 2050)) = pm_taxemiMkt("2050",regi,"ES")*1.05**(t.val-2050); !! 2035 to 2050: increase at 5% p.a.
-		pm_taxemiMkt(t,regi,"ES")$(p47_emiRescaleCo2TaxES("2030",regi) AND (p47_emiTargetES("2050",regi)) AND (t.val gt 2050)) = pm_taxemiMkt("2050",regi,"ES")*1.0125**(t.val-2050); !! post 2050: increase at 1.25% p.a.
+		pm_taxemiMkt("2050",regi,"ES")$(p47_emiRescaleCo2TaxES("2030",regi) AND pm_emiTargetES("2050",regi)) = max(1* sm_DptCO2_2_TDpGtC, pm_taxemiMkt_iteration(iteration,"2050",regi,"ES") * p47_emiRescaleCo2TaxES("2050",regi));
+		pm_taxemiMkt(t,regi,"ES")$(p47_emiRescaleCo2TaxES("2030",regi) AND (pm_emiTargetES("2050",regi)) AND (t.val gt 2030) AND (t.val lt 2050)) = pm_taxemiMkt("2030",regi,"ES") + ((t.val-2030)/(2050-2030))*(pm_taxemiMkt("2050",regi,"ES")-pm_taxemiMkt("2030",regi,"ES")) ;
+***		pm_taxemiMkt(t,regi,"ES")$((pm_emiTargetES("2050",regi)) AND (t.val gt 2030) AND (t.val le 2050)) = pm_taxemiMkt("2050",regi,"ES")*1.05**(t.val-2050); !! 2035 to 2050: increase at 5% p.a.
+		pm_taxemiMkt(t,regi,"ES")$(p47_emiRescaleCo2TaxES("2030",regi) AND (pm_emiTargetES("2050",regi)) AND (t.val gt 2050)) = pm_taxemiMkt("2050",regi,"ES")*1.0125**(t.val-2050); !! post 2050: increase at 1.25% p.a.
 
 $else.emiMktES2050
 
-		pm_taxemiMkt(t,regi,"ES")$(p47_emiRescaleCo2TaxES("2030",regi) AND (t.val gt 2030) AND (p47_emiTargetES("2030",regi)) )  = pm_taxemiMkt("2030",regi,"ES")*1.0125**(t.val-2030); !! post 2030: increase at 1.25% p.a.
+		pm_taxemiMkt(t,regi,"ES")$(p47_emiRescaleCo2TaxES("2030",regi) AND (t.val gt 2030) AND (pm_emiTargetES("2030",regi)) )  = pm_taxemiMkt("2030",regi,"ES")*1.0125**(t.val-2030); !! post 2030: increase at 1.25% p.a.
 
 $ENDIF.emiMktES2050
 
@@ -193,7 +193,7 @@ $ENDIF.emiMktES2050
 		
 	);
 		
-    display p47_emiTargetES,vm_emiTeMkt.l,p47_emiRescaleCo2TaxES;
+    display pm_emiTargetES,vm_emiTeMkt.l,p47_emiRescaleCo2TaxES;
     display pm_taxemiMkt;
 
 $ENDIF.emiMktES
@@ -302,66 +302,79 @@ $ENDIF.regicarbonprice
 ***---------------------------------------------------------------------------
 *** Non-market based Efficiency Targets:
 ***---------------------------------------------------------------------------
-$ifthen.implicitFEEffTarget not "%cm_implicitFEEffTarget%" == "off"
+
+
+$ifthen.cm_implicitFE "%cm_implicitFE%" == "exoTax"
+*** Exogenous FE implicit tax
+
+*** saving previous iteration value for implicit tax revenue
+	p47_implFETax0(t,regi) = sum(enty2$entyFE(enty2), p47_implFETax(t,regi,enty2) * sum(se2fe(enty,enty2,te), vm_prodFe.l(t,regi,enty,enty2,te)));
+
+*** setting exogenous tax level
+***		for region groups
+	loop((ttot,ext_regi,FEtarget_sector)$(p47_implFEExoTax(ttot,ext_regi,FEtarget_sector) AND (NOT(all_regi(ext_regi)))),
+		loop(all_regi$regi_group(ext_regi,all_regi),
+			p47_implFETax(ttot2,all_regi,entyFe)$((ttot2.val ge ttot.val) AND FEtarget_sector2entyFe(FEtarget_sector,entyFe)) = p47_implFEExoTax(ttot,ext_regi,FEtarget_sector) * sm_DpGJ_2_TDpTWa;
+		);
+	);
+
+***		for single regions
+	loop((ttot,ext_regi,FEtarget_sector)$(p47_implFEExoTax(ttot,ext_regi,FEtarget_sector) AND (all_regi(ext_regi))),
+		loop(all_regi$sameas(ext_regi,all_regi), !! trick to translate the ext_regi value to the all_regi set
+			p47_implFETax(ttot2,all_regi,entyFe)$((ttot2.val ge ttot.val) AND FEtarget_sector2entyFe(FEtarget_sector,entyFe)) = p47_implFEExoTax(ttot,ext_regi,FEtarget_sector) * sm_DpGJ_2_TDpTWa;
+		);
+	);
+	
+	display p47_implFETax,p47_implFETax0;
+
+$elseif.cm_implicitFE "%cm_implicitFE%" == "FEtarget"
+*** Endogenous FE implicit tax calculate to reach total FE target
 
 *** saving previous iteration value for implicit tax
-p47_implicitFEEffTargetTax_prevIter(ttot,all_regi) = p47_implicitFEEffTargetTax(ttot,all_regi);
-p47_implicitFEEffTargetTax0(ttot,regi) = p47_implicitFEEffTargetTax(ttot,regi)*sum(se2fe(enty,enty2,te), vm_prodFe.l(ttot,regi,enty,enty2,te));
+p47_implFETax_prevIter(t,all_regi,entyFe) = p47_implFETax(t,all_regi,entyFe);
+p47_implFETax0(t,regi) = sum(enty2$entyFE(enty2), p47_implFETax(t,regi,enty2) * sum(se2fe(enty,enty2,te), vm_prodFe.l(t,regi,enty,enty2,te)));
 
 ***  Calculating current FE level
 ***		for region groups
-loop((ttot,ext_regi)$(p47_implicitFEEffTarget(ttot,ext_regi) AND (NOT(all_regi(ext_regi)))),
-  p47_implicitFEEffTargetCurrent(ext_regi) = sum(all_regi$regi_group(ext_regi,all_regi), sum(ttot2$sameas(ttot2,ttot), sum(se2fe(enty,enty2,te), vm_prodFe.l(ttot2,all_regi,enty,enty2,te))));
+loop((ttot,ext_regi)$(p47_implFETarget(ttot,ext_regi) AND (NOT(all_regi(ext_regi)))),
+  p47_implFETargetCurrent(ext_regi) = sum(all_regi$regi_group(ext_regi,all_regi), sum(ttot2$sameas(ttot2,ttot), sum(se2fe(enty,,entyFe,te), vm_prodFe.l(ttot2,all_regi,enty,,entyFe,te))));
 );
 ***		for single regions (overwrites region groups)  
-loop((ttot,ext_regi)$(p47_implicitFEEffTarget(ttot,ext_regi) AND (all_regi(ext_regi))),
-  p47_implicitFEEffTargetCurrent(ext_regi) = sum(all_regi$sameas(ext_regi,all_regi), sum(ttot2$sameas(ttot2,ttot), sum(se2fe(enty,enty2,te), vm_prodFe.l(ttot2,all_regi,enty,enty2,te))));
+loop((ttot,ext_regi)$(p47_implFETarget(ttot,ext_regi) AND (all_regi(ext_regi))),
+  p47_implFETargetCurrent(ext_regi) = sum(all_regi$sameas(ext_regi,all_regi), sum(ttot2$sameas(ttot2,ttot), sum(se2fe(enty,,entyFe,te), vm_prodFe.l(ttot2,all_regi,enty,,entyFe,te))));
 );
 ***  calculating efficiency directive targets implicit tax rescale
-loop((ttot,ext_regi)$p47_implicitFEEffTarget(ttot,ext_regi),	
+loop((ttot,ext_regi)$p47_implFETarget(ttot,ext_regi),	
   if(iteration.val lt 10,
-		p47_implicitFEEffTargetTax_Rescale(ext_regi) = max(0.1, ( p47_implicitFEEffTargetCurrent(ext_regi) / p47_implicitFEEffTarget(ttot,ext_regi) ) ) ** 2; !! current final energy levels minus target 
+		p47_implFETax_Rescale(ext_regi) = max(0.1, ( p47_implFETargetCurrent(ext_regi) / p47_implFETarget(ttot,ext_regi) ) ) ** 2; !! current final energy levels minus target 
   else 
-		p47_implicitFEEffTargetTax_Rescale(ext_regi) = max(0.1, ( p47_implicitFEEffTargetCurrent(ext_regi) / p47_implicitFEEffTarget(ttot,ext_regi) ) ) ** 1;
+		p47_implFETax_Rescale(ext_regi) = max(0.1, ( p47_implFETargetCurrent(ext_regi) / p47_implFETarget(ttot,ext_regi) ) ) ** 1;
   );  
-***  p47_implicitFEEffTargetTax_Rescale(ext_regi) = 
-***    max(min( 2 * EXP( -0.15 * iteration.val ) + 1.01 , p47_implicitFEEffTargetTax_Rescale(ext_regi)),
-***			1/ ( 2 * EXP( -0.15 * iteration.val ) + 1.01)
-***	  )
-***  ;
 );
 ***	updating efficiency directive targets implicit tax
 ***		for region groups
-loop((ttot,ext_regi)$(p47_implicitFEEffTarget(ttot,ext_regi) AND (NOT(all_regi(ext_regi)))),
+loop((ttot,ext_regi)$(p47_implFETarget(ttot,ext_regi) AND (NOT(all_regi(ext_regi)))),
 	loop(all_regi$regi_group(ext_regi,all_regi),
-    p47_implicitFEEffTargetTax(t,all_regi)$((t.val ge ttot.val)) = max(1, p47_implicitFEEffTargetTax_prevIter(t,all_regi) * p47_implicitFEEffTargetTax_Rescale(ext_regi));
-	p47_implicitFEEffTargetTax(t,all_regi)$((t.val eq ttot.val-5)) = p47_implicitFEEffTargetTax(ttot,all_regi)/2;
-***	 p47_implicitFEEffTargetTax(ttot,all_regi) + ( p47_implicitFEEffTargetTax(ttot,all_regi) - sum(se2fe(enty,enty2,te), vm_prodFe.l("2015",all_regi,enty,enty2,te)) ) / (ttot.val - 2015);
+    	p47_implFETax(t,all_regi,entyFe)$((t.val ge ttot.val)) = max(1, p47_implFETax_prevIter(t,all_regi,entyFe) * p47_implFETax_Rescale(ext_regi));
+		p47_implFETax(t,all_regi,entyFe)$((t.val eq ttot.val-5)) = p47_implFETax(ttot,all_regi,entyFe)/2;
   );
 );
 ***		for single regions (overwrites region groups)
-loop((ttot,ext_regi,target_type,emi_type)$(p47_implicitFEEffTarget(ttot,ext_regi) AND (all_regi(ext_regi))),
+loop((ttot,ext_regi,target_type,emi_type)$(p47_implFETarget(ttot,ext_regi) AND (all_regi(ext_regi))),
 	loop(all_regi$sameas(ext_regi,all_regi), !! trick to translate the ext_regi value to the all_regi set
-    p47_implicitFEEffTargetTax(t,all_regi)$((t.val ge ttot.val)) = max(1, p47_implicitFEEffTargetTax_prevIter(t,all_regi) * p47_implicitFEEffTargetTax_Rescale(ext_regi));
-	p47_implicitFEEffTargetTax(t,all_regi)$((t.val eq ttot.val-5)) = p47_implicitFEEffTargetTax(ttot,all_regi)/2;
-***	 p47_implicitFEEffTargetTax(ttot,all_regi) + ( p47_implicitFEEffTargetTax(ttot,all_regi) - sum(se2fe(enty,enty2,te), vm_prodFe.l("2015",all_regi,enty,enty2,te)) ) / (ttot.val - 2015);
+    	p47_implFETax(t,all_regi,entyFe)$((t.val ge ttot.val)) = max(1, p47_implFETax_prevIter(t,all_regi,entyFe) * p47_implFETax_Rescale(ext_regi));
+		p47_implFETax(t,all_regi,entyFe)$((t.val eq ttot.val-5)) = p47_implFETax(ttot,all_regi,entyFe)/2;
   );
 );
 
-*** saving iteration level for efficiency directive targets implicit tax
-p47_implicitFEEffTargetTax_iter(iteration,ttot,all_regi) = p47_implicitFEEffTargetTax(ttot,all_regi);
-p47_implicitFEEffTargetTax_Rescale_iter(iteration,ext_regi) = p47_implicitFEEffTargetTax_Rescale(ext_regi);
-p47_implicitFEEffTargetCurrent_iter(iteration,ext_regi) = p47_implicitFEEffTargetCurrent(ext_regi);
+*** saving iteration level for efficiency directive targets implicit tax (for debugging purposes only)
+p47_implFETax_iter(iteration,ttot,all_regi,entyFe) = p47_implFETax(ttot,all_regi,entyFe);
+p47_implFETax_Rescale_iter(iteration,ext_regi) = p47_implFETax_Rescale(ext_regi);
+p47_implFETargetCurrent_iter(iteration,ext_regi) = p47_implFETargetCurrent(ext_regi);
 
-display p47_implicitFEEffTargetCurrent, p47_implicitFEEffTarget,
-	p47_implicitFEEffTargetTax_prevIter, p47_implicitFEEffTargetTax,
-	p47_implicitFEEffTargetTax_Rescale,
-	p47_implicitFEEffTargetTax_Rescale_iter,
-	p47_implicitFEEffTargetTax_iter,
-	p47_implicitFEEffTargetCurrent_iter,
-	p47_implicitFEEffTargetTax0;
+display p47_implFETargetCurrent, p47_implFETarget, p47_implFETax_prevIter, p47_implFETax, p47_implFETax_Rescale, p47_implFETax_Rescale_iter, p47_implFETax_iter, p47_implFETargetCurrent_iter, p47_implFETax0;
 
-$endIf.implicitFEEffTarget
+$endIf.cm_implicitFE
 
 
 

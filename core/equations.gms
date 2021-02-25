@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -31,6 +31,10 @@ q_costInv(t,regi)..
   =e=
   sum(en2en(enty,enty2,te),
     v_costInvTeDir(t,regi,te) + v_costInvTeAdj(t,regi,te)$teAdj(te)
+  )
+  +
+  sum((te,sector),
+    vm_costAddTeInv(t,regi,te,sector)
   )
   +
   sum(teNoTransform,
@@ -176,10 +180,10 @@ $endif
 ***---------------------------------------------------------------------------
 *' Transformation from secondary to final energy:
 ***---------------------------------------------------------------------------
-q_transSe2fe(t,regi,se2fe(enty,enty2,te))..
-         pm_eta_conv(t,regi,te) * vm_demSe(t,regi,enty,enty2,te)
+q_transSe2fe(t,regi,se2fe(entySe,entyFe,te))..
+         pm_eta_conv(t,regi,te) * vm_demSe(t,regi,entySe,entyFe,te)
          =e=
-         vm_prodFe(t,regi,enty,enty2,te)
+         vm_prodFe(t,regi,entySe,entyFe,te) 
 ;
 
 
@@ -206,7 +210,7 @@ qm_balFe(t,regi,entySe,entyFe,te)$se2fe(entySe,entyFe,te)..
 *' FE Pathway III: Energy service layer (prodFe -> demFeForEs -> prodEs), no capacity tracking.
 ***---------------------------------------------------------------------------
 
-*' Transformation from final energy to useful energy:
+*' Transformation from final energy to energy services:
 q_transFe2Es(t,regi,fe2es(entyFe,esty,teEs))..
     pm_fe2es(t,regi,teEs) * vm_demFeForEs(t,regi,entyFe,esty,teEs)
     =e=
@@ -284,7 +288,7 @@ q_limitCapCCS(t,regi,ccs2te(enty,enty2,te),rlf)$teCCS2rlf(te,rlf)..
 q_cap(ttot,regi,te2rlf(te,rlf))$(ttot.val ge cm_startyear)..
          vm_cap(ttot,regi,te,rlf)
          =e=
-***cb early retirement for some fossil technologies
+    !! early retirement for some fossil technologies
         (1 - vm_capEarlyReti(ttot,regi,te))
         *
 
@@ -293,13 +297,17 @@ q_cap(ttot,regi,te2rlf(te,rlf))$(ttot.val ge cm_startyear)..
                 * pm_omeg(regi,opTimeYr+1,te)
                 * vm_deltaCap(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi,te,rlf)
             )
-*LB* half of the last time step ttot
-        +  pm_dt(ttot)/2
-         * pm_omeg(regi,"2",te)
-         * vm_deltaCap(ttot,regi,te,rlf)
+
+       !! half of the last time step ttot
+        +  ( pm_dt(ttot) / 2 
+       * pm_omeg(regi,"2",te)
+       * vm_deltaCap(ttot,regi,te,rlf)
+       )
 $ifthen setGlobal END2110
-             - (pm_ts(ttot)* pm_omeg(regi,"11",te)
-                  * 0.5 * vm_deltaCap(ttot,regi,te,rlf))$(ord(ttot) eq card(ttot))
+    - ( pm_ts(ttot) / 2
+      * pm_omeg(regi,"11",te)
+      * vm_deltaCap(ttot,regi,te,rlf)
+      )$ (ord(ttot) eq card(ttot) )				   
 $endif
 );
 
@@ -429,9 +437,10 @@ q_costTeCapital(t,regi,teLearn) ..
 ***---------------------------------------------------------------------------
 *** this is to prevent that in the long term, all solids are supplied by biomass. Residential solids can be fully supplied by biomass (-> wood pellets), so the FE residential demand is subtracted
 *** vm_cesIO(t,regi,"fesob") will be 0 in the stationary realization
-q_limitBiotrmod(t,regi)$(t.val > 2020)..
-    vm_prodSe(t,regi,"pebiolc","sesobio","biotrmod")
-   - sum (in$sameAs("fesob",in), vm_cesIO(t,regi,in))
+
+q_limitBiotrmod(t,regi)$(t.val > 2020).. 
+    vm_prodSe(t,regi,"pebiolc","sesobio","biotrmod") 
+   - sum (in$sameAs("fesob",in), vm_cesIO(t,regi,in) + pm_cesdata(t,regi,in,"offset_quantity")) 
    - sum (fe2es(entyFe,esty,teEs)$buildMoBio(esty), vm_demFeForEs(t,regi,entyFe,esty,teEs) )
     =l=
     (2 +  max(0,min(1,( 2100 - pm_ttot_val(t)) / ( 2100 - 2020 ))) * 3) !! 5 in 2020 and 2 in 2100
@@ -531,13 +540,14 @@ q_emiAllMkt(t,regi,emi,emiMkt)..
   vm_emiAllMkt(t,regi,emi,emiMkt)
 	=e=
 	vm_emiTeMkt(t,regi,emi,emiMkt)
-	!! Non-energy sector emissions
+*** Non-energy sector emissions. Note: These are emissions from all MAC curves. 
+*** So, this includes fugitive emissions, which are sometimes also subsumed under the term energy emissions. 
 	+	sum(emiMacSector2emiMac(emiMacSector,emiMac(emi))$macSector2emiMkt(emiMacSector,emiMkt),
    	vm_emiMacSector(t,regi,emiMacSector)
   )
-	!! CDR
-	+	vm_emiCdr(t,regi,emi)$(sameas(emiMkt,"ETS"))
-	!! Exogenous emissions
+*** CDR from CDR module
+	+	vm_emiCdr(t,regi,emi)$(sameas(emiMkt,"ETS")) 
+*** Exogenous emissions (F-Gases)
   +	pm_emiExog(t,regi,emi)$(sameas(emiMkt,"other"))
 ;
 
@@ -636,9 +646,9 @@ q_emiAllGlob(t,emi(enty))..
   vm_co2eqMkt(ttot,regi,emiMkt)
   =e=
   vm_emiAllMkt(ttot,regi,"co2",emiMkt)
-  + (s_tgn_2_pgc   * vm_emiAllMkt(ttot,regi,"n2o",emiMkt) +
-     s_tgch4_2_pgc * vm_emiAllMkt(ttot,regi,"ch4",emiMkt)) $(cm_multigasscen eq 2 or cm_multigasscen eq 3)
-  - vm_emiMacSector(ttot,regi,"co2luc") $((cm_multigasscen eq 3) AND (sameas(emiMkt,"other")));
+  + (sm_tgn_2_pgc   * vm_emiAllMkt(ttot,regi,"n2o",emiMkt) +
+     sm_tgch4_2_pgc * vm_emiAllMkt(ttot,regi,"ch4",emiMkt)) $(cm_multigasscen eq 2 or cm_multigasscen eq 3) 
+  - vm_emiMacSector(ttot,regi,"co2luc") $((cm_multigasscen eq 3) AND (sameas(emiMkt,"other")));	
 
 ***------------------------------------------------------
 *' Total global emissions in CO2 equivalents that are part of the climate policy also take into account foreign emissions.
@@ -746,6 +756,7 @@ q_eqadj(regi,ttot,teAdj(te))$(ttot.val ge max(2010, cm_startyear)) ..
          ,2)
                 /( sum(te2rlf(te,rlf),vm_deltaCap(ttot-1,regi,te,rlf)) + p_adj_seed_reg(ttot,regi) * p_adj_seed_te(ttot,regi,te)
                    + p_adj_deltacapoffset("2010",regi,te)$(ttot.val eq 2010) + p_adj_deltacapoffset("2015",regi,te)$(ttot.val eq 2015)
+                   + p_adj_deltacapoffset("2020",regi,te)$(ttot.val eq 2020) + p_adj_deltacapoffset("2025",regi,te)$(ttot.val eq 2025)
                   );
 
 ***---------------------------------------------------------------------------
@@ -759,10 +770,10 @@ q_limitCapEarlyReti(ttot,regi,te)$(ttot.val lt 2109 AND pm_ttot_val(ttot+1) ge m
 q_smoothphaseoutCapEarlyReti(ttot,regi,te)$(ttot.val lt 2120 AND pm_ttot_val(ttot+1) ge max(2010, cm_startyear))..
         vm_capEarlyReti(ttot+1,regi,te)
         =l=
-        vm_capEarlyReti(ttot,regi,te) + (pm_ttot_val(ttot+1)-pm_ttot_val(ttot)) * (cm_earlyreti_rate
-*** more retirement possible for coal power plants in early time steps for Europe and USA, to account for relatively old fleet
-		+ p_earlyreti_adjRate(regi,te)$(ttot.val lt 2035)
-*** more retirement possible for first generation biofuels
+        vm_capEarlyReti(ttot,regi,te) + (pm_ttot_val(ttot+1)-pm_ttot_val(ttot)) * (cm_earlyreti_rate 
+*** more retirement possible for coal power plants in early time steps for Europe and USA, to account for relatively old fleet 
+		+ pm_earlyreti_adjRate(regi,te)$(ttot.val lt 2035)
+*** more retirement possible for first generation biofuels		
 		+ 0.05$(sameas(te,"biodiesel") or sameas(te, "bioeths")));
 
 
@@ -783,7 +794,7 @@ q_costEnergySys(ttot,regi)$( ttot.val ge cm_startyear ) ..
 ***---------------------------------------------------------------------------
 *' Investment equation for end-use capital investments (energy service layer):
 ***---------------------------------------------------------------------------
-q_esCapInv(ttot,regi,teEs)$pm_esCapCost(ttot,regi,teEs) ..
+q_esCapInv(ttot,regi,teEs)$(pm_esCapCost(ttot,regi,teEs) AND ttot.val ge cm_startyear) ..
     vm_esCapInv(ttot,regi,teEs)
     =e=
     sum (fe2es(entyFe,esty,teEs),
@@ -824,6 +835,15 @@ q_PE_histCap(t,regi,entyPe,entySe)$(p_PE_histCap(t,regi,entyPe,entySe))..
     0.9 * p_PE_histCap(t,regi,entyPe,entySe)
 ;
 
+q_PE_histCap_NGCC_2020_up(t,regi,entyPe,entySe)$( (p_PE_histCap("2015",regi,entyPe,entySe) gt 0.02) AND sameas(entyPe,"pegas") AND sameas(entySe,"seel") AND sameas(t,"2020") )..
+    sum(te$pe2se(entyPe,entySe,te),
+      sum(te2rlf(te,rlf), vm_cap(t,regi,te,rlf))
+    )
+    =l=
+    1.5 * p_PE_histCap("2015",regi,entyPe,entySe) + 0.01
+;
+
+
 ***---------------------------------------------------------------------------
 *' Share of green hydrogen in all hydrogen.
 ***---------------------------------------------------------------------------
@@ -846,7 +866,31 @@ q_shBioTrans(t,regi)..
   =e=
   sum(se2fe("seliqbio",entyFeTrans,te), vm_prodFe(t,regi,"seliqbio",entyFeTrans,te) )
 ;
+ 
+***---------------------------------------------------------------------------
+*' Share of final energy in stationary sector
+***---------------------------------------------------------------------------
+q_shfe(t,regi,entyFe,sector)$(pm_shfe_up(t,regi,entyFe,sector) OR pm_shfe_lo(t,regi,entyFe,sector))..
+  vm_shfe(t,regi,entyFe,sector) 
+  * sum(emiMkt$sector2emiMkt(sector,emiMkt), 
+      sum(se2fe(entySe,entyFe2,te)$(entyFe2Sector(entyFe2,sector)),   
+        vm_demFeSector(t,regi,entySe,entyFe2,sector,emiMkt)))
+  =e=
+  sum(emiMkt$sector2emiMkt(sector,emiMkt), 
+      sum(se2fe(entySe,entyFe,te),   
+        vm_demFeSector(t,regi,entySe,entyFe,sector,emiMkt))) 
+;
 
+q_shGasLiq_fe(t,regi,sector)$(pm_shGasLiq_fe_up(t,regi,sector) OR pm_shGasLiq_fe_lo(t,regi,sector))..
+  vm_shGasLiq_fe(t,regi,sector) 
+  * sum(emiMkt$sector2emiMkt(sector,emiMkt), 
+      sum(se2fe(entySe,entyFe,te)$(entyFe2Sector(entyFe,sector)),   
+        vm_demFeSector(t,regi,entySe,entyFe,sector,emiMkt)))
+  =e=
+  sum(emiMkt$sector2emiMkt(sector,emiMkt), 
+    sum(se2fe(entySe,entyFe,te)$(SAMEAS(entyFe,"fegas") OR SAMEAS(entyFe,"fehos")),
+      vm_demFeSector(t,regi,entySe,entyFe,sector,emiMkt))) 
+;
 
 *limit secondary energy district heating and heat pumps
 $IFTHEN.sehe_upper not "%cm_INNOPATHS_sehe_upper%" == "off"

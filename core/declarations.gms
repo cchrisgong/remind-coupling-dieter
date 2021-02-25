@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -33,8 +33,8 @@ pm_taxCO2eq_iteration(iteration,ttot,all_regi)       "save CO2eq tax used in ite
 p_taxCO2eq_iterationdiff(ttot,all_regi)              "help parameter for iterative adjustment of taxes"
 p_taxCO2eq_iterationdiff_tmp(ttot,all_regi)          "help parameter for iterative adjustment of taxes"
 o_taxCO2eq_iterDiff_Itr(iteration,all_regi) "track p_taxCO2eq_iterationdiff over iterations"
-pm_taxemiMkt(ttot,all_regi,all_emiMkt)
-pm_taxemiMkt_iteration(iteration,ttot,all_regi,all_emiMkt)
+pm_taxemiMkt(ttot,all_regi,all_emiMkt)                "CO2 or CO2eq region and emission market specific emission tax"
+pm_taxemiMkt_iteration(iteration,ttot,all_regi,all_emiMkt) "CO2 or CO2eq region and emission market specific emission tax per iteration"
 pm_emissionsForeign(tall,all_regi,all_enty)          "total emissions of other regions (nash relevant)"
 pm_co2eqForeign(tall,all_regi)                       "emissions, which are part of the climate policy, of other regions (nash relevant)"
 pm_cesdata(tall,all_regi,all_in,cesParameter)        "parameters of the CES function"
@@ -107,7 +107,7 @@ pm_emifac(tall,all_regi,all_enty,all_enty,all_te,all_enty)  "emission factor by 
 pm_omeg (all_regi,opTimeYr,all_te)                          "technical depreciation parameter, gives the share of a capacity that is still usable after tlt. [none/share, value between 0 and 1]"
 p_aux_lifetime(all_regi,all_te)                             "auxiliary parameter for calculating life times, calculated externally in excel sheet"
 pm_pedem_res(ttot,all_regi,all_te)                          "Demand for pebiolc residues, needed for enhancement of residue potential [TWa]"
-p_ef_dem(all_enty)                                          "Demand side emission factor of final energy carriers [MtCO2/EJ]"
+p_ef_dem(all_regi,all_enty)                                 "Demand side emission factor of final energy carriers [MtCO2/EJ]"
 p_bioshare(tall,all_regi,all_enty)                          "bioshare for each FE carrier"
 pm_demPeBio(tall,all_regi)                                  "Primary energy bioenergy demand from last iteration [TWyr]"
 
@@ -121,11 +121,25 @@ pm_fe2es(tall,all_regi,all_teEs)                     "Conversion factor from fin
 
 pm_shFeCes(ttot,all_regi,all_enty,all_in,all_teEs)   "Final energy shares for CES nodes"
 
+pm_shfe_up(ttot,all_regi,all_enty,emi_sectors)       "Final energy shares exogenous upper bounds per sector"
+pm_shfe_lo(ttot,all_regi,all_enty,emi_sectors)       "Final energy shares exogenous lower bounds per sector"
+pm_shGasLiq_fe_up(ttot,all_regi,emi_sectors)         "Final energy gases plus liquids shares exogenous upper bounds per sector"
+pm_shGasLiq_fe_lo(ttot,all_regi,emi_sectors)         "Final energy gases plus liquids shares exogenous lower bounds per sector"
 
 p_adj_coeff_Orig(ttot,all_regi,all_te)               "initial value of p_adj_coeff"
 p_adj_seed_te_Orig(ttot,all_regi,all_te)             "initial value of p_adj_seed_te"
 p_varyAdj_mult_adjSeedTe(ttot,all_regi)              "Multiplicative factor to adjust adjustment cost parameter p_adj_seed_te according to CO2 price level"
 p_varyAdj_mult_adjCoeff(ttot,all_regi)               "Multiplicative factor to adjust adjustment cost parameter p_adj_coeff according to CO2 price level"
+$ifthen not "%cm_INNOPATHS_adj_seed_cont%" == "off"
+  p_new_adj_seed(all_te)                               "redefine adjustment seed parameters through model config switch" / %cm_INNOPATHS_adj_seed% , %cm_INNOPATHS_adj_seed_cont% /
+$elseif not "%cm_INNOPATHS_adj_seed%" == "off" 
+  p_new_adj_seed(all_te)                               "redefine adjustment coefficient parameters through model config switch"  / %cm_INNOPATHS_adj_seed% /   
+$endif
+$ifthen not "%cm_INNOPATHS_adj_coeff_cont%" == "off"
+  p_new_adj_coeff(all_te)                              "new adj coef parameters" / %cm_INNOPATHS_adj_coeff% , %cm_INNOPATHS_adj_coeff_cont% /
+$elseif not "%cm_INNOPATHS_adj_coeff%" == "off" 
+  p_new_adj_coeff(all_te)                              "new adj coef parameters" / %cm_INNOPATHS_adj_coeff% /
+$endif
 
 p_boundtmp(tall,all_regi,all_te,rlf)                 "read-in bound on capacities"
 p_bound_cap(tall,all_regi,all_te,rlf)                "read-in bound on capacities"
@@ -164,7 +178,6 @@ p_cintraw(all_enty)                                  "carbon intensity of fossil
 p_CapFixFromRWfix(ttot,all_regi,all_te)              "parameter for fixing capacity variable to Real-World values in 2010/2015"
 p_deltaCapFromRWfix(ttot,all_regi,all_te)            "parameter with resulting deltacap values resulting from fixing capacity to real-world values in 2010/2015"
 
-pm_priceSeel(ttot,all_regi)                           "parameter with electricity price from last iteration (unit: trUSD/TWa)"
 pm_calibrate_eff_scale(all_in,all_in,eff_scale_par)   "parameters for scaling efficiencies in CES calibration"
 /   /
 
@@ -261,11 +274,12 @@ vm_usableSeTe(ttot,all_regi,entySe,all_te)           "usable se produced by one 
 vm_costFuBio(ttot,all_regi)                          "fuel costs from bio energy [tril$US]"
 vm_omcosts_cdr(tall,all_regi)                        "O&M costs for spreading grinded rocks on fields"
 vm_costpollution(tall,all_regi)                      "costs for air pollution policies"
-vm_emiFgas(tall,all_regi,all_enty)                   "F-gas emissions by single gases from IMAGE"
-v_emiTeDetailMkt(tall,all_regi,all_enty,all_enty,all_te,all_enty,all_emiMkt)
-vm_emiTeMkt(tall,all_regi,all_enty,all_emiMkt)
-vm_emiAllMkt(tall,all_regi,all_enty,all_emiMkt)
-vm_flexAdj(tall,all_regi,all_te)			         "flexibility adjustment used for flexibility subsidy (tax) to emulate price changes of technologies which see lower-than-average (higher-than-average) elec. prices [trUSD/TWa]"
+vm_emiFgas(ttot,all_regi,all_enty)                   "F-gas emissions by single gases from IMAGE"
+v_emiTeDetailMkt(tall,all_regi,all_enty,all_enty,all_te,all_enty,all_emiMkt) "emissions from fuel combustion per region, technology and emission market. [GtC, Mt CH4, Mt N]"
+vm_emiTeMkt(tall,all_regi,all_enty,all_emiMkt)       "total energy-emissions of each region and emission market. [GtC, Mt CH4, Mt N]"
+vm_emiAllMkt(tall,all_regi,all_enty,all_emiMkt)      "total regional emissions for each emission market. [GtC, Mt CH4, Mt N]"
+vm_flexAdj(tall,all_regi,all_te)                     "flexibility adjustment used for flexibility subsidy (tax) to emulate price changes of technologies which see lower-than-average (higher-than-average) elec. prices [trUSD/TWa]"
+vm_taxrevimplFETax(ttot,all_regi)                    "implicit efficiency directive target tax"
 ;
 
 ***----------------------------------------------------------------------------------------
@@ -292,7 +306,7 @@ vm_prodPe(ttot,all_regi,all_enty)                    "pe production. [TWa, Urani
 vm_demSe(ttot,all_regi,all_enty,all_enty,all_te)     "se demand. [TWa]"
 vm_prodSe(tall,all_regi,all_enty,all_enty,all_te)    "se production. [TWa]"
 vm_prodFe(ttot,all_regi,all_enty,all_enty,all_te)    "fe production. [TWa]"
-vm_demFeSector(tall,all_regi,all_enty,all_enty,emi_sectors,all_emiMkt) "fe demand per sector and emission market. Unit: TWa"
+vm_demFeSector(ttot,all_regi,all_enty,all_enty,emi_sectors,all_emiMkt) "fe demand per sector and emission market. Unit: TWa"
 v_costFu(ttot,all_regi)                              "fuel costs"
 vm_costFuEx(ttot,all_regi,all_enty)                  "fuel costs from exhaustible energy [tril$US]"
 vm_pebiolc_price(ttot,all_regi)                      "Bioenergy price according to MAgPIE supply curves [T$US/TWa]"
@@ -300,6 +314,7 @@ vm_pebiolc_price(ttot,all_regi)                      "Bioenergy price according 
 v_costOM(ttot,all_regi)                              "o&m costs"
 v_costInv(ttot,all_regi)                             "investment costs"
 vm_costTeCapital(ttot,all_regi,all_te)               "investment costs"
+vm_costAddTeInv(tall,all_regi,all_te,emi_sectors)    "small diffusion additional sector specific investment cost"
                                                                  
 vm_co2CCS(ttot,all_regi,all_enty,all_enty,all_te,rlf)       "all differenct ccs. [GtC/a]"
 
@@ -307,7 +322,6 @@ vm_co2capture(ttot,all_regi,all_enty,all_enty,all_te,rlf)   "all captured CO2. [
 v_co2capturevalve(ttot,all_regi)                            "CO2 emitted right after capture [GtC/a] (in q_balCCUvsCCS to account for different lifetimes of capture and CCU/CCS te and capacities)"
 
 vm_prodUe(ttot,all_regi,all_enty,all_enty,all_te)    "Useful energy production [TWa]"
-v_demFe(ttot,all_regi,all_enty,all_enty,all_te)      "fe demand [TWa]"
 
 vm_capEarlyReti(tall,all_regi,all_te)                "fraction of early retired capital"
 vm_otherFEdemand(ttot,all_regi,all_enty)             "final energy demand from no transformation technologies (e.g. enhanced weathering)"
@@ -318,7 +332,8 @@ vm_prodSeOth(ttot,all_regi,all_enty,all_te)	         "other sety production from
 v_shGreenH2(ttot,all_regi)   "share of green hydrogen in all hydrogen by 2030 [0..1]"
 v_shBioTrans(ttot,all_regi)    "Share of biofuels in transport liquids from 2025 onwards. Value between 0 and 1."
 
-vm_taxrevimplicitFEEffTarget(ttot,all_regi)          "implicit efficiency directive target tax"
+vm_shfe(ttot,all_regi,all_enty,emi_sectors)           "share of final energy in sector total final energy [0..1]"
+vm_shGasLiq_fe(ttot,all_regi,emi_sectors)             "share of gases and liquids in sector final energy [0..1]"
 
 *** ES layer variables
 vm_demFeForEs(ttot,all_regi,all_enty,all_esty,all_teEs)     "Final energy which will be used in the ES layer."
@@ -380,7 +395,7 @@ q_budgetCO2eqGlob                                    "global emission budget bal
 
 q_emiTeDetailMkt(ttot,all_regi,all_enty,all_enty,all_te,all_enty,all_emiMkt) "detailed energy specific emissions per region and market"
 q_emiTeMkt(ttot,all_regi,all_enty,all_emiMkt)			             "total energy-emissions per region and market"
-q_emiAllMkt(ttot,all_regi,all_enty,all_emiMkt)
+q_emiAllMkt(ttot,all_regi,all_enty,all_emiMkt)       "total regional emissions for each emission market"
 
 
 q_transCCS(ttot,all_regi,all_enty,all_enty,all_te,all_enty,all_enty,all_te,rlf)        "transformation equation for ccs"
@@ -404,6 +419,8 @@ q_smoothphaseoutCapEarlyReti(ttot,all_regi,all_te)    "phase-out constraint for 
 q_limitBiotrmod(ttot,all_regi)                        "limit the total amount of modern biomass use for solids to the amount of coal use for solids "
 q_limitShOil(ttot,all_regi)                           "requires minimum share of liquids from oil in total liquids of 15%"
 q_PE_histCap(ttot,all_regi,all_enty,all_enty)         "model capacity must be equal or greater than historical capacity"
+q_PE_histCap_NGCC_2020_up(ttot,all_regi,all_enty,all_enty) "gas capacity can only increase by 50% maximum from 2015 to 2020, plus 10 GW to account for extra flexibility in regions with small 2015 capacity"
+
 *** ES layer equations
 q_transFe2Es(ttot,all_regi,all_enty,all_esty,all_teEs)    "Conversion from final energy to energy service"
 q_es2ppfen(ttot,all_regi,all_in)                          "Energy services are handed to the CES tree."
@@ -412,8 +429,11 @@ q_shFeCes(ttot,all_regi,all_enty,all_in,all_teEs)         "Shares of final energ
 q_shGreenH2(ttot,all_regi)  "share of green hydrogen in all hydrogen"
 q_shBioTrans(ttot,all_regi)  "Define the share of biofuels in transport liquids from 2025 on."
 
+q_shfe(ttot,all_regi,all_enty,emi_sectors)            "share of gases and liquids in sector final energy"
+q_shGasLiq_fe(ttot,all_regi,emi_sectors)              "share of gases and liquids in sector final energy"
+
 $IFTHEN.sehe_upper not "%cm_INNOPATHS_sehe_upper%" == "off" 
-q_heat_limit(ttot,all_regi)
+q_heat_limit(ttot,all_regi)  "equation to limit maximum level of secondary energy district heating and heat pumps use"
 $ENDIF.sehe_upper
 
 ***----------------------------------------------------------------------------------------
@@ -456,8 +476,8 @@ s_gwpCH4                                              "Global Warming Potentials
 s_gwpN2O                                              "Global Warming Potentials of N2O, AR5 WG1 CH08 Table 8.7"     /265/
 sm_dmac                                               "step in MAC functions [US$]"                                                                   /5/
 s_macChange                                           "maximum yearly increase of relative abatement in percentage points of maximum abatement. Unit: 0..1"      /0.05/
-s_tgn_2_pgc                                           "conversion factor 100-yr GWP from TgN to PgCeq"
-s_tgch4_2_pgc                                         "conversion factor 100-yr GWP from TgCH4 to PgCeq"
+sm_tgn_2_pgc                                           "conversion factor 100-yr GWP from TgN to PgCeq"
+sm_tgch4_2_pgc                                         "conversion factor 100-yr GWP from TgCH4 to PgCeq"
 
 sm_MtCH4_2_TWa                                        "Energy content of methane. MtCH4 --> TWa: 1 MtCH4 = 1.23 * 10^6 toe * 42 GJ/toe * 10^-9 EJ/GJ * 1 TWa/31.536 EJ = 0.001638 TWa (BP statistical review)"  /0.001638/
 
@@ -469,8 +489,8 @@ s_tau_cement                                          "range of per capita inves
 s_c_so2                                               "constant, see S. Smith, 2004, Future Sulfur Dioxide Emissions"    /4.39445/
 sm_ccsinjecrate                                       "CCS injection rate factor. Unit: 1/a"
 
-s_t_start                                                      "start year of emission budget"
-cm_peakBudgYr                                              "date of net-zero CO2 emissions for peak budget runs without overshoot"
+s_t_start                                             "start year of emission budget"
+cm_peakBudgYr                                         "date of net-zero CO2 emissions for peak budget runs without overshoot"
 
 sm_endBudgetCO2eq                                     "end time step of emission budget period 1"
 sm_budgetCO2eqGlob                                    "budget for global energy-emissions in period 1"
@@ -487,8 +507,8 @@ sm_eps                                                "small number: 1e-9 "  /1e
 ***----------------------------------------------trade module------------------------------
 ;
 
-s_tgn_2_pgc = (44/28) * s_gwpN2O * (12/44) * 0.001;
-s_tgch4_2_pgc = s_gwpCH4 * (12/44) * 0.001;
+sm_tgn_2_pgc = (44/28) * s_gwpN2O * (12/44) * 0.001;
+sm_tgch4_2_pgc = s_gwpCH4 * (12/44) * 0.001;
 
 ***----------------------------------------------------------------------------------------
 *----------------------------------------------carbon intensities of coal, oil, and gas
@@ -513,34 +533,34 @@ magicc_sed_script.ap = 0;
 *** INNOPATHS emissions reporting
 
 Parameter 
-o_emissions(ttot,all_regi,all_enty) 
-o_emissions_bunkers(ttot,all_regi,all_enty)
-o_emissions_energy(ttot,all_regi,all_enty)
-o_emissions_energy_demand(ttot,all_regi,all_enty)
-o_emissions_energy_demand_sector(ttot,all_regi,all_enty,emi_sectors)
-o_emissions_energy_supply_gross(ttot,all_regi,all_enty)
-o_emissions_energy_supply_gross_carrier(ttot,all_regi,all_enty,all_enty)
-o_emissions_energy_extraction(ttot,all_regi,all_enty,all_enty)
-o_emissions_energy_negative(ttot,all_regi,all_enty)
-o_emissions_industrial_processes(ttot,all_regi,all_enty)
-o_emissions_AFOLU(ttot,all_regi,all_enty)
-o_emissions_DACCS(ttot,all_regi,all_enty)
-o_emissions_other(ttot,all_regi,all_enty)
+o_emissions(ttot,all_regi,all_enty)   "output parameter"
+o_emissions_bunkers(ttot,all_regi,all_enty)    "output parameter"
+o_emissions_energy(ttot,all_regi,all_enty)   "output parameter"
+o_emissions_energy_demand(ttot,all_regi,all_enty)   "output parameter"
+o_emissions_energy_demand_sector(ttot,all_regi,all_enty,emi_sectors)   "output parameter"
+o_emissions_energy_supply_gross(ttot,all_regi,all_enty)   "output parameter"
+o_emissions_energy_supply_gross_carrier(ttot,all_regi,all_enty,all_enty)   "output parameter"
+o_emissions_energy_extraction(ttot,all_regi,all_enty,all_enty)   "output parameter"
+o_emissions_energy_negative(ttot,all_regi,all_enty)   "output parameter"
+o_emissions_industrial_processes(ttot,all_regi,all_enty)   "output parameter"
+o_emissions_AFOLU(ttot,all_regi,all_enty)   "output parameter"
+o_emissions_DACCS(ttot,all_regi,all_enty)   "output parameter"
+o_emissions_other(ttot,all_regi,all_enty)   "output parameter"
 
-o_capture(ttot,all_regi,all_enty)
-o_capture_energy(ttot,all_regi,all_enty)
-o_capture_energy_elec(ttot,all_regi,all_enty)
-o_capture_energy_other(ttot,all_regi,all_enty)
-o_capture_cdr(ttot,all_regi,all_enty)
-o_capture_industry(ttot,all_regi,all_enty)
-o_capture_energy_bio(ttot,all_regi,all_enty)
-o_capture_energy_fos(ttot,all_regi,all_enty)
-o_carbon_CCU(ttot,all_regi,all_enty)
-o_carbon_LandUse(ttot,all_regi,all_enty)
-o_carbon_underground(ttot,all_regi,all_enty)
-o_carbon_reemitted(ttot,all_regi,all_enty)
+o_capture(ttot,all_regi,all_enty)   "output parameter"
+o_capture_energy(ttot,all_regi,all_enty)   "output parameter"
+o_capture_energy_elec(ttot,all_regi,all_enty)   "output parameter"
+o_capture_energy_other(ttot,all_regi,all_enty)   "output parameter"
+o_capture_cdr(ttot,all_regi,all_enty)   "output parameter"
+o_capture_industry(ttot,all_regi,all_enty)   "output parameter"
+o_capture_energy_bio(ttot,all_regi,all_enty)   "output parameter"
+o_capture_energy_fos(ttot,all_regi,all_enty)   "output parameter"
+o_carbon_CCU(ttot,all_regi,all_enty)   "output parameter"
+o_carbon_LandUse(ttot,all_regi,all_enty)   "output parameter"
+o_carbon_underground(ttot,all_regi,all_enty)   "output parameter"
+o_carbon_reemitted(ttot,all_regi,all_enty)   "output parameter"
 
-emi_conv(all_enty) / co2 3666.6666666666666666666666666667, ch4 28, n2o 416.4286, so2 1,	bc  1, oc  1 /
+o_emi_conv(all_enty)    "output parameter" / co2 3666.6666666666666666666666666667, ch4 28, n2o 416.4286, so2 1,	bc  1, oc  1 /
 ;
 
 *** EOF ./core/declarations.gms

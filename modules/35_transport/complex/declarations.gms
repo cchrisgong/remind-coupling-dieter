@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -8,6 +8,7 @@
 
 Positive variables
 vm_shUePeT(ttot,all_regi,all_te)             "share of the Uepet production from a certain LDV type in the total Uepet production. Unit: percent"
+v35_demFe(ttot,all_regi,all_enty,all_enty,all_te)      "fe demand [TWa]"
 ;
 
 equations
@@ -34,7 +35,7 @@ p35_share_seh2_t(ttot,all_regi)                                "share of hydroge
 p35_share_seel_t(ttot,all_regi)                                "Share of electricity used for transport sector (feelt). Unit 0..1"
 
 $ifthen not "%cm_INNOPATHS_LDV_mkt_share%" == "off"
-    new_bound(all_te,bound_type) / %cm_INNOPATHS_LDV_mkt_share% /
+    p35_shUePeT_bound   "define upper and/or lower bound for LDV EV (apCarElT), hydrogen (apCarH2T) or petrol (apCarPeT) market share  [ex. apCarElT.upper 90, apCarPeT.lower 5]" (all_te,bound_type) / %cm_INNOPATHS_LDV_mkt_share% /
 $endif    
 ;
 
