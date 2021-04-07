@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -30,12 +30,11 @@
     =e=
       v21_taxrevGHG(t,regi)
     + v21_taxrevCO2luc(t,regi)
-    + v21_taxrevCCS(t,regi)
-    + v21_taxrevNetNegEmi(t,regi)
-    + v21_taxrevFEtrans(t,regi)
-    + v21_taxrevFEBuildInd(t,regi)
-    + v21_taxrevFE_Es(t,regi)
-    + v21_taxrevResEx(t,regi)
+    + v21_taxrevCCS(t,regi) 
+    + v21_taxrevNetNegEmi(t,regi)  
+    + v21_taxrevFEtrans(t,regi) 
+    + v21_taxrevFEBuildInd(t,regi)  
+    + v21_taxrevResEx(t,regi)   
     + v21_taxrevPE2SE(t,regi)
     + v21_taxrevXport(t,regi)
     + v21_taxrevSO2(t,regi)
@@ -47,9 +46,9 @@
     + v21_taxrevMrkup(t,regi)$(cm_DTcoup_capcon = 1)
 * + v21_taxrevMrkup(t,regi)
     + v21_taxrevBioImport(t,regi)
-$ifthen.implicitFEEffTarget not "%cm_implicitFEEffTarget%" == "off"
-    + vm_taxrevimplicitFEEffTarget(t,regi)
-$endif.implicitFEEffTarget
+$ifthen.cm_implicitFE not "%cm_implicitFE%" == "off"
+    + vm_taxrevimplFETax(t,regi)
+$endif.cm_implicitFE    
  ;
 
 ***---------------------------------------------------------------------------
@@ -116,25 +115,23 @@ v21_taxrevFEtrans(t,regi)
 *'  Documentation of overall tax approach is above at q21_taxrev.
 ***---------------------------------------------------------------------------
 q21_taxrevFEBuildInd(t,regi)$(t.val ge max(2010,cm_startyear))..
-v21_taxrevFEBuildInd(t,regi)
-=e= SUM(ppfen(in)$( NOT ppfenFromUe(in)),
-          (p21_tau_fe_tax_bit_st(t,regi,ppfen) + p21_tau_fe_sub_bit_st(t,regi,ppfen) ) * vm_cesIO(t,regi,ppfen)
-        )
-	- p21_taxrevFEBuildInd0(t,regi) ;
-
+  v21_taxrevFEBuildInd(t,regi) 
+  =e= 
+  sum(sector$(SAMEAS(sector,"build") OR SAMEAS(sector,"indst")),
+    sum(ppfen$ppfEn2Sector(ppfen,sector),
+      (pm_tau_fe_tax_bit_st(t,regi,ppfen) + pm_tau_fe_sub_bit_st(t,regi,ppfen))
+      *
+      sum(emiMkt$sector2emiMkt(sector,emiMkt), 
+        sum(se2fe(entySe,entyFe,te)$fe2ppfEn(entyFe,ppfen),   
+          vm_demFeSector(t,regi,entySe,entyFe,sector,emiMkt)
+      ) )
+    )
+  )
+  - p21_taxrevFEBuildInd0(t,regi)
+;
+    
 ***---------------------------------------------------------------------------
-*'  Calculation of final Energy taxes in Buildings_Industry or Stationary sector with energy service representation: effective tax rate (tax - subsidy) times FE use in sector
-*'  Documentation of overall tax approach is above at q21_taxrev.
-***---------------------------------------------------------------------------
-q21_taxrevFE_Es(t,regi)$(t.val ge max(2010,cm_startyear))..
-v21_taxrevFE_Es(t,regi)
-=e= SUM(fe2es(entyFe,esty,teEs),
-          (pm_tau_fe_tax_ES_st(t,regi,esty) + pm_tau_fe_sub_ES_st(t,regi,esty) ) * vm_demFeForEs(t,regi,entyFe,esty,teEs)
-        )
-	- p21_taxrevFE_Es0(t,regi) ;
-
-***---------------------------------------------------------------------------
-*'  Calcuation of ressource extraction subsidies: subsidy rate times fuel extraction
+*'  Calculation of resource extraction subsidies: subsidy rate times fuel extraction
 *'  Documentation of overall tax approach is above at q21_taxrev.
 ***---------------------------------------------------------------------------
 q21_taxrevResEx(t,regi)$(t.val ge max(2010,cm_startyear))..
@@ -201,18 +198,9 @@ q21_taxemiMkt(t,regi,emiMkt)$(t.val ge max(2010,cm_startyear))..
 ;
 
 ***---------------------------------------------------------------------------
-*'  FS: Calculation of tax/subsidy on technologies with inflexible/flexible electricity input
+*'  FS: Calculation of tax/subsidy on technologies with inflexible/flexible electricity input 
+*'  This is to emulate the effect of lower/higher electricity prices in high VRE systems on flexible/inflexible electricity demands. 
 ***---------------------------------------------------------------------------
-
-* q21_taxrevFlex(t,regi)$(t.val ge max(2010,cm_startyear))..
-*   v21_taxrevFlex(t,regi)
-*   =e=
-*   sum(en2en(enty,enty2,te)$(teFlexTax(te)),
-* *** vm_flexAdj is electricity price reduction/increases for flexible/inflexible technologies
-* *** change sign such that flexible technologies get subsidy
-*       -vm_flexAdj(t,regi,te) * vm_demSe(t,regi,enty,enty2,te))
-*   - p21_taxrevFlex0(t,regi)
-* ;
 
 ***---------------------------------------------------------------------------
 *'  CG: Calculation of tax/subsidy on technologies with variable/firm electricity onput
@@ -226,6 +214,18 @@ q21_taxrevMrkup(t,regi)$((t.val ge max(2010,cm_startyear)) AND (cm_DTcoup_capcon
 *** variable supply technologies get tax, firm technologies get subsidy
       - vm_Mrkup(t,regi,te) * vm_prodSe(t,regi,enty,enty2,te))
       - p21_taxrevMrkup0(t,regi)
+
+q21_taxrevFlex(t,regi)$( t.val ge max(2010, cm_startyear) ) ..
+  v21_taxrevFlex(t,regi)
+  =e=
+    sum(en2en(enty,enty2,te)$(teFlexTax(te)),
+      !! vm_flexAdj is electricity price reduction/increases for flexible/
+      !! inflexible technologies change sign such that flexible technologies
+      !! get subsidy
+      -vm_flexAdj(t,regi,te) 
+    * vm_demSe(t,regi,enty,enty2,te)
+    )
+  - p21_taxrevFlex0(t,regi)
 ;
 
 ***---------------------------------------------------------------------------

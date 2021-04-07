@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -46,6 +46,14 @@ Sets
     steel     . co2steel
     otherInd  . co2otherInd
   /
+
+  secInd37_emiMkt(secInd37,all_emiMkt)   "industry and emission market mapping"
+  /
+    cement    . ETS
+    chemicals . ETS
+    steel     . ETS
+    otherInd  . ES  
+  /  
 
   in_industry_dyn37(all_in)   "all inputs and outputs of the CES function - industry"
   /
@@ -270,5 +278,5 @@ $endif.calibrate
 alias(secInd37_2_pf,secInd37_2_pf2);
 alias(fe2ppfen37,fe2ppfen37_2);
 
-*** EOR ./modules/37_industry_four_sectors/sets.gms
+*** EOF ./modules/37_industry_four_sectors/sets.gms
 

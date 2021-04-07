@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -12,7 +12,7 @@ file prices_NASH;
 put prices_NASH;
 put '*AJS* file was written by nash module, containing price paths. Nash runs dont depend on it. Copy to 80_optimization/nash/input/prices_NASH.inc in case you experience convergence problems though.';
 put /;
-loop(trade,
+loop(trade$(NOT tradeSe(trade)),
     loop(ttot$(ttot.val ge 2005),
          put 'p80_pvpFallback("'ttot.te(ttot):0:0'","'trade.tl:0:0'")=' pm_pvp(ttot,trade):12:8, ';'; put /;
     );
@@ -28,7 +28,7 @@ put 'Scenario',',','Region',',','Year',',','Iteration',',',"Market",",","surplus
 put /;
 loop(ttot$(ttot.val ge 2005),
     loop(iteration$(iteration.val le cm_iteration_max),
-	loop(trade,
+	loop(trade$(NOT tradeSe(trade)),
 	    put '%c_expname%',",";
 	    put "glob",",";
 	    put ttot.val:0:0,',';

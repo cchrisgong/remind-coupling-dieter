@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -29,8 +29,8 @@ te_ccu39(all_te)                            "CCU technologies"
 
 se2se_ccu39(all_enty,all_enty,all_te)  			"map secondary energy to secondary energy using a CCU-technology"
 /
-		seh2.segabio.h22ch4
-		seh2.seliqbio.MeOH
+		seh2.segasyn.h22ch4
+		seh2.seliqsyn.MeOH
 /
 
 

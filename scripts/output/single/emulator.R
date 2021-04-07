@@ -1,4 +1,4 @@
-# |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+# |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 # |  authors, and contributors see CITATION.cff file. This file is part
 # |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 # |  AGPL-3.0, you are granted additional permissions described in the
@@ -7,17 +7,13 @@
 
 # setwd("~/Documents/0_SVN/REMIND2.0")
 
-library(lucode)
+library(lucode2)
+library(gms)
 library(lusweave)
 library(luplot)
 library(gdx)
 library(ggplot2)
-slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) { 
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
-  } else {
-    library(remind)
-  }
+library(remind2)
 library(mip)
 
 #####################################################

@@ -1,4 +1,4 @@
-# |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+# |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 # |  authors, and contributors see CITATION.cff file. This file is part
 # |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 # |  AGPL-3.0, you are granted additional permissions described in the
@@ -63,7 +63,7 @@ start_comp <- function(outputdirs,shortTerm,outfilename,regionList,mainReg) {
 }
 
 # ---- For each list entry call start script that starts compareScenarios ----
-regionSubsetList <- remind::toolRegionSubsets(lucode::path(listofruns[[1]]$dirs,"fulldata.gdx"))
+regionSubsetList <- remind2::toolRegionSubsets(lucode2::path(listofruns[[1]]$dirs,"fulldata.gdx"))
 for (r in listofruns) {
   # Create multiple pdf files for H12 and subregions of H12
   for (reg in c("H12",names(regionSubsetList))){

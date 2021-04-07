@@ -19,11 +19,9 @@ q47_emiTarget_netCO2_noBunkers(t, regi)..
 	v47_emiTarget(t,regi,"netCO2_noBunkers")
 	=e=
 	vm_emiAll(t,regi,"co2")
-	-
-	sum(se2fe(enty,enty2,te),
+	- sum(se2fe(enty,enty2,te),
 		pm_emifac(t,regi,enty,enty2,te,"co2")
-		* vm_demFeSector(t,regi,enty,enty2,"trans","other")
-	)
+		* vm_demFeSector(t,regi,enty,enty2,"trans","other"))
 ;
 
 *** gross Fossil Fuel and Industry co2 emissions: net energy co2 + cement co2 + BECCS
@@ -50,8 +48,8 @@ q47_emiTarget_netGHG_noBunkers(t, regi)..
 	sum(se2fe(enty,enty2,te),
 		(
 		pm_emifac(t,regi,enty,enty2,te,"co2")
-		+ pm_emifac(t,regi,enty,enty2,te,"n2o")*s_tgn_2_pgc
-		+ pm_emifac(t,regi,enty,enty2,te,"ch4")*s_tgch4_2_pgc
+		+ pm_emifac(t,regi,enty,enty2,te,"n2o")*sm_tgn_2_pgc
+		+ pm_emifac(t,regi,enty,enty2,te,"ch4")*sm_tgch4_2_pgc
 		) * vm_demFeSector(t,regi,enty,enty2,"trans","other")
 	)
 ;
@@ -89,15 +87,17 @@ $endIf.quantity_regiCO2target
 ***---------------------------------------------------------------------------
 *'  Calculation of tax/subsidy to reflect non carbon pricing driven efficency measures applied to reduce total final energy to comply with efficiency directive targets
 ***---------------------------------------------------------------------------
-$ifthen.implicitFEEffTarget not "%cm_implicitFEEffTarget%" == "off"
+$ifthen.cm_implicitFE not "%cm_implicitFE%" == "off"
 
-q21_implicitFEEffTargetTax(t,regi)$(t.val ge max(2010,cm_startyear))..
-  vm_taxrevimplicitFEEffTarget(t,regi)
+q47_implFETax(t,regi)$(t.val ge max(2010,cm_startyear))..
+  vm_taxrevimplFETax(t,regi)
   =e=
-  p47_implicitFEEffTargetTax(t,regi) * sum(se2fe(enty,enty2,te), vm_prodFe(t,regi,enty,enty2,te))
-  - p47_implicitFEEffTargetTax0(t,regi) 
+  sum(enty2$entyFE(enty2),
+  	p47_implFETax(t,regi,enty2) * sum(se2fe(enty,enty2,te), vm_prodFe(t,regi,enty,enty2,te))
+  )
+  - p47_implFETax0(t,regi) 
   ;
 
-$endIf.implicitFEEffTarget
+$endIf.cm_implicitFE
 
 *** EOF ./modules/47_regiPol/regiCarbonPrice/equations.gms

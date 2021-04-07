@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -38,7 +38,7 @@ peRicardian(enty)    = peBio(enty) + peEx(enty);
 en2se(enty,enty2,te) = pe2se(enty,enty2,te) + se2se(enty,enty2,te);
 
 en2en(enty,enty2,te) = pe2se(enty,enty2,te) + se2se(enty,enty2,te) + se2fe(enty,enty2,te) + fe2ue(enty,enty2,te) + ccs2te(enty,enty2,te);
-te2rlf(te,rlf)       = teFe2rlf(te,rlf) + teSe2rlf(te,rlf) + teue2rlf(te,rlf) + teCCS2rlf(te,rlf) + teCCU2rlf2(te,rlf) +teNoTransform2rlf(te,rlf);
+te2rlf(te,rlf)       = teFe2rlf(te,rlf) + teSe2rlf(te,rlf) + teue2rlf(te,rlf) + teCCS2rlf(te,rlf) + teCCU2rlf2(te,rlf) +teNoTransform2rlf(te,rlf) + teFe2rlfH2BI(te,rlf);
 
 ***----------------------------------------------------------------------------
 *** Fill sets that were created empty and should be filled from the mappings above

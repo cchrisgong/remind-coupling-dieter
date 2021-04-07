@@ -1,11 +1,17 @@
 #!/usr/bin/env Rscript
-library(lucode)
+# |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
+# |  authors, and contributors see CITATION.cff file. This file is part
+# |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
+# |  AGPL-3.0, you are granted additional permissions described in the
+# |  REMIND License Exception, version 1.0 (see LICENSE file).
+# |  Contact: remind@pik-potsdam.de
+library(gms)
 
 #' Usage:
 #' Rscript start.R [options]
 #' Rscript start.R file
 #'
-#' Without additional arguments this starts a single REMIND runs using the settings
+#' Without additional arguments this starts a single REMIND run using the settings
 #' from `config/default.cfg`.
 #'
 #' Control the script's behavior by providing additional arguments:
@@ -124,7 +130,7 @@ configure_cfg <- function(icfg, iscen, iscenarios, isettings) {
 
     # Set reporting script
     if( "output" %in% names(iscenarios)){
-      icfg$output <- paste0("c(\"",gsub(",","\",\"",gsub(", ",",",iscenarios[iscen,"output"])),"\")")
+      icfg$output <- gsub('c\\("|\\)|"','',strsplit(iscenarios[iscen,"output"],',')[[1]])
     }
 
     # check if full input.gdx path is provided and, if not, search for correct path
@@ -173,7 +179,7 @@ configure_cfg <- function(icfg, iscen, iscenarios, isettings) {
 
 
 # check command-line arguments for testOneRegi and scenario_config file
-argv <- commandArgs(trailingOnly = TRUE)
+if(!exists("argv")) argv <- commandArgs(trailingOnly = TRUE)
 config.file <- argv[1]
 
 # define arguments that are accepted
@@ -187,7 +193,7 @@ if (!all(known)) {
 }
 
 ###################### Choose submission type #########################
-slurmConfig <- choose_slurmConfig()
+if(!exists("slurmConfig")) slurmConfig <- choose_slurmConfig()
 
 # Restart REMIND in existing results folder (if required by user)
 if ('--restart' %in% argv) {
@@ -196,6 +202,8 @@ if ('--restart' %in% argv) {
   for (outputdir in outputdirs) {
     cat("Restarting",outputdir,"\n")
     load(paste0("output/",outputdir,"/config.Rdata")) # read config.Rdata from results folder
+    cfg$slurmConfig <- combine_slurmConfig(cfg$slurmConfig,slurmConfig) # update the slurmConfig setting to what the user just chose
+    cfg$results_folder <- paste0("output/",outputdir) # overwrite results_folder in cfg with name of the folder the user wants to restart, because user might have renamed the folder before restarting
     submit(cfg, restart = TRUE)
     #cat(paste0("output/",outputdir,"/config.Rdata"),"\n")
   }
@@ -203,7 +211,6 @@ if ('--restart' %in% argv) {
 } else {
 
   # If testOneRegi was selected, set up a testOneRegi run.
-
   if ('--testOneRegi' %in% argv) {
     testOneRegi <- TRUE
     config.file <- NA
@@ -254,7 +261,7 @@ if ('--restart' %in% argv) {
 
     cat("\n",scen,"\n")
 
-    # configure cfg based on settings from csv if provided
+    # configure cfg according to settings from csv if provided
     if (!is.na(config.file)) {
       cfg <- configure_cfg(cfg, scen, scenarios, settings)
       # Directly start runs that have a gdx file location given as path_gdx_ref or where this field is empty
@@ -262,7 +269,7 @@ if ('--restart' %in% argv) {
                    | is.na(scenarios[scen,"path_gdx_ref"]))
     }
     
-    # save the cfg data for later start of subsequent runs (after preceding run finished)
+    # save the cfg object for the later automatic start of subsequent runs (after preceding run finished)
     filename <- paste0(scen,".RData")
     cat("   Writing cfg to file",filename,"\n")
     save(cfg,file=filename)

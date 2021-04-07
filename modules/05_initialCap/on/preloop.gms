@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -96,6 +96,11 @@ option limcol = 70;
 option limrow = 70;
 
 *** solve statement
+if (execError > 0,
+  execute_unload "abort.gdx";
+  abort "at least one execution error occured, abort.gdx written";
+);
+
 solve initialcap2 using cns;
 
 display v05_INIdemEn0.l, v05_INIcap0.l;
@@ -514,3 +519,4 @@ display pm_emifac;
 
 
 *** EOF ./modules/05_initialCap/on/preloop.gms
+

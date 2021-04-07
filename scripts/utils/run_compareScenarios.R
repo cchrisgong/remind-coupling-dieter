@@ -1,16 +1,11 @@
-# |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+# |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 # |  authors, and contributors see CITATION.cff file. This file is part
 # |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 # |  AGPL-3.0, you are granted additional permissions described in the
 # |  REMIND License Exception, version 1.0 (see LICENSE file).
 # |  Contact: remind@pik-potsdam.de
-library(lucode) # getScenNames
-slurm <- suppressWarnings(ifelse(system2('srun',stdout=FALSE,stderr=FALSE) != 127, TRUE, FALSE))
-  if (slurm) { 
-    library('remind',lib.loc = '/p/tmp/renatoro/REMIND-EU/reporting_library/lib/')  
-  } else {
-    library(remind)
-  } # compareScenarios
+library(lucode2) # getScenNames
+library(remind2)
 
 if(!exists("source_include")) {
   readArgs("outputdirs")
@@ -42,7 +37,7 @@ wrap_to_have_a_clean_exit <- function(outputdirs,shortTerm,outfilename,regionLis
   if (!shortTerm) {
     try(compareScenarios(mif=mif_path, hist=hist_path, reg=regionList, mainReg=mainRegName, fileName = paste0(outfilename,".pdf")))
   } else {
-    try(compareScenarios(mif=mif_path, hist=hist_path, reg=regionList, mainReg=mainRegName, y=c(seq(2005,2050,5)), y_hist=c(seq(1990,2015,1)), y_bar=c(2010,2030,2050), fileName=paste0(outfilename,".pdf")))
+    try(compareScenarios(mif=mif_path, hist=hist_path, reg=regionList, mainReg=mainRegName, y=c(seq(2005,2050,5)), y_hist=c(seq(1990,2020,1), seq(2025,2050,5)), y_bar=c(2010,2030,2050), fileName=paste0(outfilename,".pdf")))
   }
 }
 

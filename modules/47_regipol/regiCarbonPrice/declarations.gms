@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -43,7 +43,7 @@ Parameter
 ***	p47_emiTargetETS(ttot,ETS_mkt)				"ETS emission target (GtCO2-eq)"
 	p47_emiCurrentETS(ETS_mkt)					"previous iteration ETS CO2 equivalent emissions"
 	p47_emiRescaleCo2TaxETS(ETS_mkt)			"ETS CO2 equivalent price re-scale update factor in between iterations"
-	p47_emiTargetES(tall,all_regi)      		"Effort Sharing GtCO2-eq (or GtCO2) emissions target per region"
+	pm_emiTargetES(tall,all_regi)      		"Effort Sharing GtCO2-eq (or GtCO2) emissions target per region"
 	p47_emiRescaleCo2TaxES(ttot,all_regi)		"Effort Sharing CO2 equivalent (or CO2) price re-scale update factor in between iterations"
 ;
 
@@ -67,22 +67,47 @@ equations
 $endIf.quantity_regiCO2target    
 
 
-$ifthen.implicitFEEffTarget not "%cm_implicitFEEffTarget%" == "off"
-Parameter
-	p47_implicitFEEffTarget(ttot,ext_regi)                    "region efficiency target [TWa]" / %cm_implicitFEEffTarget% /
-	p47_implicitFEEffTargetTax(ttot,all_regi)                 "tax/subsidy level to assure that the efficiency directive target is respected"
-	p47_implicitFEEffTargetCurrent(ext_regi)                  "current iteration total final energy"
-	p47_implicitFEEffTargetTax_Rescale(ext_regi)              "rescale factor for current implicit efficiency tax" 
-	p47_implicitFEEffTargetTax_iter(iteration,ttot,all_regi)  "iteration level of efficiency directive target implicit tax"
-	p47_implicitFEEffTargetTax_prevIter(ttot,all_regi)		  "previous iteration implicit final energy efficiency target tax"
-	p47_implicitFEEffTargetTax0(ttot,all_regi)			      "previous iteration implicit final energy efficiency target tax revenue"
 
-	p47_implicitFEEffTargetTax_Rescale_iter(iteration,ext_regi)    
-	p47_implicitFEEffTargetCurrent_iter(iteration,ext_regi)
+$ifthen.cm_implicitFE not "%cm_implicitFE%" == "off"
+Parameter
+
+	p47_implFETax(ttot,all_regi,all_enty)            "tax/subsidy level on FE"
+	p47_implFETargetCurrent(ext_regi)                "current iteration total final energy"
+	p47_implFETax_Rescale(ext_regi)                  "rescale factor for current implicit FE tax" 
+	p47_implFETax_prevIter(ttot,all_regi,all_enty)   "previous iteration implicit final energy target tax"
+	p47_implFETax0(ttot,all_regi)					 "previous iteration implicit final energy target tax revenue"
+
+	p47_implFETax_iter(iteration,ttot,all_regi,all_enty) "final energy implicit tax per iteration"
+	p47_implFETax_Rescale_iter(iteration,ext_regi)   "final energy implicit tax rescale factor per iteration"    
+	p47_implFETargetCurrent_iter(iteration,ext_regi) "total final energy level per iteration"    
 ;
+
+$ifthen.implicitFEtarget "%cm_implicitFE%" == "FEtarget"
+Parameter
+	p47_implFETarget(ttot,ext_regi)                  "final energy target [TWa]"  		  / %cm_implFETarget% /
+	p47_nonEnergyUse(ttot,ext_regi)                  "non-energy use: EUR in 2030 =~ 90Mtoe (90 * 10^6 toe -> 90 * 10^6 toe * 41.868 GJ/toe -> 3768.12 * 10^6 GJ * 10^-9 EJ/GJ -> 3.76812 EJ * 1 TWa/31.536 EJ -> 0.1194863 TWa)" / 2030.EUR_regi 0.1194863 /
+	p47_implFETarget_extended(ttot,ext_regi)         "final energy target with added bunkers and non-energy use [TWa]" 
+;
+$endIf.implicitFEtarget
+
+$IFTHEN.exoTax "%cm_implFEExoTax%" == "off"
+***	default p47_implFEExoTax value
+Parameter
+	p47_implFEExoTax(ttot,ext_regi,FEtarget_sector)  "final energy exogneous tax [$/GJ]" / 
+		2025.EUR_regi.stat   1, 2030.EUR_regi.stat   2, 2035.EUR_regi.stat   3, 2040.EUR_regi.stat   4, 2045.EUR_regi.stat   5,  2050.EUR_regi.stat   7,
+		2025.EUR_regi.trans 20, 2030.EUR_regi.trans 40, 2035.EUR_regi.trans 60, 2040.EUR_regi.trans 80, 2045.EUR_regi.trans 100,  2050.EUR_regi.trans 120 
+	/
+;
+$else.exoTax
+***	p47_implFEExoTax defined by switch cm_implFEExoTax
+Parameter
+	p47_implFEExoTax(ttot,ext_regi,FEtarget_sector)  "final energy exogneous tax [$/GJ]" / %cm_implFEExoTax% /
+;
+$ENDIF.exoTax
+
 equations
-	q21_implicitFEEffTargetTax(ttot,all_regi)      "calculation of the implicit tax to assure that the efficiency directive target is respected"
+	q47_implFETax(ttot,all_regi)      "implicit final energy tax to represent non CO2-price-driven final energy policies"
 ;
-$endIf.implicitFEEffTarget
+$endIf.cm_implicitFE
 
 *** EOF ./modules/47_regipol/regiCarbonPrice/declarations.gms

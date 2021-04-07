@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -566,6 +566,7 @@ DISPLAY  p_share_seliq_s, p_share_seh2_s, p_share_seel_s;
 *GL*calculation of a bioshare for each FE carrier
 *NB* the following is only relevant for reporting. As reporting is moved to R the following will be obsolete.
 p_bioshare(ttot,regi,entyFe)$(sum(se2fe(entySe,entyFe,te),
+<<<<<<< HEAD
 								sum(pe2se(entyPe,entySe,te2), vm_prodSe.l(ttot,regi,entyPe,entySe,te2))
 								+ sum(pc2te(entyPe,entySe2,te2,entySe),
 									  max(0, pm_prodCouple(regi,entyPe,entySe2,te2,entySe)) * vm_prodSe.l(ttot,regi,entyPe,entySe2,te2)
@@ -583,6 +584,25 @@ p_bioshare(ttot,regi,entyFe)$(sum(se2fe(entySe,entyFe,te),
 		+ sum(pc2te(entyPe,entySe2,te2,entySe),
 			  max(0, pm_prodCouple(regi,entyPe,entySe2,te2,entySe)) * vm_prodSe.l(ttot,regi,entyPe,entySe2,te2)
 			)
+=======
+                                  sum(pe2se(entyPe,entySe,te2), vm_prodSe.l(ttot,regi,entyPe,entySe,te2))
+                                  + sum(pc2te(entyPe,entySe2,te2,entySe),
+                                       max(0, pm_prodCouple(regi,entyPe,entySe2,te2,entySe)) * vm_prodSe.l(ttot,regi,entyPe,entySe2,te2)
+                                     )
+                             ) ne 0) 
+  = sum(se2fe(entySe,entyFe,te),
+        sum(pe2se(peBio,entySe,te2), vm_prodSe.l(ttot,regi,peBio,entySe,te2))
+        + sum(pc2te(peBio,entySe2,te2,entySe),
+               max(0, pm_prodCouple(regi,peBio,entySe2,te2,entySe)) * vm_prodSe.l(ttot,regi,peBio,entySe2,te2)
+             )
+    ) 
+    /
+    sum(se2fe(entySe,entyFe,te),
+        sum(pe2se(entyPe,entySe,te2), vm_prodSe.l(ttot,regi,entyPe,entySe,te2))
+        + sum(pc2te(entyPe,entySe2,te2,entySe),
+             max(0, pm_prodCouple(regi,entyPe,entySe2,te2,entySe)) * vm_prodSe.l(ttot,regi,entyPe,entySe2,te2)
+           )
+>>>>>>> REMIND
     )
 ;
 
@@ -621,16 +641,17 @@ $iftheni.CO2priceDependent_AdjCosts %c_CO2priceDependent_AdjCosts% == "on"
 loop(ttot$( (ttot.val > cm_startyear) AND (ttot.val > 2020) ),  !! only change values in the unfixed time steps of the current run, and not in the past
   loop(regi,
     if( pm_taxCO2eq(ttot-1,regi) le (40 * sm_DptCO2_2_TDpGtC) ,
-	  p_varyAdj_mult_adjSeedTe(ttot,regi) = 0.1;
-	  p_varyAdj_mult_adjCoeff(ttot,regi)  = 4;
+      p_varyAdj_mult_adjSeedTe(ttot,regi) = 0.1;
+      p_varyAdj_mult_adjCoeff(ttot,regi)  = 4;
     elseif ( ( pm_taxCO2eq(ttot-1,regi) gt (40 * sm_DptCO2_2_TDpGtC) ) AND ( pm_taxCO2eq(ttot-1,regi) le (80 * sm_DptCO2_2_TDpGtC) ) ) ,
       p_varyAdj_mult_adjSeedTe(ttot,regi) = 0.25;
-	  p_varyAdj_mult_adjCoeff(ttot,regi)  = 2.5;
+      p_varyAdj_mult_adjCoeff(ttot,regi)  = 2.5;
     elseif ( ( pm_taxCO2eq(ttot-1,regi) gt (80 * sm_DptCO2_2_TDpGtC) ) AND ( pm_taxCO2eq(ttot-1,regi) le (160 * sm_DptCO2_2_TDpGtC) ) ) ,
       p_varyAdj_mult_adjSeedTe(ttot,regi) = 0.5;
-	  p_varyAdj_mult_adjCoeff(ttot,regi)  = 1.5;
+      p_varyAdj_mult_adjCoeff(ttot,regi)  = 1.5;
     elseif ( ( pm_taxCO2eq(ttot-1,regi) gt (160 * sm_DptCO2_2_TDpGtC) ) AND ( pm_taxCO2eq(ttot-1,regi) le (320 * sm_DptCO2_2_TDpGtC) ) ) ,
       p_varyAdj_mult_adjSeedTe(ttot,regi) = 1;
+<<<<<<< HEAD
 	  p_varyAdj_mult_adjCoeff(ttot,regi)  = 1;
     elseif ( ( pm_taxCO2eq(ttot-1,regi) gt (320 * sm_DptCO2_2_TDpGtC) ) AND ( pm_taxCO2eq(ttot-1,regi) le (640 * sm_DptCO2_2_TDpGtC) ) ) ,
       p_varyAdj_mult_adjSeedTe(ttot,regi) = 2;
@@ -638,8 +659,17 @@ loop(ttot$( (ttot.val > cm_startyear) AND (ttot.val > 2020) ),  !! only change v
 	elseif ( pm_taxCO2eq(ttot-1,regi) gt (640 * sm_DptCO2_2_TDpGtC) ) ,
       p_varyAdj_mult_adjSeedTe(ttot,regi) = 4;
 	  p_varyAdj_mult_adjCoeff(ttot,regi)  = 0.25;
+=======
+      p_varyAdj_mult_adjCoeff(ttot,regi)  = 1;	
+    elseif ( ( pm_taxCO2eq(ttot-1,regi) gt (320 * sm_DptCO2_2_TDpGtC) ) AND ( pm_taxCO2eq(ttot-1,regi) le (640 * sm_DptCO2_2_TDpGtC) ) ) ,
+      p_varyAdj_mult_adjSeedTe(ttot,regi) = 2;
+      p_varyAdj_mult_adjCoeff(ttot,regi)  = 0.5;	
+    elseif ( pm_taxCO2eq(ttot-1,regi) gt (640 * sm_DptCO2_2_TDpGtC) ) ,
+      p_varyAdj_mult_adjSeedTe(ttot,regi) = 4;
+      p_varyAdj_mult_adjCoeff(ttot,regi)  = 0.25;	
+>>>>>>> REMIND
     );
-	p_adj_seed_te(ttot,regi,'apCarH2T')        = p_varyAdj_mult_adjSeedTe(ttot,regi) * p_adj_seed_te_Orig(ttot,regi,'apCarH2T');
+    p_adj_seed_te(ttot,regi,'apCarH2T')        = p_varyAdj_mult_adjSeedTe(ttot,regi) * p_adj_seed_te_Orig(ttot,regi,'apCarH2T');
     p_adj_seed_te(ttot,regi,'apCarElT')        = p_varyAdj_mult_adjSeedTe(ttot,regi) * p_adj_seed_te_Orig(ttot,regi,'apCarElT');
     p_adj_seed_te(ttot,regi,'apCarDiEffT')     = p_varyAdj_mult_adjSeedTe(ttot,regi) * p_adj_seed_te_Orig(ttot,regi,'apCarDiEffT');
     p_adj_seed_te(ttot,regi,'apCarDiEffH2T')   = p_varyAdj_mult_adjSeedTe(ttot,regi) * p_adj_seed_te_Orig(ttot,regi,'apCarDiEffH2T');
@@ -654,6 +684,7 @@ display p_adj_seed_te, p_adj_coeff, p_varyAdj_mult_adjSeedTe, p_varyAdj_mult_adj
 $endif.CO2priceDependent_AdjCosts
 
 
+<<<<<<< HEAD
 *** CG: calculate adjustment cost for capacity investment: d(v_costInvTeAdj) / d(vm_deltaCap)  !!!! the closed formula only holds when v_adjFactorGlob.fx(t,regi,te) = 0;
 pm_adjCostInv(ttot,regi,te)$(ttot.val ge max(2010, cm_startyear) AND teAdj(te)) =  vm_costTeCapital.l(ttot,regi,te) * p_adj_coeff(ttot,regi,te)
     * 2
@@ -687,28 +718,67 @@ o_emissions_energy_demand(ttot,regi,emi)$(ttot.val ge 2005) =
 	)*emi_conv(emi)
 	- o_emissions_bunkers(ttot,regi,emi)
 	;
+=======
+*** calculation of PE and SE Prices (useful for internal use and reporting purposes)
+pm_SEPrice(t,regi,entySE)$(abs (qm_budget.m(t,regi)) gt sm_eps AND (NOT (sameas(entySE,"seel")))) = 
+       q_balSe.m(t,regi,entySE) / qm_budget.m(t,regi);
 
+p_PEPrice(t,regi,entyPe)$(abs (qm_budget.m(t,regi)) gt sm_eps) = 
+       q_balPe.m(t,regi,entyPe) / qm_budget.m(t,regi);
+
+
+
+*** INNOPATHS emissions reporting
+o_emissions_bunkers(ttot,regi,emi)$(ttot.val ge 2005) = 
+    sum(se2fe(enty,enty2,te),
+        pm_emifac(ttot,regi,enty,enty2,te,emi)
+        * vm_demFeSector.l(ttot,regi,enty,enty2,"trans","other")
+    )*o_emi_conv(emi);
+
+o_emissions(ttot,regi,emi)$(ttot.val ge 2005) = 
+    sum(emiMkt, vm_emiAllMkt.l(ttot,regi,emi,emiMkt))*o_emi_conv(emi)
+    - o_emissions_bunkers(ttot,regi,emi);
+
+*** note! this still excludes industry CCS and CCU. To fix. 
+o_emissions_energy(ttot,regi,emi)$(ttot.val ge 2005) = 
+    sum(emiMkt, vm_emiTeMkt.l(ttot,regi,emi,emiMkt))*o_emi_conv(emi)
+    - o_emissions_bunkers(ttot,regi,emi);
+
+*** note! this still excludes industry CCS. To fix. 
+o_emissions_energy_demand(ttot,regi,emi)$(ttot.val ge 2005) = 
+    sum(sector2emiMkt(sector,emiMkt),
+        sum(se2fe(enty,enty2,te),
+            pm_emifac(ttot,regi,enty,enty2,te,emi)
+            * vm_demFeSector.l(ttot,regi,enty,enty2,sector,emiMkt)
+        )
+    )*o_emi_conv(emi)
+    - o_emissions_bunkers(ttot,regi,emi)
+;
+>>>>>>> REMIND
+
+*** note! this still excludes industry CCS. To fix.
 o_emissions_energy_demand_sector(ttot,regi,emi,sector)$(ttot.val ge 2005) =
-	sum(emiMkt$sector2emiMkt(sector,emiMkt),
-		sum(se2fe(enty,enty2,te),
-			pm_emifac(ttot,regi,enty,enty2,te,emi) * vm_demFeSector.l(ttot,regi,enty,enty2,sector,emiMkt)
-		)
-	)*emi_conv(emi)
-	+
-	(	sum(emiMacSector$(emiMac2sector(emiMacSector,"trans","process",emi)),
-			vm_emiMacSector.l(ttot,regi,emiMacSector)
-		)*emi_conv(emi)
-		- o_emissions_bunkers(ttot,regi,emi)
-	)$(sameas(sector,"trans"))
-	+
-	(	sum(emiMacSector$(emiMac2sector(emiMacSector,"waste","process",emi)),
-			vm_emiMacSector.l(ttot,regi,emiMacSector)
-		)*emi_conv(emi)
-	)$(sameas(sector,"waste"))
-	;
+    sum(emiMkt$sector2emiMkt(sector,emiMkt),
+        sum(se2fe(enty,enty2,te),
+            pm_emifac(ttot,regi,enty,enty2,te,emi) * vm_demFeSector.l(ttot,regi,enty,enty2,sector,emiMkt)
+        )
+    )*o_emi_conv(emi)
+    +
+   (sum(emiMacSector$(emiMac2sector(emiMacSector,"trans","process",emi)),
+        vm_emiMacSector.l(ttot,regi,emiMacSector)
+        )*o_emi_conv(emi)
+        - o_emissions_bunkers(ttot,regi,emi)
+    )$(sameas(sector,"trans"))
+    +
+    (sum(emiMacSector$(emiMac2sector(emiMacSector,"waste","process",emi)),
+         vm_emiMacSector.l(ttot,regi,emiMacSector)
+        )*o_emi_conv(emi)
+    )$(sameas(sector,"waste"))
+;
 
 o_emissions_energy_extraction(ttot,regi,emi,entyPe)$(ttot.val ge 2005) =
 ***   emissions from non-conventional fuel extraction
+<<<<<<< HEAD
 	(
 	( sum(emi2fuelMine(emi,entyPe,rlf),
 		  p_cint(regi,emi,entyPe,rlf)
@@ -739,10 +809,43 @@ o_emissions_energy_extraction(ttot,regi,emi,entyPe)$(ttot.val ge 2005) =
 			vm_emiMacSector.l(ttot,regi,emiMacSector)
 		)*emi_conv(emi)
 	)$(sameas(entyPe,"peoil"))
+=======
+    (
+    ( sum(emi2fuelMine(emi,entyPe,rlf),      
+           p_cint(regi,emi,entyPe,rlf)
+         * vm_fuExtr.l(ttot,regi,entyPe,rlf)
+         )$( c_cint_scen eq 1 )
+     )
+***   emissions from conventional fuel extraction
+    + ( sum(pe2rlf(entyPe,rlf2),sum(enty2,      
+         (p_cintraw(enty2)
+          * pm_fuExtrOwnCons(regi, enty2, entyPe) 
+          * vm_fuExtr.l(ttot,regi,entyPe,rlf2)
+         )$(pm_fuExtrOwnCons(regi, entyPe, enty2) gt 0)    
+        ))
+    )
+    )*o_emi_conv(emi)
+    +
+    (sum(emiMacSector$(emiMac2sector("ch4coal","extraction","process",emi)),
+         vm_emiMacSector.l(ttot,regi,emiMacSector)
+        )*o_emi_conv(emi)
+    )$(sameas(entyPe,"pecoal"))
+    +
+    (sum(emiMacSector$(emiMac2sector("ch4gas","extraction","process",emi)),
+         vm_emiMacSector.l(ttot,regi,emiMacSector)
+        )*o_emi_conv(emi)
+    )$(sameas(entyPe,"pegas"))
+    +
+    (sum(emiMacSector$(emiMac2sector("ch4oil","extraction","process",emi)),
+         vm_emiMacSector.l(ttot,regi,emiMacSector)
+        )*o_emi_conv(emi)
+    )$(sameas(entyPe,"peoil"))
+>>>>>>> REMIND
 ;
 
 
 o_emissions_energy_supply_gross(ttot,regi,emi)$(ttot.val ge 2005) =
+<<<<<<< HEAD
 	sum(pe2se(entyPe,entySe,te)$(pm_emifac(ttot,regi,entyPe,entySe,te,emi)>0),
 		pm_emifac(ttot,regi,entyPe,entySe,te,emi)
 		* vm_demPE.l(ttot,regi,entyPe,entySe,te)
@@ -794,101 +897,165 @@ o_emissions_energy_negative(ttot,regi,emi)$(ttot.val ge 2005) =
 
 	)
 	)*emi_conv(emi)
+=======
+    sum(pe2se(entyPe,entySe,te)$(pm_emifac(ttot,regi,entyPe,entySe,te,emi)>0),
+         pm_emifac(ttot,regi,entyPe,entySe,te,emi)
+         * vm_demPE.l(ttot,regi,entyPe,entySe,te)
+    )*o_emi_conv(emi)
+    +
+    sum(entyPe, o_emissions_energy_extraction(ttot,regi,emi,entyPe))
+;
+    
+o_emissions_energy_supply_gross_carrier(ttot,regi,emi,entySe)$(ttot.val ge 2005) =
+    sum((entyPe,te)$(pe2se(entyPe,entySe,te) AND (pm_emifac(ttot,regi,entyPe,entySe,te,emi)>0)),
+         pm_emifac(ttot,regi,entyPe,entySe,te,emi)
+         * vm_demPE.l(ttot,regi,entyPe,entySe,te)
+    )*o_emi_conv(emi)
+    +
+    (
+    o_emissions_energy_extraction(ttot,regi,emi,"pecoal")
+    )$(sameas(entySe,"sesofos"))
+    +
+    (
+    o_emissions_energy_extraction(ttot,regi,emi,"pegas")
+    )$(sameas(entySe,"segafos"))
+    +
+    (	
+    o_emissions_energy_extraction(ttot,regi,emi,"peoil")
+    )$(sameas(entySe,"seliqfos"))
+;
+
+o_emissions_energy_negative(ttot,regi,emi)$(ttot.val ge 2005) =
+    (
+     sum(pe2se(entyPe,entySe,te)$(pm_emifac(ttot,regi,entyPe,entySe,te,emi)<0),
+         pm_emifac(ttot,regi,entyPe,entySe,te,emi)
+         * vm_demPE.l(ttot,regi,entyPe,entySe,te)
+    )
+    +
+    sum((ccs2Leak(enty,enty2,te,emi),teCCS2rlf(te,rlf)),
+            pm_emifac(ttot,regi,enty,enty2,te,emi)
+            * vm_co2CCS.l(ttot,regi,enty,enty2,te,rlf)
+          )
+***   Industry CCS emissions
+    - ( sum(emiMac2mac(emiInd37_fuel,enty2),
+          vm_emiIndCCS.l(ttot,regi,emiInd37_fuel)
+        )$( sameas(emi,"co2") )
+    )
+    )*o_emi_conv(emi)
+>>>>>>> REMIND
 ;
 
 o_emissions_industrial_processes(ttot,regi,emi)$(ttot.val ge 2005) =
-	sum(emiMacSector$(emiMac2sector(emiMacSector,"indst","process",emi)),
-			vm_emiMacSector.l(ttot,regi,emiMacSector)
-	)*emi_conv(emi);
+    sum(emiMacSector$(emiMac2sector(emiMacSector,"indst","process",emi)),
+        vm_emiMacSector.l(ttot,regi,emiMacSector)
+    )*o_emi_conv(emi);
 
 o_emissions_AFOLU(ttot,regi,emi)$(ttot.val ge 2005) =
+<<<<<<< HEAD
 	sum(emiMacSector$(emiMac2sector(emiMacSector,"agriculture","process",emi) OR emiMac2sector(emiMacSector,"lulucf","process",emi)),
 		vm_emiMacSector.l(ttot,regi,emiMacSector)
 	)*emi_conv(emi);
+=======
+    sum(emiMacSector$(emiMac2sector(emiMacSector,"agriculture","process",emi) OR emiMac2sector(emiMacSector,"lulucf","process",emi)),
+        vm_emiMacSector.l(ttot,regi,emiMacSector)
+    )*o_emi_conv(emi);
+>>>>>>> REMIND
 
 o_emissions_DACCS(ttot,regi,emi)$(ttot.val ge 2005) =
-	vm_emiCdr.l(ttot,regi,emi)*emi_conv(emi)
+   vm_emiCdr.l(ttot,regi,emi)*o_emi_conv(emi)
 ;
 
 o_emissions_other(ttot,regi,emi)$(ttot.val ge 2005) =
-	pm_emiExog(ttot,regi,emi)*emi_conv(emi)
+    pm_emiExog(ttot,regi,emi)*o_emi_conv(emi)
 ;
 
 ***Carbon Management|Carbon Capture (Mt CO2/yr)
 o_capture(ttot,regi,"co2")$(ttot.val ge 2005) =
-	sum(teCCS2rlf(te,rlf),
-		vm_co2capture.l(ttot,regi,"cco2","ico2","ccsinje",rlf)
-	)*emi_conv("co2");
+    sum(teCCS2rlf(te,rlf),
+        vm_co2capture.l(ttot,regi,"cco2","ico2","ccsinje",rlf)
+    )*o_emi_conv("co2");
 
 ***Carbon Management|Carbon Capture|Process|Energy (Mt CO2/yr)
 o_capture_energy(ttot,regi,"co2")$(ttot.val ge 2005) =
+<<<<<<< HEAD
 	sum(emi2te(enty3,enty4,te2,"cco2"),
 		vm_emiTeDetail.l(ttot,regi,enty3,enty4,te2,"cco2")
 	)*emi_conv("co2");
+=======
+    sum(emi2te(enty3,enty4,te2,"cco2"),
+        vm_emiTeDetail.l(ttot,regi,enty3,enty4,te2,"cco2")
+    )*o_emi_conv("co2");
+>>>>>>> REMIND
 
 ***Carbon Management|Carbon Capture|Process|Energy|Electricity (Mt CO2/yr)
 o_capture_energy_elec(ttot,regi,"co2")$(ttot.val ge 2005) =
-	sum(emi2te(enty3,enty4,te2,"cco2")$(sameas(enty4,"seel")),
-		vm_emiTeDetail.l(ttot,regi,enty3,enty4,te2,"cco2")
-	)*emi_conv("co2");
+    sum(emi2te(enty3,enty4,te2,"cco2")$(sameas(enty4,"seel")),
+        vm_emiTeDetail.l(ttot,regi,enty3,enty4,te2,"cco2")
+    )*o_emi_conv("co2");
 
 ***Carbon Management|Carbon Capture|Process|Energy|Other (Mt CO2/yr)
 o_capture_energy_other(ttot,regi,"co2")$(ttot.val ge 2005) =
+<<<<<<< HEAD
 	sum(emi2te(enty3,enty4,te2,"cco2")$(NOT(sameas(enty4,"seel"))),
 		vm_emiTeDetail.l(ttot,regi,enty3,enty4,te2,"cco2")
 	)*emi_conv("co2");
+=======
+    sum(emi2te(enty3,enty4,te2,"cco2")$(NOT(sameas(enty4,"seel"))),
+        vm_emiTeDetail.l(ttot,regi,enty3,enty4,te2,"cco2")
+    )*o_emi_conv("co2");
+>>>>>>> REMIND
 
 ***Carbon Management|Carbon Capture|Process|Direct Air Capture (Mt CO2/yr)
 o_capture_cdr(ttot,regi,"co2")$(ttot.val ge 2005) =
-	sum(teCCS2rlf("ccsinje",rlf),
+    sum(teCCS2rlf("ccsinje",rlf),
       vm_ccs_cdr.l(ttot,regi,"cco2","ico2","ccsinje",rlf)
-    )*emi_conv("co2");
+    )*o_emi_conv("co2");
 
 ***Carbon Management|Carbon Capture|Process|Industrial Processes (Mt CO2/yr)
 o_capture_industry(ttot,regi,"co2")$(ttot.val ge 2005) =
-	sum(emiInd37,
+    sum(emiInd37,
       vm_emiIndCCS.l(ttot,regi,emiInd37)
-    )*emi_conv("co2")
+    )*o_emi_conv("co2")
 ;
 
 ***Carbon Management|Carbon Capture|Primary Energy|Biomass (Mt CO2/yr)
 o_capture_energy_bio(ttot,regi,"co2")$(ttot.val ge 2005) =
-	sum(enty3$pebio(enty3),
-		sum(emi2te(enty3,enty4,te2,"cco2"),
-			vm_emiTeDetail.l(ttot,regi,enty3,enty4,te2,"cco2")
-		)
-	)*emi_conv("co2");
+    sum(enty3$pebio(enty3),
+        sum(emi2te(enty3,enty4,te2,"cco2"),
+            vm_emiTeDetail.l(ttot,regi,enty3,enty4,te2,"cco2")
+        )
+    )*o_emi_conv("co2");
 
 ***Carbon Management|Carbon Capture|Primary Energy|Fossil (Mt CO2/yr)
 o_capture_energy_fos(ttot,regi,"co2")$(ttot.val ge 2005) =
-	sum(enty3$(NOT(pebio(enty3))),
-		sum(emi2te(enty3,enty4,te2,"cco2"),
-			vm_emiTeDetail.l(ttot,regi,enty3,enty4,te2,"cco2")
-		)
-	)*emi_conv("co2");
+    sum(enty3$(NOT(pebio(enty3))),
+        sum(emi2te(enty3,enty4,te2,"cco2"),
+            vm_emiTeDetail.l(ttot,regi,enty3,enty4,te2,"cco2")
+        )
+    )*o_emi_conv("co2");
 
 ***Carbon Management|CCU (Mt CO2/yr)
 o_carbon_CCU(ttot,regi,"co2")$(ttot.val ge 2005) =
-	sum(teCCU2rlf(te2,rlf),
-		vm_co2CCUshort.l(ttot,regi,"cco2","ccuco2short",te2,rlf)
-	)*emi_conv("co2");
+    sum(teCCU2rlf(te2,rlf),
+        vm_co2CCUshort.l(ttot,regi,"cco2","ccuco2short",te2,rlf)
+    )*o_emi_conv("co2");
 
 ***Carbon Management|Land Use (Mt CO2/yr)
 o_carbon_LandUse(ttot,regi,"co2")$(ttot.val ge 2005) =
-	vm_emiMacSector.l(ttot,regi,"co2luc")
-	*emi_conv("co2");
+    vm_emiMacSector.l(ttot,regi,"co2luc")
+    *o_emi_conv("co2");
 
 ***Carbon Management|Underground Storage (Mt CO2/yr)
 o_carbon_underground(ttot,regi,"co2")$(ttot.val ge 2005) =
-	sum(teCCS2rlf(te,rlf),
-		vm_co2CCS.l(ttot,regi,"cco2","ico2",te,rlf)
-	)*emi_conv("co2")
-	;
-
+    sum(teCCS2rlf(te,rlf), 
+         vm_co2CCS.l(ttot,regi,"cco2","ico2",te,rlf)
+    )*o_emi_conv("co2") 	
+;
+    
 ***Carbon Management|Carbon Re-emitted (Mt CO2/yr)
 o_carbon_reemitted(ttot,regi,"co2")$(ttot.val ge 2005) =
-	v_co2capturevalve.l(ttot,regi)
-	*emi_conv("co2")
-	;
+     v_co2capturevalve.l(ttot,regi)	
+     *o_emi_conv("co2") 	
+;
 
 *** EOF ./core/postsolve.gms

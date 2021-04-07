@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -6,7 +6,7 @@
 *** |  Contact: remind@pik-potsdam.de
 *** SOF ./modules/40_techpol/NDC2018/equations.gms
 
-q40_ElecBioBound(t,regi)$(t.val gt 2015)..
+q40_ElecBioBound(t,regi)$(t.val gt 2015 AND (NOT cm_bioprod_histlim ge 0))..
 ***am minimum targets for certain technologies
     sum(te2rlf(te,rlf)$(sameas(te,"biochp") OR sameas(te,"bioigcc") OR sameas(te,"bioigccc")), vm_cap(t,regi,te,rlf))
       * 1000 =g= p40_ElecBioBound(t,regi);	 

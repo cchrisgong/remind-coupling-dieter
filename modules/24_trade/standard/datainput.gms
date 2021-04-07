@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -38,5 +38,8 @@ pm_costsTradePeFinancial(regi,"Xport", "pebiolc") = pm_costsTradePeFinancial(reg
 pm_costsTradePeFinancial(regi,"Xport", "pegas") = cm_trdcst * pm_costsTradePeFinancial(regi,"Xport", "pegas") ;
 pm_costsTradePeFinancial(regi,"XportElasticity","pegas") = cm_trdadj *pm_costsTradePeFinancial(regi,"XportElasticity","pegas");
 
+*set trase se prices to zero
+pm_MPortsPrice(ttot,regi,tradeSe)=0;
+pm_XPortsPrice(ttot,regi,tradeSe)=0;
 
 *** EOF ./modules/24_trade/standard/datainput.gms

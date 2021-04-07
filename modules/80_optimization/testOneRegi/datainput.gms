@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -9,7 +9,7 @@
 pm_w(regi) = 1;
 
 *LB* initialize price parameter, import from gdx in preloop
-pm_pvp(ttot,trade)$(ttot.val ge 2005) = 0;
+pm_pvp(ttot,trade)$((ttot.val ge 2005) AND (NOT tradeSe(trade))) = 0;
 p80_etaXp(tradePe) = 1;
 p80_etaXp("good") = 1;
 p80_etaXp("perm") = 1;
