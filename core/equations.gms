@@ -133,11 +133,13 @@ q_balSe(t,regi,enty2)$( entySE(enty2) AND (NOT (sameas(enty2,"seel"))) )..
       - vm_emiMacSector(t,regi,"ch4wstl")
       )
     )$( sameas(enty2,"segabio") AND t.val gt 2005 )
-  + sum(prodSeOth2te(enty2,te), vm_prodSeOth(t,regi,enty2,te) )
+  + sum(prodSeOth2te(enty2,te), vm_prodSeOth(t,regi,enty2,te) ) 
+  + vm_Mport(t,regi,enty2) 
   =e=
     sum(se2fe(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te))
   + sum(se2se(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te))
-  + sum(demSeOth2te(enty2,te), vm_demSeOth(t,regi,enty2,te) )
+  + sum(demSeOth2te(enty2,te), vm_demSeOth(t,regi,enty2,te) )  
+  + vm_Xport(t,regi,enty2)
 ;
 
 ***---------------------------------------------------------------------------
@@ -203,8 +205,7 @@ qm_balFe(t,regi,entySe,entyFe,te)$se2fe(entySe,entyFe,te)..
   vm_prodFe(t,regi,entySe,entyFe,te)
   =e=
   sum((sector,emiMkt)$(entyFe2Sector(entyFe,sector) AND sector2emiMkt(sector,emiMkt)), vm_demFeSector(t,regi,entySe,entyFe,sector,emiMkt))
-;
-
+; 
 
 ***To be moved to specific modules---------------------------------------------------------------------------
 *' FE Pathway III: Energy service layer (prodFe -> demFeForEs -> prodEs), no capacity tracking.
@@ -497,7 +498,29 @@ q_emiTeDetailMkt(t,regi,enty,enty2,te,enty3,emiMkt)$(emi2te(enty,enty2,te,enty3)
 ;
 
 ***--------------------------------------------------
-*' Total energy-emissions per emission market, region and timestep
+*' energy emissions from fuel extraction  
+***--------------------------------------------------
+
+q_emiEnFuelEx(t,regi,emiTe(enty))..
+  v_emiEnFuelEx(t,regi,enty)
+  =e=
+***   emissions from non-conventional fuel extraction
+	sum(emi2fuelMine(enty,enty2,rlf),      
+		  p_cint(regi,enty,enty2,rlf)
+		* vm_fuExtr(t,regi,enty2,rlf)
+		)$( c_cint_scen eq 1 )
+***   emissions from conventional fuel extraction
+	+ (sum(pe2rlf(enty3,rlf2),
+      sum(enty2$(peFos(enty2)),   
+		    (p_cintraw(enty2)
+		     * pm_fuExtrOwnCons(regi, enty2, enty3) 
+		     * vm_fuExtr(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))))$(sameas("co2",enty))
+;    
+		 
+
+
+***--------------------------------------------------
+*' Total energy-emissions per emission market, region and timestep  
 ***--------------------------------------------------
 q_emiTeMkt(t,regi,emiTe(enty),emiMkt)..
   vm_emiTeMkt(t,regi,enty,emiMkt)
@@ -506,20 +529,8 @@ q_emiTeMkt(t,regi,emiTe(enty),emiMkt)..
     sum(emi2te(enty2,enty3,te,enty),
       v_emiTeDetailMkt(t,regi,enty2,enty3,te,enty,emiMkt)
     )
-***   emissions from non-conventional fuel extraction
-	+ ( sum(emi2fuelMine(enty,enty2,rlf),
-		  p_cint(regi,enty,enty2,rlf)
-		* vm_fuExtr(t,regi,enty2,rlf)
-		)$( c_cint_scen eq 1 )
-	 )$(sameas(emiMkt,"ETS"))
-***   emissions from conventional fuel extraction
-	+ ( sum(pe2rlf(enty3,rlf2),sum(enty2,
-		 (p_cintraw(enty2)
-		  * pm_fuExtrOwnCons(regi, enty2, enty3)
-		  * vm_fuExtr(t,regi,enty3,rlf2)
-		 )$(pm_fuExtrOwnCons(regi, enty, enty2) gt 0)
-		))
-	)$(sameas(emiMkt,"ETS"))
+***   energy emissions fuel extraction
+	+ v_emiEnFuelEx(t,regi,enty)$(sameas(emiMkt,"ETS"))
 ***   Industry CCS emissions
 	- ( sum(emiMac2mac(emiInd37_fuel,enty2),
 		  vm_emiIndCCS(t,regi,emiInd37_fuel)
@@ -547,7 +558,7 @@ q_emiAllMkt(t,regi,emi,emiMkt)..
   )
 *** CDR from CDR module
 	+	vm_emiCdr(t,regi,emi)$(sameas(emiMkt,"ETS")) 
-*** Exogenous emissions (F-Gases)
+*** Exogenous emissions
   +	pm_emiExog(t,regi,emi)$(sameas(emiMkt,"other"))
 ;
 
@@ -870,8 +881,9 @@ q_shBioTrans(t,regi)..
 ***---------------------------------------------------------------------------
 *' Share of final energy in stationary sector
 ***---------------------------------------------------------------------------
+
 q_shfe(t,regi,entyFe,sector)$(pm_shfe_up(t,regi,entyFe,sector) OR pm_shfe_lo(t,regi,entyFe,sector))..
-  vm_shfe(t,regi,entyFe,sector) 
+  v_shfe(t,regi,entyFe,sector) 
   * sum(emiMkt$sector2emiMkt(sector,emiMkt), 
       sum(se2fe(entySe,entyFe2,te)$(entyFe2Sector(entyFe2,sector)),   
         vm_demFeSector(t,regi,entySe,entyFe2,sector,emiMkt)))
@@ -882,7 +894,7 @@ q_shfe(t,regi,entyFe,sector)$(pm_shfe_up(t,regi,entyFe,sector) OR pm_shfe_lo(t,r
 ;
 
 q_shGasLiq_fe(t,regi,sector)$(pm_shGasLiq_fe_up(t,regi,sector) OR pm_shGasLiq_fe_lo(t,regi,sector))..
-  vm_shGasLiq_fe(t,regi,sector) 
+  v_shGasLiq_fe(t,regi,sector) 
   * sum(emiMkt$sector2emiMkt(sector,emiMkt), 
       sum(se2fe(entySe,entyFe,te)$(entyFe2Sector(entyFe,sector)),   
         vm_demFeSector(t,regi,entySe,entyFe,sector,emiMkt)))
@@ -900,5 +912,32 @@ q_heat_limit(t,regi)$(t.val gt 2020)..
     %cm_INNOPATHS_sehe_upper%*vm_prodFe("2020",regi,"sehe","fehes","tdhes")
 ;
 $ENDIF.sehe_upper
+
+$ontext
+q_H2BICouple(ttot,regi)$(ttot.val ge max(2010, cm_startyear))..
+    sum(sector2emiMkt(sector,emiMkt)$(SAMEAS(sector,"build")), 
+      vm_demFeSector(ttot,regi,"seh2","feh2s",sector,emiMkt) - vm_demFeSector(ttot-1,regi,"seh2","feh2s",sector,emiMkt))
+  * sum(sector2emiMkt(sector,emiMkt)$(SAMEAS(sector,"indst")),
+      vm_demFeSector(ttot,regi,"seh2","feh2s",sector,emiMkt) - vm_demFeSector(ttot-1,regi,"seh2","feh2s",sector,emiMkt))
+  =g=
+  0
+;
+$offtext
+
+
+q_capH2BI(t,regi)$(t.val ge max(2015, cm_startyear))..
+  vm_cap(t,regi,"tdh2i","1") + vm_cap(t,regi,"tdh2b","1")
+  =e=
+  vm_cap(t,regi,"tdh2s","1")
+;
+
+q_limitCapFeH2BI(t,regi,sector)$(SAMEAS(sector,"build") OR SAMEAS(sector,"indst") AND t.val ge max(2015, cm_startyear))..
+    sum(sector2emiMkt(sector,emiMkt), 
+      vm_demFeSector(t,regi,"seh2","feh2s",sector,emiMkt))
+    =l=
+    sum(te2sectortdH2(te,sector),
+      sum(teFe2rlfH2BI(te,rlf), 
+        vm_capFac(t,regi,te) * vm_cap(t,regi,te,rlf)))
+;
 
 *** EOF ./core/equations.gms
