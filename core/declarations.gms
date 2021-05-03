@@ -179,11 +179,8 @@ p_cintraw(all_enty)                                  "carbon intensity of fossil
 p_CapFixFromRWfix(ttot,all_regi,all_te)              "parameter for fixing capacity variable to Real-World values in 2010/2015"
 p_deltaCapFromRWfix(ttot,all_regi,all_te)            "parameter with resulting deltacap values resulting from fixing capacity to real-world values in 2010/2015"
 
-<<<<<<< HEAD
 pm_priceSeel(ttot,all_regi)                           "parameter with electricity price from last iteration (unit: trUSD/TWa)"
 pm_adjCostInv(ttot,all_regi,all_te)                   "adjustment cost to technology investment"
-=======
->>>>>>> REMIND
 pm_calibrate_eff_scale(all_in,all_in,eff_scale_par)   "parameters for scaling efficiencies in CES calibration"
 /   /
 
@@ -284,14 +281,6 @@ vm_usableSeTe(ttot,all_regi,entySe,all_te)           "usable se produced by one 
 vm_costFuBio(ttot,all_regi)                          "fuel costs from bio energy [tril$US]"
 vm_omcosts_cdr(tall,all_regi)                        "O&M costs for spreading grinded rocks on fields"
 vm_costpollution(tall,all_regi)                      "costs for air pollution policies"
-<<<<<<< HEAD
-vm_emiFgas(tall,all_regi,all_enty)                   "F-gas emissions by single gases from IMAGE"
-v_emiTeDetailMkt(tall,all_regi,all_enty,all_enty,all_te,all_enty,all_emiMkt)
-vm_emiTeMkt(tall,all_regi,all_enty,all_emiMkt)
-vm_emiAllMkt(tall,all_regi,all_enty,all_emiMkt)
-vm_flexAdj(tall,all_regi,all_te)			         "flexibility adjustment used for flexibility subsidy (tax) to emulate price changes of technologies which see lower-than-average (higher-than-average) elec. prices [trUSD/TWa]"
-vm_Mrkup(tall,all_regi,all_te)                  "markup adjustment used for subsidy (tax) to emulate market value of power generation technologies produces either below or above annual average elec. prices [trUSD/TWa]"
-=======
 vm_emiFgas(ttot,all_regi,all_enty)                   "F-gas emissions by single gases from IMAGE"
 v_emiTeDetailMkt(tall,all_regi,all_enty,all_enty,all_te,all_enty,all_emiMkt) "emissions from fuel combustion per region, technology and emission market. [GtC, Mt CH4, Mt N]"
 vm_emiTeMkt(tall,all_regi,all_enty,all_emiMkt)       "total energy-emissions of each region and emission market. [GtC, Mt CH4, Mt N]"
@@ -299,7 +288,7 @@ v_emiEnFuelEx(ttot,all_regi,all_enty)                 "energy emissions from fue
 vm_emiAllMkt(tall,all_regi,all_enty,all_emiMkt)      "total regional emissions for each emission market. [GtC, Mt CH4, Mt N]"
 vm_flexAdj(tall,all_regi,all_te)                     "flexibility adjustment used for flexibility subsidy (tax) to emulate price changes of technologies which see lower-than-average (higher-than-average) elec. prices [trUSD/TWa]"
 vm_taxrevimplFETax(ttot,all_regi)                    "implicit efficiency directive target tax"
->>>>>>> REMIND
+vm_Mrkup(tall,all_regi,all_te)                  "markup adjustment used for subsidy (tax) to emulate market value of power generation technologies produces either below or above annual average elec. prices [trUSD/TWa]"
 ;
 
 ***----------------------------------------------------------------------------------------
@@ -334,12 +323,9 @@ vm_pebiolc_price(ttot,all_regi)                      "Bioenergy price according 
 v_costOM(ttot,all_regi)                              "o&m costs"
 v_costInv(ttot,all_regi)                             "investment costs"
 vm_costTeCapital(ttot,all_regi,all_te)               "investment costs"
-<<<<<<< HEAD
 
-=======
 vm_costAddTeInv(tall,all_regi,all_te,emi_sectors)    "small diffusion additional sector specific investment cost"
                                                                  
->>>>>>> REMIND
 vm_co2CCS(ttot,all_regi,all_enty,all_enty,all_te,rlf)       "all differenct ccs. [GtC/a]"
 
 vm_co2capture(ttot,all_regi,all_enty,all_enty,all_te,rlf)   "all captured CO2. [GtC/a]"
@@ -454,10 +440,6 @@ q_shFeCes(ttot,all_regi,all_enty,all_in,all_teEs)         "Shares of final energ
 q_shGreenH2(ttot,all_regi)  "share of green hydrogen in all hydrogen"
 q_shBioTrans(ttot,all_regi)  "Define the share of biofuels in transport liquids from 2025 on."
 
-<<<<<<< HEAD
-$IFTHEN.sehe_upper not "%cm_INNOPATHS_sehe_upper%" == "off"
-q_heat_limit(ttot,all_regi)
-=======
 q_shfe(ttot,all_regi,all_enty,emi_sectors)            "share of gases and liquids in sector final energy"
 q_shGasLiq_fe(ttot,all_regi,emi_sectors)              "share of gases and liquids in sector final energy"
 
@@ -467,7 +449,6 @@ q_limitCapFeH2BI(ttot,all_regi,emi_sectors)               "capacity limit equati
 
 $IFTHEN.sehe_upper not "%cm_INNOPATHS_sehe_upper%" == "off" 
 q_heat_limit(ttot,all_regi)  "equation to limit maximum level of secondary energy district heating and heat pumps use"
->>>>>>> REMIND
 $ENDIF.sehe_upper
 
 

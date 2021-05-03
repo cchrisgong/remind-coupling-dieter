@@ -80,11 +80,11 @@
 
 *##################### R SECTION START (VERSION INFO) ##########################
 * 
-* Regionscode: 690d3718e151be1b450b394c1064b1c5
+* Regionscode: 2b1450bc
 * 
-* Input data revision: 5.979
+* Input data revision: 5.98312
 * 
-* Last modification (input data): Tue Mar 16 15:12:14 2021
+* Last modification (input data): Sat Apr 24 23:17:41 2021
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -139,7 +139,7 @@ option profile = 0;
 
 
 ***---------------------    Run name    -----------------------------------------
-$setGlobal c_expname  default
+$setGlobal c_expname  xx_ref_FEmed
 
 ***------------------------------------------------------------------------------
 ***                           MODULES
@@ -190,7 +190,7 @@ $setglobal industry  fixed_shares     !! def = simple
 ***---------------------    38_stationary    --------------------------------------
 $setglobal stationary  off            !! def = simple
 ***---------------------    39_CCU    --------------------------------------
-$setglobal CCU  on !! def = on
+$setglobal CCU  off !! def = on
 ***---------------------    40_techpol  -----------------------------------------
 $setglobal techpol  none              !! def = none
 ***---------------------    41_emicapregi  --------------------------------------
@@ -200,7 +200,7 @@ $setglobal banking  off               !! def = off
 ***---------------------    45_carbonprice  -------------------------------------
 $setglobal carbonprice  none          !! def = none
 ***---------------------    47_regipol  -------------------------------------
-$setglobal regipol  none              !! def = none
+$setglobal regipol  regiCarbonPrice              !! def = none
 ***---------------------    50_damages    ---------------------------------------
 $setGlobal damages  off               !! def = off
 ***---------------------    51_internalizeDamages    ---------------------------------------
@@ -400,7 +400,7 @@ cm_rentconvgas      = 50;        !! def 50
 cm_rentdisccoal     = 0.4;       !! def 0.4
 cm_rentdisccoal2    = 0.6;       !! def 0.6
 cm_rentconvcoal     = 50;        !! def 50
-cm_earlyreti_rate   = 0.09;      !! def 0.09
+cm_earlyreti_rate   = 0.15;      !! def 0.09
 
 cm_so2tax_scen        = 1;         !! def =
 c_cint_scen           = 1;         !! def = 1
@@ -421,7 +421,7 @@ cm_expoLinear_yearStart  = 2050;   !! def = 2050
 c_budgetCO2FFI           = 1000;   !! def = 1000
 c_abtrdy                 = 2010;   !! def = 2010
 c_abtcst                 = 1;      !! def = 1
-c_budgetCO2              = 1350;   !! def = 1300
+c_budgetCO2              = 0;   !! def = 1300
 $setGlobal cm_regiCO2target  off   !! def = off
 cm_postTargetIncrease    = 2;      !! def = 2
 $setGlobal cm_quantity_regiCO2target  off !! def = off
@@ -431,20 +431,20 @@ cm_CO2priceRegConvEndYr  = 2050;   !! def = 2050
 $setGlobal cm_emiMktETS  off       !! def = off
 $setGlobal cm_emiMktETS_type  off  !! def = off
 
-$setGlobal cm_ETS_postTargetIncrease  linear !! def = linear
+$setGlobal cm_ETS_postTargetIncrease  2 !! def = linear
 $setGlobal cm_ETS_post2055Increase  2      !! def = 2
 
 $setGlobal cm_emiMktES  off        !! def = off	
-$setGlobal cm_emiMktES_type  netGHG !! def = netGHG	
+$setGlobal cm_emiMktES_type  off !! def = netGHG	
 
-$setGlobal cm_ESD_postTargetIncrease  8 !! def = 8
-$setGlobal cm_ESD_post2055Increase  2 !! def = 2
+$setGlobal cm_ESD_postTargetIncrease  off !! def = 8
+$setGlobal cm_ESD_post2055Increase  off !! def = 2
 
 $setGlobal cm_emiMktEScoop  off    !! def = off	
-$setGlobal cm_emiMktES2020price  30 !! def = 30
+$setGlobal cm_emiMktES2020price  off !! def = 30
 $setGlobal cm_emiMktES2050	 off   !! def = off	
-$setGlobal cm_NucRegiPol	 off   !! def = off		
-$setGlobal cm_CoalRegiPol	 off   !! def = off		
+$setGlobal cm_NucRegiPol	 on   !! def = off		
+$setGlobal cm_CoalRegiPol	 on   !! def = off		
 $setGlobal cm_proNucRegiPol	 off   !! def = off
 $setGlobal cm_CCSRegiPol	 off   !! def = off	
 $setGlobal cm_implicitFE  off !! def = off
@@ -479,14 +479,14 @@ $setGlobal c_regi_capturescen  all !! def = all
 $setGlobal c_regi_synfuelscen  all !! def = all
 $setGlobal c_regi_sensscen  all !! def = all
 
-cm_TaxConvCheck = 1; !! def 1, which means tax convergence check is on
+cm_TaxConvCheck = 0; !! def 1, which means tax convergence check is on
 
 cm_biotrade_phaseout = 0; !! def 0
 cm_bioprod_histlim = -1; !! def -1
 
 cm_H2targets = 0; !! def 0
 
-cm_BioSupply_Adjust_EU = 3; !! def 1
+cm_BioSupply_Adjust_EU = 2; !! def 1
 cm_BioImportTax_EU = 1; !! def 0.25
 
 *** buildings services_putty switches
@@ -494,7 +494,7 @@ cm_logitCal_markup_conv_b = 0.8; !! def 0.8
 cm_logitCal_markup_newtech_conv_b = 0.3; !! def 0.3
 
 *** flex tax switches
-cm_flex_tax = 1; !! def 0
+cm_flex_tax = 0; !! def 0
 cm_PriceDurSlope_elh2 = 20; !! def 10
 cm_FlexTaxFeedback = 0; !! def 0
 
@@ -508,7 +508,7 @@ cm_indst_costDecayStart = 0.05; !! def 5%
 cm_indst_H2costDecayEnd = 0.1;  !! def 10%
 
 *** EU bioenergy switches
-cm_BioSupply_Adjust_EU = 3; !! def 1
+cm_BioSupply_Adjust_EU = 2; !! def 1
 cm_BioImportTax_EU = 1; !! def 0.25
 
 $setGlobal cm_demTcomplex  temporary_trend !! def = temporary_trend
@@ -524,7 +524,7 @@ cm_startIter_EDGET = 14; !! def 14, by default EDGE-T is run first in iteration 
 
 cm_TaxConvCheck = 0; !! def 1, which means tax convergence check is on
 
-$setGlobal cm_altFeEmiFac  off        !! def = off	
+$setGlobal cm_altFeEmiFac  EUR_regi, NEU_regi        !! def = off	
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ***                           YOU ARE IN THE WARNING ZONE (DON'T DO CHANGES HERE)
@@ -537,7 +537,7 @@ $setGlobal cm_nash_mode  parallel      !! def = parallel
 $setGlobal c_EARLYRETIRE       on         !! def = on
 $setGlobal cm_OILRETIRE  on        !! def = on
 $setglobal cm_INCONV_PENALTY  on         !! def = on
-$setglobal cm_INCONV_PENALTY_bioSwitch  off !! def = off
+$setglobal cm_INCONV_PENALTY_bioSwitch  on !! def = off
 $setGlobal cm_so2_out_of_opt  on         !! def = on
 $setGlobal c_skip_output  off        !! def = off
 $setGlobal cm_MOFEX  off        !! def = off
@@ -551,16 +551,16 @@ $setGlobal cm_magicc_temperatureImpulseResponse  off           !! def = off
 
 $setGlobal cm_damage_DiceLike_specification  HowardNonCatastrophic   !! def = HowardNonCatastrophic
 
-$setglobal cm_CES_configuration  stat_off-indu_fixed_shares-buil_simple-tran_complex-POP_pop_SSP2-GDP_gdp_SSP2-Kap_debt_limit-Reg_690d3718e1   !! this will be changed by start_run()
+$setglobal cm_CES_configuration  stat_off-indu_fixed_shares-buil_simple-tran_complex-POP_pop_SSP2-GDP_gdp_SSP2-Kap_debt_limit-FE_med-Reg_2b1450bc   !! this will be changed by start_run()
 
 $setglobal c_CES_calibration_new_structure  0    !! def =  0
 $setglobal c_CES_calibration_iterations  10    !! def = 10
 $setglobal c_CES_calibration_iteration          1    !! def =  1
 $setglobal c_CES_calibration_write_prices  0    !! def =  0
 $setglobal cm_CES_calibration_default_prices  0    !! def = 0
-$setglobal cm_calibration_string  off      !! def = off
+$setglobal cm_calibration_string  FE_med      !! def = off
 
-$setglobal c_testOneRegi_region  EUR       !! def = EUR
+$setglobal c_testOneRegi_region  DEU       !! def = EUR
 
 $setglobal cm_cooling_shares  static    !! def = static
 $setglobal cm_techcosts  REG       !! def = REG
@@ -582,8 +582,8 @@ $setglobal cm_INNOPATHS_adj_seed_cont  off
 $setglobal cm_INNOPATHS_adj_coeff  off
 $setglobal cm_INNOPATHS_adj_coeff_cont  off
 
-$setglobal cm_INNOPATHS_adj_seed_multiplier  off
-$setglobal cm_INNOPATHS_adj_coeff_multiplier  off
+$setglobal cm_INNOPATHS_adj_seed_multiplier  4
+$setglobal cm_INNOPATHS_adj_coeff_multiplier  0.25
 
 $setglobal cm_INNOPATHS_inco0Factor  off !! def = off
 

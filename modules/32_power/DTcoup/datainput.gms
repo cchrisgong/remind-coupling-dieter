@@ -59,15 +59,24 @@ $include "./modules/32_power/IntC/input/f32_storageCap.prn"
 p32_storageCap(te,char) = f32_storageCap(char,te);
 display p32_storageCap;
 
+
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+
 p32_minVF_spv = 0.1;
 
-***CG
-$IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_peakDemand_relFac(t,regi) = 0;
 p32_DIETER_VF(t,te) = 0;
+p32_DIETER_MV(t,te) = 0;
+p32_DIETER_elecprice(t) = 0;
 p32_seelDem(t,regi,enty) = 0;
 p32_shSeEl(t,regi,te) = 0;
 p32_DIETER_shSeEl(t,regi,te) = 0;
 p32_deltaCap(t,regi,te,rlf) = 0;
-p32_marketValue_spv(t) = 0;
+p32_marketValue(t,te) = 0;
+p32_valueFactor(t,te) = 1;
+p32_budget(t,regi) = 0;
+
+Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;
+p32_fuelprice_lastiter(t,regi,entyPe) = q_balPe.m(t,regi,entyPe);
+p32_fuelprice_lastx2iter(t,regi,entyPe) = q_balPe.m(t,regi,entyPe);
 $ENDIF.DTcoup

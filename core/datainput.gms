@@ -425,7 +425,7 @@ pm_cf(ttot,regi,"tdh2i") = pm_cf(ttot,regi,"tdh2s");
 
 pm_cf_linear(ttot,regi,te) =  pm_cf(ttot,regi,te);
 
-table p_earlyreti_adjRate(all_regi,all_te)  "extra retirement rate for technologies in countries with relatively old fleet"
+table pm_earlyreti_adjRate(all_regi,all_te)  "extra retirement rate for technologies in countries with relatively old fleet"
 $ondelim
 $include "./core/input/p_earlyRetirementAdjFactor.cs3r"
 $offdelim

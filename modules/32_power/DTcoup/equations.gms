@@ -21,9 +21,20 @@ q32_balSe(t,regi,enty2)$(sameas(enty2,"seel"))..
   =e=
     sum(se2fe(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
 	+ sum(se2se(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
-	+ sum(teVRE, v32_storloss(t,regi,teVRE) )
+  + sum(teVRE, v32_storloss(t,regi,teVRE) )
 	+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! don't use in 2005 because this demand is not contained in 05_initialCap
 ;
+
+*** CG: total electricity demand to be passed on to DIETER
+* q32_seelDem(t,regi,enty2)$(sameas(enty2,"seel"))..
+* 	v32_seelDem(t,regi,enty2)
+* 	=e=
+* 	sum(se2fe(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
+* 									+ sum(se2se(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
+* * + sum(teVRE, v32_storloss.l(t,regi,teVRE) )
+* 									+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! don't use in 2005 because this demand is not contained in 05_initialCap;
+* ;
+
 
 q32_usableSe(t,regi,entySe)$(sameas(entySe,"seel"))..
 	vm_usableSe(t,regi,entySe)
@@ -31,18 +42,18 @@ q32_usableSe(t,regi,entySe)$(sameas(entySe,"seel"))..
 	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
 	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
 	+ sum(pc2te(entyPe,entySe(enty3),te,entySe)$(pm_prodCouple(regi,entyPe,enty3,te,entySe) gt 0),
-		pm_prodCouple(regi,entyPe,enty3,te,entySe)*vm_prodSe(t,regi,entyPe,enty3,te) )
-	- sum(teVRE, v32_storloss(t,regi,teVRE) )
+		pm_prodCouple(regi,entyPe,enty3,te,entySe) * vm_prodSe(t,regi,entyPe,enty3,te) )
+ - sum(teVRE, v32_storloss(t,regi,teVRE) )
 ;
 
-q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND teVRE(te))..
+q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel"))..
  	vm_usableSeTe(t,regi,entySe,te)
  	=e=
  	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
 	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
- 	+ sum(pc2te(enty,entySe(enty3),te,entySe)$(pm_prodCouple(regi,enty,enty3,te,entySe) gt 0),
-		pm_prodCouple(regi,enty,enty3,te,entySe) * vm_prodSe(t,regi,enty,enty3,te) )
- 	- sum(teVRE$sameas(te,teVRE), v32_storloss(t,regi,teVRE) )
+ 	+ sum(pc2te(entyPe,entySe(enty3),te,entySe)$(pm_prodCouple(regi,entyPe,enty3,te,entySe) gt 0),
+		pm_prodCouple(regi,entyPe,enty3,te,entySe) * vm_prodSe(t,regi,entyPe,enty3,te) )
+ - sum(teVRE$sameas(te,teVRE), v32_storloss(t,regi,teVRE) )
 ;
 
 **---------------------------------------------------------------------------
@@ -91,14 +102,21 @@ q32_limitCapTeGrid(t,regi)$( t.val ge 2015 ) ..
 ;
 
 ***---------------------------------------------------------------------------
-*** Calculation of share of electricity production of a technology:
+*** Calculation of share of electricity production of VRE
 ***---------------------------------------------------------------------------
-q32_shSeEl(t,regi,teVRE)..
-    v32_shSeEl(t,regi,teVRE) / 100 * vm_usableSe(t,regi,"seel")
+q32_shSeEl(t,regi,te)..
+    v32_shSeEl(t,regi,te) / 100 * vm_usableSe(t,regi,"seel")
     =e=
-    vm_usableSeTe(t,regi,"seel",teVRE)
+    vm_usableSeTe(t,regi,"seel",te)
 ;
-
+* ***---------------------------------------------------------------------------
+* *** Calculation of share of electricity production of nonVRE
+* ***---------------------------------------------------------------------------
+* q32_shSeEl_disp(t,regi,teNoRe)..
+*     v32_shSeEl(t,regi,teNoRe) / 100 * vm_usableSe(t,regi,"seel")
+*     =e=
+*     vm_usableSeTe(t,regi,"seel",teVRE)
+* ;
 ***---------------------------------------------------------------------------
 *** Calculation of necessary storage electricity production:
 ***---------------------------------------------------------------------------
@@ -132,49 +150,38 @@ q32_limitSolarWind(t,regi)$( (cm_solwindenergyscen = 2) OR (cm_solwindenergyscen
 ;
 
 ***---------------------------------------------------------------------------
-*** DIETER related equations
+*** DIETER coupling equations
 ***---------------------------------------------------------------------------
-$IFTHEN.DTcoup %cm_DTcoup% == "on"
 
-q32_peakDemand_DT(t,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND cm_DTcoup_capcon = 1) ..
-	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,"DEU",te,rlf)))
+q32_peakDemand_DT(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND sameas(regi,"DEU") AND (cm_DTcoup_capcon = 1) ) ..
+	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf))) * 1$( sameas(regi,'DEU') )
 	=g=
-p32_peakDemand_relFac(t,"DEU") * p32_seelDem(t,"DEU",enty2) * 8760
+	p32_peakDemand_relFac(t,regi) * p32_seelDem(t,regi,enty2) * 8760 * 1$( sameas(regi,'DEU') )
 	;
 
 ***----------------------------------------------------------------------------
 *** CG: calculate markup adjustment used in flexibility tax for supply-side technologies
 ***----------------------------------------------------------------------------
-q32_mkup(t,"DEU",te)$(tDT32(t) AND teDTCoupSupp(te) AND (cm_DTcoup_capcon = 1))..
-	vm_Mrkup(t,"DEU",te)
+q32_mkup(t,regi,te)$(tDT32(t) AND teDTCoupSupp(te) AND (cm_DTcoup_capcon = 1) AND sameas(regi,"DEU"))..
+	vm_Mrkup(t,regi,te) * 1$( sameas(regi,'DEU') )
 	=e=
-*** supply-side technology markup p32_DIETER_VF as a multiplicative factor
+*** supply-side technology markup v32_DIETER_VF as a multiplicative factor
 *** of the wholesale electricity price of the last iteration
-*** p32_DIETER_VF < 1 -> market value lower than average electricity price (usually fluctuating VRE generation),
-*** p32_DIETER_VF > 1 -> market value higher than average electricity price (usually firm generation technologies)
-** prefactor depends on difference between gen share of DIETER and current REMIND iter
-* (p32_DIETER_VF(t,te) * ( 1 - (v32_shSeEl(t,"DEU","spv")/ 100 - p32_DIETER_shSeEl(t,"DEU",te)/ 100) ) - 1 ) * pm_priceSeel(t,"DEU")
-** prefactor depends on difference between gen share of last and current REMIND iter
-  (p32_DIETER_VF(t,te) * ( 1 - (v32_shSeEl(t,"DEU","spv")/ 100 - p32_shSeEl(t,"DEU",te)/ 100 ) ) - 1 ) * pm_priceSeel(t,"DEU")
+*** v32_DIETER_VF < 1 -> market value lower than average electricity price (usually fluctuating VRE generation),
+*** v32_DIETER_VF > 1 -> market value higher than average electricity price (usually firm generation technologies)
+*** prefactor depends on difference between gen share of DIETER and current REMIND iter
+ (v32_DIETER_VF(t,te) * ( 1 - (v32_shSeEl(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100) ) - 1 ) * pm_SEPrice(t,regi,"seel")
+*** prefactor depends on difference between gen share of last and current REMIND iter
+* (v32_DIETER_VF(t,te) * ( 1 - (v32_shSeEl(t,regi,te) / 100 - p32_shSeEl(t,regi,te) / 100 ) ) - 1 ) * pm_SEPrice(t,regi,"seel")
+*** NO prefactor
+* (v32_DIETER_VF(t,te) - 1 ) * pm_SEPrice(t,regi,"seel") * 1$( sameas(regi,'DEU') )
+*** nonlinear relation
+* ((v32_DIETER_VF(t,te) * p32_shSeEl(t,regi,te)) / (v32_shSeEl(t,regi,te) + sm_eps) * pm_SEPrice(t,regi,"seel") - pm_SEPrice(t,regi,"seel")) * 1$( sameas(regi,'DEU') )
+
+*** absolute markup, multiply by budget from DIETER to REMIND, but divide here again by budget
+* (v32_DIETER_MV(t,te) * (1- (v32_shSeEl(t,regi,te) / 100 - p32_shSeEl(t,regi,te) / 100 )  ) - v32_DIETER_elecprice(t) ) / 1e12 * sm_TWa_2_MWh / 1.2
+* (v32_DIETER_MV(t,te) - v32_DIETER_elecprice(t) ) / 1e12 * sm_TWa_2_MWh / 1.2
 ;
 
-$ENDIF.DTcoup
-
-* q32_peakDemand_DT(t,enty2)$(tDT32(t) AND sameas(enty2,"seel")) ..
-* * q32_peakDemand_DT(tall,"seel")$(ct_DT_32(tall)) ..
-* 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,"DEU",te,rlf)))
-* 	=g=
-* * p32_peakDemand_relFac(t,"DEU") * v32_seelDem(t,"DEU",enty2) * 8760 * s32_iteration_ge_5 !! either NO (= 0) for iteration lt 5, or YES (= 1) otherwise
-* p32_peakDemand_relFac(t,"DEU") * v32_seelDem(t,"DEU",enty2) * 8760
-* 	;
-*
-* *** calculate markup adjustment from solar pv share
-* q32_mkup_noCOUP(t,"DEU",te)$(tDT32(t) AND teDTCoupSupp(te))..
-* 	vm_flexAdj(t,"DEU",te)
-* 	=e=
-* *** linearly increase/decrease electricity price that inflexible/flexible technology sees with increasing VRE share up to p32_minVF_spv
-* *** p32_minVF_spv positive -> lower-than-average electricity price (flexible demand),
-* *** p32_minVF_spv negative -> higher-than-average electricity price (inflexible demand)
-** 	( (1 + p32_minVF_spv - v32_shSeEl(t,"DEU","spv") / 100) - 1) * pm_priceSeel(t,"DEU")
-* 	(p32_minVF_spv - v32_shSeEl(t,"DEU","spv") / 100) * pm_priceSeel(t,"DEU")
-* ;
+* price_new = price/budget * 1e12 / sm_TWa_2_MWh * 1.2
+* price = price_new * budget/1e12*sm_TWa_2_MWh/1.2

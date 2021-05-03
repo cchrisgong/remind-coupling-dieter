@@ -62,6 +62,9 @@ display "iteration", sm21_tmp;
 
 p21_taxrevBioImport0(ttot,regi) = p21_tau_BioImport(ttot,regi) * pm_pvp(ttot,"pebiolc") / pm_pvp(ttot,"good") * vm_Mport.l(ttot,regi,"pebiolc");
 
+
+
+
 ***DK: for reporting only
 p21_tau_bioenergy_tax(t) = v21_tau_bio.l(t);
 

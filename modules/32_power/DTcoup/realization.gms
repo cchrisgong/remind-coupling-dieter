@@ -8,7 +8,7 @@
 
 *' @description  
 *'
-*'The `DTcoup` realization (Dieter Coupling) 
+*'The `DTcoup` realization (DIETER Coupling) 
 *'
 *' @authors Robert Pietzcker, Falko Ueckerdt, Renato Rodrigues, Chris Gong
 
@@ -17,8 +17,9 @@ $Ifi "%phase%" == "sets" $include "./modules/32_power/DTcoup/sets.gms"
 $Ifi "%phase%" == "declarations" $include "./modules/32_power/DTcoup/declarations.gms"
 $Ifi "%phase%" == "datainput" $include "./modules/32_power/DTcoup/datainput.gms"
 $Ifi "%phase%" == "equations" $include "./modules/32_power/DTcoup/equations.gms"
+$Ifi "%phase%" == "preloop" $include "./modules/32_power/DTcoup/preloop.gms"
 $Ifi "%phase%" == "bounds" $include "./modules/32_power/DTcoup/bounds.gms"
 $Ifi "%phase%" == "presolve" $include "./modules/32_power/DTcoup/presolve.gms"
+$Ifi "%phase%" == "postsolve" $include "./modules/32_power/DTcoup/postsolve.gms"
 *######################## R SECTION END (PHASES) ###############################
-
 *** EOF ./modules/32_power/DTcoup/realization.gms

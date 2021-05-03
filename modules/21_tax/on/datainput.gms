@@ -91,7 +91,7 @@ $offdelim
 if(cm_fetaxscen eq 0,
 p21_tau_fe_tax_transport(ttot,regi,all_enty)     = 0;
 p21_tau_fe_sub_transport(ttot,regi,all_enty)     = 0;
-pm_tau_fe_tax_bit_st(ttot,regi,all_in)          = 0; 
+pm_tau_fe_tax_bit_st(ttot,regi,all_in)          = 0;
 pm_tau_fe_sub_bit_st(ttot,regi,all_in)          = 0;
 p21_tau_fuEx_sub(ttot,regi,all_enty)               = 0;
 );
@@ -101,7 +101,7 @@ if(cm_fetaxscen ne 0,
 ***cb20110923 rescaling of FE parameters from $/GJ to trillion $ / TWa (subsidies also get adjusted in preloop.gms to avoid neg. prices)
 p21_tau_fe_tax_transport(ttot,regi,entyFE)     = p21_tau_fe_tax_transport(ttot,regi,entyFE)*0.001/sm_EJ_2_TWa;
 p21_tau_fe_sub_transport(ttot,regi,entyFE)     = p21_tau_fe_sub_transport(ttot,regi,entyFE)*0.001/sm_EJ_2_TWa;!!(subsidies also get adjusted in preloop.gms to avoid neg. prices)
-pm_tau_fe_tax_bit_st(ttot,regi,ppfen)          = pm_tau_fe_tax_bit_st(ttot,regi,ppfen)*0.001/sm_EJ_2_TWa; 
+pm_tau_fe_tax_bit_st(ttot,regi,ppfen)          = pm_tau_fe_tax_bit_st(ttot,regi,ppfen)*0.001/sm_EJ_2_TWa;
 pm_tau_fe_sub_bit_st(ttot,regi,ppfen)          = pm_tau_fe_sub_bit_st(ttot,regi,ppfen)*0.001/sm_EJ_2_TWa;!!(subsidies also get adjusted in preloop.gms to avoid neg. prices)
 p21_tau_fuEx_sub(ttot,regi,entyPE)              =p21_tau_fuEx_sub(ttot,regi,entyPE)*0.001/sm_EJ_2_TWa;
 );
@@ -165,7 +165,7 @@ $include "./modules/21_tax/on/input/pm_taxCO2eqHist.cs4r"
 $offdelim
 /
 ;
-f21_taxCO2eqHist(ttot,"DEU") = 25;
+f21_taxCO2eqHist(ttot,"DEU") = 100;
 
 ** Fixing European 2020 carbon price to 20€/t CO2 (other regions to zero)
 f21_taxCO2eqHist("2020",regi) = 0;
