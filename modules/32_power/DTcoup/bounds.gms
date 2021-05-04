@@ -8,11 +8,6 @@
 ***                  module specific bounds
 ***------------------------------------------------------------
 *
-v32_DIETER_VF.fx(t,te) = p32_DIETER_VF(t,te);
-v32_DIETER_MV.fx(t,te) = p32_DIETER_MV(t,te);
-v32_DIETER_elecprice.fx(t) = p32_DIETER_elecprice(t);
-*v32_DIETER_shSeEl.fx(t,"DEU",te) = p32_DIETER_shSeEl(t,"DEU",te);
-
 vm_capFac.fx(t,regi,te) = pm_cf(t,regi,te);
 
 * vm_capFac.fx(t,regi,te)$(teSe2rlf(te,"1")) = pm_cf(t,regi,te)$(teSe2rlf(te,"1"));

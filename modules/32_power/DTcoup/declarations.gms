@@ -28,8 +28,8 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_reportmk_4RM(gdxfile32,ttot,all_regi,DIETERte32,DIETERvarname32) "load markup report from DIETER"
     p32_peakDemand_relFac(ttot,all_regi)                             "annual peak demand as a relative ratio of total annual power demand from DIETER"
     p32_DIETER_VF(ttot,all_te)                                       "multiplicative value factor from DIETER that indicates the multiplicative price mark up of technology"
-    p32_DIETER_MV(ttot,all_te)                                     "absolute markup from DIETER v32_DIETER_MV is fixed to"
-    p32_DIETER_elecprice(ttot)                                     "elec price in DIETER"
+    p32_DIETER_MV(ttot,all_te)                                       "absolute markup from DIETER"
+    p32_DIETER_elecprice(ttot)                                       "elec price in DIETER"
     p32_DIETER_shSeEl(ttot,all_regi,all_te)                          "generation share of technology from DIETER"
 
 $ENDIF.DTcoup
@@ -50,10 +50,6 @@ positive variables
     v32_shStor(ttot,all_regi,all_te)      "share of seel production from renewables that needs to be stored, range 0..1 [0,1]"
     v32_storloss(ttot,all_regi,all_te)    "total energy loss from storage for a given technology [TWa]"
     v32_shSeEl(ttot,all_regi,all_te)			"new share of electricity production in % [%]"
-    v32_DIETER_VF(ttot,all_te)            "multiplicative value factor from DIETER that indicates the multiplicative price mark up of technology, fixed to p32_DIETER_VF"
-    v32_DIETER_MV(ttot,all_te)          "absolute markup from DIETER fixed to p32_DIETER_MV"
-    v32_DIETER_elecprice(ttot)          "elec price in DIETER, fixed to p32_DIETER_elecprice"
-    v32_DIETER_shSeEl(ttot,all_regi,all_te)       "generation share of technology from DIETER, fixed to p32_DIETER_shSeEl"
 * v32_seelDem(ttot,all_regi,all_enty)   "total secondary electricity demand (excluding curtailment)"
 ;
 
