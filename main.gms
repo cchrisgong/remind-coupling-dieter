@@ -80,11 +80,11 @@
 
 *##################### R SECTION START (VERSION INFO) ##########################
 * 
-* Regionscode: 62eff8f7
+* Regionscode: 2b1450bc
 * 
-* Input data revision: 6.1
+* Input data revision: 6
 * 
-* Last modification (input data): Wed Apr 28 19:37:13 2021
+* Last modification (input data): Mon May  3 19:31:39 2021
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -443,8 +443,8 @@ $setGlobal cm_ESD_post2055Increase  off !! def = 2
 $setGlobal cm_emiMktEScoop  off    !! def = off	
 $setGlobal cm_emiMktES2020price  off !! def = 30
 $setGlobal cm_emiMktES2050	 off   !! def = off	
-$setGlobal cm_NucRegiPol	 on   !! def = off		
-$setGlobal cm_CoalRegiPol	 on   !! def = off		
+$setGlobal cm_NucRegiPol	 off   !! def = off		
+$setGlobal cm_CoalRegiPol	 off   !! def = off		
 $setGlobal cm_proNucRegiPol	 off   !! def = off
 $setGlobal cm_CCSRegiPol	 off   !! def = off	
 $setGlobal cm_implicitFE  off !! def = off
@@ -487,7 +487,7 @@ cm_bioprod_histlim = -1; !! def -1
 
 cm_H2targets = 0; !! def 0
 
-cm_BioSupply_Adjust_EU = 2; !! def 1
+cm_BioSupply_Adjust_EU = 3; !! def 1
 cm_BioImportTax_EU = 1; !! def 0.25
 
 *** buildings services_putty switches
@@ -509,7 +509,7 @@ cm_indst_costDecayStart = 0.05; !! def 5%
 cm_indst_H2costDecayEnd = 0.1;  !! def 10%
 
 *** EU bioenergy switches
-cm_BioSupply_Adjust_EU = 2; !! def 1
+cm_BioSupply_Adjust_EU = 3; !! def 1
 cm_BioImportTax_EU = 1; !! def 0.25
 
 $setGlobal cm_demTcomplex  temporary_trend !! def = temporary_trend
@@ -552,7 +552,7 @@ $setGlobal cm_magicc_temperatureImpulseResponse  off           !! def = off
 
 $setGlobal cm_damage_DiceLike_specification  HowardNonCatastrophic   !! def = HowardNonCatastrophic
 
-$setglobal cm_CES_configuration  stat_off-indu_fixed_shares-buil_simple-tran_complex-POP_pop_SSP2-GDP_gdp_SSP2-Kap_debt_limit-Reg_62eff8f7   !! this will be changed by start_run()
+$setglobal cm_CES_configuration  stat_off-indu_fixed_shares-buil_simple-tran_complex-POP_pop_SSP2-GDP_gdp_SSP2-Kap_debt_limit-FE_med-Reg_2b1450bc   !! this will be changed by start_run()
 
 $setglobal c_CES_calibration_new_structure  0    !! def =  0
 $setglobal c_CES_calibration_iterations  10    !! def = 10
@@ -583,10 +583,10 @@ $setglobal cm_INNOPATHS_adj_seed_cont  off
 $setglobal cm_INNOPATHS_adj_coeff  off
 $setglobal cm_INNOPATHS_adj_coeff_cont  off
 
-$setglobal cm_INNOPATHS_adj_seed_multiplier  4
-$setglobal cm_INNOPATHS_adj_coeff_multiplier  0.25
+$setglobal cm_INNOPATHS_adj_seed_multiplier  off
+$setglobal cm_INNOPATHS_adj_coeff_multiplier  off
 
-$setglobal cm_INNOPATHS_inco0Factor  off !! def = off
+$setglobal cm_INNOPATHS_inco0Factor  apcardiEfft 0.8, apcardiEffH2t 0.675 !! def = off
 
 $setglobal cm_INNOPATHS_CCS_markup  off !! def = off
 $setglobal cm_INNOPATHS_Industry_CCS_markup  off !! def = off
