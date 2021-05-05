@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
-runnumber = "oldbranch"
+runnumber = "mrkup106"
 
 mydatapath = paste0("~/remind-coupling-dieter/output/", runnumber, "/")
 
@@ -11,49 +11,77 @@ library(readr)
 
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 # specify output file
-iteration = 15
+iteration = 35
 file1 = paste0("report_DIETER_i",iteration,".gdx")
 
 # gdxToQuitte_annual(mydatapath, file1,runnumber)
 # gdxToQuitte_hourly(mydatapath, file1,runnumber)
 
+annual_reportCSV = read.csv(paste0(myDIETERPLOT_path, runnumber, "_i", iteration, "_annualreport.csv"), sep = ';', header = T, stringsAsFactors = F)
+VAR_report_key_DT = c("fuel cost - divided by eta ($/MWh)","CO2 cost ($/MWh)")
+
+TECH_DISPATCH_DT = c("CCGT", "lig","bio", "OCGT_eff", "nuc", "hc")
+
+dieter.tech.mapping <- c(hc = "Hard coal",
+                         lig = "Lignite",
+                         coal = "Coal (Lig + HC)",
+                         nuc = "Nuclear",
+                         OCGT_eff = "OCGT",
+                         CCGT = "CCGT",
+                         bio = "Biomass",
+                         ror = "Hydro",
+                         Wind_on = "Wind",
+                         Solar = "Solar",
+                         NULL)
+
+color.mapping <- c("CCGT" = "#999959", "Lignite" = "#0c0c0c", "Coal (Lig + HC)" = "#0c0c0c",
+                   "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
+                   "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
+                   "Hard coal" = "#808080", "peak demand" = "#0c0c0c")
+
 #####################################################
 #plot load duration curve of residual loads once production is being accounted for for various tech., one by one, ordered by their capacity factor
-year_toplot_list <- c(2045)
+year_toplot_list <- c(2030,2050,2070)
 
 for(year_toplot in year_toplot_list){
-  
-# year_toplot = 2025
+
+# year_toplot = 2030
 
 mycolors <- c("combined cycle gas" = "#999959", "lignite" = "#0c0c0c", "solar" = "#ffcc00", "wind" = "#337fff", "biomass" = "#005900", "open cycle gas turbine" = "#e51900", "hydro" =  "#191999", "nuclear" =  "#ff33ff", "hard coal" = "#808080")
 
-hourly_reportCSV = read.csv(paste0(mypath, "capfac", runnumber, "_i",iteration,"_hourlyreport.csv"), sep = ';', header = T, stringsAsFactors = F)
+hourly_reportCSV = read.csv(paste0(mypath, "/", runnumber, "_i",iteration,"_hourlyreport.csv"), sep = ';', header = T, stringsAsFactors = F)
+
 hourly_reportQUITT <- as.quitte(hourly_reportCSV) 
+
 QUITTobj<-hourly_reportQUITT %>% 
-  filter(period == year_toplot) 
+  filter(period == year_toplot) %>% 
+  revalue.levels(tech = dieter.tech.mapping) %>%
+  mutate( tech = factor(tech, levels=rev(unique(dieter.tech.mapping))) )
 
 LDC <- QUITTobj %>% 
-  filter(variable == "Net fixed electricity demand") %>% 
+  filter(variable == "fixed demand (MWh)") %>% 
   select(hour, value) %>% 
+  mutate(value = value/1e3) %>% 
   dplyr::rename(load = value)
   
 LDC0 <- LDC %>% arrange(desc(load)) %>% 
   mutate(hour = as.numeric(hour)) %>% 
-  select(load, hour) %>% 
-  mutate(load = load/1e3)
+  select(load, hour) 
 LDC0$sorted_x <- seq(1, 8760)  
-LDC0$te <- "solar"
+LDC0$te <- "Solar"
 
 PV<- QUITTobj %>% 
-  filter(variable == "Hourly generation") %>% 
-  filter(tech == "Solar PV") %>% 
-  select(hour, value) %>% 
+  filter(variable == "generation (GWh)") %>% 
+  filter(tech == "Solar") %>% 
+  select(hour, value) %>%  
+  mutate(value = value)%>% 
   dplyr::rename(solgen = value)
 
 CU_VRE_solar <- QUITTobj %>% 
-  filter(variable == "Hourly VRE curtailment") %>% 
-  filter(tech == "Solar PV")%>% 
+  filter(variable == "curtailment renewable (GWh)") %>% 
+  filter(tech == "Solar")%>% 
   select(hour, value) %>% 
+  mutate(value = value)%>% 
   dplyr::rename(curt_s = value)
 
 RLDC_all = list(LDC, PV, CU_VRE_solar) %>% 
@@ -63,23 +91,24 @@ RLDC_all[is.na(RLDC_all)] <- 0
 RLDC_all$rldc1<- RLDC_all$load - PV$solgen - RLDC_all$curt_s
 
 RLDC1 <- RLDC_all %>% arrange(desc(rldc1)) %>% 
-  select(rldc1) %>% 
-  mutate(rldc1 = rldc1/1e3)
+  select(rldc1) 
 
 RLDC1$sorted_x <- seq(1, 8760)  
-RLDC1$te <- "wind"
+RLDC1$te <- "Wind"
 #=================================================================================================
 #=================================================================================================
 
 Wind<- QUITTobj %>% 
-  filter(variable == "Hourly generation") %>% 
-  filter(tech == "Wind_on")%>% 
+  filter(variable == "generation (GWh)") %>% 
+  filter(tech == "Wind")%>% 
   select(hour, value) %>% 
+  mutate(value = value)%>% 
   dplyr::rename(windgen = value)
 
 CU_VRE_wind <- QUITTobj %>% 
-  filter(variable == "Hourly VRE curtailment") %>% 
-  filter(tech == "Wind_on")%>% 
+  filter(variable == "curtailment renewable (GWh)") %>% 
+  filter(tech == "Wind")%>% 
+  mutate(value = value)%>% 
   select(hour, value) %>% 
   dplyr::rename(curt_w = value)
 
@@ -90,142 +119,150 @@ RLDC_all[is.na(RLDC_all)] <- 0
 RLDC_all$rldc2 <- RLDC_all$rldc1 - Wind$windgen - RLDC_all$curt_w
   
 RLDC2 <- RLDC_all %>% arrange(desc(rldc2)) %>% 
-  select(rldc2)%>% 
-  mutate(rldc2 = rldc2/1e3)
+  select(rldc2)
 
 RLDC2$sorted_x <- seq(1, 8760)  
-RLDC2$te <- "open cycle gas turbine"
 
 #=================================================================================================
 #=================================================================================================
+#order based on lowest running cost (repeated script from price_duration_curve_w_varCost)
+annual_reportQUITT <- as.quitte(annual_reportCSV) 
 
-OCGT<- QUITTobj %>% 
-  filter(variable == "Hourly generation") %>% 
-  filter(tech == "OCGT_eff")%>% 
-  select(hour, value) %>% 
-  dplyr::rename(ocgtgen = value)
+running_cost <- annual_reportQUITT %>% 
+  filter(period %in% year_toplot) %>% 
+  filter(tech %in% TECH_DISPATCH_DT) %>% 
+  filter(variable %in% VAR_report_key_DT) %>% 
+  select(tech, value) %>% 
+  revalue.levels(tech = dieter.tech.mapping) %>%
+  mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))) %>% 
+  dplyr::group_by(tech) %>%
+  dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
+  dplyr::ungroup(tech) %>% 
+  arrange(desc(value))
 
-RLDC_all = list(RLDC_all, OCGT) %>% 
+low_running_tech_list = as.vector(running_cost$tech)
+
+RLDC2$te <- low_running_tech_list[[1]]
+
+#--------------------------------------------------------------
+
+hr_gen3 <- QUITTobj %>% 
+  filter(variable == "generation (GWh)") %>% 
+  filter(tech == low_running_tech_list[[1]]) %>% 
+  select(hour, gen3 = value)
+
+RLDC_all = list(RLDC_all, hr_gen3) %>% 
   reduce(full_join) 
-RLDC_all[is.na(RLDC_all)] <- 0
-  
-RLDC_all$rldc3 <- RLDC_all$rldc2 - RLDC_all$ocgtgen 
 
-RLDC3 <- RLDC_all %>% arrange(desc(rldc3)) %>% 
-  select(rldc3)%>% 
-  mutate(rldc3 = rldc3/1e3)
+RLDC_all[is.na(RLDC_all)] <- 0
+
+RLDC_all$rldc3 <- RLDC_all$rldc2 - RLDC_all$gen3
+
+RLDC3 <- RLDC_all %>% 
+  arrange(desc(rldc3)) %>% 
+  select(rldc3)
 
 RLDC3$sorted_x <- seq(1, 8760)
-RLDC3$te <- "combined cycle gas"
-
+RLDC3$te <- low_running_tech_list[[2]]
 #=================================================================================================
 #=================================================================================================
 
-CCGT<- QUITTobj %>% 
-  filter(variable == "Hourly generation") %>% 
-  filter(tech == "CCGT")%>% 
+hr_gen4<- QUITTobj %>% 
+  filter(variable == "generation (GWh)") %>% 
+  filter(tech == low_running_tech_list[[2]])%>% 
   select(hour, value) %>% 
-  dplyr::rename(ccgtgen = value)
+  dplyr::rename(gen4 = value)
 
-RLDC_all$rldc4 <- RLDC_all$rldc3 - CCGT$ccgtgen 
+RLDC_all$rldc4 <- RLDC_all$rldc3 - hr_gen4$gen4 
 
 RLDC4 <- RLDC_all %>% arrange(desc(rldc4)) %>% 
-  select(rldc4)%>% 
-  mutate(rldc4 = rldc4/1e3)
+  select(rldc4)
 
 RLDC4$sorted_x <- seq(1, 8760)
-RLDC4$te <- "hard coal"
+RLDC4$te <- low_running_tech_list[[3]]
 #=================================================================================================
 #=================================================================================================
 
-HCoal<- QUITTobj %>% 
-  filter(variable == "Hourly generation") %>% 
-  filter(tech == "Hard coal")%>% 
+hr_gen5<- QUITTobj %>% 
+  filter(variable == "generation (GWh)") %>% 
+  filter(tech == low_running_tech_list[[3]])%>% 
   select(hour, value) %>% 
-  dplyr::rename(hcgen = value)
+  dplyr::rename(gen5 = value)
 
-RLDC_all$rldc5 <- RLDC_all$rldc4 - HCoal$hcgen 
+RLDC_all$rldc5 <- RLDC_all$rldc4 - hr_gen5$gen5
 
 RLDC5 <- RLDC_all %>% arrange(desc(rldc5)) %>% 
-  select(rldc5)%>% 
-  mutate(rldc5 = rldc5/1e3)
+  select(rldc5)
 
 RLDC5$sorted_x <- seq(1, 8760)
-RLDC5$te <- "lignite"
+RLDC5$te <- low_running_tech_list[[4]]
 #=================================================================================================
 #=================================================================================================
 
-Lignite<- QUITTobj %>% 
-  filter(variable == "Hourly generation") %>% 
-  filter(tech == "Lignite")%>% 
+hr_gen6 <- QUITTobj %>% 
+  filter(variable == "generation (GWh)") %>% 
+  filter(tech == low_running_tech_list[[4]])%>% 
+  mutate(value = value)%>% 
   select(hour, value) %>% 
-  dplyr::rename(liggen = value)
+  dplyr::rename(gen6 = value)
 
-RLDC_all$rldc6 <- RLDC_all$rldc5 - Lignite$liggen 
+RLDC_all$rldc6 <- RLDC_all$rldc5 - hr_gen6$gen6
 
 RLDC6 <- RLDC_all %>% arrange(desc(rldc6)) %>% 
-  select(rldc6)%>% 
-  mutate(rldc6 = rldc6/1e3)
+  select(rldc6)
 
 RLDC6$sorted_x <- seq(1, 8760)
-RLDC6$te <- "biomass"
+RLDC6$te <- low_running_tech_list[[5]]
 #=================================================================================================
 #=================================================================================================
 
-Biomass<- QUITTobj %>% 
-  filter(variable == "Hourly generation") %>% 
-  filter(tech == "Biomass")%>% 
+hr_gen7<- QUITTobj %>% 
+  filter(variable == "generation (GWh)") %>% 
+  filter(tech == low_running_tech_list[[5]])%>% 
   select(hour, value) %>% 
-  dplyr::rename(biogen = value)
+  dplyr::rename(gen7 = value)
 
-RLDC_all$rldc7 <- RLDC_all$rldc6 - Biomass$biogen 
+RLDC_all$rldc7 <- RLDC_all$rldc6 - hr_gen7$gen7
 
 RLDC7 <- RLDC_all %>% arrange(desc(rldc7)) %>% 
-  select(rldc7)%>% 
-  mutate(rldc7 = rldc7/1e3)
+  select(rldc7)
 
 RLDC7$sorted_x <- seq(1, 8760)
-RLDC7$te <- "hydro"
+RLDC7$te <- low_running_tech_list[[6]]
 
 #=================================================================================================
 #=================================================================================================
 
-hydro<- QUITTobj %>% 
-  filter(variable == "Hourly generation") %>% 
-  filter(tech == "Run-of-River")%>% 
+hr_gen8<- QUITTobj %>% 
+  filter(variable == "generation (GWh)") %>% 
+  filter(tech == low_running_tech_list[[6]])%>% 
+  select(hour, value) %>% 
+  dplyr::rename(gen8 = value)
+
+RLDC_all$rldc8 <- RLDC_all$rldc7 - hr_gen8$gen8 
+
+RLDC8 <- RLDC_all %>% arrange(desc(rldc8)) %>% 
+  select(rldc8)
+
+RLDC8$sorted_x <- seq(1, 8760)
+RLDC8$te <- "Hydro"
+
+#=================================================================================================
+#=================================================================================================
+
+ROR<- QUITTobj %>% 
+  filter(variable == "generation (GWh)") %>% 
+  filter(tech == "Hydro")%>% 
   select(hour, value) %>% 
   dplyr::rename(rorgen = value)
 
-RLDC_all$rldc8 <- RLDC_all$rldc7 - hydro$rorgen 
-
-RLDC8 <- RLDC_all %>% arrange(desc(rldc8)) %>% 
-  select(rldc8)%>% 
-  mutate(rldc8 = rldc8/1e3)
-
-RLDC8$sorted_x <- seq(1, 8760)
-RLDC8$te <- "nuclear"
-
-#=================================================================================================
-#=================================================================================================
-
-Nuc<- QUITTobj %>% 
-  filter(variable == "Hourly generation") %>% 
-  filter(tech == "Nuclear")%>% 
-  select(hour, value) %>% 
-  dplyr::rename(nucgen = value)
-
-RLDC_all$rldc9 <- RLDC_all$rldc8 - Nuc$nucgen 
+RLDC_all$rldc9 <- RLDC_all$rldc8 - ROR$rorgen 
 
 RLDC9 <- RLDC_all %>% arrange(desc(rldc9)) %>% 
-  select(rldc9)%>% 
-  mutate(rldc9 = rldc9/1e3)
+  select(rldc9)
 
 RLDC9$sorted_x <- seq(1, 8760)
 
-# RLDC_test = list(LDC, PV, CU_VRE_solar, Wind, CU_VRE_wind, hydro, CCGT, OCGT, Biomass, Lignite, HCoal, Nuc) %>% 
-#   reduce(full_join) 
-# 
-# RLDC_test$RLDC <- RLDC_test$LDC- RLDC_test$PV- RLDC_test$CU_VRE_solar- RLDC_test$Wind- RLDC_test$CU_VRE_wind- RLDC_test$hydro- RLDC_test$CCGT- RLDC_test$OCGT- RLDC_test$Biomass- RLDC_test$Lignite- RLDC_test$HCoal - RLDC_test$Nuc
 
 p1<-ggplot() +
     geom_area(data = LDC0, aes(x = sorted_x, y = load, fill = te), size = 1.2, alpha = 0.8) +
@@ -238,10 +275,10 @@ p1<-ggplot() +
     geom_area(data = RLDC7, aes(x = sorted_x, y = rldc7, fill = te), size = 1.2, alpha = 0.8) +
     geom_area(data = RLDC8, aes(x = sorted_x, y = rldc8, fill = te), size = 1.2, alpha = 0.8) +
     geom_area(data = RLDC9, aes(x = sorted_x, y = rldc9), size = 1.2, alpha = 0.8) +
-    scale_fill_manual(name = "Technology", values = mycolors)+
+    scale_fill_manual(name = "Technology", values = color.mapping)+
     xlab("hour") + ylab("residual load (GW)")
   
-  ggsave(filename = paste0(mypath, "RLCD_xNte_", runnumber, "_", iteration, "_", year_toplot, ".png"),  width = 8, height =8, units = "in", dpi = 120)
+  ggsave(filename = paste0(mypath, "RLDC_xNte_", runnumber, "_", iteration, "_", year_toplot, ".png"),  width = 8, height =8, units = "in", dpi = 120)
   
   }
   

@@ -1,6 +1,6 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
 
-runnumber = "mrkup2"
+runnumber = "mrkup106"
 mydatapath = paste0("~/remind-coupling-dieter/output/", runnumber, "/")
 
 
@@ -11,9 +11,9 @@ source(paste0(mypath, "library_import.R"))
 source(paste0(mypath, "GDXtoQuitte.R"))
 library(readr)
 # specify output file
-iteration = 5
+iteration = 35
 file = paste0("report_DIETER_i", iteration, ".gdx")
-year_toplot = 2050
+
 
 # gdxToQuitte_hourly(mydatapath, file,runnumber)
 
@@ -30,9 +30,10 @@ year_toplot_list <- c(2030,2040,2050,2055,2070,2080,2090,2100)
 
 for(year_toplot in year_toplot_list){
 
+  # year_toplot = 2055
   # select price
   price_hr <- QUITTobj %>% 
-    filter(variable == "price") %>% 
+    filter(variable == "hourly wholesale price ($/MWh)") %>% 
     mutate(hour = as.numeric(hour)) %>% 
     filter(period == year_toplot) %>% 
     mutate(unit = "$/MWh", tech, value) %>% 
@@ -84,14 +85,15 @@ for(year_toplot in year_toplot_list){
   
   p1<-ggplot( data = price_Hr_plot ) +
     geom_line(aes(x = sorted_x, y = value ), size = 1.2, alpha = 0.5, color = "red") +
-    coord_cartesian(expand = FALSE, ylim = c(0.001, max_price*100)) +
+    coord_cartesian(expand = FALSE, ylim = c(0.1, max_price*100)) +
     # geom_col( aes(x = sorted_x, y = value, fill = hour ), position = "identity", width = 0.2) +
     # geom_point(aes(x = sorted_x, y = 0.9 * max_price_plot * tech_Prod/max_techProd), color = "green", size = 5) +
     # annotate(geom = "text", x = 2000, y = 0.7 * max_price_plot, label = paste0("mean price = ",round(mean_price)), color = "purple",  size=15) +
     # scale_y_continuous(sec.axis = sec_axis(~.*max_techProd/(0.9 * max_price_plot), name = "GW")) +
     theme(axis.text = element_text(size=10), axis.title = element_text(size= 10, face="bold")) +
     scale_y_continuous(trans = 'log10')+
-    xlab("hour") + ylab("electricity price")
+    ggtitle(paste0("DIETER ", year_toplot))+
+    xlab("hour") + ylab("electricity price (with scarcity price) ($/MWh)")
   
   ggsave(filename = paste0(mypath, "Price_duration_curve_yr", year_toplot, "_", runnumber, "_iter_", iteration,".png"),  width = 5, height =5, units = "in", dpi = 120)
   
