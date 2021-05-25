@@ -130,7 +130,6 @@ if ( (c_keep_iteration_gdxes eq 1) ,
     put_utility "shell" /
       "cp DIETER_v1.0.2_12.lst DIETER_v1.0.2_12_i" sm32_tmp:0:0 ".lst";
 
-
 );
 logfile.nr = 2;
 

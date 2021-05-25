@@ -155,7 +155,6 @@ $include "./modules/21_tax/on/input/pm_taxCO2eqHist.cs4r"
 $offdelim
 /
 ;
-*CG**RP*for baseline adding a low flat CO2 price for stability reasons for DIETER coupling
 f21_taxCO2eqHist(ttot,regi) = 5;
 f21_taxCO2eqHist(ttot,"DEU") = 25;
 

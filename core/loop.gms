@@ -13,6 +13,7 @@ option limcol    = 0;
 option limrow    = 0;
 *option limcol = 2147483647;
 *option limrow = 2147483647;
+
 hybrid.optfile   = 1;
 hybrid.holdfixed = 1;
 hybrid.scaleopt  = 1;
@@ -44,6 +45,11 @@ LOOP(iteration $(ord(iteration)<(cm_iteration_max+1)),
       IF(ord(iteration)>(cm_iteration_max-1),
             OPTION solprint=on
         );
+
+* if (ord(iteration) eq 4,
+*   option limcol    = 2147483647;
+*   option limrow    = 2147483647;
+* );
 *--------------------------------------------------------------------------
 ***         BOUNDS
 *--------------------------------------------------------------------------
@@ -67,7 +73,7 @@ $batinclude "./modules/include.gms" presolve
 if( (cm_startyear gt 2005),
     Execute_Loadpoint 'input_ref' p_pvpRef = pm_pvp;
     pm_pvp(ttot,trade)$( (ttot.val ge 2005) and (ttot.val lt cm_startyear) and (NOT tradeSe(trade))) = p_pvpRef(ttot,trade);
-);    
+);
 
 ***--------------------------------------------------------------------------
 ***         SOLVE
@@ -162,13 +168,13 @@ if (o_modelstat le 2,
   !! retain gdxes of intermediate iterations by copying them using shell
   !! commands
   if (c_keep_iteration_gdxes eq 1,
-    put_utility logfile, "shell" / 
+    put_utility logfile, "shell" /
       "cp fulldata.gdx fulldata_" iteration.val:0:0 ".gdx";
   );
 else
   execute_unload 'non_optimal';
   if (c_keep_iteration_gdxes eq 1,
-    put_utility logfile, "shell" / 
+    put_utility logfile, "shell" /
       "cp non_optimal.gdx non_optimal_" iteration.val:0:0 ".gdx";
   );
 );

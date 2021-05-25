@@ -44,7 +44,7 @@
     + sum(emiMkt, v21_taxemiMkt(t,regi,emiMkt))
 * + v21_taxrevFlex(t,regi)$(cm_flex_tax eq 1)
     + v21_taxrevMrkup(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND cm_DTcoup_capcon ne 0)
-* + v21_taxrevMrkup(t,regi)
+    + v21_taxrevCap(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND cm_DTcoup_capcon ne 0)
     + v21_taxrevBioImport(t,regi)
 $ifthen.cm_implicitFE not "%cm_implicitFE%" == "off"
     + vm_taxrevimplFETax(t,regi)
@@ -129,7 +129,7 @@ v21_taxrevResEx(t,regi) =e=  sum(pe2rlf(peEx(enty),rlf), p21_tau_fuEx_sub(t,regi
 q21_taxrevPE2SE(t,regi)$(t.val ge max(2010,cm_startyear))..
 v21_taxrevPE2SE(t,regi)
 =e= SUM(pe2se(enty,enty2,te),
-          (p21_tau_pe2se_tax(t,regi,te) + p21_tau_pe2se_sub(t,regi,te) + p21_tau_pe2se_inconv(t,regi,te)) * vm_prodSe(t,regi,enty,enty2,te)
+          (p21_eu_pe2se_tax(t,regi,te) + p21_tau_pe2se_sub(t,regi,te) + p21_tau_pe2se_inconv(t,regi,te)) * vm_prodSe(t,regi,enty,enty2,te)
        )
 	- p21_taxrevPE2SE0(t,regi) ;
 
@@ -138,11 +138,11 @@ v21_taxrevPE2SE(t,regi)
 *'  Documentation of overall tax approach is above at q21_taxrev.
 ***---------------------------------------------------------------------------
 q21_taxrevTech(t,regi)$(t.val ge max(2010,cm_startyear))..
-v21_taxrevTech(t,regi) 
+v21_taxrevTech(t,regi)
 =e= sum(te2rlf(te,rlf),
           (p21_tech_tax(t,regi,te,rlf) + p21_tech_sub(t,regi,te,rlf)) * vm_deltaCap(t,regi,te,rlf)
        )
-	- p21_taxrevTech0(t,regi) ;   
+	- p21_taxrevTech0(t,regi) ;
 
 ***---------------------------------------------------------------------------
 *'  Calculation of export taxes: tax rate times export volume
@@ -218,6 +218,15 @@ q21_taxrevMrkup(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_capcon ne 0
 *** wholesale annual price, negative if below)
    - vm_Mrkup(t,regi,te) * vm_prodSe(t,regi,enty,enty2,te))
       - p21_taxrevMrkup0(t,regi)
+;
+***---------------------------------------------------------------------------
+*'  CG: Calculation of subsidy on dispatchable technology
+***---------------------------------------------------------------------------
+q21_priceCap(t,regi)$(tDT32(t) AND (sameas(regi,"DEU")) AND (cm_DTcoup_capcon = 1))..
+  v21_taxrevCap(t,regi)$(sameas(regi,"DEU"))
+  =e=
+      - vm_priceCap(t,regi)$(sameas(regi,"DEU")) * vm_reqCap(t,regi)$(sameas(regi,"DEU"))
+      - p21_taxrevCap0(t,regi)$(sameas(regi,"DEU"))
 ;
 
 ***---------------------------------------------------------------------------

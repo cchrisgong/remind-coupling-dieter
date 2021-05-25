@@ -145,11 +145,54 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** DIETER coupling equations
 ***---------------------------------------------------------------------------
 
-q32_peakDemand_DT(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1) ) ..
-	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)$( regDTCoup(regi) )))
-	=g=
-	p32_peakDemand_relFac(t,regi)$( regDTCoup(regi) ) * p32_seelUsableDem(t,regi,enty2)$( regDTCoup(regi) ) * 8760
-	;
+*q32_peakDemand_DT(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1) ) ..
+*	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)$( regDTCoup(regi) )))
+*	=g=
+*	p32_peakDemand_relFac(t,regi)$( regDTCoup(regi) ) * p32_seelUsableDem(t,regi,enty2)$( regDTCoup(regi) ) * 8760
+*	;
+
+
+*** CG: implementing a softer capacity bound, with a flat capacity subsidy, once the sum of dispatchable capacity exceeds
+*** the bound which is the peak demand from last iteration, the subsidy rapidly drops according to logistic function
+***
+q32_reqCap(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1) ) ..
+	vm_reqCap(t,regi)
+ 	=e=
+ 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)
+ 	;
+
+q32_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1) )..
+  vm_priceCap(t,regi)
+  =e=
+	0.1 / 1.2 * p32_budget(t,regi) * !! 0.1 = 100$/kW * 1e9 / 1e12, this is the capacity subsidy per kW of dispatchable, kW -> TW, USD -> trUSD
+  ( 1 / ( 1 + ( 3 ** v32_capPriceExponent(t,regi) ) )
+	)
+  + ( v32_expSlack(t,regi) * 1e-8 )
+;
+
+
+*** CG: Logistic function exponent for additional dispatchable capacity, LHS bound up to 20 to reduce computational intensity
+*  because the exponent v32_capPriceExponent is capped by 20, we introduce
+*  v32_expSlack, to save the remaining values if the exponent value on equation q32_auxPriceCap is bigger due to the
+*  "x" value (vm_reqCap). At the same time we want this slack variable to be used only if necessary, so we add a penalization term
+*  in the main equation q32_priceCap (v32_expSlack(t,regi)*1e-8), such that the result variable is a
+*  investment cost variable and the model will try to keep its value at the minimal possible.
+
+q32_auxPriceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1) )..
+  v32_capPriceExponent(t,regi)
+  =e=
+  (
+		  (
+			10 / ( p32_capDecayEnd(t,regi) - p32_capDecayStart(t,regi) )
+			)
+	* (
+		(vm_reqCap(t,regi) + 1e-11)
+	- (( p32_capDecayEnd(t,regi) + p32_capDecayStart(t,regi) ) / 2 )
+  	)
+	)
+	- v32_expSlack(t,regi)
+;
+
 
 ***----------------------------------------------------------------------------
 *** CG: calculate markup adjustment used in flexibility tax for supply-side technologies
