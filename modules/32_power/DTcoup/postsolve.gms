@@ -39,7 +39,7 @@ sm32_tmp = iteration.val;
 display "iteration", sm32_tmp;
 
 *   switch on second coupling switch when coupling actually begins
-    if( (ord(iteration) ge 3) ,
+    if( (ord(iteration) eq 2) ,
         cm_DTcoup_capcon = 1;
     );
 
