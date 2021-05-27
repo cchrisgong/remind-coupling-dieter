@@ -11,7 +11,7 @@
 * pm_cf_linear(tDT32,"DEU",DISPATCHte32_2) = pm_cf(tDT32,"DEU",DISPATCHte32_2) * ( 1 - 0.5 * v32_shSeEl.l(tDT32,"DEU","spv") / 100);
 
 *** FS: calculate electricity price of last iteration in trUSD2005/TWa
-*p32_budget(t,regi) = qm_budget.m(t,regi);
+p32_budget(t,regi) = qm_budget.m(t,regi);
 pm_SEPrice(t,regi,"seel") = q32_balSe.m(t,regi,"seel")/(qm_budget.m(t,regi) + sm_eps);
 *Display "electricity price", pm_SEPrice(t,"DEU","seel");
 
