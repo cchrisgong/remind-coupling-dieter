@@ -1443,22 +1443,22 @@ teDTCoupSupp(all_te)       "all supply technologies to which markup coupling wit
 /
 spv
 wind
-* hydro
-* igcc
-* igccc
-* pc
-* pcc
-* pco
-* coalchp
-* ngcc
-* ngccc
-* gaschp
-* biochp
-* bioigcc
-* bioigccc
-* ngt
-* tnrs
-* fnrs
+hydro
+igcc
+igccc
+pc
+pcc
+pco
+coalchp
+ngcc
+ngccc
+gaschp
+biochp
+bioigcc
+bioigccc
+ngt
+tnrs
+fnrs
 /
 
 * DTcoupDemte(all_te)       "all demand technologies to which markup coupling with DIETER applies"

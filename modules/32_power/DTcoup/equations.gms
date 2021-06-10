@@ -102,7 +102,7 @@ q32_limitCapTeGrid(t,regi)$( t.val ge 2015 ) ..
 ;
 
 ***---------------------------------------------------------------------------
-*** Calculation of share of electricity production of VRE
+*** Calculation of share of electricity production
 ***---------------------------------------------------------------------------
 q32_shSeEl(t,regi,te)..
     v32_shSeEl(t,regi,te) / 100 * vm_usableSe(t,regi,"seel")
@@ -179,9 +179,9 @@ q32_mkup(t,regi,te)$(tDT32(t) AND teDTCoupSupp(te) AND (cm_DTcoup_capcon = 1) AN
 * ((v32_DIETER_VF(t,te) * p32_shSeEl(t,regi,te)) / (v32_shSeEl(t,regi,te) + sm_eps) * pm_SEPrice(t,regi,"seel") - pm_SEPrice(t,regi,"seel")) * 1$( sameas(regi,'DEU') )
 
 *** absolute markup, multiply by budget from DIETER to REMIND, but divide here again by budget
-( (p32_DIETER_MV(t,te) * (1- (v32_shSeEl(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 )  ) - p32_DIETER_elecprice(t) ) / 1e12 * sm_TWa_2_MWh / 1.2 )* 1$( sameas(regi,'DEU') )
+*** price_new = price/budget * 1e12 / sm_TWa_2_MWh * 1.2
+*** price = price_new * budget/1e12 * sm_TWa_2_MWh/1.2
+( (p32_DIETER_MV(t,te) * (1 - (v32_shSeEl(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 )  ) - p32_DIETER_elecprice(t) ) / 1e12 * sm_TWa_2_MWh / 1.2 ) * 1$( sameas(regi,'DEU') )
+* ( (p32_DIETER_MV(t,te)  - p32_DIETER_elecprice(t) ) / 1e12 * sm_TWa_2_MWh / 1.2 ) * 1$( sameas(regi,'DEU') )
 * (p32_DIETER_MV(t,te) - p32_DIETER_elecprice(t) ) / 1e12 * sm_TWa_2_MWh / 1.2
 ;
-
-* price_new = price/budget * 1e12 / sm_TWa_2_MWh * 1.2
-* price = price_new * budget/1e12*sm_TWa_2_MWh/1.2

@@ -90,29 +90,19 @@ logfile.nr = 2;
     pm_cf(t,"DEU",te)$(tDT32(t) AND NUCte32(te)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,"DEU","nuc","capfac")$(tDT32(t)));
 
 *   pass peak demand from DIETER to REMIND as a fraction of the total demand
-    p32_peakDemand_relFac(t,"DEU")$(tDT32(t)) = sum(gdxfile32, p32_report4RM(gdxfile32,t,"DEU","all_te","ResPeakDem_relFac")$(tDT32(t)));
+    p32_peakDemand_relFac(t,"DEU")$(tDT32(t)) = sum(gdxfile32, p32_report4RM(gdxfile32,t,"DEU","all_te","peakDem_relFac")$(tDT32(t)));
 
 *   flexible demand side tech (might be able to be replaced by the mkup implementation)
 *   p32_flex_multmk(t,"elh2")$(tDT32(t)) = sum(gdxfile32, p32_report4RM(gdxfile32, t, "DEU", "elh2", "valuefactor")$(tDT32(t)));
-
-*** dividing each DIETER tech into REMIND tech, using the last iteration REMIND share within DIETER tech category to scale down the generation share
-    p32_tech_category_genshare(t,"DEU",te)$(BIOte32(te)) = p32_shSeEl(t,"DEU",te)$(BIOte32(te))/sum(te2$(BIOte32(te2)),p32_shSeEl(t,"DEU",te2)+sm_eps);
-		p32_tech_category_genshare(t,"DEU",te)$(NonPeakGASte32(te)) = p32_shSeEl(t,"DEU",te)$(NonPeakGASte32(te))/sum(te2$(NonPeakGASte32(te2)),p32_shSeEl(t,"DEU",te2)+sm_eps);
-		p32_tech_category_genshare(t,"DEU",te)$(NUCte32(te)) = p32_shSeEl(t,"DEU",te)$(NUCte32(te))/sum(te2$(NUCte32(te2)),p32_shSeEl(t,"DEU",te2)+sm_eps);
-		p32_tech_category_genshare(t,"DEU",te)$(COALte32(te)) = p32_shSeEl(t,"DEU",te)$(COALte32(te))/sum(te2$(COALte32(te2)),p32_shSeEl(t,"DEU",te2) +sm_eps);
 
     p32_DIETER_shSeEl(t,"DEU","spv")$(tDT32(t)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,"DEU","Solar","gen_share")$(tDT32(t)));
     p32_DIETER_shSeEl(t,"DEU","wind")$(tDT32(t)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,"DEU","Wind_on","gen_share")$(tDT32(t)));
     p32_DIETER_shSeEl(t,"DEU","ngt")$(tDT32(t)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,"DEU","OCGT_eff","gen_share")$(tDT32(t)));
     p32_DIETER_shSeEl(t,"DEU","hydro")$(tDT32(t)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,"DEU","ror","gen_share")$(tDT32(t)));
-    p32_DIETER_shSeEl(t,"DEU",te)$(tDT32(t) AND BIOte32(te)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,"DEU","bio","gen_share")$(tDT32(t)))
-																																*	p32_tech_category_genshare(t,"DEU",te)$(BIOte32(te)) ;
-    p32_DIETER_shSeEl(t,"DEU",te)$(tDT32(t) AND NonPeakGASte32(te))= sum(gdxfile32,p32_report4RM(gdxfile32,t,"DEU","CCGT","gen_share")$(tDT32(t)))
-																											            	* p32_tech_category_genshare(t,"DEU",te)$(NonPeakGASte32(te)) ;
-    p32_DIETER_shSeEl(t,"DEU",te)$(tDT32(t) AND NUCte32(te)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,"DEU","nuc","gen_share")$(tDT32(t)))
-																													   	* p32_tech_category_genshare(t,"DEU",te)$(NUCte32(te)) ;
-    p32_DIETER_shSeEl(t,"DEU",te)$(tDT32(t) AND COALte32(te)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,"DEU","coal","gen_share")$(tDT32(t)))
-																																			* p32_tech_category_genshare(t,"DEU",te)$(COALte32(te)) ;
+    p32_DIETER_shSeEl(t,"DEU",te)$(tDT32(t) AND BIOte32(te)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,"DEU","bio","gen_share")$(tDT32(t)));
+    p32_DIETER_shSeEl(t,"DEU",te)$(tDT32(t) AND NonPeakGASte32(te))= sum(gdxfile32,p32_report4RM(gdxfile32,t,"DEU","CCGT","gen_share")$(tDT32(t)));
+    p32_DIETER_shSeEl(t,"DEU",te)$(tDT32(t) AND NUCte32(te)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,"DEU","nuc","gen_share")$(tDT32(t)));
+    p32_DIETER_shSeEl(t,"DEU",te)$(tDT32(t) AND COALte32(te)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,"DEU","coal","gen_share")$(tDT32(t)));
 
     p32_DIETER_VF(t,te)$(tDT32(t) AND BIOte32(te)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,"DEU","bio","valuefactor")$(tDT32(t)));
     p32_DIETER_VF(t,te)$(tDT32(t) AND NonPeakGASte32(te)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,"DEU","CCGT","valuefactor")$(tDT32(t)));

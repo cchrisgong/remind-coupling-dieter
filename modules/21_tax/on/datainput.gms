@@ -187,7 +187,7 @@ $include "./modules/21_tax/on/input/pm_taxCO2eqHist.cs4r"
 $offdelim
 /
 ;
-f21_taxCO2eqHist(ttot,"DEU") = 100;
+f21_taxCO2eqHist(ttot,"DEU") = 25;
 
 ** Fixing European 2020 carbon price to 20€/t CO2 (other regions to zero)
 f21_taxCO2eqHist("2020",regi) = 0;

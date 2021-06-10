@@ -31,7 +31,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_DIETER_MV(ttot,all_te)                                       "absolute markup from DIETER"
     p32_DIETER_elecprice(ttot)                                       "elec price in DIETER"
     p32_DIETER_shSeEl(ttot,all_regi,all_te)                          "generation share of technology from DIETER"
-
+    p32_tech_category_genshare(ttot,all_regi,all_te)                 "generation share of sub-technology within a DIETER tech category from last REMIND iteration"
 $ENDIF.DTcoup
 
 p32_fuelprice_lastiter(ttot,all_regi,all_enty)                      "fuel cost of the last iteration"
