@@ -277,11 +277,11 @@ all_enty             "all types of quantities"
         pebiolc      "PE biomass lignocellulosic"
         pebios       "PE biomass sugar and starch"
         pebioil      "PE biomass sunflowers, palm oil, etc"
-	all_seliq	 "all to SE liquids" 
+	all_seliq	 "all to SE liquids"
 		seliqbio     "SE liquids from biomass (ex. ethanol)"
 		seliqfos     "SE liquids from fossil pe (ex. petrol and diesel)"
                 seliqsyn     "SE synthetic liquids from H2 (ex. petrol and diesel)"
-        all_seso	 "all to SE solids" 
+        all_seso	 "all to SE solids"
 		sesobio      "SE solids from biomass"
 		sesofos      "SE solids from fossil pe"
         seel         "SE electricity"
@@ -482,7 +482,7 @@ all_in   "all inputs and outputs of the CES function"
 
   enb                     "buildings energy use"
   enhb                    "buildings heat energy use"
-  enhgab                  "buildings heat gaseous energy use (fegab and feh2b)"  
+  enhgab                  "buildings heat gaseous energy use (fegab and feh2b)"
   fesob                   "buildings use of solid energy carriers"
   fehob                   "buildings use of liquid energy carriers"
   fegab                   "buildings use of gaseous energy carriers"
@@ -495,7 +495,7 @@ all_in   "all inputs and outputs of the CES function"
 
   eni                     "industry energy use"
   enhi                    "industry heat energy use"
-  enhgai                  "industry heat gaseous energy use (fegab and feh2b)" 
+  enhgai                  "industry heat gaseous energy use (fegab and feh2b)"
   fesoi                   "industry use of solid energy carriers"
   fehoi                   "industry use of liquid energy carriers"
   fegai                   "industry use of gaseous energy carriers"
@@ -818,20 +818,19 @@ $ELSE.RegScenSens
 $ENDIF.RegScenSens
 
 *** definition of set of regions that use alternative FE emission factors from umweltbundesamt
-$ifthen.altFeEmiFac not "%cm_altFeEmiFac%" == "off" 
+$ifthen.altFeEmiFac not "%cm_altFeEmiFac%" == "off"
 set
-  altFeEmiFac_regi(ext_regi)  "set of regions that use alternative FE emission factors from umweltbundesamt" 
+  altFeEmiFac_regi(ext_regi)  "set of regions that use alternative FE emission factors from umweltbundesamt"
   /
     %cm_altFeEmiFac%
   /
 ;
-$endif.altFeEmiFac 
+$endif.altFeEmiFac
 
 ***###############################################################################
 ***######################## R SECTION START (MODULES) ###############################
 *** THIS CODE IS CREATED AUTOMATICALLY, DO NOT MODIFY THESE LINES DIRECTLY
 *** ANY DIRECT MODIFICATION WILL BE LOST AFTER NEXT MODEL START
-*** CHANGES CAN BE DONE USING THE RESPECTIVE LINES IN scripts/start_functions.R
 
 sets
 
@@ -872,7 +871,7 @@ sets
        codePerformance
        /
 
-module2realisation(modules,*) "mapping of modules and active realisations" /
+      module2realisation(modules,*) "mapping of modules and active realisations" /
        macro . %macro%
        welfare . %welfare%
        PE_FE_parameters . %PE_FE_parameters%
@@ -1437,6 +1436,11 @@ teFlexTax(all_te)       "all technologies to which flexibility tax/subsidy appli
 /
 elh2
 tdels
+/
+
+regDTCoup(all_regi)      "regions where REMIND is coupled to DIETER"
+/
+DEU
 /
 
 teDTCoupSupp(all_te)       "all supply technologies to which markup coupling with DIETER applies"

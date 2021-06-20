@@ -65,15 +65,15 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_minVF_spv = 0.1;
 
 p32_peakDemand_relFac(t,regi) = 0;
-p32_DIETER_VF(t,te) = 0;
-p32_DIETER_MV(t,te) = 0;
-p32_DIETER_elecprice(t) = 0;
+p32_DIETER_VF(t,regi,te) = 0;
+p32_DIETER_MV(t,regi,te) = 0;
+p32_DIETER_elecprice(t,regi) = 0;
 p32_seelDem(t,regi,enty) = 0;
 p32_shSeEl(t,regi,te) = 0;
 p32_DIETER_shSeEl(t,regi,te) = 0;
 p32_deltaCap(t,regi,te,rlf) = 0;
-p32_marketValue(t,te) = 0;
-p32_valueFactor(t,te) = 1;
+p32_marketValue(t,regi,te) = 0;
+p32_valueFactor(t,regi,te) = 1;
 p32_budget(t,regi) = 0;
 
 Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;

@@ -25,16 +25,6 @@ q32_balSe(t,regi,enty2)$(sameas(enty2,"seel"))..
 	+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! don't use in 2005 because this demand is not contained in 05_initialCap
 ;
 
-*** CG: total electricity demand to be passed on to DIETER
-* q32_seelDem(t,regi,enty2)$(sameas(enty2,"seel"))..
-* 	v32_seelDem(t,regi,enty2)
-* 	=e=
-* 	sum(se2fe(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
-* 									+ sum(se2se(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
-* * + sum(teVRE, v32_storloss.l(t,regi,teVRE) )
-* 									+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! don't use in 2005 because this demand is not contained in 05_initialCap;
-* ;
-
 
 q32_usableSe(t,regi,entySe)$(sameas(entySe,"seel"))..
 	vm_usableSe(t,regi,entySe)
@@ -153,35 +143,37 @@ q32_limitSolarWind(t,regi)$( (cm_solwindenergyscen = 2) OR (cm_solwindenergyscen
 *** DIETER coupling equations
 ***---------------------------------------------------------------------------
 
-q32_peakDemand_DT(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND sameas(regi,"DEU") AND (cm_DTcoup_capcon = 1) ) ..
-	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf))) * 1$( sameas(regi,'DEU') )
+q32_peakDemand_DT(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1) ) ..
+	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)$( regDTCoup(regi) )))
 	=g=
-	p32_peakDemand_relFac(t,regi) * p32_seelDem(t,regi,enty2) * 8760 * 1$( sameas(regi,'DEU') )
+	p32_peakDemand_relFac(t,regi)$( regDTCoup(regi) ) * p32_seelDem(t,regi,enty2)$( regDTCoup(regi) ) * 8760
 	;
 
 ***----------------------------------------------------------------------------
 *** CG: calculate markup adjustment used in flexibility tax for supply-side technologies
 ***----------------------------------------------------------------------------
-q32_mkup(t,regi,te)$(tDT32(t) AND teDTCoupSupp(te) AND (cm_DTcoup_capcon = 1) AND sameas(regi,"DEU"))..
-	vm_Mrkup(t,regi,te) * 1$( sameas(regi,'DEU') )
+q32_mkup(t,regi,te)$(tDT32(t) AND teDTCoupSupp(te) AND (cm_DTcoup_capcon = 1) AND regDTCoup(regi))..
+	vm_Mrkup(t,regi,te)$( regDTCoup(regi) )
 	=e=
 *** supply-side technology markup v32_DIETER_VF as a multiplicative factor
 *** of the wholesale electricity price of the last iteration
 *** v32_DIETER_VF < 1 -> market value lower than average electricity price (usually fluctuating VRE generation),
 *** v32_DIETER_VF > 1 -> market value higher than average electricity price (usually firm generation technologies)
 *** prefactor depends on difference between gen share of DIETER and current REMIND iter
-* (v32_DIETER_VF(t,te) * ( 1 - (v32_shSeEl(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100) ) - 1 ) * pm_SEPrice(t,regi,"seel")
+* (v32_DIETER_VF(t,regi,te) * ( 1 - (v32_shSeEl(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100) ) - 1 ) * pm_SEPrice(t,regi,"seel")
 *** prefactor depends on difference between gen share of last and current REMIND iter
-* (v32_DIETER_VF(t,te) * ( 1 - (v32_shSeEl(t,regi,te) / 100 - p32_shSeEl(t,regi,te) / 100 ) ) - 1 ) * pm_SEPrice(t,regi,"seel")
+* (v32_DIETER_VF(t,regi,te) * ( 1 - (v32_shSeEl(t,regi,te) / 100 - p32_shSeEl(t,regi,te) / 100 ) ) - 1 ) * pm_SEPrice(t,regi,"seel")
 *** NO prefactor
-* (v32_DIETER_VF(t,te) - 1 ) * pm_SEPrice(t,regi,"seel") * 1$( sameas(regi,'DEU') )
+* (v32_DIETER_VF(t,regi,te) - 1 ) * pm_SEPrice(t,regi,"seel") * 1$( regDTCoup(regi) )
 *** nonlinear relation
-* ((v32_DIETER_VF(t,te) * p32_shSeEl(t,regi,te)) / (v32_shSeEl(t,regi,te) + sm_eps) * pm_SEPrice(t,regi,"seel") - pm_SEPrice(t,regi,"seel")) * 1$( sameas(regi,'DEU') )
+* ((v32_DIETER_VF(t,regi,te) * p32_shSeEl(t,regi,te)) / (v32_shSeEl(t,regi,te) + sm_eps) * pm_SEPrice(t,regi,"seel") - pm_SEPrice(t,regi,"seel")) * 1$( regDTCoup(regi) )
 
 *** absolute markup, multiply by budget from DIETER to REMIND, but divide here again by budget
 *** price_new = price/budget * 1e12 / sm_TWa_2_MWh * 1.2
 *** price = price_new * budget/1e12 * sm_TWa_2_MWh/1.2
-( (p32_DIETER_MV(t,te) * (1 - (v32_shSeEl(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 )  ) - p32_DIETER_elecprice(t) ) / 1e12 * sm_TWa_2_MWh / 1.2 ) * 1$( sameas(regi,'DEU') )
-* ( (p32_DIETER_MV(t,te)  - p32_DIETER_elecprice(t) ) / 1e12 * sm_TWa_2_MWh / 1.2 ) * 1$( sameas(regi,'DEU') )
-* (p32_DIETER_MV(t,te) - p32_DIETER_elecprice(t) ) / 1e12 * sm_TWa_2_MWh / 1.2
+( (p32_DIETER_MV(t,regi,te)$( regDTCoup(regi) ) *
+   (1 - (v32_shSeEl(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_DIETER_shSeEl(t,regi,te)$( regDTCoup(regi) ) / 100 )  ) - p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) )
+	 / 1e12 * sm_TWa_2_MWh / 1.2 )
+* ( (p32_DIETER_MV(t,regi,te)  - p32_DIETER_elecprice(t,regi) ) / 1e12 * sm_TWa_2_MWh / 1.2 ) * 1$( regDTCoup(regi) )
+* (p32_DIETER_MV(t,regi,te) - p32_DIETER_elecprice(t,regi) ) / 1e12 * sm_TWa_2_MWh / 1.2
 ;
