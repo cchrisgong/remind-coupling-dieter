@@ -189,7 +189,7 @@ $offdelim
 ;
 *CG**RP*for baseline adding a low flat CO2 price for stability reasons for DIETER coupling
 f21_taxCO2eqHist(ttot,regi) = 5;
-f21_taxCO2eqHist(ttot,"DEU") = 10;
+f21_taxCO2eqHist(ttot,"DEU") = 25;
 
 ** Fixing European 2020 carbon price to 20$/t CO2 (other regions to zero)
 f21_taxCO2eqHist("2020",regi) = 0;
