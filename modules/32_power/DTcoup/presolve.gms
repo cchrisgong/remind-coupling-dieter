@@ -15,8 +15,9 @@ p32_budget(t,regi) = qm_budget.m(t,regi);
 pm_SEPrice(t,regi,"seel") = q32_balSe.m(t,regi,"seel")/(qm_budget.m(t,regi) + sm_eps);
 *Display "electricity price", pm_SEPrice(t,"DEU","seel");
 
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** CG:load fuel prices from two previous iterations
 p32_fuelprice_lastx2iter(t,regi,entyPe)$regDTCoup(regi) = p32_fuelprice_lastiter(t,regi,entyPe)$regDTCoup(regi);
 p32_fuelprice_lastiter(t,regi,entyPe)$regDTCoup(regi) = q_balPe.m(t,regi,entyPe)$regDTCoup(regi);
-
+$ENDIF.DTcoup
 *** EOF ./modules/32_power/DTcoup/presolve.gms

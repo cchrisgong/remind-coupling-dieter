@@ -32,6 +32,11 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_DIETER_elecprice(ttot,all_regi)                                       "elec price in DIETER"
     p32_DIETER_shSeEl(ttot,all_regi,all_te)                          "generation share of technology from DIETER"
     p32_tech_category_genshare(ttot,all_regi,all_te)                 "generation share of sub-technology within a DIETER tech category from last REMIND iteration"
+
+*** CG: storage related parameters
+    p32_DIETER_curtailmentratio(ttot,all_regi,all_te)               "ratio of curtailed energy to usable energy for VRE from DIETER"
+    p32_cf_last_iter(ttot,all_regi,all_te)                          "pm_cf of last iteration, used for averaging"
+
 $ENDIF.DTcoup
 
 p32_fuelprice_lastiter(ttot,all_regi,all_enty)                      "fuel cost of the last iteration"
@@ -63,17 +68,18 @@ equations
     q32_limitCapTeChp(ttot,all_regi)              "capacitiy constraint for chp electricity generation"
     q32_limitCapTeGrid(ttot,all_regi)          		"calculate the additional grid capacity required by VRE"
     q32_shSeEl(ttot,all_regi,all_te)         		  "calculate share of electricity production of a technology (v32_shSeEl)"
-    q32_shStor(ttot,all_regi,all_te)              "equation to calculate v32_shStor"
-    q32_storloss(ttot,all_regi,all_te)            "equation to calculate vm_storloss"
+* q32_shStor(ttot,all_regi,all_te)              "equation to calculate v32_shStor"
+* q32_storloss(ttot,all_regi,all_te)            "equation to calculate vm_storloss"
 
 *** disabling flexibility constraint q32_operatingReserve in coupled mode
 *   q32_operatingReserve(ttot,all_regi)  			    "operating reserve for necessary flexibility"
 
     q32_limitSolarWind(ttot,all_regi)           	"limits on fluctuating renewables, only turned on for special EMF27 scenarios"
 *    q32_seelDem(ttot,all_regi,all_enty)           "calculates total secondary electricity demand (excluding curtailment)"
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
     q32_peakDemand_DT(ttot,all_regi,all_enty)     "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"
     q32_mkup(ttot,all_regi,all_te)                "calculate markup or markdown of generation technology value"
-
+$ENDIF.DTcoup
 *   q32_mkup_noCOUP(ttot,all_regi,all_te)         "calculate markup or markdown of generation technology value without DIETER coupling (FS's implementation)"
 *   q32_flexAdj(tall,all_regi,all_te)             "calculate flexibility used in flexibility tax for technologies with electricity input"
 

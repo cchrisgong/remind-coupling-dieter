@@ -15,12 +15,6 @@ p32_seelDem(t,regi,enty2) = sum(se2fe(enty2,enty3,te), vm_demSe.l(t,regi,enty2,e
 									+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr.l(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! don't use in 2005 because this demand is not contained in 05_initialCap;
 ;
 
-*** CG: smoothing fuel cost over iterations
-p32_fuelprice_avgiter(t,regi,entyPe)$regDTCoup(regi)
-      = (q_balPe.m(t,regi,entyPe)$regDTCoup(regi)
-		   + 2 * p32_fuelprice_lastiter(t,regi,entyPe)$regDTCoup(regi)
-			 + p32_fuelprice_lastx2iter(t,regi,entyPe)$regDTCoup(regi))
-			 / 4;
 
 *** CG: market value as seen by REMIND
 p32_marketValue(t,regi,te)$regDTCoup(regi)
@@ -33,8 +27,19 @@ p32_valueFactor(t,regi,te)$regDTCoup(regi)
 
 
 $ifthen.calibrate %CES_parameters% == "load"
+
 *** CG: DIETER coupling
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
+
+*** CG: smoothing fuel cost over iterations to pass to DIETER
+p32_fuelprice_avgiter(t,regi,entyPe)$regDTCoup(regi)
+      = (q_balPe.m(t,regi,entyPe)$regDTCoup(regi)
+		   + 2 * p32_fuelprice_lastiter(t,regi,entyPe)$regDTCoup(regi)
+			 + p32_fuelprice_lastx2iter(t,regi,entyPe)$regDTCoup(regi))
+			 / 4;
+
+
+
 *iteration happens at N=5, 10, 15, 20, ...; if (ord(iteration) ge 5) N starts at N= 4
 
 * if( ((ord(iteration) ge 1) and ( mod(ord(iteration), 5) eq 0)),
