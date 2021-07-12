@@ -61,7 +61,7 @@ q32_balSe_DT(t,regi,enty2)$(sameas(enty2,"seel") AND regDTCoup(regi))..
   =e=
     sum(se2fe(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
 	+ sum(se2se(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
-  - sum(teVRE, p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) )
+  + sum(teVRE, p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) )
 	+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! don't use in 2005 because this demand is not contained in 05_initialCap
 ;
 
@@ -162,13 +162,12 @@ q32_shStor(t,regi,teVRE)$(t.val ge 2015 AND not regDTCoup(regi))..
 ;
 
 q32_storloss(t,regi,teVRE)$(t.val ge 2015 AND not regDTCoup(regi))..
-	0.05* vm_usableSeTe(t,regi,"seel",teVRE)
+	v32_storloss(t,regi,teVRE)
 	=e=
 	v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
 	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
 	* vm_usableSeTe(t,regi,"seel",teVRE)
 ;
-
 
 ***---------------------------------------------------------------------------
 *** EMF27 limits on fluctuating renewables, only turned on for special EMF27 and AWP 2 scenarios, not for SSP
