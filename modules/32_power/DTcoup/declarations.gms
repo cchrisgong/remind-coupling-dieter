@@ -54,6 +54,7 @@ sm32_discount_factor                      "discount factor for investment"
 positive variables
     v32_shStor(ttot,all_regi,all_te)      "share of seel production from renewables that needs to be stored, range 0..1 [0,1]"
     v32_storloss(ttot,all_regi,all_te)    "total energy loss from storage for a given technology [TWa]"
+    v32_storloss_DT(ttot,all_regi,all_te)    "curtailment given by DIETER [TWa]"
     v32_shSeEl(ttot,all_regi,all_te)			"new share of electricity production in % [%]"
 * v32_seelDem(ttot,all_regi,all_enty)   "total secondary electricity demand (excluding curtailment)"
 ;
@@ -73,12 +74,13 @@ equations
     q32_shSeEl(ttot,all_regi,all_te)         		  "calculate share of electricity production of a technology (v32_shSeEl)"
     q32_shStor(ttot,all_regi,all_te)              "equation to calculate v32_shStor for non-DIETER coupled regions"
     q32_storloss(ttot,all_regi,all_te)            "equation to calculate vm_storloss for non-DIETER coupled regions"
-
+    q32_storloss_DT(ttot,all_regi,all_te)         "equation to calculate vm_storloss_DT for DIETER coupled regions"
 *** disabling flexibility constraint q32_operatingReserve in coupled mode
 *   q32_operatingReserve(ttot,all_regi)  			    "operating reserve for necessary flexibility"
 
     q32_limitSolarWind(ttot,all_regi)           	"limits on fluctuating renewables, only turned on for special EMF27 scenarios"
-*    q32_seelDem(ttot,all_regi,all_enty)           "calculates total secondary electricity demand (excluding curtailment)"
+*   q32_seelDem(ttot,all_regi,all_enty)          "calculates total secondary electricity demand (excluding curtailment)"
+
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
     q32_peakDemand_DT(ttot,all_regi,all_enty)     "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"
     q32_mkup(ttot,all_regi,all_te)                "calculate markup or markdown of generation technology value"

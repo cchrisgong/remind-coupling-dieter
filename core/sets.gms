@@ -831,6 +831,7 @@ $endif.altFeEmiFac
 ***######################## R SECTION START (MODULES) ###############################
 *** THIS CODE IS CREATED AUTOMATICALLY, DO NOT MODIFY THESE LINES DIRECTLY
 *** ANY DIRECT MODIFICATION WILL BE LOST AFTER NEXT MODEL START
+*** CHANGES CAN BE DONE USING THE RESPECTIVE LINES IN scripts/start_functions.R
 
 sets
 
@@ -871,7 +872,7 @@ sets
        codePerformance
        /
 
-      module2realisation(modules,*) "mapping of modules and active realisations" /
+module2realisation(modules,*) "mapping of modules and active realisations" /
        macro . %macro%
        welfare . %welfare%
        PE_FE_parameters . %PE_FE_parameters%
@@ -1440,8 +1441,10 @@ tdels
 
 regDTCoup(all_regi)      "regions where REMIND is coupled to DIETER"
 /
-DEU
+USA
 /
+
+regNoDTCoup(all_regi)    "regions which are not DIETER coupled"
 
 teDTCoupSupp(all_te)       "all supply technologies to which markup coupling with DIETER applies"
 /
