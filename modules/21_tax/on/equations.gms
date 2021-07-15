@@ -43,7 +43,7 @@
     + v21_implicitDiscRate(t,regi)
     + sum(emiMkt, v21_taxemiMkt(t,regi,emiMkt))
 * + v21_taxrevFlex(t,regi)$(cm_flex_tax eq 1)
-    + v21_taxrevMrkup(t,regi)$(cm_DTcoup_capcon = 1)
+    + v21_taxrevMrkup(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND cm_DTcoup_capcon ne 0)
 * + v21_taxrevMrkup(t,regi)
     + v21_taxrevBioImport(t,regi)
 $ifthen.cm_implicitFE not "%cm_implicitFE%" == "off"
@@ -210,14 +210,13 @@ q21_taxemiMkt(t,regi,emiMkt)$(t.val ge max(2010,cm_startyear))..
 ***---------------------------------------------------------------------------
 *'  CG: Calculation of tax/subsidy on technologies with variable/firm electricity onput
 ***---------------------------------------------------------------------------
-q21_taxrevMrkup(t,regi)$((t.val ge max(2010,cm_startyear)) AND (cm_DTcoup_capcon = 1))..
-* q21_taxrevMrkup(t,regi)$((t.val ge max(2010,cm_startyear)))..
+q21_taxrevMrkup(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_capcon ne 0))..
   v21_taxrevMrkup(t,regi)
   =e=
   sum(en2en(enty,enty2,te)$(teDTcoupSupp(te)),
-*** vm_Mrkup is electricity price reduction/increases for variable/firm technologies
-*** variable supply technologies get tax, firm technologies get subsidy
-      - vm_Mrkup(t,regi,te) * vm_prodSe(t,regi,enty,enty2,te))
+*** vm_Mrkup is markup or markdown for generation technologies (positive if market value above
+*** wholesale annual price, negative if below)
+   - vm_Mrkup(t,regi,te) * vm_prodSe(t,regi,enty,enty2,te))
       - p21_taxrevMrkup0(t,regi)
 ;
 

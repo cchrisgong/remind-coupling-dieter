@@ -123,16 +123,35 @@ logfile.nr = 2;
     Execute_Loadpoint 'results_DIETER' p32_reportmk_4RM;
 *   ONLY pass on the disptachable capacity factors, since the VRE's capfac are treated differently in REMIND
 *   sum over gdxfile set removes this extra index that comes from gdxmerge algorithm
+*   optional: averaging capfac over 2 iterations
+    p32_cf_last_iter(t,regi,te) = pm_cf(t,regi,te);
+
+* pm_cf(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
+* 			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac")$(tDT32(t) AND regDTCoup(regi)));
+* pm_cf(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi))
+* 			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"CCGT","capfac")$(tDT32(t) AND regDTCoup(regi)));
+* pm_cf(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi))
+* 			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"bio","capfac")$(tDT32(t) AND regDTCoup(regi)));
+* pm_cf(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi))
+* 			= sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"OCGT_eff","capfac")$(tDT32(t) AND regDTCoup(regi)));
+* pm_cf(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi))
+* 			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","capfac")$(tDT32(t) AND regDTCoup(regi)));
+
     pm_cf(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
-					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac")$(tDT32(t) AND regDTCoup(regi)));
-    pm_cf(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi))
-					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"CCGT","capfac")$(tDT32(t) AND regDTCoup(regi)));
-    pm_cf(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi))
-					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"bio","capfac")$(tDT32(t) AND regDTCoup(regi)));
-    pm_cf(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi))
-					= sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"OCGT_eff","capfac")$(tDT32(t) AND regDTCoup(regi)));
-    pm_cf(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi))
-					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","capfac")$(tDT32(t) AND regDTCoup(regi)));
+					= 0.5 * ( p32_cf_last_iter(t,regi,te)$(COALte32(te))
+					+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac")$(tDT32(t) AND regDTCoup(regi))) );
+		pm_cf(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi))
+					= 0.5 * ( p32_cf_last_iter(t,regi,te)$(NonPeakGASte32(te))
+					+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"CCGT","capfac")$(tDT32(t) AND regDTCoup(regi))) );
+		pm_cf(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi))
+					= 0.5 * ( p32_cf_last_iter(t,regi,te)$(BIOte32(te))
+					+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"bio","capfac")$(tDT32(t) AND regDTCoup(regi))) );
+		pm_cf(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi))
+					= 0.5 * ( p32_cf_last_iter(t,regi,"ngt")
+					+ sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"OCGT_eff","capfac")$(tDT32(t) AND regDTCoup(regi))) );
+		pm_cf(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi))
+					= 0.5 * ( p32_cf_last_iter(t,regi,te)$(NUCte32(te))
+					+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","capfac")$(tDT32(t) AND regDTCoup(regi))) );
 
 *   pass peak demand from DIETER to REMIND as a fraction of the total demand
     p32_peakDemand_relFac(t,regi)$(tDT32(t) AND regDTCoup(regi))
