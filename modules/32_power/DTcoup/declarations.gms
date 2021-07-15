@@ -15,13 +15,19 @@ parameters
     p32_storageCap(all_te,char)           "multiplicative factor between dummy seel<-->h2 technologies and storXXX technologies"
 *   p32_capStor_DIET(tall,all_regi)       "storage cap from DIETER"
     p32_minVF_spv                         "value factor of solar at 100% VRE shares"
-    p32_seelDem(ttot,all_regi,all_enty)   "total secondary electricity demand"
+    p32_seelTotDem(ttot,all_regi,all_enty)    "total secondary electricity demand (including curtailment)"
+    p32_seelUsableDem(ttot,all_regi,all_enty) "total usable secondary electricity demand"
     p32_shSeEl(ttot,all_regi,all_te)      "generation share of the last iteration"
     p32_deltaCap(ttot,all_regi,all_te,rlf)"capacity of the last iteration"
-    p32_marketValue(ttot,all_regi,all_te)          "market value seen by REMIND"
-    p32_valueFactor(ttot,all_regi,all_te)          "value factor seen by REMIND"
+    p32_marketValue(ttot,all_regi,all_te) "market value seen by REMIND"
+    p32_valueFactor(ttot,all_regi,all_te) "value factor seen by REMIND"
     p32_peakDemand_relFac(ttot,all_regi)  "annual peak demand as a relative ratio of total annual power demand from DIETER"
-    p32_budget(ttot,all_regi)          "budget from last iteration"
+    p32_budget(ttot,all_regi)             "budget from last iteration"
+
+*   for diagnostics
+    p32_coupledProd(ttot,all_regi,all_enty) "coupled production"
+    p32_seelProd(ttot,all_regi,all_enty)    "seel production (not from coupled production)"
+    p32_totProd(ttot,all_regi,all_enty)     "total seel production (both coupled and uncoupled production)"
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_report4RM(gdxfile32,ttot,all_regi,DIETERte32,DIETERvarname32)    "load report from DIETER"

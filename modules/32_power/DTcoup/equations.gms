@@ -8,18 +8,17 @@
 *** Balance equation for electricity secondary energy type:
 ***---------------------------------------------------------------------------
 q32_balSe(t,regi,enty2)$(sameas(enty2,"seel"))..
-	 sum(pe2se(enty,enty2,te), vm_prodSe(t,regi,enty,enty2,te) )
+	sum(pe2se(enty,enty2,te), vm_prodSe(t,regi,enty,enty2,te) )
 	+ sum(se2se(enty,enty2,te), vm_prodSe(t,regi,enty,enty2,te) )
 	+ sum(pc2te(enty,entySE(enty3),te,enty2),
 		pm_prodCouple(regi,enty,enty3,te,enty2) * vm_prodSe(t,regi,enty,enty3,te) )
 	+ sum(pc2te(enty4,entyFE(enty5),te,enty2),
 		pm_prodCouple(regi,enty4,enty5,te,enty2) * vm_prodFe(t,regi,enty4,enty5,te) )
 	+ sum(pc2te(enty,enty3,te,enty2),
-		sum(teCCS2rlf(te,rlf),
-			pm_prodCouple(regi,enty,enty3,te,enty2) * vm_co2CCS(t,regi,enty,enty3,te,rlf) ) )
+		sum(teCCS2rlf(te,rlf), pm_prodCouple(regi,enty,enty3,te,enty2) * vm_co2CCS(t,regi,enty,enty3,te,rlf) ) )
 	+ vm_Mport(t,regi,enty2)
   =e=
-   sum(se2fe(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
+    sum(se2fe(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
 	+ sum(se2se(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
 	+ sum(teVRE, v32_storloss(t,regi,teVRE) )
 	+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! do not use in 2005 because this demand is not contained in 05_initialCap
@@ -27,9 +26,9 @@ q32_balSe(t,regi,enty2)$(sameas(enty2,"seel"))..
 ;
 
 q32_usableSe(t,regi,entySe)$(sameas(entySe,"seel"))..
-	vm_usableSe(t,regi,entySe) 
+	vm_usableSe(t,regi,entySe)
 	=e=
-	 sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
+	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
 	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
 	+ sum(pc2te(entyPe,entySe(enty3),te,entySe)$(pm_prodCouple(regi,entyPe,enty3,te,entySe) gt 0),
 		pm_prodCouple(regi,entyPe,enty3,te,entySe)*vm_prodSe(t,regi,entyPe,enty3,te) )
@@ -41,8 +40,6 @@ q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND teVRE(te))..
  	=e=
  	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
 	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
- 	+ sum(pc2te(enty,entySe(enty3),te,entySe)$(pm_prodCouple(regi,enty,enty3,te,entySe) gt 0),
-		pm_prodCouple(regi,enty,enty3,te,entySe) * vm_prodSe(t,regi,enty,enty3,te) )
  	- sum(teVRE$sameas(te,teVRE), v32_storloss(t,regi,teVRE) )
 ;
 
@@ -80,15 +77,18 @@ q32_limitCapTeChp(t,regi)..
 ;
 
 ***---------------------------------------------------------------------------
-*** Calculation of necessary grid instations for centralized renewables:
+*** Calculation of necessary grid installations for centralized renewables:
 ***---------------------------------------------------------------------------
 q32_limitCapTeGrid(t,regi)$( t.val ge 2015 ) ..
-    vm_cap(t,regi,"gridwind",'1')       !! Technology is now parameterized to yield marginal costs of ~3.5$/MWh VRE electricity
+    vm_cap(t,regi,"gridwind",'1')      !! Technology is now parameterized to yield marginal costs of ~3.5$/MWh VRE electricity
     / p32_grid_factor(regi)        		!! It is assumed that large regions require higher grid investment
     =g=
     vm_prodSe(t,regi,"pesol","seel","spv")
     + vm_prodSe(t,regi,"pesol","seel","csp")
-    + 1.5 * vm_prodSe(t,regi,"pewin","seel","wind")        !! wind has larger variations accross space, so adding grid is more important for wind (result of REMIX runs for ADVANCE project)
+    + 1.5 * vm_prodSe(t,regi,"pewin","seel","wind")                 !! wind has larger variations accross space, so adding grid is more important for wind (result of REMIX runs for ADVANCE project)
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+    + 3 * vm_prodSe(t,regi,"pewin","seel","windoff")
+$ENDIF.WindOff
 ;
 
 ***---------------------------------------------------------------------------

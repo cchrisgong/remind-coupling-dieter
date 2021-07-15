@@ -8,12 +8,42 @@
 
 p32_shSeEl(t,regi,te)$regDTCoup(regi) = v32_shSeEl.l(t,regi,te)$regDTCoup(regi);
 
-*** CG: total electricity demand to be passed on to DIETER
-p32_seelDem(t,regi,enty2) = sum(se2fe(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) )
-									+ sum(se2se(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) )
-* + sum(teVRE, v32_storloss.l(t,regi,teVRE) )
-									+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr.l(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! don't use in 2005 because this demand is not contained in 05_initialCap;
-                	+ vm_Xport.l(t,regi,enty2)
+p32_totProd = sum(pe2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
+	+ sum(se2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
+	+ sum(pc2te(enty,entySE(enty3),te,enty2),
+		pm_prodCouple(regi,enty,enty3,te,enty2) * vm_prodSe.l(t,regi,enty,enty3,te) )
+	+ sum(pc2te(enty4,entyFE(enty5),te,enty2),
+		pm_prodCouple(regi,enty4,enty5,te,enty2) * vm_prodFe.l(t,regi,enty4,enty5,te) )
+	+ sum(pc2te(enty,enty3,te,enty2),
+		sum(teCCS2rlf(te,rlf), pm_prodCouple(regi,enty,enty3,te,enty2) * vm_co2CCS.l(t,regi,enty,enty3,te,rlf) ) )
+;
+
+*** CG: total electricity demand to be passed on to DIETER:
+p32_seelProd(t,regi,enty2)$(sameas(enty2,"seel")) =
+	sum(pe2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
+	+ sum(se2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
+;
+
+*** coupled production
+p32_coupledProd = sum(pc2te(enty,entySE(enty3),te,enty2),
+		pm_prodCouple(regi,enty,enty3,te,enty2) * vm_prodSe.l(t,regi,enty,enty3,te) )
+	+ sum(pc2te(enty4,entyFE(enty5),te,enty2),
+		pm_prodCouple(regi,enty4,enty5,te,enty2) * vm_prodFe.l(t,regi,enty4,enty5,te) )
+	+ sum(pc2te(enty,enty3,te,enty2),
+		sum(teCCS2rlf(te,rlf), pm_prodCouple(regi,enty,enty3,te,enty2) * vm_co2CCS.l(t,regi,enty,enty3,te,rlf) ) )
+;
+
+p32_seelTotDem(t,regi,enty2)$(sameas(enty2,"seel")) =
+  sum(se2fe(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) )
++ sum(se2se(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) )
++ sum(teVRE, v32_storloss.l(t,regi,teVRE) )
++ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr.l(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! do not use in 2005 because this demand is not contained in 05_initialCap
+;
+
+p32_seelUsableDem(t,regi,enty2)$(sameas(enty2,"seel")) =
+  sum(se2fe(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) )
++ sum(se2se(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) )
++ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr.l(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! do not use in 2005 because this demand is not contained in 05_initialCap
 ;
 
 *** CG: market value as seen by REMIND
