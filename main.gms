@@ -82,9 +82,9 @@
 * 
 * Regionscode: 2b1450bc
 * 
-* Input data revision: 6.1516
+* Input data revision: 6.18
 * 
-* Last modification (input data): Sun Jun  6 10:24:10 2021
+* Last modification (input data): Fri Jun 25 13:09:38 2021
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -243,6 +243,7 @@ cm_bioenergy_tax      "level of bioenergy tax in fraction of bioenergy price"
 cm_bioenergymaxscen   "choose bound on global pebiolc production excluding residues"
 cm_tradecost_bio       "choose financal tradecosts for biomass (purpose grown pebiolc)"
 cm_1stgen_phaseout    "choose if 1st generation biofuels should phase out after 2030 (vm_deltaCap=0)"
+cm_tradbio_phaseout   "Switch that allows for a faster phase out of traditional biomass"
 cm_cprice_red_factor  "reduction factor for price on co2luc when calculating the revenues. Replicates the reduction applied in MAgPIE"
 cm_startyear          "first optimized modelling time step [year]"
 c_start_budget        "start of GHG budget limit"
@@ -315,6 +316,7 @@ cm_flexMax_elh2             "switch for setting the maximum relative reduction o
 cm_H2targets                "switches on capacity targets for electrolysis in NDC techpol following national Hydrogen Strategies"
 cm_PriceDurSlope_elh2       "slope of price duration curve of electrolysis"
 cm_FlexTaxFeedback          "switch deciding whether flexibility tax feedback on buildlings and industry electricity prices is on"
+cm_VRE_supply_assumptions        "default (0), optimistic (1), sombre (2), or bleak (3) assumptions on VRE supply"
 cm_build_H2costAddH2Inv     "additional h2 distribution costs for low diffusion levels (default value: 6.5$/ 100 /Kwh)"
 cm_build_costDecayStart     "simplified logistic function end of full value (ex. 5%  -> between 0 and 5% the function will have the value 1). [%]"
 cm_build_H2costDecayEnd     "simplified logistic function start of null value (ex. 10% -> after 10% the function will have the value 0). [%]"
@@ -323,14 +325,26 @@ cm_indst_costDecayStart     "simplified logistic function end of full value   (e
 cm_indst_H2costDecayEnd     "simplified logistic function start of null value (ex. 10% -> between 10% and 100% the simplified logistic function will have the value 0). [%]"
 cm_BioSupply_Adjust_EU      "factor for scaling sub-EU bioenergy supply curves"
 cm_BioImportTax_EU          "factor for EU bioenergy import tax"
+cm_import_EU                "EU switch for different scenarios of EU SE import assumptions"
 cm_logitCal_markup_conv_b   "value to which logit calibration markup of standard fe2ue technologies in detailed buildings module converges to"
 cm_logitCal_markup_newtech_conv_b "value to which logit calibration markup of new fe2ue technologies in detailed buildings module converges to"
 cm_demTcomplex              "switch used to select the source of demand trends for the complex transport realization. By default, temporary handmade trajectories; if set to fromEDGET, EDGE-T based mrremind results."
-c_noPeFosCCDeu              "switch to suppress Pe2Se Fossil Carbon Capture in Germany"
-c_H2tdCapCost_stat          "factor to scale H2 transmission and distribution capital cost for buildings and industry"
+cm_noPeFosCCDeu              "switch to suppress Pe2Se Fossil Carbon Capture in Germany"
 cm_HeatLim_b                "switch to set maximum share of district heating in FE buildings"
 cm_ElLim_b                  "switch to set maximum share of electricity in FE buildings"
 cm_startIter_EDGET          "starting iteration of EDGE-T"
+cm_ARIADNE_FeShareBounds    "switch for minimum share of liquids and gases for industry needed for the ARIADNE project"
+cm_ariadne_trade_el         "switch for enabling electricity imports to Germany for ARIADNE project"
+cm_ariadne_trade_h2         "switch for enabling H2 imports to Germany for ARIADNE project"
+cm_ariadne_trade_syn        "switch for enabling synfuel imports to Germany for ARIADNE project"
+c_VREPot_Factor             "switch for rescaling renewable potentials in all grades which have not been used by 2020"
+cm_FEtax_trajectory_abs     "switch for setting the aboslute FE tax level explicitly from a given year onwards, before tax levels increases or decreases linearly to that value"
+cm_FEtax_trajectory_rel     "factor for scaling the FE tax level relative to cm_startyear from a given year onwards, before tax levels increases or decreases linearly to that value"
+cm_regipol_slope_beforeTarget "factor for scaling the slope of the co2 price trajectory in the regipol module which is apply only to the last years before target year"
+cm_heatPumpMkup_build       "switch for cost markup for using heat pumps in simple buildings module"
+cm_districtHeatingMkup_build "switch for cost markup for using district heat in simple buildings module"   
+c_BaselineAgriEmiRedDEU     "switch to lower agricultural base line emissions in Germany as fraction of standard assumption, a value of 0.25 will lower emissions by a fourth"
+cm_deuCDRmax                 "switch to limit maximum annual CDR amount in Germany in MtCO2 per y"
 ;
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -372,6 +386,7 @@ cm_bioenergymaxscen = 0;         !! def = 0
 cm_tradecost_bio     = 2;         !! def = 2
 $setglobal cm_LU_emi_scen  SSP2   !! def = SSP2
 cm_1stgen_phaseout  = 0;         !! def = 0
+$setglobal cm_tradbio_phaseout  default  !! def = default
 cm_cprice_red_factor  = 1;         !! def = 1
 
 $setglobal cm_POPscen  pop_SSP2  !! def = pop_SSP2
@@ -480,6 +495,8 @@ $setGlobal c_regi_capturescen  all !! def = all
 $setGlobal c_regi_synfuelscen  all !! def = all
 $setGlobal c_regi_sensscen  all !! def = all
 
+
+
 cm_TaxConvCheck = 0; !! def 1, which means tax convergence check is on
 
 cm_biotrade_phaseout = 0; !! def 0
@@ -490,6 +507,9 @@ cm_H2targets = 0; !! def 0
 cm_BioSupply_Adjust_EU = 3; !! def 1
 cm_BioImportTax_EU = 1; !! def 0.25
 
+*** EU import switches
+$setGlobal cm_import_EU  off !! def off
+
 *** buildings services_putty switches
 cm_logitCal_markup_conv_b = 0.8; !! def 0.8
 cm_logitCal_markup_newtech_conv_b = 0.3; !! def 0.3
@@ -498,6 +518,9 @@ cm_logitCal_markup_newtech_conv_b = 0.3; !! def 0.3
 cm_flex_tax = 0; !! def 0
 cm_PriceDurSlope_elh2 = 20; !! def 10
 cm_FlexTaxFeedback = 0; !! def 0
+
+*** VRE switch
+cm_VRE_supply_assumptions = 0; !! 0 - default, 1 - optimistic, 2 - sombre, 3 - bleak
 
 *** H2 simple buildings/industry switches
 cm_build_H2costAddH2Inv = 0.2;  !! def 6.5$/kg = 0.2 $/Kwh
@@ -514,8 +537,8 @@ cm_BioImportTax_EU = 1; !! def 0.25
 
 $setGlobal cm_demTcomplex  temporary_trend !! def = temporary_trend
 
-c_noPeFosCCDeu = 0; !! def 0
-c_H2tdCapCost_stat = 1; !! def 1
+cm_noPeFosCCDeu = 0; !! def 0
+
 
 cm_HeatLim_b = 1; !! def 1
 cm_ElLim_b = 1; !! def 1
@@ -525,7 +548,29 @@ cm_startIter_EDGET = 14; !! def 14, by default EDGE-T is run first in iteration 
 
 cm_TaxConvCheck = 0; !! def 1, which means tax convergence check is on
 
-$setGlobal cm_altFeEmiFac  EUR_regi, NEU_regi        !! def = off	
+$setGlobal cm_ARIADNE_FeShareBounds  off !! def = off
+
+cm_ariadne_trade_el = 0; !! def 0
+cm_ariadne_trade_h2 = 0; !! def 0
+cm_ariadne_trade_syn = 0; !! def 0
+
+
+$setGlobal c_VREPot_Factor  off !! def = off
+
+$setGlobal cm_FEtax_trajectory_abs  off !! def = off
+$setGlobal cm_FEtax_trajectory_rel  off !! def = off
+
+$setGlobal cm_regipol_slope_beforeTarget  off !! def = off
+
+$setGlobal cm_altFeEmiFac  off        !! def = off	
+
+
+cm_heatPumpMkup_build = 200; !! def = 200
+cm_districtHeatingMkup_build = 25; !! def = 25
+
+c_BaselineAgriEmiRedDEU = 0; !! def = 0
+
+cm_deuCDRmax = -1; !! def = -1
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ***                           YOU ARE IN THE WARNING ZONE (DON'T DO CHANGES HERE)
@@ -535,6 +580,7 @@ $setglobal cm_DTcoup  on         !! def = off
 cm_DTcoup_capcon = 0;         !! def = 0
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
 $setGlobal cm_nash_mode  parallel      !! def = parallel
+$setGLobal cm_debug_preloop off !! def = off
 $setGlobal c_EARLYRETIRE       on         !! def = on
 $setGlobal cm_OILRETIRE  on        !! def = on
 $setglobal cm_INCONV_PENALTY  on         !! def = on
@@ -605,6 +651,7 @@ $setglobal cm_seTradeScenario  off  !! def = off
 
 $setglobal cm_altTransBunkersShare  off      !! def = off
 
+$setglobal cm_wind_offshore  0      !! def = 0
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ***                                  END OF WARNING ZONE

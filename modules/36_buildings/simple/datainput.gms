@@ -9,7 +9,7 @@
 Parameter 
   p36_cesdata_sigma(all_in)  "substitution elasticities"
   /
-        enb    2.5
+        enb    0.5
         enhb   3.0
         enhgab 5.0
   /
@@ -18,9 +18,6 @@ pm_cesdata_sigma(ttot,in)$p36_cesdata_sigma(in) = p36_cesdata_sigma(in);
 
 pm_cesdata_sigma(ttot,in)$ (pm_ttot_val(ttot) le 2025  AND sameAs(in, "enb")) = 0.1;
 pm_cesdata_sigma(ttot,in)$ (pm_ttot_val(ttot) eq 2030  AND sameAs(in, "enb")) = 0.3;
-pm_cesdata_sigma(ttot,in)$ (pm_ttot_val(ttot) eq 2035  AND sameAs(in, "enb")) = 0.6;
-pm_cesdata_sigma(ttot,in)$ (pm_ttot_val(ttot) eq 2040  AND sameAs(in, "enb")) = 1.3;
-pm_cesdata_sigma(ttot,in)$ (pm_ttot_val(ttot) eq 2045  AND sameAs(in, "enb")) = 1.7;
 
 pm_cesdata_sigma(ttot,in)$ (pm_ttot_val(ttot) le 2025  AND sameAs(in, "enhb")) = 0.1;
 pm_cesdata_sigma(ttot,in)$ (pm_ttot_val(ttot) eq 2030  AND sameAs(in, "enhb")) = 0.3;
@@ -72,6 +69,13 @@ if ((cm_ElLim_b lt 1),
   pm_shfe_up(t,regi,"feels","build")$(regi_group("EUR_regi",regi) AND t.val gt 2030 AND t.val lt 2100) = cm_ElLim_b+0.05;
   pm_shfe_up(t,regi,"feels","build")$(regi_group("EUR_regi",regi) AND t.val gt 2040 AND t.val lt 2100) = cm_ElLim_b;
 );
+
+
+
+*** Heat pumps markup cost: convert USD/MWh to trUSD/TWa
+p36_heatPumpMkup(t,regi) = cm_heatPumpMkup_build * sm_TWa_2_MWh * 1e-12;
+*** District heating markup cost: convert USD/MWh to trUSD/TWa
+p36_districtHeatingMkup(ttot,all_regi) = cm_districtHeatingMkup_build * sm_TWa_2_MWh * 1e-12;
 
 *** EOF ./modules/36_buildings/simple/datainput.gms
 

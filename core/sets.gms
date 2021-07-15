@@ -159,6 +159,9 @@ $endif
         geohe           "geothermal heat"
         hydro           "hydro electric"
         wind            "wind power converters"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        windoff         "wind offshore power converters"
+$ENDIF.WindOff
         spv             "solar photovoltaic"
         csp             "concentrating solar power"
         solhe           "solar thermal heat generation"
@@ -212,16 +215,23 @@ $endif
 
 *        ccscomp         "compression of co2"
 *        ccspipe         "transportation of co2"
-        ccsinje         "injection of co2"
+         ccsinje         "injection of co2"
 *        ccsmoni         "monitoring of co2"
 *RP* Storage technology:
         storspv         "storage technology for photo voltaic (PV)"
-        storwind        "storage technology for wind"
+        storwind        "storage technology for wind onshore"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        storwindoff     "storage technology for wind offshore"
+$ENDIF.WindOff
         storcsp         "storage technology for concentrating solar power (CSP)"
 *RP* grid technology
         gridspv         "grid between areas with high pv production and the rest"
         gridcsp         "grid between areas with high csp production and the rest"
-        gridwind        "grid between areas with high wind production and the rest"
+        gridwind        "grid between areas with high wind onshore production and the rest"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        gridwindoff     "grid between areas with high wind offshore production and the rest"
+$ENDIF.WindOff
+
 *AJS* transport technologies (ESH2T etc..) are defined in the transport module.
  	apCarPeT        "Cars using final energy petrol (FEPET) to produce useful energy in form of petrol for transport (UEPET) "
     apCarDiT        "Vehicles using final energy diesel (FEDIE) to produce heavy-duty useful energy (uedit, e.g. freight, busses, planes, ships)."
@@ -305,6 +315,9 @@ all_enty             "all types of quantities"
         fesob
         feels        "FE electricity stationary"
         feelb
+        feelcb       "buildings use of conventional electricity (all but space heating)"
+        feelhpb      "buildings use of electricity for space heating with heat pumps"
+        feelrhb      "buildings use of electricity for space heating with resistive heating"
         feeli
         feel
         fehes        "FE district heating (including combined heat and power), and heat pumps stationary"
@@ -794,6 +807,9 @@ iso_regi "all iso countries and EU and greater China region" /  EUR,CHA,
 ***######################### R SECTION END (SETS) ################################
 ***###############################################################################
 
+set alt_regions "alternative region names initialization to allow conditionals use in code for different regional aggregations"
+  / ENC, NES, EWN, ECS, ESC, ECE, UKI, NEN, ESW  /;
+
 *** FS: definition of regional sensitivity/scenario sets
 
 $IFTHEN.RegScenNuc "%c_regi_nucscen%" == "all"
@@ -1093,6 +1109,9 @@ $endif
         geohe           "geothermal heat"
         hydro           "hydro electric"
         wind            "wind power converters"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        windoff         "wind offshore power converters"
+$ENDIF.WindOff
         spv             "solar photovoltaic"
         csp             "concentrating solar power"
         solhe           "solar thermal heat generation"
@@ -1135,12 +1154,18 @@ $endif
 *        ccsmoni         "monitoring of co2, CCS related"
 
         storspv         "storage technology for photo voltaic"
-        storwind        "storage technology for wind"
+        storwind        "storage technology for wind onshore"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        storwindoff     "storage technology for wind offshore"
+$ENDIF.WindOff
         storcsp         "storage technology for concentrating solar power"
 
         gridspv         "grid between areas with high pv production and the rest"
         gridcsp         "grid between areas with high csp production and the rest"
-        gridwind        "grid between areas with high wind production and the rest"
+        gridwind        "grid between areas with high wind onshore production and the rest"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        gridwindoff     "grid between areas with high wind offshore production and the rest"
+$ENDIF.WindOff
 /
 teAdj(all_te)           "technologies with adjustment costs on capacity additions"
 /
@@ -1187,7 +1212,10 @@ $endif
   geohdr          "geothermal electric hot dry rock"
   geohe           "geothermal heat"
   hydro           "hydro electric"
-  wind            "wind power converters"
+  wind            "wind onshore power converters"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+  windoff         "wind offshore power converters"
+$ENDIF.WindOff
   spv             "solar photovoltaic"
   csp             "concentrating solar power"
   solhe           "solar thermal heat generation"
@@ -1202,14 +1230,20 @@ $endif
 *** ccsmoni         "monitoring of co2, CCS related"
 
   storspv         "storage technology for PV"
-  storwind        "storage technology for wind"
+  storwind        "storage technology for wind onshore"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+  storwindoff     "storage technology for wind offshore"
+$ENDIF.WindOff
   storcsp         "storage technology for CSP"
 
   refliq          "refinery oil to SE liquids"
 
   gridspv         "grid between areas with high pv production and the rest"
   gridcsp         "grid between areas with high csp production and the rest"
-  gridwind        "grid between areas with high wind production and the rest"
+  gridwind        "grid between areas with high wind onshore production and the rest"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+  gridwindoff     "grid between areas with high wind offshore production and the rest"
+$ENDIF.WindOff
 /
 
 ***-----------------------------------------------------------------------------
@@ -1222,11 +1256,17 @@ teRLDCDisp(all_te)     "RLDC Dispatchable technologies that produce seel"
 
 teLearn(all_te)     "Learning technologies (investment costs can be reduced)"
 /
-        wind        "wind power converters"
+        wind        "wind onshore power converters"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+	windoff     "wind offshore power converters"
+$ENDIF.WindOff
         spv         "solar photovoltaic"
         csp         "concentrating solar power"
         storspv     "storage technology for spv"
-        storwind    "storage technology for wind"
+        storwind    "storage technology for wind onshore"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        storwindoff "storage technology for wind offshore"
+$ENDIF.WindOff
         storcsp     "storage technology for csp"
         dac         "direct air capture"
         elh2        "hydrogen elecrolysis"
@@ -1316,6 +1356,9 @@ teReNoBio(all_te) "renewable technologies except for biomass"
         geohe       "geothermal heat"
         hydro       "hydro electric"
         wind        "wind power converters"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        windoff     "wind offshore power converters"
+$ENDIF.WindOff
         spv         "solar photovoltaic"
         csp         "concentrating solar power"
 ***        solhe       "solar thermal heat generation"
@@ -1325,6 +1368,9 @@ teNoRe(all_te)        "Non renewable energy technologies"
 teVRE(all_te)      "technologies requiring storage"
 /
         wind        "wind power converters"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        windoff     "wind offshore power converters"
+$ENDIF.WindOff
         spv         "solar photovoltaic"
         csp         "concentrating solar power"
 /
@@ -1332,7 +1378,10 @@ teVRE(all_te)      "technologies requiring storage"
 teStor(all_te)        "storage technologies"
 /
         storspv     "storage technology for spv"
-        storwind    "storage technology for wind"
+        storwind    "storage technology for wind onshore"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        storwindoff "storage technology for wind offshore"
+$ENDIF.WindOff
         storcsp     "storage technology for csp"
 /
 teLoc(all_te)      "centralized technologies which require grid"
@@ -1340,12 +1389,18 @@ teLoc(all_te)      "centralized technologies which require grid"
         wind        "wind power converters"
         spv         "solar photovoltaic"
         csp         "concentrating solar power"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        windoff     "wind offshore power converters"
+$ENDIF.WindOff
 /
 teGrid(all_te)      "grid between areas"
 /
     gridspv     "grid between areas with high pv production and the rest"
     gridcsp     "grid between areas with high csp production and the rest"
-    gridwind    "grid between areas with high wind production and the rest"
+    gridwind    "grid between areas with high wind onshore production and the rest"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+    gridwindoff "grid between areas with high wind offshore production and the rest"
+$ENDIF.WindOff
 /
 teFosCCS(all_te)    "fossil technologies with CCS"
 /
@@ -1397,12 +1452,18 @@ teBioPebiolc(all_te)      "biomass technologies using pebiolc"
 teNoTransform(all_te) "all technologies that do not transform energy but still have investment and O&M costs (like storage or grid)"
 /
        storspv       "storage technology for photo voltaic (PV)"
-       storwind      "storage technology for wind"
+       storwind      "storage technology for wind onshore"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+       storwindoff   "storage technology for wind offshore"
+$ENDIF.WindOff
        storcsp       "storage technology for concentrating solar power (CSP)"
 
        gridspv       "grid between areas with high pv production and the rest"
        gridcsp       "grid between areas with high csp production and the rest"
-       gridwind      "grid between areas with high wind production and the rest"
+       gridwind        "grid between areas with high wind onshore production and the rest"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+       gridwindoff     "grid between areas with high wind offshore production and the rest"
+$ENDIF.WindOff
 /
 teRegTechCosts(all_te) "all technologies for which we differantiate tech costs"
 /
@@ -2152,7 +2213,7 @@ steps         "iterator for MAC steps"
 alias(t,t2,t3);
 alias(iteration,iteration2);
 alias(tall,tall2,tall3);
-alias(ttot,ttot2);
+alias(ttot,ttot2,ttot3,ttot4,ttot5);
 alias(opTimeYr,opTimeYr2);
 alias(teVRE,teVRE2);
 alias(teLoc,teLoc2);
@@ -2232,6 +2293,9 @@ $endif
         pegeo.sehe.geohe
         pehyd.seel.hydro
         pewin.seel.wind
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        pewin.seel.windoff
+$ENDIF.WindOff
         pesol.seel.spv
         pesol.seel.csp
         pesol.sehe.solhe
@@ -2263,6 +2327,9 @@ VRE2teStor(all_te,teStor)   "mapping to know which technology uses which storage
 /
         spv.storspv
         wind.storwind
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        windoff.storwindoff
+$ENDIF.WindOff
         csp.storcsp
 /
 
@@ -2277,6 +2344,9 @@ VRE2teGrid(all_te,teGrid)              "mapping to know which technology needs w
 /
         spv.gridspv
         wind.gridwind
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        windoff.gridwindoff
+$ENDIF.WindOff
         csp.gridcsp
 /
 
@@ -2284,6 +2354,10 @@ te2teLoclinked(teLoc,teLoc2)   "mapping between the technologies requiring grids
 /
         spv.csp
         csp.spv
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        windoff.wind
+        wind.windoff
+$ENDIF.WindOff
 /
 
 se2se(all_enty,all_enty,all_te)  "map secondary energy to secondary energy using a technology"
@@ -2529,6 +2603,12 @@ emiMac2sector(all_enty,emi_sectors,sector_types,all_enty)            "mapping of
         (co2luc).lulucf.process.co2
 /
 
+emiBECCS2te(all_enty,all_enty,all_te,all_enty) "mapping of BECCS PE,SE,technology and captured emissions"
+/
+        pebiolc.seliqbio.bioftcrec.cco2
+        pebiolc. seel.bioigccc.cco2
+        pebiolc.seh2.bioh2c.cco2
+/
 
 *NB*111125 emissions from fossil fuel extraction by grade that is on top of combustion
 emi2fuelMine(all_enty,all_enty,rlf)   "missions from fossil fuel extraction"
@@ -2582,7 +2662,11 @@ prodSeOth2te(all_enty,all_te)      "map other se production not directly followi
 
 teSe2rlf(all_te,rlf)        "mapping for techologies to grades. Currently, the information was shifted to teRe2rlfDetail. Thus, teSe2rlf now only has '1' for the rlf values"
 /
-      (wind,spv,csp,refliq,hydro,geohe,geohdr,solhe,ngcc,ngccc,ngt,gaschp,gashp,gash2,gash2c,gastr,gasftrec,gasftcrec,dot,
+      (wind
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        windoff
+$ENDIF.WindOff
+        spv,csp,refliq,hydro,geohe,geohdr,solhe,ngcc,ngccc,ngt,gaschp,gashp,gash2,gash2c,gastr,gasftrec,gasftcrec,dot,
        igcc,igccc,pc,coaltr,coalgas,coalh2,coalh2c,coalchp,coalhp,coalftrec,coalftcrec,
        biotr,biotrmod,biogas,bioftrec,bioftcrec,bioh2,bioh2c,biohp,biochp,bioigcc,bioigccc,
        elh2,h2turb,elh2VRE,h2turbVRE,bioethl,bioeths,biodiesel,tnrs,fnrs
@@ -2595,6 +2679,9 @@ $endif
 teRe2rlfDetail(all_te,rlf)        "mapping for se techologies to grades"
 /
         wind.(1*9)
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+        windoff.(1*9)
+$ENDIF.WindOff
         spv.(1*9)
         csp.(1*9)
         hydro.(1*5)
@@ -2623,7 +2710,11 @@ teCCS2rlf(all_te,rlf)     "mapping for CCS technologies to grades"
 
 teNoTransform2rlf(all_te,rlf)         "mapping for no transformation technologies to grades"
 /
-      (storspv,storwind,storcsp,gridspv,gridwind,gridcsp,h2curt) . 1
+      (storspv,storwind
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+storwindoff,gridwindoff
+$ENDIF.WindOff
+        storcsp,gridspv,gridwind,gridcsp,h2curt) . 1
 /
 
 opTimeYr2te(all_te,opTimeYr)        "mapping for technologies to yearly lifetime - is filled automatically in generisdata.inc from the lifetime values in generisdata_tech.prn"

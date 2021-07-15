@@ -51,6 +51,9 @@ outputfile_catalog
 
 # ignore all the MAGICC files, should they be present
 core/magicc/
+!core/magicc/magicc_scen_bau.inc
+!core/magicc/magicc_scen_450.inc
+!core/magicc/magicc_scen_550.inc
 
 <<<<<<< HEAD
 
