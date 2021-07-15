@@ -68,7 +68,7 @@ p32_peakDemand_relFac(t,regi) = 0;
 p32_DIETER_VF(t,regi,te) = 0;
 p32_DIETER_MV(t,regi,te) = 0;
 p32_DIETER_elecprice(t,regi) = 0;
-p32_seelDem(t,regi,enty) = 0;
+p32_seelUsableDem(t,regi,enty) = 0;
 p32_shSeEl(t,regi,te) = 0;
 p32_DIETER_shSeEl(t,regi,te) = 0;
 p32_deltaCap(t,regi,te,rlf) = 0;
@@ -77,9 +77,9 @@ p32_valueFactor(t,regi,te) = 1;
 p32_budget(t,regi) = 0;
 
 Execute_Loadpoint 'input_DIETER' p32_report4RM;
-p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_share")$(tDT32(t) AND regDTCoup(regi)))/4;
-p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_share")$(tDT32(t) AND regDTCoup(regi)))/4;
-p32_DIETER_curtailmentratio(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"ror","curt_share")$(tDT32(t) AND regDTCoup(regi)))/4;
+p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_share")$(tDT32(t) AND regDTCoup(regi)))/5;
+p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_share")$(tDT32(t) AND regDTCoup(regi)))/5;
+p32_DIETER_curtailmentratio(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"ror","curt_share")$(tDT32(t) AND regDTCoup(regi)))/5;
 
 Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;
 p32_fuelprice_lastiter(t,regi,entyPe) = q_balPe.m(t,regi,entyPe);

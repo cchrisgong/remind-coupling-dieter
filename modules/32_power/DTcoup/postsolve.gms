@@ -8,7 +8,7 @@
 
 p32_shSeEl(t,regi,te)$regDTCoup(regi) = v32_shSeEl.l(t,regi,te)$regDTCoup(regi);
 
-p32_totProd = sum(pe2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
+p32_totProd(t,regi,enty2)$(sameas(enty2,"seel"))  = sum(pe2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
 	+ sum(se2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
 	+ sum(pc2te(enty,entySE(enty3),te,enty2),
 		pm_prodCouple(regi,enty,enty3,te,enty2) * vm_prodSe.l(t,regi,enty,enty3,te) )
@@ -25,7 +25,7 @@ p32_seelProd(t,regi,enty2)$(sameas(enty2,"seel")) =
 ;
 
 *** coupled production
-p32_coupledProd = sum(pc2te(enty,entySE(enty3),te,enty2),
+p32_coupledProd(t,regi,enty2)$(sameas(enty2,"seel"))  = sum(pc2te(enty,entySE(enty3),te,enty2),
 		pm_prodCouple(regi,enty,enty3,te,enty2) * vm_prodSe.l(t,regi,enty,enty3,te) )
 	+ sum(pc2te(enty4,entyFE(enty5),te,enty2),
 		pm_prodCouple(regi,enty4,enty5,te,enty2) * vm_prodFe.l(t,regi,enty4,enty5,te) )

@@ -147,7 +147,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 q32_peakDemand_DT(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)$( regDTCoup(regi) )))
 	=g=
-	p32_peakDemand_relFac(t,regi)$( regDTCoup(regi) ) * p32_seelDem(t,regi,enty2)$( regDTCoup(regi) ) * 8760
+	p32_peakDemand_relFac(t,regi)$( regDTCoup(regi) ) * p32_seelUsableDem(t,regi,enty2)$( regDTCoup(regi) ) * 8760
 	;
 
 ***----------------------------------------------------------------------------
