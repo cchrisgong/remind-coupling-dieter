@@ -13,8 +13,8 @@ p32_seelDem(t,regi,enty2) = sum(se2fe(enty2,enty3,te), vm_demSe.l(t,regi,enty2,e
 									+ sum(se2se(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) )
 * + sum(teVRE, v32_storloss.l(t,regi,teVRE) )
 									+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr.l(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! don't use in 2005 because this demand is not contained in 05_initialCap;
+                	+ vm_Xport.l(t,regi,enty2)
 ;
-
 
 *** CG: market value as seen by REMIND
 p32_marketValue(t,regi,te)$regDTCoup(regi)
@@ -166,7 +166,8 @@ logfile.nr = 2;
 *** CG: storage related coupling parameters
     p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
     p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_curtailmentratio(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"ror","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
+* no curtailment for ror right now from DIETER
+*p32_DIETER_curtailmentratio(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"ror","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
 
 );
 

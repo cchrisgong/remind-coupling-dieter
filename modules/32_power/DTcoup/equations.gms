@@ -7,8 +7,8 @@
 ***---------------------------------------------------------------------------
 *** Balance equation for electricity secondary energy type:
 ***---------------------------------------------------------------------------
-q32_balSe(t,regi,enty2)$(sameas(enty2,"seel") AND regNoDTCoup(regi))..
-	( sum(pe2se(enty,enty2,te), vm_prodSe(t,regi,enty,enty2,te) )
+q32_balSe(t,regi,enty2)$(sameas(enty2,"seel"))..
+	 sum(pe2se(enty,enty2,te), vm_prodSe(t,regi,enty,enty2,te) )
 	+ sum(se2se(enty,enty2,te), vm_prodSe(t,regi,enty,enty2,te) )
 	+ sum(pc2te(enty,entySE(enty3),te,enty2),
 		pm_prodCouple(regi,enty,enty3,te,enty2) * vm_prodSe(t,regi,enty,enty3,te) )
@@ -17,73 +17,33 @@ q32_balSe(t,regi,enty2)$(sameas(enty2,"seel") AND regNoDTCoup(regi))..
 	+ sum(pc2te(enty,enty3,te,enty2),
 		sum(teCCS2rlf(te,rlf),
 			pm_prodCouple(regi,enty,enty3,te,enty2) * vm_co2CCS(t,regi,enty,enty3,te,rlf) ) )
-	+ vm_Mport(t,regi,enty2) ) * 1$(regNoDTCoup(regi))
+	+ vm_Mport(t,regi,enty2)
   =e=
-  ( sum(se2fe(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
+   sum(se2fe(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
 	+ sum(se2se(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
 	+ sum(teVRE, v32_storloss(t,regi,teVRE) )
 	+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! do not use in 2005 because this demand is not contained in 05_initialCap
-	+ vm_Xport(t,regi,enty2) ) * 1$(regNoDTCoup(regi))
+	+ vm_Xport(t,regi,enty2)
 ;
 
-q32_usableSe(t,regi,entySe)$(sameas(entySe,"seel") AND regNoDTCoup(regi))..
-	vm_usableSe(t,regi,entySe) * 1$(regNoDTCoup(regi))
+q32_usableSe(t,regi,entySe)$(sameas(entySe,"seel"))..
+	vm_usableSe(t,regi,entySe) 
 	=e=
-	( sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
+	 sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
 	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
 	+ sum(pc2te(entyPe,entySe(enty3),te,entySe)$(pm_prodCouple(regi,entyPe,enty3,te,entySe) gt 0),
 		pm_prodCouple(regi,entyPe,enty3,te,entySe)*vm_prodSe(t,regi,entyPe,enty3,te) )
-	- sum(teVRE, v32_storloss(t,regi,teVRE) ) ) * 1$(regNoDTCoup(regi))
+	- sum(teVRE, v32_storloss(t,regi,teVRE) )
 ;
 
-q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND regNoDTCoup(regi) AND teVRE(te))..
- 	vm_usableSeTe(t,regi,entySe,te) * 1$(regNoDTCoup(regi))
+q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND teVRE(te))..
+ 	vm_usableSeTe(t,regi,entySe,te)
  	=e=
  	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
 	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
  	+ sum(pc2te(enty,entySe(enty3),te,entySe)$(pm_prodCouple(regi,enty,enty3,te,entySe) gt 0),
 		pm_prodCouple(regi,enty,enty3,te,entySe) * vm_prodSe(t,regi,enty,enty3,te) )
- 	- sum(teVRE$sameas(te,teVRE), v32_storloss(t,regi,teVRE) ) * 1$(regNoDTCoup(regi))
-;
-
-
-q32_balSe_DT(t,regi,enty2)$(sameas(enty2,"seel") AND regDTCoup(regi))..
-	sum(pe2se(enty,enty2,te), vm_prodSe(t,regi,enty,enty2,te) )
-	+ sum(se2se(enty,enty2,te), vm_prodSe(t,regi,enty,enty2,te) )
-*** co-production terms
-	+ sum(pc2te(enty,entySE(enty3),te,enty2),
-		pm_prodCouple(regi,enty,enty3,te,enty2) * vm_prodSe(t,regi,enty,enty3,te) )
-	+ sum(pc2te(enty4,entyFE(enty5),te,enty2),
-		pm_prodCouple(regi,enty4,enty5,te,enty2) * vm_prodFe(t,regi,enty4,enty5,te) )
-	+ sum(pc2te(enty,enty3,te,enty2),
-		sum(teCCS2rlf(te,rlf),
-			pm_prodCouple(regi,enty,enty3,te,enty2) * vm_co2CCS(t,regi,enty,enty3,te,rlf) ) )
-  =e=
-    sum(se2fe(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
-	+ sum(se2se(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
-  + sum(teVRE, p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) )
-	+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! don't use in 2005 because this demand is not contained in 05_initialCap
-;
-
-
-q32_usableSe_DT(t,regi,entySe)$(sameas(entySe,"seel") AND regDTCoup(regi))..
-	vm_usableSe(t,regi,entySe)
-	=e=
-	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
-	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
-	+ sum(pc2te(entyPe,entySe(enty3),te,entySe)$(pm_prodCouple(regi,entyPe,enty3,te,entySe) gt 0),
-		pm_prodCouple(regi,entyPe,enty3,te,entySe) * vm_prodSe(t,regi,entyPe,enty3,te) )
- - sum(teVRE, p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) )
-;
-
-q32_usableSeTe_DT(t,regi,entySe,te)$(sameas(entySe,"seel") AND regDTCoup(regi) AND teVRE(te))..
- 	vm_usableSeTe(t,regi,entySe,te)
- 	=e=
- 	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
-	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
- 	+ sum(pc2te(entyPe,entySe(enty3),te,entySe)$(pm_prodCouple(regi,entyPe,enty3,te,entySe) gt 0),
-		pm_prodCouple(regi,entyPe,enty3,te,entySe) * vm_prodSe(t,regi,entyPe,enty3,te) )
- - p32_DIETER_curtailmentratio(t,regi,te) * vm_usableSeTe(t,regi,"seel",te)
+ 	- sum(teVRE$sameas(te,teVRE), v32_storloss(t,regi,teVRE) )
 ;
 
 **---------------------------------------------------------------------------
@@ -161,18 +121,13 @@ q32_shStor(t,regi,teVRE)$(t.val ge 2015 AND regNoDTCoup(regi))..
 	)  )* 1$(regNoDTCoup(regi))
 ;
 
-q32_storloss_DT(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi))..
-	v32_storloss_DT(t,regi,teVRE)
-	=e=
-	p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE)
-;
-
-q32_storloss(t,regi,teVRE)$(t.val ge 2015 AND regNoDTCoup(regi))..
+q32_storloss(t,regi,teVRE)$(t.val ge 2015 )..
 	v32_storloss(t,regi,teVRE)
 	=e=
-	v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
+	(v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
 	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
-	* vm_usableSeTe(t,regi,"seel",teVRE)
+	* vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regNoDTCoup(regi))
+	+ (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi))
 ;
 
 ***---------------------------------------------------------------------------
