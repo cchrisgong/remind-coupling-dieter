@@ -1441,7 +1441,7 @@ tdels
 
 regDTCoup(all_regi)      "regions where REMIND is coupled to DIETER"
 /
-USA
+DEU
 /
 
 regNoDTCoup(all_regi)    "regions which are not DIETER coupled"
