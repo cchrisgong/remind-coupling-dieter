@@ -8,43 +8,60 @@
 
 p32_shSeEl(t,regi,te)$regDTCoup(regi) = v32_shSeEl.l(t,regi,te)$regDTCoup(regi);
 
-p32_totProd(t,regi,enty2)$(sameas(enty2,"seel"))  = sum(pe2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
+*** CG: Total power produced (including curtailment, co-production, own consumption)
+p32_totProd(t,regi,enty2)$(sameas(enty2,"seel")) =
+* PE to SE transformation
+    sum(pe2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
+* SE to SE transformation
 	+ sum(se2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
+* Coupled production of two types of SE: such as sehe + seel, or seh2 + seel
 	+ sum(pc2te(enty,entySE(enty3),te,enty2),
 		pm_prodCouple(regi,enty,enty3,te,enty2) * vm_prodSe.l(t,regi,enty,enty3,te) )
+* Power used in transporting and distributing FE
 	+ sum(pc2te(enty4,entyFE(enty5),te,enty2),
 		pm_prodCouple(regi,enty4,enty5,te,enty2) * vm_prodFe.l(t,regi,enty4,enty5,te) )
+* Power used in CCS
 	+ sum(pc2te(enty,enty3,te,enty2),
 		sum(teCCS2rlf(te,rlf), pm_prodCouple(regi,enty,enty3,te,enty2) * vm_co2CCS.l(t,regi,enty,enty3,te,rlf) ) )
 ;
 
-*** CG: total electricity demand to be passed on to DIETER:
-p32_seelProd(t,regi,enty2)$(sameas(enty2,"seel")) =
-	sum(pe2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
-	+ sum(se2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
-;
 
 *** coupled production
-p32_coupledProd(t,regi,enty2)$(sameas(enty2,"seel"))  = sum(pc2te(enty,entySE(enty3),te,enty2),
-		pm_prodCouple(regi,enty,enty3,te,enty2) * vm_prodSe.l(t,regi,enty,enty3,te) )
-	+ sum(pc2te(enty4,entyFE(enty5),te,enty2),
-		pm_prodCouple(regi,enty4,enty5,te,enty2) * vm_prodFe.l(t,regi,enty4,enty5,te) )
-	+ sum(pc2te(enty,enty3,te,enty2),
-		sum(teCCS2rlf(te,rlf), pm_prodCouple(regi,enty,enty3,te,enty2) * vm_co2CCS.l(t,regi,enty,enty3,te,rlf) ) )
-;
+p32_coupledProd(t,regi,enty2)$(sameas(enty2,"seel")) = sum(pc2te(enty,entySE(enty3),te,enty2),
+		pm_prodCouple(regi,enty,enty3,te,enty2) * vm_prodSe.l(t,regi,enty,enty3,te) );
+*** power for d&t of FE
+p32_prod4dtFE(t,regi,enty2)$(sameas(enty2,"seel")) = sum(pc2te(enty4,entyFE(enty5),te,enty2),
+		pm_prodCouple(regi,enty4,enty5,te,enty2) * vm_prodFe.l(t,regi,enty4,enty5,te) );
+*** power for CCS
+p32_prod4CCS(t,regi,enty2)$(sameas(enty2,"seel")) = sum(pc2te(enty,enty3,te,enty2),
+		sum(teCCS2rlf(te,rlf), pm_prodCouple(regi,enty,enty3,te,enty2) * vm_co2CCS.l(t,regi,enty,enty3,te,rlf) ) );
 
+*** all non SE2SE or PE2SE production terms
+p32_nonSEPE2SE(t,regi,enty2)$(sameas(enty2,"seel")) = p32_coupledProd(t,regi,enty2)
+    + p32_prod4dtFE(t,regi,enty2) + p32_prod4CCS(t,regi,enty2);
+
+*** total demand: including curtailment and fuel extraction power usage
 p32_seelTotDem(t,regi,enty2)$(sameas(enty2,"seel")) =
   sum(se2fe(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) )
 + sum(se2se(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) )
+* VRE curtailment
 + sum(teVRE, v32_storloss.l(t,regi,teVRE) )
+* own consumption: electricity used for extracting fossil fuel, ususally negative
 + sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr.l(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! do not use in 2005 because this demand is not contained in 05_initialCap
 ;
 
+*** CG: total usable demand to pass on to DIETER: this has to
+*** include the electricity consumed for extracting fuels (included in p32_seelTotDem),
+*** as well as distributing and transporting them (p32_prod4dtFE) and doing CCS (p32_prod4CCS)
+*** and exclude curtailment
+*** (note: p32_prod4dtFE and p32_prod4CCS are negative)
 p32_seelUsableDem(t,regi,enty2)$(sameas(enty2,"seel")) =
-  sum(se2fe(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) )
-+ sum(se2se(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) )
-+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr.l(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! do not use in 2005 because this demand is not contained in 05_initialCap
+p32_seelTotDem(t,regi,enty2) - sum(teVRE, v32_storloss.l(t,regi,teVRE) )
+- p32_prod4dtFE(t,regi,enty2) - p32_prod4CCS(t,regi,enty2)
 ;
+
+*** total curtailment
+p32_seelCurt(t,regi) = sum(teVRE, v32_storloss.l(t,regi,teVRE) );
 
 *** CG: market value as seen by REMIND
 p32_marketValue(t,regi,te)$regDTCoup(regi)
@@ -53,8 +70,6 @@ p32_marketValue(t,regi,te)$regDTCoup(regi)
 *** CG: value factor in REMIND
 p32_valueFactor(t,regi,te)$regDTCoup(regi)
       = p32_marketValue(t,regi,te)$regDTCoup(regi)/(pm_SEPrice(t,regi,"seel")$regDTCoup(regi) + sm_eps);
-
-
 
 $ifthen.calibrate %CES_parameters% == "load"
 

@@ -25,9 +25,12 @@ parameters
     p32_budget(ttot,all_regi)             "budget from last iteration"
 
 *   for diagnostics
+    p32_nonSEPE2SE(ttot,all_regi,all_enty)  "all non SE2SE PE2SE terms"
     p32_coupledProd(ttot,all_regi,all_enty) "coupled production"
-    p32_seelProd(ttot,all_regi,all_enty)    "seel production (not from coupled production)"
+    p32_prod4dtFE(ttot,all_regi,all_enty)   "power used in transporting and distributing FE"
+    p32_prod4CCS(ttot,all_regi,all_enty)    "power consumption for CCS"
     p32_totProd(ttot,all_regi,all_enty)     "total seel production (both coupled and uncoupled production)"
+    p32_seelCurt(ttot,all_regi)             "total curtailment"
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_report4RM(gdxfile32,ttot,all_regi,DIETERte32,DIETERvarname32)    "load report from DIETER"
