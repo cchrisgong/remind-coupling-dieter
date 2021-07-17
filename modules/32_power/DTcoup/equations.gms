@@ -110,8 +110,8 @@ q32_shSeEl(t,regi,te)..
 ***---------------------------------------------------------------------------
 *** Calculation of necessary storage electricity production:
 ***---------------------------------------------------------------------------
-q32_shStor(t,regi,teVRE)$(t.val ge 2015 AND regNoDTCoup(regi))..
-	v32_shStor(t,regi,teVRE)  * 1$(regNoDTCoup(regi))
+q32_shStor(t,regi,teVRE)$(t.val ge 2020)..
+	v32_shStor(t,regi,teVRE) * 1$(regNoDTCoup(regi))
 	=g=
 	( p32_factorStorage(regi,teVRE) * 100
 	* (
@@ -126,7 +126,7 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2020)..
 	=e=
 	(v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
 	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
-	* vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regNoDTCoup(regi) OR (regDTCoup(regi) AND (cm_DTcoup_capcon = 0)))
+	* vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regNoDTCoup(regi))
 	+ (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi) AND (cm_DTcoup_capcon ne 0))
 ;
 

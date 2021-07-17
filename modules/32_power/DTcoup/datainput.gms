@@ -77,9 +77,9 @@ p32_valueFactor(t,regi,te) = 1;
 p32_budget(t,regi) = 0;
 p32_DIETER_curtailmentratio(t,regi,te) = 0;
 
-*Execute_Loadpoint 'input_DIETER' p32_report4RM;
-*p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_share")$(tDT32(t) AND regDTCoup(regi)))/3;
-*p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_share")$(tDT32(t) AND regDTCoup(regi)))/5;
+Execute_Loadpoint 'input_DIETER' p32_report4RM;
+p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_share")$(tDT32(t) AND regDTCoup(regi)))/3;
+p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_share")$(tDT32(t) AND regDTCoup(regi)));
 
 Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;
 p32_fuelprice_lastiter(t,regi,entyPe) = q_balPe.m(t,regi,entyPe);
