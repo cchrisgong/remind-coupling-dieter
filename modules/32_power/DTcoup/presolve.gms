@@ -26,4 +26,5 @@ p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = q_balPe.m(t,regi,entyP
 p32_reqCap(t,regi)$(regDTCoup(regi)) = p32_peakDemand_relFac(t,regi) * p32_seelUsableDem(t,regi,"seel") * 8760;
 p32_capDecayStart(t,regi)$(regDTCoup(regi)) = p32_reqCap(t,regi) * 0.95;
 p32_capDecayEnd(t,regi)$(regDTCoup(regi)) = p32_reqCap(t,regi) * 1.05;
+$ENDIF.DTcoup
 *** EOF ./modules/32_power/DTcoup/presolve.gms
