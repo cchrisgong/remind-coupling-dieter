@@ -158,7 +158,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 q32_reqCap(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1) ) ..
 	vm_reqCap(t,regi)
  	=e=
- 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)
+ 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
  	;
 
 q32_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1) )..
