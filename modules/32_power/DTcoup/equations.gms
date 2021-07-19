@@ -145,7 +145,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** DIETER coupling equations
 ***---------------------------------------------------------------------------
 
-q32_peakDemand_DT(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1) ) ..
+q32_peakDemand_DT(t,regi,enty2)$(tDT32_aux(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)$( regDTCoup(regi) )))
 	=l=
 	p32_peakDemand_relFac(t,regi)$( regDTCoup(regi) ) * p32_seelUsableDem(t,regi,enty2)$( regDTCoup(regi) ) * 8760 * 0.95
@@ -164,7 +164,7 @@ q32_reqCap(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) 
 q32_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1) )..
   vm_priceCap(t,regi)
   =e=
-	0.1 / 1.2 * p32_budget(t,regi) * !! 0.1 = 100$/kW * 1e9 / 1e12, this is the capacity subsidy per kW of dispatchable, kW -> TW, USD -> trUSD
+	0.1 / 1.2 *( -p32_budget(t,regi)) * !! 0.1 = 100$/kW * 1e9 / 1e12, this is the capacity subsidy per kW of dispatchable, kW -> TW, USD -> trUSD
   ( 1 / ( 1 + ( 3 ** v32_capPriceExponent(t,regi) ) )
 	)
   + ( v32_expSlack(t,regi) * 1e-8 )
