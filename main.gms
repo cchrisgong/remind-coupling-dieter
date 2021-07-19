@@ -578,6 +578,7 @@ cm_deuCDRmax = -1; !! def = -1
 *--------------------flags------------------------------------------------------------
 $setglobal cm_DTcoup  on         !! def = off
 cm_DTcoup_capcon = 0;         !! def = 0
+$setglobal cm_softcap  on         !! def = off
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
 $setGlobal cm_nash_mode  parallel      !! def = parallel
 $setGLobal cm_debug_preloop off !! def = off

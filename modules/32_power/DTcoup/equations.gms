@@ -145,16 +145,16 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** DIETER coupling equations
 ***---------------------------------------------------------------------------
 
-*q32_peakDemand_DT(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1) ) ..
-*	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)$( regDTCoup(regi) )))
-*	=g=
-*	p32_peakDemand_relFac(t,regi)$( regDTCoup(regi) ) * p32_seelUsableDem(t,regi,enty2)$( regDTCoup(regi) ) * 8760
-*	;
+q32_peakDemand_DT(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1) ) ..
+	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)$( regDTCoup(regi) )))
+	=l=
+	p32_peakDemand_relFac(t,regi)$( regDTCoup(regi) ) * p32_seelUsableDem(t,regi,enty2)$( regDTCoup(regi) ) * 8760 * 0.95
+	;
 
-
-*** CG: implementing a softer capacity bound, with a flat capacity subsidy, once the sum of dispatchable capacity exceeds
-*** the bound which is the peak demand from last iteration, the subsidy rapidly drops according to logistic function
-***
+$IFTHEN.softcap %cm_softcap% == "on"
+** CG: implementing a softer capacity bound, with a flat capacity subsidy, once the sum of dispatchable capacity exceeds
+** the bound which is the peak demand from last iteration, the subsidy rapidly drops according to logistic function
+**
 q32_reqCap(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1) ) ..
 	vm_reqCap(t,regi)
  	=e=
@@ -193,7 +193,7 @@ q32_auxPriceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_capcon = 1)
 	- v32_expSlack(t,regi)
 ;
 
-
+$ENDIF.softcap
 ***----------------------------------------------------------------------------
 *** CG: calculate markup adjustment used in flexibility tax for supply-side technologies
 ***----------------------------------------------------------------------------
