@@ -820,8 +820,8 @@ q_smoothphaseoutCapEarlyReti(ttot,regi,te)$(ttot.val lt 2120 AND pm_ttot_val(tto
 *** more retirement possible for coal power plants in early time steps for Europe and USA, to account for relatively old fleet 
 		+ pm_earlyreti_adjRate(regi,te)$(ttot.val lt 2035)
 *** more retirement possible for first generation biofuels		
-		+ 0.05$(sameas(te,"biodiesel") or sameas(te, "bioeths")))
-                + p_earlyreti_lim(ttot,regi,te)
+		+ 0.05$(sameas(te,"biodiesel") or sameas(te, "bioeths"))
+                + p_earlyreti_lim(ttot,regi,te))
 ;
 
 

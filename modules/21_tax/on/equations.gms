@@ -30,10 +30,10 @@
     =e=
       v21_taxrevGHG(t,regi)
     + v21_taxrevCO2luc(t,regi)
-    + v21_taxrevCCS(t,regi) 
-    + v21_taxrevNetNegEmi(t,regi)  
-    + v21_taxrevFE(t,regi) 
-    + v21_taxrevResEx(t,regi)   
+    + v21_taxrevCCS(t,regi)
+    + v21_taxrevNetNegEmi(t,regi)
+    + v21_taxrevFE(t,regi)
+    + v21_taxrevResEx(t,regi)
     + v21_taxrevPE2SE(t,regi)
     + v21_taxrevTech(t,regi)
     + v21_taxrevXport(t,regi)
@@ -100,13 +100,13 @@ v21_emiALLco2neg(t,regi) =e= -vm_emiAll(t,regi,"co2") + v21_emiALLco2neg_slack(t
 *'  Documentation of overall tax approach is above at q21_taxrev.
 ***---------------------------------------------------------------------------
 q21_taxrevFE(t,regi)$(t.val ge max(2010,cm_startyear))..
-  v21_taxrevFE(t,regi) 
+  v21_taxrevFE(t,regi)
   =e=
   sum((entyFe,sector)$entyFe2Sector(entyFe,sector),
-    ( pm_tau_fe_tax(t,regi,sector,entyFe) + pm_tau_fe_sub(t,regi,sector,entyFe) ) 
-    * 
-    sum(emiMkt$sector2emiMkt(sector,emiMkt), 
-      sum(se2fe(entySe,entyFe,te),   
+    ( pm_tau_fe_tax(t,regi,sector,entyFe) + pm_tau_fe_sub(t,regi,sector,entyFe) )
+    *
+    sum(emiMkt$sector2emiMkt(sector,emiMkt),
+      sum(se2fe(entySe,entyFe,te),
         vm_demFeSector(t,regi,entySe,entyFe,sector,emiMkt)
       )
     )
@@ -222,11 +222,11 @@ q21_taxrevMrkup(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_capcon ne 0
 ***---------------------------------------------------------------------------
 *'  CG: Calculation of subsidy on dispatchable technology
 ***---------------------------------------------------------------------------
-q21_priceCap(t,regi)$(tDT32(t) AND (sameas(regi,"DEU")) AND (cm_DTcoup_capcon = 1))..
-  v21_taxrevCap(t,regi)$(sameas(regi,"DEU"))
+q21_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_capcon ne 0))..
+  v21_taxrevCap(t,regi)
   =e=
-      - vm_priceCap(t,regi)$(sameas(regi,"DEU")) * vm_reqCap(t,regi)$(sameas(regi,"DEU"))
-      - p21_taxrevCap0(t,regi)$(sameas(regi,"DEU"))
+      - vm_priceCap(t,regi) * vm_reqCap(t,regi)
+      - p21_taxrevCap0(t,regi)
 ;
 
 ***---------------------------------------------------------------------------
