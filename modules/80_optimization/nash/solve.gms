@@ -33,7 +33,7 @@ if (execError > 0,
 
 solve hybrid using nlp maximizing vm_welfareGlob;
 *** CG* testing
-* if (ord(iteration) eq 5,
+* if (ord(iteration) eq 4,
 *   abort "lets look at logs";
 * );
 
