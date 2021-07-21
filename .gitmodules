@@ -1,0 +1,3 @@
+[submodule "scripts/iterative/dieter-coupling-remind"]
+	path = scripts/iterative/dieter-coupling-remind
+	url = git@github.com:cchrisgong/dieter-coupling-remind.git
