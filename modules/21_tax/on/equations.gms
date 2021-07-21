@@ -17,12 +17,12 @@
 
 
 ***---------------------------------------------------------------------------
-*'  Calculation of the value of the overall tax revenue vm_taxrev, that is included in the qm_budget equation. 
+*'  Calculation of the value of the overall tax revenue vm_taxrev, that is included in the qm_budget equation.
 *'  Overall tax revenue is the sum of various components which are calculated in the following equations, each of those with similar structure:
-*'  The tax revenue is the difference between the product of an activity level (a variable) and a tax rate (a parameter), 
+*'  The tax revenue is the difference between the product of an activity level (a variable) and a tax rate (a parameter),
 *'  and this product in the last iteration (which is loaded as a parameter).
-*'  After converging Negishi/Nash iterations, the value approaches 0, as the activity levels between the current and last iteration don't change anymore. 
-*'  This means, taxes are budget-neutral: the revenue is always recycled back and still available for the economy. 
+*'  After converging Negishi/Nash iterations, the value approaches 0, as the activity levels between the current and last iteration don't change anymore.
+*'  This means, taxes are budget-neutral: the revenue is always recycled back and still available for the economy.
 *'  Nevertheless, the marginal of the (variable of) taxed activities is impacted by the tax which leads to the adjustment effect.
 ***---------------------------------------------------------------------------
   q21_taxrev(t,regi)$(t.val ge max(2010,cm_startyear))..
@@ -30,10 +30,10 @@
     =e=
       v21_taxrevGHG(t,regi)
     + v21_taxrevCO2luc(t,regi)
-    + v21_taxrevCCS(t,regi) 
-    + v21_taxrevNetNegEmi(t,regi)  
-    + v21_taxrevFE(t,regi) 
-    + v21_taxrevResEx(t,regi)   
+    + v21_taxrevCCS(t,regi)
+    + v21_taxrevNetNegEmi(t,regi)
+    + v21_taxrevFE(t,regi)
+    + v21_taxrevResEx(t,regi)
     + v21_taxrevPE2SE(t,regi)
     + v21_taxrevTech(t,regi)
     + v21_taxrevXport(t,regi)
@@ -41,14 +41,15 @@
     + v21_taxrevBio(t,regi)
     - vm_costSubsidizeLearning(t,regi)
     + v21_implicitDiscRate(t,regi)
-    + sum(emiMkt, v21_taxemiMkt(t,regi,emiMkt))  
-    + v21_taxrevFlex(t,regi)
-    + v21_taxrevBioImport(t,regi)  
+    + sum(emiMkt, v21_taxemiMkt(t,regi,emiMkt))
+* + v21_taxrevFlex(t,regi)$(cm_flex_tax eq 1)
+    + v21_taxrevMrkup(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND cm_DTcoup_capcon ne 0)
+    + v21_taxrevCap(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND cm_DTcoup_capcon ne 0)
+    + v21_taxrevBioImport(t,regi)
 $ifthen.cm_implicitFE not "%cm_implicitFE%" == "off"
     + vm_taxrevimplFETax(t,regi)
-$endif.cm_implicitFE    
+$endif.cm_implicitFE
  ;
-
 
 ***---------------------------------------------------------------------------
 *'  Calculation of greenhouse gas taxes: tax rate (combination of 3 components) times ghg emissions
@@ -71,8 +72,8 @@ v21_taxrevCO2luc(t,regi) =e= ( pm_taxCO2eq(t,regi)  + pm_taxCO2eqSCC(t,regi) + p
 *'  Documentation of overall tax approach is above at q21_taxrev.
 ***---------------------------------------------------------------------------
 q21_taxrevCCS(t,regi)$(t.val ge max(2010,cm_startyear))..
-v21_taxrevCCS(t,regi) 
-=e= cm_frac_CCS * pm_data(regi,"omf","ccsinje") * pm_inco0_t(t,regi,"ccsinje") 
+v21_taxrevCCS(t,regi)
+=e= cm_frac_CCS * pm_data(regi,"omf","ccsinje") * pm_inco0_t(t,regi,"ccsinje")
     * ( sum(teCCS2rlf(te,rlf), sum(ccs2te(ccsCO2(enty),enty2,te), vm_co2CCS(t,regi,enty,enty2,te,rlf) ) ) )
     * (1/sm_ccsinjecrate) * sum(teCCS2rlf(te,rlf), sum(ccs2te(ccsCO2(enty),enty2,te), vm_co2CCS(t,regi,enty,enty2,te,rlf) ) ) / pm_dataccs(regi,"quan","1")	!! fraction of injection constraint per year
 	- p21_taxrevCCS0(t,regi);
@@ -86,7 +87,7 @@ v21_taxrevNetNegEmi(t,regi) =e=  cm_frac_NetNegEmi * pm_taxCO2eq(t,regi) * v21_e
                                  - p21_taxrevNetNegEmi0(t,regi);
 
 ***---------------------------------------------------------------------------
-*'  Auxiliary calculation of net-negative emissions: 
+*'  Auxiliary calculation of net-negative emissions:
 *'  v21_emiAllco2neg and v21_emiAllco2neg_slack are defined as positive variables
 *'  so as long as vm_emiAll is positive, v21_emiAllco2neg_slack adjusts so that sum is zero
 *'  if vm_emiAll is negative, in order to minimize tax v21_emiAllco2neg_slack becomes zero
@@ -99,13 +100,13 @@ v21_emiALLco2neg(t,regi) =e= -vm_emiAll(t,regi,"co2") + v21_emiALLco2neg_slack(t
 *'  Documentation of overall tax approach is above at q21_taxrev.
 ***---------------------------------------------------------------------------
 q21_taxrevFE(t,regi)$(t.val ge max(2010,cm_startyear))..
-  v21_taxrevFE(t,regi) 
+  v21_taxrevFE(t,regi)
   =e=
   sum((entyFe,sector)$entyFe2Sector(entyFe,sector),
-    ( pm_tau_fe_tax(t,regi,sector,entyFe) + pm_tau_fe_sub(t,regi,sector,entyFe) ) 
-    * 
-    sum(emiMkt$sector2emiMkt(sector,emiMkt), 
-      sum(se2fe(entySe,entyFe,te),   
+    ( pm_tau_fe_tax(t,regi,sector,entyFe) + pm_tau_fe_sub(t,regi,sector,entyFe) )
+    *
+    sum(emiMkt$sector2emiMkt(sector,emiMkt),
+      sum(se2fe(entySe,entyFe,te),
         vm_demFeSector(t,regi,entySe,entyFe,sector,emiMkt)
       )
     )
@@ -122,26 +123,26 @@ v21_taxrevResEx(t,regi) =e=  sum(pe2rlf(peEx(enty),rlf), p21_tau_fuEx_sub(t,regi
                              - p21_taxrevResEx0(t,regi);
 
 ***---------------------------------------------------------------------------
-*'  Calculation of pe2se taxes (Primary to secondary energy technology taxes, specified by technology): effective tax rate (tax - subsidy) times SE output of technology 
+*'  Calculation of pe2se taxes (Primary to secondary energy technology taxes, specified by technology): effective tax rate (tax - subsidy) times SE output of technology
 *'  Documentation of overall tax approach is above at q21_taxrev.
 ***---------------------------------------------------------------------------
 q21_taxrevPE2SE(t,regi)$(t.val ge max(2010,cm_startyear))..
-v21_taxrevPE2SE(t,regi) 
+v21_taxrevPE2SE(t,regi)
 =e= SUM(pe2se(enty,enty2,te),
           (p21_tau_pe2se_tax(t,regi,te) + p21_tau_pe2se_sub(t,regi,te) + p21_tau_pe2se_inconv(t,regi,te)) * vm_prodSe(t,regi,enty,enty2,te)
        )
-	- p21_taxrevPE2SE0(t,regi) ; 
+        - p21_taxrevPE2SE0(t,regi) ;
 
 ***---------------------------------------------------------------------------
 *'  Calculation of technology specific subsidies and taxes. Tax incidency applied only over new capacity (deltaCap)
 *'  Documentation of overall tax approach is above at q21_taxrev.
 ***---------------------------------------------------------------------------
 q21_taxrevTech(t,regi)$(t.val ge max(2010,cm_startyear))..
-v21_taxrevTech(t,regi) 
+v21_taxrevTech(t,regi)
 =e= sum(te2rlf(te,rlf),
           (p21_tech_tax(t,regi,te,rlf) + p21_tech_sub(t,regi,te,rlf)) * vm_deltaCap(t,regi,te,rlf)
        )
-	- p21_taxrevTech0(t,regi) ;   
+	- p21_taxrevTech0(t,regi) ;
 
 ***---------------------------------------------------------------------------
 *'  Calculation of export taxes: tax rate times export volume
@@ -156,7 +157,7 @@ v21_taxrevXport(t,regi) =e= SUM(tradePe(enty), p21_tau_XpRes_tax(t,regi,enty) * 
 *'  Documentation of overall tax approach is above at q21_taxrev.
 ***---------------------------------------------------------------------------
 q21_taxrevSO2(t,regi)$(t.val ge max(2010,cm_startyear))..
-v21_taxrevSO2(t,regi) =e= p21_tau_so2_tax(t,regi) * vm_emiTe(t,regi,"so2") 
+v21_taxrevSO2(t,regi) =e= p21_tau_so2_tax(t,regi) * vm_emiTe(t,regi,"so2")
                           - p21_taxrevSO20(t,regi);
 
 ***---------------------------------------------------------------------------
@@ -166,52 +167,70 @@ v21_taxrevSO2(t,regi) =e= p21_tau_so2_tax(t,regi) * vm_emiTe(t,regi,"so2")
 q21_taxrevBio(t,regi)$(t.val ge max(2010,cm_startyear))..
 v21_taxrevBio(t,regi) =e= v21_tau_bio(t) * vm_fuExtr(t,regi,"pebiolc","1") * vm_pebiolc_price(t,regi)
                           - p21_taxrevBio0(t,regi);
-						  
+
 ***---------------------------------------------------------------------------
-*'  Calculation of High implicit discount rates in energy efficiency capital 
+*'  Calculation of High implicit discount rates in energy efficiency capital
 *'  which is also modeled as a tax to mirror the lack of incentive for cost-efficient renovations.
 *'  calculation is done via additional discount rate times input of capital at different levels
 ***---------------------------------------------------------------------------
 q21_implicitDiscRate(t,regi)$(t.val ge max(2010,cm_startyear))..
- v21_implicitDiscRate(t,regi) 
+ v21_implicitDiscRate(t,regi)
  =e= sum(ppfKap(in),
-        p21_implicitDiscRateMarg(t,regi,in) 
+        p21_implicitDiscRateMarg(t,regi,in)
         * vm_cesIO(t,regi,in)
         ) - p21_implicitDiscRate0(t,regi);
-;        
-						  
+;
+
 ***---------------------------------------------------------------------------
 *'  Calculation of specific emission market taxes
 *'  calculation is done via additional budget emission contraints defined in regiplo module
 ***---------------------------------------------------------------------------
 q21_taxemiMkt(t,regi,emiMkt)$(t.val ge max(2010,cm_startyear))..
-  v21_taxemiMkt(t,regi,emiMkt) 
+  v21_taxemiMkt(t,regi,emiMkt)
   =e=
   pm_taxemiMkt(t,regi,emiMkt) * vm_co2eqMkt(t,regi,emiMkt)
-  - p21_taxemiMkt0(t,regi,emiMkt); 
-; 
-
-***---------------------------------------------------------------------------
-*'  FS: Calculation of tax/subsidy on technologies with inflexible/flexible electricity input 
-*'  This is to emulate the effect of lower/higher electricity prices in high VRE systems on flexible/inflexible electricity demands. 
-***---------------------------------------------------------------------------
-
-q21_taxrevFlex(t,regi)$( t.val ge max(2010, cm_startyear) ) ..
-  v21_taxrevFlex(t,regi)
-  =e=
-    sum(en2en(enty,enty2,te)$(teFlexTax(te)),
-      !! vm_flexAdj is electricity price reduction/increases for flexible/
-      !! inflexible technologies change sign such that flexible technologies
-      !! get subsidy
-      -vm_flexAdj(t,regi,te) 
-    * vm_demSe(t,regi,enty,enty2,te)
-    )
-  - p21_taxrevFlex0(t,regi)
+  - p21_taxemiMkt0(t,regi,emiMkt);
 ;
 
+***---------------------------------------------------------------------------
+*'  FS: Calculation of tax/subsidy on technologies with inflexible/flexible electricity input
+*'  This is to emulate the effect of lower/higher electricity prices in high VRE systems on flexible/inflexible electricity demands.
+***---------------------------------------------------------------------------
+
+* q21_taxrevFlex(t,regi)$(t.val ge max(2010,cm_startyear))..
+*   v21_taxrevFlex(t,regi)
+*   =e=
+*   sum(en2en(enty,enty2,te)$(teFlexTax(te)),
+* *** vm_flexAdj is electricity price reduction/increases for flexible/inflexible technologies
+* *** change sign such that flexible technologies get subsidy
+*       -vm_flexAdj(t,regi,te) * vm_demSe(t,regi,enty,enty2,te))
+*   - p21_taxrevFlex0(t,regi)
+* ;
 
 ***---------------------------------------------------------------------------
-*'  FS: bioenergy import tax 
+*'  CG: Calculation of tax/subsidy on technologies with variable/firm electricity onput
+***---------------------------------------------------------------------------
+q21_taxrevMrkup(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_capcon ne 0))..
+  v21_taxrevMrkup(t,regi)
+  =e=
+  sum(en2en(enty,enty2,te)$(teDTcoupSupp(te)),
+*** vm_Mrkup is markup or markdown for generation technologies (positive if market value above
+*** wholesale annual price, negative if below)
+   - vm_Mrkup(t,regi,te) * vm_prodSe(t,regi,enty,enty2,te))
+      - p21_taxrevMrkup0(t,regi)
+;
+***---------------------------------------------------------------------------
+*'  CG: Calculation of subsidy on dispatchable technology
+***---------------------------------------------------------------------------
+q21_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_capcon ne 0))..
+  v21_taxrevCap(t,regi)
+  =e=
+      - vm_priceCap(t,regi) * vm_reqCap(t,regi)
+      - p21_taxrevCap0(t,regi)
+;
+
+***---------------------------------------------------------------------------
+*'  FS: bioenergy import tax
 *'  adjusts bioenergy import price, adresses sustainability concerns about the biomass world market
 *'  e.g. about negative consequences of biomass supply-chains in the Global South
 ***---------------------------------------------------------------------------

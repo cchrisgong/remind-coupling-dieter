@@ -10,6 +10,20 @@
 *.un~
 *.swp
 *.pdf
+*.png
+
+# Ignore DIETER folder because of seperate repo
+scripts/iterative/DIETER/
+
+# Ignore run log for own use
+outputfile_catalog
+
+# ignore DEITER tables
+dataprocessing/DIETER_plots/*.csv
+dataprocessing/*.csv
+dataprocessing/*.xls
+dataprocessing/*.xls#
+dataprocessing/*.csv#
 
 # ignore libreoffice lock files
 .~*#
@@ -17,8 +31,9 @@
 # Ignore everything in "input" folders
 input/
 
-# Ignore everything in root "output" folder
-/output/
+# Ignore everything in root "output" folders
+output/
+!scripts/output/
 
 # Ignore everything in "doc" folders, except for 3 specific files
 doc/
@@ -32,11 +47,17 @@ main.lst
 # Ignore .RData files only in the root folder
 /*.RData
 
+outputfile_catalog
+
 # ignore all the MAGICC files, should they be present
 core/magicc/
 !core/magicc/magicc_scen_bau.inc
 !core/magicc/magicc_scen_450.inc
 !core/magicc/magicc_scen_550.inc
 
+<<<<<<< HEAD
+
+=======
 # ignore GDX files in the gdx-files folder
 config/gdx-files/*.gdx
+>>>>>>> REMIND

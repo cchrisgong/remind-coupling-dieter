@@ -148,6 +148,19 @@ v21_tau_bio.l(ttot) = 0;
 
 *** FS: initizalize flexibility tax
 vm_flexAdj.l(ttot,all_regi,all_te) = 0;
+v21_taxrevFlex.l(ttot,all_regi) = 0;
+
+*** CG: initialize markup tax
+vm_Mrkup.l(ttot,all_regi,all_te) = 0;
+v21_taxrevMrkup.l(ttot,all_regi) = 0;
+display "vm_Mrkup", vm_Mrkup.l;
+
+*** CG: initialize capacity subsidy
+vm_priceCap.l(ttot,all_regi) = 0;
+vm_reqCap.l(ttot,all_regi) = 0;
+v21_taxrevCap.l(ttot,all_regi) = 0;
+display "vm_priceCap", vm_priceCap.l;
+Display "end of preloop tax chris";
 
 *** FS: set market price of good to non-zero to avoid division by zero in first iteration
 pm_pvp(ttot,"good")$(pm_pvp(ttot,"good") = 0) = sm_eps;

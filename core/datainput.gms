@@ -519,6 +519,7 @@ pm_cf(ttot,regi,"ngt")$(ttot.val ge 2045) = 0.4 * pm_cf(ttot,regi,"ngt");
 pm_cf(ttot,regi,"tdh2b") = pm_cf(ttot,regi,"tdh2s");
 pm_cf(ttot,regi,"tdh2i") = pm_cf(ttot,regi,"tdh2s");
 
+pm_cf_linear(ttot,regi,te) =  pm_cf(ttot,regi,te);
 
 table pm_earlyreti_adjRate(all_regi,all_te)  "extra retirement rate for technologies in countries with relatively old fleet"
 $ondelim
@@ -526,6 +527,8 @@ $include "./core/input/p_earlyRetirementAdjFactor.cs3r"
 $offdelim
 ;
 
+***CG: limit all ngt early reti to 0 (since ngt can serve as peaker at high share of VRE)
+p_earlyreti_lim(ttot,regi,"ngt")$(ttot.val > 2005) = 0.1 - cm_earlyreti_rate;
 ***---------------------------------------------------------------------------
 *RP* calculate omegs and opTimeYr2te
 ***---------------------------------------------------------------------------
