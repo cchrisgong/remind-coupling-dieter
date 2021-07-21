@@ -24,7 +24,9 @@ p32_fuelprice_lastx2iter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_lastit
 p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = q_balPe.m(t,regi,entyPe);
 
 p32_reqCap(t,regi)$(regDTCoup(regi)) = p32_peakDemand_relFac(t,regi) * p32_seelUsableDem(t,regi,"seel") * 8760;
-p32_capDecayStart(t,regi)$(regDTCoup(regi)) = p32_reqCap(t,regi) * 0.95;
-p32_capDecayEnd(t,regi)$(regDTCoup(regi)) = p32_reqCap(t,regi) * 1.05;
+p32_capDecayStart(t,regi)$(regDTCoup(regi)) = p32_reqCap(t,regi) * 1.0;
+p32_capDecayEnd(t,regi)$(regDTCoup(regi)) = p32_reqCap(t,regi) * 1.1;
+Display p32_capDecayStart;
+Display p32_capDecayEnd;
 $ENDIF.DTcoup
 *** EOF ./modules/32_power/DTcoup/presolve.gms
