@@ -95,13 +95,15 @@ equations
 
     q32_limitSolarWind(ttot,all_regi)           	"limits on fluctuating renewables, only turned on for special EMF27 scenarios"
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
+$IFTHEN.hardcap %cm_softcap% == "off"
     q32_peakDemand_DT(ttot,all_regi,all_enty)     "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"
+$ENDIF.hardcap
     q32_mkup(ttot,all_regi,all_te)                "calculate markup or markdown of generation technology value"
 
 $IFTHEN.softcap %cm_softcap% == "on"
     q32_reqCap(ttot,all_regi,all_enty)            "required total dispatchable capacities"
     q32_priceCap(ttot,all_regi)                   "calculates subsidy for disptachable capacity / capacity shadow price"
-    q32_auxPriceCap(ttot,all_regi)                 "Auxiliary equation for the exponent of the dispatchable capacity subsidy"
+*    q32_auxPriceCap(ttot,all_regi)                 "Auxiliary equation for the exponent of the dispatchable capacity subsidy"
 $ENDIF.softcap
 
 $ENDIF.DTcoup
