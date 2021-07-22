@@ -150,11 +150,12 @@ q32_limitSolarWind(t,regi)$( (cm_solwindenergyscen = 2) OR (cm_solwindenergyscen
 	0.2 * vm_usableSe(t,regi,"seel")
 ;
 
+**** with DIETER coupling
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 ***---------------------------------------------------------------------------
 *** DIETER coupling equations
 ***---------------------------------------------------------------------------
-$IFTHEN.softcap %cm_softcap% == "off"
+$IFTHEN.hardcap %cm_softcap% == "off"
 *** hard capacity constraint to peak residual load demand
 
 q32_peakDemand_DT(t,regi,enty2)$(tDT32_aux(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq = 1) ) ..
@@ -163,7 +164,7 @@ q32_peakDemand_DT(t,regi,enty2)$(tDT32_aux(t) AND sameas(enty2,"seel") AND regDT
 	p32_peakDemand_relFac(t,regi) * p32_seelUsableDem(t,regi,enty2) * 8760
 	;
 
-$ENDIF.softcap
+$ENDIF.hardcap
 
 $IFTHEN.softcap %cm_softcap% == "on"
 ** CG: implementing a softer capacity bound, with a flat capacity subsidy, once the sum of dispatchable capacity exceeds
@@ -216,6 +217,75 @@ q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_D
 	 / 1e12 * sm_TWa_2_MWh / 1.2 )
 * no prefactor
 * ( (p32_DIETER_MV(t,regi,te)  - p32_DIETER_elecprice(t,regi) ) / 1e12 * sm_TWa_2_MWh / 1.2 ) * 1$( regDTCoup(regi) )
+;
+
+*** CG: giving flexible demand side technology, e.g. electrolyzer a subsidy, non DIETER coupled version is q32_flexAdj below
+*** need cm_flex_tax = 0, for demand side tech there is a sign change compared to supp side, currently no feedback cm_FlexTaxFeedback implemented
+q32_flexAdj_DT(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_DTcoup_eq = 1) AND (cm_flex_tax = 0))..
+	vm_flexAdj(t,regi,te)
+	=e=
+* no prefactor
+  (p32_DIETER_elecprice(t,regi) - p32_DIETER_MV(t,regi,te)) / 1e12 * sm_TWa_2_MWh / 1.2
+;
+***----------------------------------------------------------------------------
+*** FS: calculate flexibility adjustment used in flexibility tax for technologies with electricity input
+***----------------------------------------------------------------------------
+
+*** This equation calculates the minimal flexible electricity price that flexible technologies (like elh2) can see. It is reached when the VRE share is 100%.
+*** It depends on the capacity factor with a hyperbolic function. The equation ensures that by decreasing
+*** capacity factor of flexible technologies (teFlex) these technologies see lower electricity prices given that there is a high VRE share in the power system.
+
+*** On the derivation of the equation:
+*** The formulation assumes a cubic price duration curve. That is, the effective electricity price the flexible technologies sees
+*** depends on the capacity factor (CF) with a cubic function centered at (0.5,1):
+*** p32_PriceDurSlope * (CF-0.5)^3 + 1,
+*** Hence, at CF = 0.5, the REMIND average price pm_SEPrice(t,regi,"seel") is paid.
+*** To get the average electricity price that a flexible technology sees at a certain CF,
+*** we need to integrate this function with respect to CF and divide by CF. This gives the formulation below:
+*** v32_flexPriceShareMin = p32_PriceDurSlope * ((CF-0.5)^4-0.5^4) / (4*CF) + 1.
+*** This is the new average electricity price a technology sees if it runs on (a possibly lower than one) capacity factor CF
+*** and deliberately uses hours of low-cost electricity.
+ q32_flexPriceShareMin(t,regi,te)$(teFlex(te) AND (cm_DTcoup_eq lt 0))..
+  v32_flexPriceShareMin(t,regi,te) * 4 * vm_capFac(t,regi,te)
+  =e=
+  p32_PriceDurSlope(regi,te) * (power(vm_capFac(t,regi,te) - 0.5,4) - 0.5**4) +
+  4 * vm_capFac(t,regi,te)
+;
+
+*** Calculates the electricity price of flexible technologies:
+*** The effective flexible price linearly decreases with VRE share
+*** from 1 (at 0% VRE share) to v32_flexPriceShareMin (at 100% VRE).
+q32_flexPriceShare(t,regi,te)$(teFlex(te) AND (cm_DTcoup_eq lt 0))..
+  v32_flexPriceShare(t,regi,te)
+  =e=
+  1 - (1-v32_flexPriceShareMin(t,regi,te)) * sum(teVRE, v32_shSeEl(t,regi,teVRE))/100
+;
+
+*** This balance ensures that the lower electricity prices of flexible technologies are compensated
+*** by higher electricity prices of inflexible technologies. Inflexible technologies are all technologies
+*** which are part of teFlexTax but not of teFlex. The weighted sum of
+*** flexible/inflexible electricity prices (v32_flexPriceShare) and electricity demand must be one.
+*** Note: this is only on if cm_FlexTaxFeedback = 1. Otherwise, there is no change in electricity prices for inflexible technologies.
+q32_flexPriceBalance(t,regi)$((cm_FlexTaxFeedback eq 1) AND (cm_DTcoup_eq lt 0))..
+  sum(en2en(enty,enty2,te)$(teFlexTax(te)),
+  	vm_demSe(t,regi,enty,enty2,te))
+  =e=
+  sum(en2en(enty,enty2,te)$(teFlexTax(te)),
+  	vm_demSe(t,regi,enty,enty2,te) * v32_flexPriceShare(t,regi,te))
+;
+
+
+*** This calculates the flexibility benefit or cost per unit electricity input
+*** of flexibile or inflexibly technology.
+*** In the tax module, vm_flexAdj is then deduced from the electricity price via the flexibility tax formulation.
+*** Below, pm_SEPrice(t,regi,"seel") is the (average) electricity price from the last iteration.
+*** Flexible technologies benefit (v32_flexPriceShare < 1),
+*** while inflexible technologies are penalized (v32_flexPriceShare > 1).
+*** Flexibility tax is switched only if cm_flex_tax = 1 and is active from 2025 onwards.
+q32_flexAdj(t,regi,te)$(teFlexTax(te) AND (cm_DTcoup_eq lt 0))..
+	vm_flexAdj(t,regi,te)
+	=e=
+	(1 - v32_flexPriceShare(t,regi,te)) * pm_SEPrice(t,regi,"seel")$(cm_flex_tax eq 1 AND t.val ge 2025)
 ;
 
 $ENDIF.DTcoup

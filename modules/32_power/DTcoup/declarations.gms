@@ -17,6 +17,7 @@ parameters
     p32_minVF_spv                         "value factor of solar at 100% VRE shares"
     p32_seelTotDem(ttot,all_regi,all_enty)    "total secondary electricity demand (including curtailment)"
     p32_seelUsableDem(ttot,all_regi,all_enty) "total usable secondary electricity demand"
+    p32_seh2elh2Dem(ttot,all_regi,all_enty)   "total green H2 demand"
     p32_shSeEl(ttot,all_regi,all_te)      "generation share of the last iteration"
     p32_deltaCap(ttot,all_regi,all_te,rlf)"capacity of the last iteration"
     p32_marketValue(ttot,all_regi,all_te) "market value seen by REMIND"
@@ -67,11 +68,13 @@ sm32_discount_factor                      "discount factor for investment"
 positive variables
     v32_shStor(ttot,all_regi,all_te)      "share of seel production from renewables that needs to be stored, range 0..1 [0,1]"
     v32_storloss(ttot,all_regi,all_te)    "total energy loss from storage for a given technology [TWa]"
-*   v32_storloss_DT(ttot,all_regi,all_te)    "curtailment given by DIETER [TWa]"
     v32_shSeEl(ttot,all_regi,all_te)			"new share of electricity production in % [%]"
-*   v32_seelDem(ttot,all_regi,all_enty)   "total secondary electricity demand (excluding curtailment)"
-    v32_capPriceExponent(ttot,all_regi)   "exponent for the cost of additional dispatchable capacity"
-    v32_expSlack(ttot,all_regi)           "slack variable to make sure the exponent is bounded"
+*    v32_capPriceExponent(ttot,all_regi)   "exponent for the cost of additional dispatchable capacity"
+*    v32_expSlack(ttot,all_regi)           "slack variable to make sure the exponent is bounded"
+
+    v32_flexPriceShare(tall,all_regi,all_te)            "share of average electricity price that flexible technologies see [share: 0...1]"
+    v32_flexPriceShareMin(tall,all_regi,all_te)         "possible minimum of share of average electricity price that flexible technologies see [share: 0...1]"
+
 ;
 
 equations
@@ -90,19 +93,23 @@ equations
 *   q32_operatingReserve(ttot,all_regi)  			    "operating reserve for necessary flexibility"
 
     q32_limitSolarWind(ttot,all_regi)           	"limits on fluctuating renewables, only turned on for special EMF27 scenarios"
+    q32_flexAdj(tall,all_regi,all_te)               "calculate flexibility used in flexibility tax for technologies with electricity input"
+    q32_flexPriceShareMin                           "calculatae miniumum share of average electricity that flexible technologies can see"
+    q32_flexPriceShare(tall,all_regi,all_te)        "calculate share of average electricity price that flexible technologies see"
+    q32_flexPriceBalance(tall,all_regi)             "constraint such that flexible electricity prices balanance to average electricity price"
+
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
+    q32_flexAdj_DT(tall,all_regi,all_te)          "from DIETER coupling: calculate flexibility used in flexibility tax for technologies with electricity input"
+    q32_mkup(ttot,all_regi,all_te)                "calculate markup or markdown of generation technology value"
 $IFTHEN.hardcap %cm_softcap% == "off"
     q32_peakDemand_DT(ttot,all_regi,all_enty)     "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"
 $ENDIF.hardcap
-    q32_mkup(ttot,all_regi,all_te)                "calculate markup or markdown of generation technology value"
 
 $IFTHEN.softcap %cm_softcap% == "on"
+*   q32_peakDemand_DT(ttot,all_regi,all_enty)     "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"
     q32_reqCap(ttot,all_regi,all_enty)            "required total dispatchable capacities"
     q32_priceCap(ttot,all_regi)                   "calculates subsidy for disptachable capacity / capacity shadow price"
 
 $ENDIF.softcap
 
 $ENDIF.DTcoup
-
-*   q32_flexAdj(tall,all_regi,all_te)             "calculate flexibility used in flexibility tax for technologies with electricity input"
-;

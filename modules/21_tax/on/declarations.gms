@@ -61,15 +61,15 @@ p21_implicitDiscRateMarg(ttot,all_regi,all_in)  "Difference between the normal d
 ;
 
 
-$ifthen.fetax not "%cm_FEtax_trajectory_abs%" == "off" 
+$ifthen.fetax not "%cm_FEtax_trajectory_abs%" == "off"
 Parameters
-    p21_FEtax_trajectory_abs(ttot,emi_sectors,all_enty)     "absolute final energy tax level of the end year set by cm_FEtax_trajectory_abs switch [USD/MWh]"  / %cm_FEtax_trajectory_abs% /   
+    p21_FEtax_trajectory_abs(ttot,emi_sectors,all_enty)     "absolute final energy tax level of the end year set by cm_FEtax_trajectory_abs switch [USD/MWh]"  / %cm_FEtax_trajectory_abs% /
 ;
 $endif.fetax
 
-$ifthen.fetaxRel not "%cm_FEtax_trajectory_rel%" == "off" 
+$ifthen.fetaxRel not "%cm_FEtax_trajectory_rel%" == "off"
 Parameters
-    p21_FEtax_trajectory_rel(ttot,emi_sectors,all_enty)     "factor to scale final energy tax level of the end year from cm_FEtax_trajectory_rel switch"  / %cm_FEtax_trajectory_rel% /   
+    p21_FEtax_trajectory_rel(ttot,emi_sectors,all_enty)     "factor to scale final energy tax level of the end year from cm_FEtax_trajectory_rel switch"  / %cm_FEtax_trajectory_rel% /
 ;
 $endif.fetaxRel
 
@@ -120,7 +120,7 @@ q21_taxrevTech(ttot,all_regi)                "calculation of technology specific
 q21_taxrevXport(ttot,all_regi)               "calculation of tax on exports"
 q21_taxrevSO2(ttot,all_regi)                 "calculation of tax on SO2"
 q21_taxrevBio(ttot,all_regi)                 "calculation of tax on bioenergy"
-* q21_taxrevFlex(ttot,all_regi)                "tax on technologies with flexible or inflexible electricity input"
+q21_taxrevFlex(ttot,all_regi)                "tax on technologies with flexible or inflexible electricity input"
 q21_taxrevMrkup(ttot,all_regi)               "calculation for markup of electricity generation technologies from DIETER coupling"
 q21_priceCap(ttot,all_regi)                  "calculation of subsidy for dispatchable electricity generation technologies"
 q21_implicitDiscRate(ttot,all_regi)          "calculation of the implicit discount rate on energy efficiency capital"

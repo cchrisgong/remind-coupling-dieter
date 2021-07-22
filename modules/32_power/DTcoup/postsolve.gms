@@ -51,6 +51,8 @@ p32_seelTotDem(t,regi,enty2)$(sameas(enty2,"seel")) =
 + sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr.l(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! do not use in 2005 because this demand is not contained in 05_initialCap
 ;
 
+p32_seh2elh2Dem(t,regi,enty2)$(sameas(enty2,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
+
 *** CG: total usable demand to pass on to DIETER: this has to
 *** include the electricity consumed for extracting fuels (included in p32_seelTotDem),
 *** as well as distributing and transporting them (p32_prod4dtFE) and doing CCS (p32_prod4CCS)
@@ -72,10 +74,6 @@ p32_marketValue(t,regi,te)$regDTCoup(regi)
 p32_valueFactor(t,regi,te)$regDTCoup(regi)
       = p32_marketValue(t,regi,te)$regDTCoup(regi)/(pm_SEPrice(t,regi,"seel")$regDTCoup(regi) + sm_eps);
 
-$ifthen.calibrate %CES_parameters% == "load"
-
-*** CG: DIETER coupling
-$IFTHEN.DTcoup %cm_DTcoup% == "on"
 
 *** CG: smoothing fuel cost over iterations to pass to DIETER
 p32_fuelprice_avgiter(t,regi,entyPe)$regDTCoup(regi)
@@ -83,6 +81,14 @@ p32_fuelprice_avgiter(t,regi,entyPe)$regDTCoup(regi)
 		   + 2 * p32_fuelprice_lastiter(t,regi,entyPe)$regDTCoup(regi)
 			 + p32_fuelprice_lastx2iter(t,regi,entyPe)$regDTCoup(regi))
 			 / 4;
+
+$ifthen.calibrate %CES_parameters% == "load"
+
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+**** CG: DIETER coupling
+
+*********** INTERFACE FOR READING IN DIETER RESULTS ****************
+
 
 
 
@@ -172,9 +178,6 @@ logfile.nr = 2;
     p32_peakDemand_relFac(t,regi)$(tDT32(t) AND regDTCoup(regi))
 		      = sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"all_te","ResPeakDem_relFac")$(tDT32(t) AND regDTCoup(regi)));
 
-*   flexible demand side tech (might be able to be replaced by the mkup implementation)
-*   p32_flex_multmk(t,"elh2")$(tDT32(t)) = sum(gdxfile32, p32_report4RM(gdxfile32, t, regi, "elh2", "valuefactor")$(tDT32(t) AND regDTCoup(regi)));
-
 *** dividing each DIETER tech into REMIND tech, using the last iteration REMIND share within DIETER tech category to scale down the generation share
     p32_tech_category_genshare(t,regi,te)$(BIOte32(te) AND regDTCoup(regi))
 		      = p32_shSeEl(t,regi,te)$(BIOte32(te) AND regDTCoup(regi))/sum(te2$(BIOte32(te2)),p32_shSeEl(t,regi,te2)$regDTCoup(regi) + sm_eps);
@@ -207,15 +210,7 @@ logfile.nr = 2;
 					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","gen_share")$(tDT32(t) AND regDTCoup(regi)))
 				    	* p32_tech_category_genshare(t,regi,te)$(COALte32(te) AND regDTCoup(regi)) ;
 
-    p32_DIETER_VF(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"bio","valuefactor")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_VF(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"CCGT","valuefactor")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_VF(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"OCGT_eff","valuefactor")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_VF(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"nuc","valuefactor")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_VF(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"coal","valuefactor")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_VF(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Solar","valuefactor")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_VF(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"ror","valuefactor")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_VF(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Wind_on","valuefactor")$(tDT32(t) AND regDTCoup(regi)));
-
+*   supply side tech market value
     p32_DIETER_MV(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"bio","market_value")$(tDT32(t) AND regDTCoup(regi)));
     p32_DIETER_MV(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"CCGT","market_value")$(tDT32(t) AND regDTCoup(regi)));
     p32_DIETER_MV(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"OCGT_eff","market_value")$(tDT32(t) AND regDTCoup(regi)));
@@ -224,12 +219,15 @@ logfile.nr = 2;
     p32_DIETER_MV(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Solar","market_value")$(tDT32(t) AND regDTCoup(regi)));
     p32_DIETER_MV(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"ror","market_value")$(tDT32(t) AND regDTCoup(regi)));
     p32_DIETER_MV(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Wind_on","market_value")$(tDT32(t) AND regDTCoup(regi)));
-
+*   flexible demand side tech market value (electricity price that the flex tech "sees")
+    p32_DIETER_MV(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"elh2","market_value")$(tDT32(t) AND regDTCoup(regi)));
+*   DIETER electricity price
     p32_DIETER_elecprice(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"all_te","elec_price")$(tDT32(t) AND regDTCoup(regi)));
 
 *** CG: storage related coupling parameters
     p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
     p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
+
 * no curtailment for ror right now from DIETER
 *p32_DIETER_curtailmentratio(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"ror","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
 
