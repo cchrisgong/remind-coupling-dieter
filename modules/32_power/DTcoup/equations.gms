@@ -43,28 +43,45 @@ q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND teVRE(te))..
  	- sum(teVRE$sameas(te,teVRE), v32_storloss(t,regi,teVRE) )
 ;
 
-**---------------------------------------------------------------------------
-** Definition of capacity constraints for storage:
-**---------------------------------------------------------------------------
-* q32_limitCapTeStor(t,regi,teStor)$(t.val ge 2015)..
-* 	sum(VRE2teStor(teVRE,teStor), v32_storloss(t,regi,teVRE) )
-* 	* pm_eta_conv(t,regi,teStor) / ( 1 - pm_eta_conv(t,regi,teStor))
-* 	=l=
-* 	sum(te2rlf(teStor,rlf),
-* 		vm_capFac(t,regi,teStor) * pm_dataren(regi,"nur",rlf,teStor) * vm_cap(t,regi,teStor,rlf) )
-* ;
-*
-* q32_h2turbVREcapfromTestor(t,regi)..
-*  vm_cap(t,regi,"h2turbVRE","1")
-*  =e=
-*  sum(te$testor(te), p32_storageCap(te,"h2turbVREcapratio") * vm_cap(t,regi,te,"1") )
-* ;
-*
-* q32_elh2VREcapfromTestor(t,regi)..
-*  vm_cap(t,regi,"elh2VRE","1")
-*  =e=
-*  sum(te$testor(te), p32_storageCap(te,"elh2VREcapratio") * vm_cap(t,regi,te,"1") )
-* ;
+*---------------------------------------------------------------------------
+* Definition of capacity constraints for storage:
+*---------------------------------------------------------------------------
+
+q32_limitCapTeStor(t,regi,teStor)$( t.val ge 2015 ) ..
+  ( ( 0.5$( cm_VRE_supply_assumptions eq 1 )
+    + 1$(   cm_VRE_supply_assumptions ne 1 )
+    )
+  * sum(VRE2teStor(teVRE,teStor), v32_storloss(t,regi,teVRE))
+  * pm_eta_conv(t,regi,teStor)
+  / (1 - pm_eta_conv(t,regi,teStor)) ) * 1$(regNoDTCoup(regi))
+  =l=
+  ( sum(te2rlf(teStor,rlf),
+    vm_capFac(t,regi,teStor)
+  * pm_dataren(regi,"nur",rlf,teStor)
+  * vm_cap(t,regi,teStor,rlf)
+  ) ) * 1$(regNoDTCoup(regi))
+;
+
+
+*** H2 storage implementation: Storage technologies (storspv, storwind etc.) also
+*** represent H2 storage. This is implemented by automatically scaling up capacities of
+*** elh2VRE (electrolysis from VRE, seel -> seh2) and H2 turbines (h2turbVRE, seh2 -> seel)
+*** with VRE capacities which require storage (according to q32_limitCapTeStor):
+
+
+*** build additional electrolysis capacities with stored VRE electricity
+q32_elh2VREcapfromTestor(t,regi)..
+  vm_cap(t,regi,"elh2","1") * 1$(regNoDTCoup(regi))
+  =g=
+  (sum(te$testor(te), p32_storageCap(te,"elh2VREcapratio") * vm_cap(t,regi,te,"1") )) * 1$(regNoDTCoup(regi))
+;
+
+*** build additional h2 to seel capacities to use stored hydrogen
+q32_h2turbVREcapfromTestor(t,regi)..
+  vm_cap(t,regi,"h2turbVRE","1") * 1$(regNoDTCoup(regi))
+  =e=
+  (sum(te$testor(te), p32_storageCap(te,"h2turbVREcapratio") * vm_cap(t,regi,te,"1") ) ) * 1$(regNoDTCoup(regi))
+;
 
 ***---------------------------------------------------------------------------
 *** Definition of capacity constraints for CHP technologies:
@@ -99,14 +116,7 @@ q32_shSeEl(t,regi,te)..
     =e=
     vm_usableSeTe(t,regi,"seel",te)
 ;
-* ***---------------------------------------------------------------------------
-* *** Calculation of share of electricity production of nonVRE
-* ***---------------------------------------------------------------------------
-* q32_shSeEl_disp(t,regi,teNoRe)..
-*     v32_shSeEl(t,regi,teNoRe) / 100 * vm_usableSe(t,regi,"seel")
-*     =e=
-*     vm_usableSeTe(t,regi,"seel",teVRE)
-* ;
+
 ***---------------------------------------------------------------------------
 *** Calculation of necessary storage electricity production:
 *** ONLY for non-DIETER-coupled regions
@@ -145,6 +155,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** DIETER coupling equations
 ***---------------------------------------------------------------------------
 $IFTHEN.softcap %cm_softcap% == "off"
+*** hard capacity constraint to peak residual load demand
 
 q32_peakDemand_DT(t,regi,enty2)$(tDT32_aux(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq = 1) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
@@ -155,14 +166,22 @@ q32_peakDemand_DT(t,regi,enty2)$(tDT32_aux(t) AND sameas(enty2,"seel") AND regDT
 $ENDIF.softcap
 
 $IFTHEN.softcap %cm_softcap% == "on"
+** CG: implementing a softer capacity bound, with a flat capacity subsidy, once the sum of dispatchable capacity exceeds
+** the bound which is the peak demand from last iteration, the subsidy rapidly drops according to logistic function
+** Logistic function exponent for additional dispatchable capacity, LHS bound up to 20 to reduce computational intensity
+*  because the exponent v32_capPriceExponent is capped by 20, we introduce
+*  v32_expSlack, to save the remaining values if the exponent value on equation q32_auxPriceCap is bigger due to the
+*  "x" value (vm_reqCap). At the same time we want this slack variable to be used only if necessary, so we add a penalization term
+*  in the main equation q32_priceCap (v32_expSlack(t,regi)*1e-8), such that the result variable is a
+*  investment cost variable and the model will try to keep its value at the minimal possible.
+
+*** CG: for debugging:
 * q32_peakDemand_DT(t,regi,enty2)$(tDT32_aux(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq = 1) ) ..
 * 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 * 	=l=
 * 	p32_peakDemand_relFac(t,regi) * p32_seelUsableDem(t,regi,enty2) * 8760 * 0.95
 * 	;
-** CG: implementing a softer capacity bound, with a flat capacity subsidy, once the sum of dispatchable capacity exceeds
-** the bound which is the peak demand from last iteration, the subsidy rapidly drops according to logistic function
-**
+
 q32_reqCap(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq = 1) ) ..
 	vm_reqCap(t,regi)
  	=e=
@@ -178,49 +197,25 @@ q32_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq = 1) )..
 * + ( v32_expSlack(t,regi) * 1e-8 )
 ;
 
-
-*** CG: Logistic function exponent for additional dispatchable capacity, LHS bound up to 20 to reduce computational intensity
-*  because the exponent v32_capPriceExponent is capped by 20, we introduce
-*  v32_expSlack, to save the remaining values if the exponent value on equation q32_auxPriceCap is bigger due to the
-*  "x" value (vm_reqCap). At the same time we want this slack variable to be used only if necessary, so we add a penalization term
-*  in the main equation q32_priceCap (v32_expSlack(t,regi)*1e-8), such that the result variable is a
-*  investment cost variable and the model will try to keep its value at the minimal possible.
-
-* q32_auxPriceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq = 1) )..
-*   v32_capPriceExponent(t,regi)
-*   =e=
-*   (1 / ( p32_capDecayEnd(t,regi) - p32_capDecayStart(t,regi) ))
-* 	* ( vm_reqCap(t,regi) + 1e-11 - ( p32_capDecayEnd(t,regi) + p32_capDecayStart(t,regi) ) / 2	)
-* * - v32_expSlack(t,regi)
-* ;
-
 $ENDIF.softcap
 ***----------------------------------------------------------------------------
-*** CG: calculate markup adjustment used in flexibility tax for supply-side technologies
+*** CG: calculate markup adjustment used in flexibility tax for supply-side technologies:
+*** supply-side technology (absolute) markup p32_DIETER_MV from DIETER
+*** multiplied with a prefactor that depends on generation share of current REMIND iteration
+*** Note: price conversions between REMIND and DIETER:
+*** multiply by budget from DIETER to REMIND, but divide here again by budget
+*** price_DIETER = price_REMIND/budget_REMIND * 1e12 / sm_TWa_2_MWh * 1.2
+*** price_REMIND = price_DIETER * budget_REMIND/1e12 * sm_TWa_2_MWh/1.2
 ***----------------------------------------------------------------------------
 q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq = 1))..
 	vm_Mrkup(t,regi,te)$( regDTCoup(regi) )
 	=e=
-*** supply-side technology markup v32_DIETER_VF as a multiplicative factor
-*** of the wholesale electricity price of the last iteration
-*** v32_DIETER_VF < 1 -> market value lower than average electricity price (usually fluctuating VRE generation),
-*** v32_DIETER_VF > 1 -> market value higher than average electricity price (usually firm generation technologies)
-*** prefactor depends on difference between gen share of DIETER and current REMIND iter
-* (v32_DIETER_VF(t,regi,te) * ( 1 - (v32_shSeEl(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100) ) - 1 ) * pm_SEPrice(t,regi,"seel")
-*** prefactor depends on difference between gen share of last and current REMIND iter
-* (v32_DIETER_VF(t,regi,te) * ( 1 - (v32_shSeEl(t,regi,te) / 100 - p32_shSeEl(t,regi,te) / 100 ) ) - 1 ) * pm_SEPrice(t,regi,"seel")
-*** NO prefactor
-* (v32_DIETER_VF(t,regi,te) - 1 ) * pm_SEPrice(t,regi,"seel") * 1$( regDTCoup(regi) )
-*** nonlinear relation
-* ((v32_DIETER_VF(t,regi,te) * p32_shSeEl(t,regi,te)) / (v32_shSeEl(t,regi,te) + sm_eps) * pm_SEPrice(t,regi,"seel") - pm_SEPrice(t,regi,"seel")) * 1$( regDTCoup(regi) )
-
-*** absolute markup, multiply by budget from DIETER to REMIND, but divide here again by budget
-*** price_new = price/budget * 1e12 / sm_TWa_2_MWh * 1.2
-*** price = price_new * budget/1e12 * sm_TWa_2_MWh/1.2
+* with prefactor
 ( (p32_DIETER_MV(t,regi,te)$( regDTCoup(regi) ) *
    (1 - (v32_shSeEl(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_DIETER_shSeEl(t,regi,te)$( regDTCoup(regi) ) / 100 )  ) - p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) )
 	 / 1e12 * sm_TWa_2_MWh / 1.2 )
+* no prefactor
 * ( (p32_DIETER_MV(t,regi,te)  - p32_DIETER_elecprice(t,regi) ) / 1e12 * sm_TWa_2_MWh / 1.2 ) * 1$( regDTCoup(regi) )
-* (p32_DIETER_MV(t,regi,te) - p32_DIETER_elecprice(t,regi) ) / 1e12 * sm_TWa_2_MWh / 1.2
 ;
+
 $ENDIF.DTcoup
