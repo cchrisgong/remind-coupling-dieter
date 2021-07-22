@@ -311,7 +311,7 @@ c_regi_sensscen				"regions which regional sensitivity parameters apply to"
 cm_biotrade_phaseout        "switch for phaseing out biomass trade in the respective regions by 2030"
 cm_bioprod_histlim			"regional parameter to limit biomass (pebiolc.1) production to a multiple of the 2015 production"
 cm_flex_tax                 "switch for enabling flexibility tax"
-cm_DTcoup_capcon         "switch for capacity constraint"
+cm_DTcoup_eq                "switch for DIETER coupling equations"
 cm_flexMax_elh2             "switch for setting the maximum relative reduction of the electricity price electrolysis sees when flex. tax is enabled"
 cm_H2targets                "switches on capacity targets for electrolysis in NDC techpol following national Hydrogen Strategies"
 cm_PriceDurSlope_elh2       "slope of price duration curve of electrolysis"
@@ -577,7 +577,7 @@ cm_deuCDRmax = -1; !! def = -1
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *--------------------flags------------------------------------------------------------
 $setglobal cm_DTcoup  on         !! def = off
-cm_DTcoup_capcon = 0;         !! def = 0
+cm_DTcoup_eq = 0;         !! def = 0
 $setglobal cm_softcap  on         !! def = off
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
 $setGlobal cm_nash_mode  parallel      !! def = parallel

@@ -43,8 +43,8 @@
     + v21_implicitDiscRate(t,regi)
     + sum(emiMkt, v21_taxemiMkt(t,regi,emiMkt))
 * + v21_taxrevFlex(t,regi)$(cm_flex_tax eq 1)
-    + v21_taxrevMrkup(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND cm_DTcoup_capcon ne 0)
-    + v21_taxrevCap(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND cm_DTcoup_capcon ne 0)
+    + v21_taxrevMrkup(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND cm_DTcoup_eq ne 0)
+    + v21_taxrevCap(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND cm_DTcoup_eq ne 0)
     + v21_taxrevBioImport(t,regi)
 $ifthen.cm_implicitFE not "%cm_implicitFE%" == "off"
     + vm_taxrevimplFETax(t,regi)
@@ -210,7 +210,7 @@ q21_taxemiMkt(t,regi,emiMkt)$(t.val ge max(2010,cm_startyear))..
 ***---------------------------------------------------------------------------
 *'  CG: Calculation of tax/subsidy on technologies with variable/firm electricity onput
 ***---------------------------------------------------------------------------
-q21_taxrevMrkup(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_capcon ne 0))..
+q21_taxrevMrkup(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0))..
   v21_taxrevMrkup(t,regi)
   =e=
   sum(en2en(enty,enty2,te)$(teDTcoupSupp(te)),
@@ -222,7 +222,7 @@ q21_taxrevMrkup(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_capcon ne 0
 ***---------------------------------------------------------------------------
 *'  CG: Calculation of subsidy on dispatchable technology
 ***---------------------------------------------------------------------------
-q21_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_capcon ne 0))..
+q21_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0))..
   v21_taxrevCap(t,regi)
   =e=
       - vm_priceCap(t,regi) * vm_reqCap(t,regi)

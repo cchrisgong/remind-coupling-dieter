@@ -8,6 +8,7 @@
 
 p32_shSeEl(t,regi,te)$regDTCoup(regi) = v32_shSeEl.l(t,regi,te)$regDTCoup(regi);
 
+
 *** CG: Total power produced (including curtailment, co-production, own consumption)
 p32_totProd(t,regi,enty2)$(sameas(enty2,"seel")) =
 * PE to SE transformation
@@ -95,7 +96,7 @@ display "iteration", sm32_tmp;
 
 *   switch on second coupling switch when coupling actually begins
     if( (ord(iteration) eq 2) ,
-        cm_DTcoup_capcon = 1;
+        cm_DTcoup_eq = 1;
     );
 
     execute "./DIETER_parallel.sh";
