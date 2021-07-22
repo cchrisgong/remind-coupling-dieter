@@ -42,7 +42,7 @@
     - vm_costSubsidizeLearning(t,regi)
     + v21_implicitDiscRate(t,regi)
     + sum(emiMkt, v21_taxemiMkt(t,regi,emiMkt))
-* + v21_taxrevFlex(t,regi)$(cm_flex_tax eq 1)
+    + v21_taxrevFlex(t,regi)$((cm_flex_tax eq 1) OR cm_DTcoup_eq ne 0)
     + v21_taxrevMrkup(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND cm_DTcoup_eq ne 0)
     + v21_taxrevCap(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND cm_DTcoup_eq ne 0)
     + v21_taxrevBioImport(t,regi)

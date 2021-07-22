@@ -21,7 +21,7 @@ $ondelim
 $include "./modules/21_tax/on/input/f21_tau_fe_sub.cs4r"
 $offdelim
   /             ;
-  
+
 Parameter f21_tau_fuEx_sub(tall,all_regi,all_enty) "2005 subsidy for fuel extraction"
   /
 $ondelim
@@ -35,7 +35,7 @@ $ondelim
 $include "./modules/21_tax/on/input/f21_tax_convergence.cs4r"
 $offdelim
   /             ;
- 
+
 Parameter f21_max_fe_sub(tall,all_regi,all_enty) "maximum final energy subsidy levels (in $/Gj) from REMIND version prior to rev. 5429"
   /
 $ondelim
@@ -72,7 +72,7 @@ Parameter f21_tech_sub(tall,all_regi,all_te) "subsidy path for transport specifi
 $ondelim
 $include "./modules/21_tax/on/input/f21_vehiclesSubsidies.cs4r"
 $offdelim
-  /; 
+  /;
 
   p21_tech_sub(t,regi,te,"1")$(f21_tech_sub(t,regi,te)) = - f21_tech_sub("2020",regi,te);
 
@@ -80,7 +80,7 @@ $offdelim
 
 $endIf.vehiclesSubsidies
 
-  
+
 *** transfer data to parameters and rescaling of FE parameters from $/GJ to trillion $ / TWa (subsidies also get adjusted in preloop.gms to avoid neg. prices)
 
   pm_tau_fe_tax(ttot,all_regi,emi_sectors,entyFe)$f21_tau_fe_tax(ttot,all_regi,emi_sectors,entyFe) = f21_tau_fe_tax(ttot,all_regi,emi_sectors,entyFe)*0.001/sm_EJ_2_TWa;
@@ -97,14 +97,14 @@ if(cm_fetaxscen eq 0,
 );
 
 *** -------------------------PE2SE Taxes--------------------------(Primary to secondary energy technology taxes, specified by technology)
-*** cb 20110923 load paths for technology taxes, subsidies and inconvenience costs 
+*** cb 20110923 load paths for technology taxes, subsidies and inconvenience costs
 p21_tau_pe2se_tax(tall,regi,te) = 0;
 p21_tau_pe2se_inconv(tall,regi,te) = 0;
 p21_tau_pe2se_sub(tall,regi,te)= 0;
 
 *RP* FILE changed by hand after introduction of SO2 taxes and inconvenience penalties on 2012-03-08
 *GL* Values try to account for excessive water use, further pollution
-*GL* Taxes are given in USD(2005) per GJ 
+*GL* Taxes are given in USD(2005) per GJ
 p21_tau_pe2se_tax(ttot,regi,"pcc")$(ttot.val ge 2005)        = 0.25;
 p21_tau_pe2se_tax(ttot,regi,"pco")$(ttot.val ge 2005)        = 0.25;
 p21_tau_pe2se_tax(ttot,regi,"igcc")$(ttot.val ge 2005)       = 0.25;
@@ -140,9 +140,9 @@ $offdelim
 *** converted to T$/TWyr
 p21_tau_xpres_tax(ttot,regi,"peoil")$(ttot.val ge 2005) = p21_tau_xpres_tax(ttot,regi,"peoil") * sm_DpGJ_2_TDpTWa;
 *LB* use 0 for all regions as default
-p21_tau_xpres_tax(ttot,regi,all_enty) = 0;  
+p21_tau_xpres_tax(ttot,regi,all_enty) = 0;
 
-           
+
 *** --------------------
 *** CO2 prices
 *** --------------------
@@ -231,4 +231,5 @@ elseif (cm_DiscRateScen eq 4),
 p21_tau_BioImport(t,regi) = 0;
 p21_tau_BioImport(t,regi)$(regi_group("EUR_regi",regi) AND t.val ge 2030) = cm_BioImportTax_EU;
 
+p21_taxrevFlex0(t,regi) = 0;
 *** EOF ./modules/21_tax/on/datainput.gms

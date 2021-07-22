@@ -85,3 +85,6 @@ Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;
 p32_fuelprice_lastiter(t,regi,entyPe) = q_balPe.m(t,regi,entyPe);
 p32_fuelprice_lastx2iter(t,regi,entyPe) = q_balPe.m(t,regi,entyPe);
 $ENDIF.DTcoup
+
+*** initialize p32_PriceDurSlope parameter
+p32_PriceDurSlope(regi,"elh2") = cm_PriceDurSlope_elh2;

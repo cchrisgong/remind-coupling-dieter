@@ -13,6 +13,7 @@ parameters
     p32_factorStorage(all_regi,all_te)    "multiplicative factor that scales total curtailment and storage requirements up or down in different regions for different technologies (e.g. down for PV in regions where high solar radiation coincides with high electricity demand)"
     f32_storageCap(char, all_te)          "multiplicative factor between dummy seel<-->h2 technologies and storXXX technologies"
     p32_storageCap(all_te,char)           "multiplicative factor between dummy seel<-->h2 technologies and storXXX technologies"
+    p32_PriceDurSlope(all_regi,all_te)              "slope of price duration curve used for calculation of electricity price for flexible technologies, determines how fast electricity price declines at lower capacity factors"
 *   p32_capStor_DIET(tall,all_regi)       "storage cap from DIETER"
     p32_minVF_spv                         "value factor of solar at 100% VRE shares"
     p32_seelTotDem(ttot,all_regi,all_enty)    "total secondary electricity demand (including curtailment)"

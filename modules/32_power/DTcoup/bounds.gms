@@ -10,7 +10,7 @@
 *
 vm_capFac.fx(t,regi,te) = pm_cf(t,regi,te);
 
-v32_capPriceExponent.up(t,regi)$(regDTCoup(regi)) = 20;
+*v32_capPriceExponent.up(t,regi)$(regDTCoup(regi)) = 20;
 
 * vm_capFac.fx(t,regi,te)$(teSe2rlf(te,"1")) = pm_cf(t,regi,te)$(teSe2rlf(te,"1"));
 * vm_capFac.fx(t,regi,te) = pm_cf_linear(t,regi,te);
