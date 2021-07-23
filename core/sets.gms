@@ -1497,7 +1497,7 @@ elh2
 teFlexTax(all_te)       "all technologies to which flexibility tax/subsidy applies, flexible technologies are those in teFlex, inflexible technologies those which are not in teFlex"
 /
 elh2
-tdels
+*tdels
 /
 
 regDTCoup(all_regi)      "regions where REMIND is coupled to DIETER"
