@@ -161,7 +161,7 @@ $IFTHEN.hardcap %cm_softcap% == "off"
 q32_peakDemand_DT(t,regi,enty2)$(tDT32_aux(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq = 1) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=e=
-	p32_peakDemand_relFac(t,regi) * p32_seelUsableDem(t,regi,enty2) * 8760
+	p32_peakDemand_relFac(t,regi) * (p32_seelUsableDem(t,regi,enty2)-p32_seh2elh2Dem(t,regi,enty2)) * 8760
 	;
 
 $ENDIF.hardcap
@@ -245,7 +245,7 @@ q32_flexAdj_DT(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_D
 *** v32_flexPriceShareMin = p32_PriceDurSlope * ((CF-0.5)^4-0.5^4) / (4*CF) + 1.
 *** This is the new average electricity price a technology sees if it runs on (a possibly lower than one) capacity factor CF
 *** and deliberately uses hours of low-cost electricity.
- q32_flexPriceShareMin(t,regi,te)$(teFlex(te) AND (cm_DTcoup_eq lt 0))..
+ q32_flexPriceShareMin(t,regi,te)$(teFlex(te) AND (cm_DTcoup_eq = 0))..
   v32_flexPriceShareMin(t,regi,te) * 4 * vm_capFac(t,regi,te)
   =e=
   p32_PriceDurSlope(regi,te) * (power(vm_capFac(t,regi,te) - 0.5,4) - 0.5**4) +
@@ -255,7 +255,7 @@ q32_flexAdj_DT(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_D
 *** Calculates the electricity price of flexible technologies:
 *** The effective flexible price linearly decreases with VRE share
 *** from 1 (at 0% VRE share) to v32_flexPriceShareMin (at 100% VRE).
-q32_flexPriceShare(t,regi,te)$(teFlex(te) AND (cm_DTcoup_eq lt 0))..
+q32_flexPriceShare(t,regi,te)$(teFlex(te) AND (cm_DTcoup_eq = 0))..
   v32_flexPriceShare(t,regi,te)
   =e=
   1 - (1-v32_flexPriceShareMin(t,regi,te)) * sum(teVRE, v32_shSeEl(t,regi,teVRE))/100
@@ -266,7 +266,7 @@ q32_flexPriceShare(t,regi,te)$(teFlex(te) AND (cm_DTcoup_eq lt 0))..
 *** which are part of teFlexTax but not of teFlex. The weighted sum of
 *** flexible/inflexible electricity prices (v32_flexPriceShare) and electricity demand must be one.
 *** Note: this is only on if cm_FlexTaxFeedback = 1. Otherwise, there is no change in electricity prices for inflexible technologies.
-q32_flexPriceBalance(t,regi)$((cm_FlexTaxFeedback eq 1) AND (cm_DTcoup_eq lt 0))..
+q32_flexPriceBalance(t,regi)$((cm_FlexTaxFeedback eq 1) AND (cm_DTcoup_eq = 0))..
   sum(en2en(enty,enty2,te)$(teFlexTax(te)),
   	vm_demSe(t,regi,enty,enty2,te))
   =e=
@@ -282,7 +282,7 @@ q32_flexPriceBalance(t,regi)$((cm_FlexTaxFeedback eq 1) AND (cm_DTcoup_eq lt 0))
 *** Flexible technologies benefit (v32_flexPriceShare < 1),
 *** while inflexible technologies are penalized (v32_flexPriceShare > 1).
 *** Flexibility tax is switched only if cm_flex_tax = 1 and is active from 2025 onwards.
-q32_flexAdj(t,regi,te)$(teFlexTax(te) AND (cm_DTcoup_eq lt 0))..
+q32_flexAdj(t,regi,te)$(teFlexTax(te) AND (cm_DTcoup_eq = 0))..
 	vm_flexAdj(t,regi,te)
 	=e=
 	(1 - v32_flexPriceShare(t,regi,te)) * pm_SEPrice(t,regi,"seel")$(cm_flex_tax eq 1 AND t.val ge 2025)

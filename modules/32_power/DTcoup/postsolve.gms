@@ -51,7 +51,7 @@ p32_seelTotDem(t,regi,enty2)$(sameas(enty2,"seel")) =
 + sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr.l(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! do not use in 2005 because this demand is not contained in 05_initialCap
 ;
 
-p32_seh2elh2Dem(t,regi,enty2)$(sameas(enty2,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
+
 
 *** CG: total usable demand to pass on to DIETER: this has to
 *** include the electricity consumed for extracting fuels (included in p32_seelTotDem),
@@ -62,6 +62,10 @@ p32_seelUsableDem(t,regi,enty2)$(sameas(enty2,"seel")) =
 p32_seelTotDem(t,regi,enty2) - sum(teVRE, v32_storloss.l(t,regi,teVRE) )
 - p32_prod4dtFE(t,regi,enty2) - p32_prod4CCS(t,regi,enty2)
 ;
+
+*** CG: vm_demSe.l(t,regi,"seel","seh2","elh2") is how much electricity is needed to produse seh2 (green h2)
+*** p32_seh2elh2Dem < p32_seelUsableDem (p32_seh2elh2Dem is part of the total usable demand p32_seelUsableDem)
+p32_seh2elh2Dem(t,regi,enty2)$(sameas(enty2,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
 
 *** total curtailment
 p32_seelCurt(t,regi) = sum(teVRE, v32_storloss.l(t,regi,teVRE) );
