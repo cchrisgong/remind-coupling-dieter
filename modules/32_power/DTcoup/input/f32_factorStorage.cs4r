@@ -1,8 +1,8 @@
 * description: multiplicative factor that scales total curtailment and storage requirements up or down in different regions for different technologies
 * unit: % of capacity
-* comment: Data aggregated (toolAggregate): Thu May 20 13:40:27 2021
-* origin: calcOutput(type = "StorageFactor", file = "f32_factorStorage.cs4r", round = 6) (madrat 1.102.8 | mrremind 0.60.3)
-* creation date: Thu May 20 19:05:42 2021
+* comment: Data aggregated (toolAggregate): Tue Jul 13 11:57:13 2021
+* origin: calcOutput(type = "StorageFactor", file = "f32_factorStorage.cs4r", round = 6) (madrat 2.0.1 | mrremind 0.66.2)
+* creation date: Tue Jul 13 13:41:23 2021
 OAS,spv,1.4
 ENC,spv,1.75
 NES,spv,1.4
