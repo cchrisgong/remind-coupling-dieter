@@ -214,6 +214,9 @@ logfile.nr = 2;
 					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","gen_share")$(tDT32(t) AND regDTCoup(regi)))
 				    	* p32_tech_category_genshare(t,regi,te)$(COALte32(te) AND regDTCoup(regi)) ;
 
+    p32_DIETER_shSeElDem(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi))
+					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","dem_share")) ;
+
 *   supply side tech market value
     p32_DIETER_MV(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"bio","market_value")$(tDT32(t) AND regDTCoup(regi)));
     p32_DIETER_MV(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"CCGT","market_value")$(tDT32(t) AND regDTCoup(regi)));

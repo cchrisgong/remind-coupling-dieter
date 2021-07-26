@@ -117,6 +117,14 @@ q32_shSeEl(t,regi,te)..
     vm_usableSeTe(t,regi,"seel",te)
 ;
 
+*** Calculation of share of electricity demand, e.g. of green h2 using elh2
+***---------------------------------------------------------------------------
+q32_shSeElDem(t,regi,te)$(sameas(te,"elh2"))..
+    v32_shSeElDem(t,regi,te) / 100 * vm_usableSe(t,regi,"seel")
+    =e=
+    vm_prodSe(t,regi,"seel","seh2",te)
+;
+
 ***---------------------------------------------------------------------------
 *** Calculation of necessary storage electricity production:
 *** ONLY for non-DIETER-coupled regions
@@ -137,8 +145,9 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2020)..
 	=e=
 	(v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
 	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
-	* vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regNoDTCoup(regi))
-	+ (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi))
+	* vm_usableSeTe(t,regi,"seel",teVRE) )
+* 1$(regNoDTCoup(regi))
+* + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi))
 ;
 
 ***---------------------------------------------------------------------------
@@ -158,7 +167,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 $IFTHEN.hardcap %cm_softcap% == "off"
 *** hard capacity constraint to peak residual load demand
 
-q32_peakDemand_DT(t,regi,enty2)$(tDT32_aux(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq = 1) ) ..
+q32_peakDemand_DT(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq = 1) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=e=
 	p32_peakDemand_relFac(t,regi) * (p32_seelUsableDem(t,regi,enty2)-p32_seh2elh2Dem(t,regi,enty2)) * 8760
@@ -225,8 +234,9 @@ q32_flexAdj_DT(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_D
 	vm_flexAdj(t,regi,te)
 	=e=
 * no prefactor
-  (p32_DIETER_elecprice(t,regi) - p32_DIETER_MV(t,regi,te)) / 1e12 * sm_TWa_2_MWh / 1.2
+  (p32_DIETER_elecprice(t,regi) - p32_DIETER_MV(t,regi,te)) * (1 - (p32_DIETER_shSeElDem(t,regi,te) / 100 - v32_shSeElDem(t,regi,te) / 100)  ) / 1e12 * sm_TWa_2_MWh / 1.2
 ;
+
 ***----------------------------------------------------------------------------
 *** FS: calculate flexibility adjustment used in flexibility tax for technologies with electricity input
 ***----------------------------------------------------------------------------
