@@ -149,7 +149,8 @@ logfile.nr = 2;
 *   ONLY pass on the disptachable capacity factors, since the VRE's capfac are treated differently in REMIND
 *   sum over gdxfile set removes this extra index that comes from gdxmerge algorithm
 *   optional: averaging capfac over 2 iterations
-    p32_cf_last_iter(t,regi,te) = pm_cf(t,regi,te);
+    p32_cf_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = pm_cf(t,regi,te);
+    p32_DIETER_curtailmentratio_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = p32_DIETER_curtailmentratio(t,regi,te);
 
 * pm_cf(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
 * 			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac")$(tDT32(t) AND regDTCoup(regi)));
@@ -232,8 +233,18 @@ logfile.nr = 2;
     p32_DIETER_elecprice(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"all_te","elec_price")$(tDT32(t) AND regDTCoup(regi)));
 
 *** CG: storage related coupling parameters
-    p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
+** no curt_ratio averaging
+* p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
+* p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
+
+* with curt_ratio averaging
+p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) =
+      0.5 * (p32_DIETER_curtailmentratio_last_iter(t,regi,"spv")
+      + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio")$(tDT32(t) AND regDTCoup(regi))));
+
+p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) =
+      0.5* (p32_DIETER_curtailmentratio_last_iter(t,regi,"wind")
+      + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio")$(tDT32(t) AND regDTCoup(regi))));
 
 * no curtailment for ror right now from DIETER
 *p32_DIETER_curtailmentratio(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"ror","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
