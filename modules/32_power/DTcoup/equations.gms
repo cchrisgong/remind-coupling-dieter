@@ -122,7 +122,7 @@ q32_shSeEl(t,regi,te)..
 q32_shSeElDem(t,regi,te)$(sameas(te,"elh2"))..
     v32_shSeElDem(t,regi,te) / 100 * vm_usableSe(t,regi,"seel")
     =e=
-    vm_prodSe(t,regi,"seel","seh2",te)
+    vm_demSe(t,regi,"seel","seh2",te)
 ;
 
 ***---------------------------------------------------------------------------
@@ -130,14 +130,16 @@ q32_shSeElDem(t,regi,te)$(sameas(te,"elh2"))..
 *** ONLY for non-DIETER-coupled regions
 ***---------------------------------------------------------------------------
 q32_shStor(t,regi,teVRE)$(t.val ge 2020)..
-	v32_shStor(t,regi,teVRE) * 1$(regNoDTCoup(regi))
+	v32_shStor(t,regi,teVRE)
+*	* 1$(regNoDTCoup(regi))
 	=g=
 	( p32_factorStorage(regi,teVRE) * 100
 	* (
 		(1.e-10 + (v32_shSeEl(t,regi,teVRE) + sum(VRE2teVRElinked(teVRE,teVRE2), v32_shSeEl(t,regi,teVRE2)) /s32_storlink)/100 ) ** p32_storexp(regi,teVRE)    !! offset of 1.e-10 for numerical reasons: gams doesn't like 0 if the exponent is not integer
 		- (1.e-10 ** p32_storexp(regi,teVRE) )       !! offset correction
 		- 0.07                                      !! first 7% of VRE share bring no negative effects
-	)  )* 1$(regNoDTCoup(regi))
+	)  )
+* * 1$(regNoDTCoup(regi))
 ;
 
 q32_storloss(t,regi,teVRE)$(t.val ge 2020)..
@@ -146,8 +148,8 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2020)..
 	(v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
 	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
 	* vm_usableSeTe(t,regi,"seel",teVRE) )
-* 1$(regNoDTCoup(regi))
-* + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi))
+*	* 1$(regNoDTCoup(regi))
+*  + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi))
 ;
 
 ***---------------------------------------------------------------------------
@@ -170,7 +172,7 @@ $IFTHEN.hardcap %cm_softcap% == "off"
 q32_peakDemand_DT(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq = 1) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=e=
-	p32_peakDemand_relFac(t,regi) * (p32_seelUsableDem(t,regi,enty2)-p32_seh2elh2Dem(t,regi,enty2)) * 8760
+	p32_peakDemand_relFac(t,regi) * (p32_seelUsableDem(t,regi,enty2) - p32_seh2elh2Dem(t,regi,enty2)) * 8760
 	;
 
 $ENDIF.hardcap
@@ -221,20 +223,24 @@ q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_D
 	vm_Mrkup(t,regi,te)$( regDTCoup(regi) )
 	=e=
 * with prefactor
-( (p32_DIETER_MV(t,regi,te)$( regDTCoup(regi) ) *
+ (p32_DIETER_MV(t,regi,te)$( regDTCoup(regi) ) *
    (1 - (v32_shSeEl(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_DIETER_shSeEl(t,regi,te)$( regDTCoup(regi) ) / 100 )  ) - p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) )
-	 / 1e12 * sm_TWa_2_MWh / 1.2 )
+	 / 1e12 * sm_TWa_2_MWh / 1.2
 * no prefactor
 * ( (p32_DIETER_MV(t,regi,te)  - p32_DIETER_elecprice(t,regi) ) / 1e12 * sm_TWa_2_MWh / 1.2 ) * 1$( regDTCoup(regi) )
 ;
 
 *** CG: giving flexible demand side technology, e.g. electrolyzer a subsidy, non DIETER coupled version is q32_flexAdj below
 *** need cm_flex_tax = 0, for demand side tech there is a sign change compared to supp side, currently no feedback cm_FlexTaxFeedback implemented
-q32_flexAdj_DT(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_DTcoup_eq = 1) AND (cm_flex_tax = 0))..
-	vm_flexAdj(t,regi,te)
+q32_flexAdj_DT(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_DTcoup_eq = 2) AND (cm_flex_tax = 0))..
+	vm_flexAdj(t,regi,te)$( regDTCoup(regi) )
 	=e=
 * no prefactor
-  (p32_DIETER_elecprice(t,regi) - p32_DIETER_MV(t,regi,te)) * (1 - (p32_DIETER_shSeElDem(t,regi,te) / 100 - v32_shSeElDem(t,regi,te) / 100)  ) / 1e12 * sm_TWa_2_MWh / 1.2
+* (p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MV(t,regi,te)$( regDTCoup(regi) ))	/ 1e12 * sm_TWa_2_MWh / 1.2
+* with prefactor
+  (p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MV(t,regi,te)$( regDTCoup(regi) ) *
+	(1 - ( v32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_DIETER_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 ) )
+	/ 1e12 * sm_TWa_2_MWh / 1.2 ) * 1$(cm_DTcoup_eq = 2)
 ;
 
 ***----------------------------------------------------------------------------
