@@ -65,19 +65,14 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_minVF_spv = 0.1;
 
 p32_peakDemand_relFac(t,regi) = 0;
-p32_DIETER_VF(t,regi,te) = 0;
 p32_DIETER_MV(t,regi,te) = 0;
 p32_DIETER_elecprice(t,regi) = 0;
 p32_seelUsableDem(t,regi,enty) = 0;
 p32_seh2elh2Dem(t,regi,enty) = 0;
-p32_shSeEl(t,regi,te) = 0;
+p32_seh2elh2Dem_last_iter(t,regi,enty) = 0;
 p32_DIETER_shSeEl(t,regi,te) = 0;
 p32_DIETER_shSeElDem(t,regi,te) = 0;
-p32_deltaCap(t,regi,te,rlf) = 0;
-p32_marketValue(t,regi,te) = 0;
-p32_valueFactor(t,regi,te) = 1;
 p32_budget(t,regi) = 0;
-p32_DIETER_curtailmentratio(t,regi,te) = 0;
 
 Execute_Loadpoint 'input_DIETER' p32_report4RM;
 p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_share")$(tDT32(t) AND regDTCoup(regi)));

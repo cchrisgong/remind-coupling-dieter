@@ -47,41 +47,41 @@ q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND teVRE(te))..
 * Definition of capacity constraints for storage:
 *---------------------------------------------------------------------------
 
-q32_limitCapTeStor(t,regi,teStor)$( t.val ge 2015 ) ..
-  ( ( 0.5$( cm_VRE_supply_assumptions eq 1 )
-    + 1$(   cm_VRE_supply_assumptions ne 1 )
-    )
-  * sum(VRE2teStor(teVRE,teStor), v32_storloss(t,regi,teVRE))
-  * pm_eta_conv(t,regi,teStor)
-  / (1 - pm_eta_conv(t,regi,teStor)) ) * 1$(regNoDTCoup(regi))
-  =l=
-  ( sum(te2rlf(teStor,rlf),
-    vm_capFac(t,regi,teStor)
-  * pm_dataren(regi,"nur",rlf,teStor)
-  * vm_cap(t,regi,teStor,rlf)
-  ) ) * 1$(regNoDTCoup(regi))
-;
+* q32_limitCapTeStor(t,regi,teStor)$( t.val ge 2015 ) ..
+*   ( ( 0.5$( cm_VRE_supply_assumptions eq 1 )
+*     + 1$(   cm_VRE_supply_assumptions ne 1 )
+*     )
+*   * sum(VRE2teStor(teVRE,teStor), v32_storloss(t,regi,teVRE))
+*   * pm_eta_conv(t,regi,teStor)
+*   / (1 - pm_eta_conv(t,regi,teStor)) ) * 1$(regNoDTCoup(regi))
+*   =l=
+*   ( sum(te2rlf(teStor,rlf),
+*     vm_capFac(t,regi,teStor)
+*   * pm_dataren(regi,"nur",rlf,teStor)
+*   * vm_cap(t,regi,teStor,rlf)
+*   ) ) * 1$(regNoDTCoup(regi))
+* ;
+*
+*
+* *** H2 storage implementation: Storage technologies (storspv, storwind etc.) also
+* *** represent H2 storage. This is implemented by automatically scaling up capacities of
+* *** elh2VRE (electrolysis from VRE, seel -> seh2) and H2 turbines (h2turbVRE, seh2 -> seel)
+* *** with VRE capacities which require storage (according to q32_limitCapTeStor):
+*
+*
+* *** build additional electrolysis capacities with stored VRE electricity
+* q32_elh2VREcapfromTestor(t,regi)..
+*   vm_cap(t,regi,"elh2","1") * 1$(regNoDTCoup(regi))
+*   =g=
+*   (sum(te$testor(te), p32_storageCap(te,"elh2VREcapratio") * vm_cap(t,regi,te,"1") )) * 1$(regNoDTCoup(regi))
+* ;
 
-
-*** H2 storage implementation: Storage technologies (storspv, storwind etc.) also
-*** represent H2 storage. This is implemented by automatically scaling up capacities of
-*** elh2VRE (electrolysis from VRE, seel -> seh2) and H2 turbines (h2turbVRE, seh2 -> seel)
-*** with VRE capacities which require storage (according to q32_limitCapTeStor):
-
-
-*** build additional electrolysis capacities with stored VRE electricity
-q32_elh2VREcapfromTestor(t,regi)..
-  vm_cap(t,regi,"elh2","1") * 1$(regNoDTCoup(regi))
-  =g=
-  (sum(te$testor(te), p32_storageCap(te,"elh2VREcapratio") * vm_cap(t,regi,te,"1") )) * 1$(regNoDTCoup(regi))
-;
-
-*** build additional h2 to seel capacities to use stored hydrogen
-q32_h2turbVREcapfromTestor(t,regi)..
-  vm_cap(t,regi,"h2turbVRE","1") * 1$(regNoDTCoup(regi))
-  =e=
-  (sum(te$testor(te), p32_storageCap(te,"h2turbVREcapratio") * vm_cap(t,regi,te,"1") ) ) * 1$(regNoDTCoup(regi))
-;
+* *** build additional h2 to seel capacities to use stored hydrogen
+* q32_h2turbVREcapfromTestor(t,regi)..
+*   vm_cap(t,regi,"h2turbVRE","1") * 1$(regNoDTCoup(regi))
+*   =e=
+*   (sum(te$testor(te), p32_storageCap(te,"h2turbVREcapratio") * vm_cap(t,regi,te,"1") ) ) * 1$(regNoDTCoup(regi))
+* ;
 
 ***---------------------------------------------------------------------------
 *** Definition of capacity constraints for CHP technologies:
@@ -129,28 +129,50 @@ q32_shSeElDem(t,regi,te)$(sameas(te,"elh2"))..
 *** Calculation of necessary storage electricity production:
 *** ONLY for non-DIETER-coupled regions
 ***---------------------------------------------------------------------------
-q32_shStor(t,regi,teVRE)$(t.val ge 2020)..
+* q32_shStor(t,regi,teVRE)$(t.val ge 2020)..
+* 	v32_shStor(t,regi,teVRE)
+* *	* 1$(regNoDTCoup(regi))
+* 	=g=
+* 	( p32_factorStorage(regi,teVRE) * 100
+* 	* (
+* 		(1.e-10 + (v32_shSeEl(t,regi,teVRE) + sum(VRE2teVRElinked(teVRE,teVRE2), v32_shSeEl(t,regi,teVRE2)) /s32_storlink)/100 ) ** p32_storexp(regi,teVRE)    !! offset of 1.e-10 for numerical reasons: gams doesn't like 0 if the exponent is not integer
+* 		- (1.e-10 ** p32_storexp(regi,teVRE) )       !! offset correction
+* 		- 0.07                                      !! first 7% of VRE share bring no negative effects
+* 	)  )
+* * * 1$(regNoDTCoup(regi))
+* ;
+*
+q32_shStor(t,regi,teVRE)$(t.val ge 2015 AND (regNoDTCoup(regi)))..
 	v32_shStor(t,regi,teVRE)
-*	* 1$(regNoDTCoup(regi))
 	=g=
-	( p32_factorStorage(regi,teVRE) * 100
+	p32_factorStorage(regi,teVRE) * 100
 	* (
-		(1.e-10 + (v32_shSeEl(t,regi,teVRE) + sum(VRE2teVRElinked(teVRE,teVRE2), v32_shSeEl(t,regi,teVRE2)) /s32_storlink)/100 ) ** p32_storexp(regi,teVRE)    !! offset of 1.e-10 for numerical reasons: gams doesn't like 0 if the exponent is not integer
+		(1.e-10 + (v32_shSeEl(t,regi,teVRE)+ sum(VRE2teVRElinked(teVRE,teVRE2), v32_shSeEl(t,regi,teVRE2)) /s32_storlink)/100 ) ** p32_storexp(regi,teVRE)    !! offset of 1.e-10 for numerical reasons: gams doesn't like 0 if the exponent is not integer
 		- (1.e-10 ** p32_storexp(regi,teVRE) )       !! offset correction
 		- 0.07                                      !! first 7% of VRE share bring no negative effects
-	)  )
-* * 1$(regNoDTCoup(regi))
+	)
 ;
 
-q32_storloss(t,regi,teVRE)$(t.val ge 2020)..
+q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
 	v32_storloss(t,regi,teVRE)
 	=e=
 	(v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
 	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
-	* vm_usableSeTe(t,regi,"seel",teVRE) )
-*	* 1$(regNoDTCoup(regi))
-*  + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi))
+	* vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regNoDTCoup(regi))
+* + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi))
+	+ 0 * 1$(regDTCoup(regi))
 ;
+
+
+* q32_storloss(t,regi,teVRE)$(t.val ge 2020)..
+* 	v32_storloss(t,regi,teVRE)
+* 	=e=
+* 	(v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
+* 	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
+* 	* vm_usableSeTe(t,regi,"seel",teVRE) )
+* *	* 1$(regNoDTCoup(regi))
+* *  + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi))
+* ;
 
 ***---------------------------------------------------------------------------
 *** EMF27 limits on fluctuating renewables, only turned on for special EMF27 and AWP 2 scenarios, not for SSP
@@ -232,15 +254,17 @@ q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_D
 
 *** CG: giving flexible demand side technology, e.g. electrolyzer a subsidy, non DIETER coupled version is q32_flexAdj below
 *** need cm_flex_tax = 0, for demand side tech there is a sign change compared to supp side, currently no feedback cm_FlexTaxFeedback implemented
-q32_flexAdj_DT(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_DTcoup_eq = 2) AND (cm_flex_tax = 0))..
+q32_flexAdj_DT(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_DTcoup_eq = 1) AND (cm_flex_tax = 0))..
 	vm_flexAdj(t,regi,te)$( regDTCoup(regi) )
 	=e=
 * no prefactor
 * (p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MV(t,regi,te)$( regDTCoup(regi) ))	/ 1e12 * sm_TWa_2_MWh / 1.2
 * with prefactor
-  (p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MV(t,regi,te)$( regDTCoup(regi) ) *
-	(1 - ( v32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_DIETER_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 ) )
-	/ 1e12 * sm_TWa_2_MWh / 1.2 ) * 1$(cm_DTcoup_eq = 2)
+  (p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MV(t,regi,te)$( regDTCoup(regi) ))
+*  *
+* (1 - ( v32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_DIETER_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 ) )
+	/ 1e12 * sm_TWa_2_MWh / 1.2
+*	* 1$(cm_DTcoup_eq eq 2)
 ;
 
 ***----------------------------------------------------------------------------

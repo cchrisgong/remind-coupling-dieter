@@ -10,15 +10,16 @@
 * *** calculate CF for dispatchable from solar pv share
 * pm_cf_linear(tDT32,regi,DISPATCHte32_2)$regDTCoup(regi) = pm_cf(tDT32,regi,DISPATCHte32_2)$regDTCoup(regi) * ( 1 - 0.5 * v32_shSeEl.l(tDT32,regi,"spv")$regDTCoup(regi) / 100);
 
-*** CG: calculate budget from last iteration
-p32_budget(t,regi) = qm_budget.m(t,regi);
-
 *** FS: calculate electricity price of last iteration in trUSD2005/TWa
 p32_budget(t,regi) = qm_budget.m(t,regi);
 pm_SEPrice(t,regi,"seel") = q32_balSe.m(t,regi,"seel")/(qm_budget.m(t,regi) + sm_eps);
 *Display "electricity price", pm_SEPrice(t,"DEU","seel");
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
+
+p32_seh2elh2Dem_last_iter(t,regi,enty)$(sameas(enty,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
+p32_seelUsableDem_last_iter(t,regi,enty)$(sameas(enty,"seel")) = p32_seelUsableDem(t,regi,enty);
+
 *** CG:load fuel prices from two previous iterations
 p32_fuelprice_lastx2iter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_lastiter(t,regi,entyPe);
 p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = q_balPe.m(t,regi,entyPe);

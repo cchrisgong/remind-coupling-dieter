@@ -8,6 +8,8 @@
 
 p32_shSeEl(t,regi,te)$regDTCoup(regi) = v32_shSeEl.l(t,regi,te)$regDTCoup(regi);
 
+*** CG: calculate budget from last iteration
+p32_budget(t,regi) = qm_budget.m(t,regi);
 
 *** CG: Total power produced (including curtailment, co-production, own consumption)
 p32_totProd(t,regi,enty2)$(sameas(enty2,"seel")) =
@@ -65,7 +67,8 @@ p32_seelTotDem(t,regi,enty2) - sum(teVRE, v32_storloss.l(t,regi,teVRE) )
 
 *** CG: vm_demSe.l(t,regi,"seel","seh2","elh2") is how much electricity is needed to produse seh2 (green h2)
 *** p32_seh2elh2Dem < p32_seelUsableDem (p32_seh2elh2Dem is part of the total usable demand p32_seelUsableDem)
-p32_seh2elh2Dem(t,regi,enty2)$(sameas(enty2,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
+p32_seh2elh2Dem(t,regi,enty2)$(sameas(enty2,"seh2")) =
+  0.5 * (vm_demSe.l(t,regi,"seel","seh2","elh2") + p32_seh2elh2Dem_last_iter(t,regi,enty2));
 
 *** total curtailment
 p32_seelCurt(t,regi) = sum(teVRE, v32_storloss.l(t,regi,teVRE) );
