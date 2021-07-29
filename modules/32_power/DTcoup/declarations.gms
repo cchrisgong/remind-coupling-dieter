@@ -18,6 +18,7 @@ parameters
     p32_minVF_spv                         "value factor of solar at 100% VRE shares"
     p32_seelTotDem(ttot,all_regi,all_enty)"total secondary electricity demand (including curtailment)"
     p32_seelUsableDem(ttot,all_regi,all_enty) "total usable secondary electricity demand"
+    p32_seelUsableDem_last_iter(ttot,all_regi,all_enty) "total usable secondary electricity demand from last iteration"
     p32_seh2elh2Dem(ttot,all_regi,all_enty)   "total green H2 demand"
     p32_seh2elh2Dem_last_iter(ttot,all_regi,all_enty)   "total green H2 demand from last iteration"
     p32_shSeEl(ttot,all_regi,all_te)      "generation share of the last iteration"
