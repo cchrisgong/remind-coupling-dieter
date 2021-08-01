@@ -73,6 +73,9 @@ p32_seh2elh2Dem_last_iter(t,regi,enty) = 0;
 p32_DIETER_shSeEl(t,regi,te) = 0;
 p32_DIETER_shSeElDem(t,regi,te) = 0;
 p32_budget(t,regi) = 0;
+p32_cf_curr_iter(t,regi,te) = 0;
+p32_cf_next_iter(t,regi,te) = 0;
+pm_prodSe(t,regi,enty,enty2,te) = 0;
 
 Execute_Loadpoint 'input_DIETER' p32_report4RM;
 p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_share")$(tDT32(t) AND regDTCoup(regi)));

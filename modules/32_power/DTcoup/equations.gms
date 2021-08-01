@@ -129,19 +129,7 @@ q32_shSeElDem(t,regi,te)$(sameas(te,"elh2"))..
 *** Calculation of necessary storage electricity production:
 *** ONLY for non-DIETER-coupled regions
 ***---------------------------------------------------------------------------
-* q32_shStor(t,regi,teVRE)$(t.val ge 2020)..
-* 	v32_shStor(t,regi,teVRE)
-* *	* 1$(regNoDTCoup(regi))
-* 	=g=
-* 	( p32_factorStorage(regi,teVRE) * 100
-* 	* (
-* 		(1.e-10 + (v32_shSeEl(t,regi,teVRE) + sum(VRE2teVRElinked(teVRE,teVRE2), v32_shSeEl(t,regi,teVRE2)) /s32_storlink)/100 ) ** p32_storexp(regi,teVRE)    !! offset of 1.e-10 for numerical reasons: gams doesn't like 0 if the exponent is not integer
-* 		- (1.e-10 ** p32_storexp(regi,teVRE) )       !! offset correction
-* 		- 0.07                                      !! first 7% of VRE share bring no negative effects
-* 	)  )
-* * * 1$(regNoDTCoup(regi))
-* ;
-*
+
 q32_shStor(t,regi,teVRE)$(t.val ge 2015 AND (regNoDTCoup(regi)))..
 	v32_shStor(t,regi,teVRE)
 	=g=
@@ -159,8 +147,8 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
 	(v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
 	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
 	* vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regNoDTCoup(regi))
-* + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi))
-	+ 0 * 1$(regDTCoup(regi))
+  + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi))
+*	+ 0 * 1$(regDTCoup(regi))
 ;
 
 
@@ -191,7 +179,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 $IFTHEN.hardcap %cm_softcap% == "off"
 *** hard capacity constraint to peak residual load demand
 
-q32_peakDemand_DT(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq = 1) ) ..
+q32_peakDemand_DT(t,regi,enty2)$(tDT32s(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=e=
 	p32_peakDemand_relFac(t,regi) * (p32_seelUsableDem(t,regi,enty2) - p32_seh2elh2Dem(t,regi,enty2)) * 8760
@@ -210,19 +198,19 @@ $IFTHEN.softcap %cm_softcap% == "on"
 *  investment cost variable and the model will try to keep its value at the minimal possible.
 
 *** CG: for debugging:
-* q32_peakDemand_DT(t,regi,enty2)$(tDT32_aux(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq = 1) ) ..
+* q32_peakDemand_DT(t,regi,enty2)$(tDT32_aux(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
 * 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 * 	=l=
 * 	p32_peakDemand_relFac(t,regi) * p32_seelUsableDem(t,regi,enty2) * 8760 * 0.95
 * 	;
 
-q32_reqCap(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq = 1) ) ..
+q32_reqCap(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
 	vm_reqCap(t,regi)
  	=e=
  	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
  	;
 
-q32_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq = 1) )..
+q32_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) )..
   vm_priceCap(t,regi)
   =e=
 	1 / 1.2 *( -p32_budget(t,regi)) !! 0.1 = 100$/kW * 1e9 / 1e12, this is the capacity subsidy per kW of dispatchable, kW -> TW, USD -> trUSD
@@ -241,7 +229,7 @@ $ENDIF.softcap
 *** price_DIETER = price_REMIND/budget_REMIND * 1e12 / sm_TWa_2_MWh * 1.2
 *** price_REMIND = price_DIETER * budget_REMIND/1e12 * sm_TWa_2_MWh/1.2
 ***----------------------------------------------------------------------------
-q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq = 1))..
+q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq ne 0))..
 	vm_Mrkup(t,regi,te)$( regDTCoup(regi) )
 	=e=
 * with prefactor
@@ -254,18 +242,22 @@ q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_D
 
 *** CG: giving flexible demand side technology, e.g. electrolyzer a subsidy, non DIETER coupled version is q32_flexAdj below
 *** need cm_flex_tax = 0, for demand side tech there is a sign change compared to supp side, currently no feedback cm_FlexTaxFeedback implemented
-q32_flexAdj_DT(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_DTcoup_eq = 1) AND (cm_flex_tax = 0))..
+q32_flexAdj_DT(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_DTcoup_eq ne 0) AND (cm_flex_tax = 0))..
 	vm_flexAdj(t,regi,te)$( regDTCoup(regi) )
 	=e=
-* no prefactor
-* (p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MV(t,regi,te)$( regDTCoup(regi) ))	/ 1e12 * sm_TWa_2_MWh / 1.2
+* no prefactor: this seems the more reasonable option: since more h2 (flexible) demand allow more VRE, which lower overall seel price,
+* so it is not like VRE with decreasing market value with increasing share
+(p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MV(t,regi,te)$( regDTCoup(regi) ))	/ 1e12 * sm_TWa_2_MWh / 1.2
 * with prefactor
-  (p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MV(t,regi,te)$( regDTCoup(regi) ))
-*  *
-* (1 - ( v32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_DIETER_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 ) )
-	/ 1e12 * sm_TWa_2_MWh / 1.2
-*	* 1$(cm_DTcoup_eq eq 2)
+* ( p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MV(t,regi,te)$( regDTCoup(regi) )
+* * (1 - ( v32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_DIETER_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 ) )
+* )
+* / 1e12 * sm_TWa_2_MWh / 1.2
 ;
+
+*
+
+$ENDIF.DTcoup
 
 ***----------------------------------------------------------------------------
 *** FS: calculate flexibility adjustment used in flexibility tax for technologies with electricity input
@@ -285,7 +277,7 @@ q32_flexAdj_DT(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_D
 *** v32_flexPriceShareMin = p32_PriceDurSlope * ((CF-0.5)^4-0.5^4) / (4*CF) + 1.
 *** This is the new average electricity price a technology sees if it runs on (a possibly lower than one) capacity factor CF
 *** and deliberately uses hours of low-cost electricity.
- q32_flexPriceShareMin(t,regi,te)$(teFlex(te) AND (cm_DTcoup_eq = 0))..
+ q32_flexPriceShareMin(t,regi,te)$(teFlex(te) AND (cm_flex_tax = 1))..
   v32_flexPriceShareMin(t,regi,te) * 4 * vm_capFac(t,regi,te)
   =e=
   p32_PriceDurSlope(regi,te) * (power(vm_capFac(t,regi,te) - 0.5,4) - 0.5**4) +
@@ -295,7 +287,7 @@ q32_flexAdj_DT(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_D
 *** Calculates the electricity price of flexible technologies:
 *** The effective flexible price linearly decreases with VRE share
 *** from 1 (at 0% VRE share) to v32_flexPriceShareMin (at 100% VRE).
-q32_flexPriceShare(t,regi,te)$(teFlex(te) AND (cm_DTcoup_eq = 0))..
+q32_flexPriceShare(t,regi,te)$(teFlex(te) AND (cm_flex_tax = 1))..
   v32_flexPriceShare(t,regi,te)
   =e=
   1 - (1-v32_flexPriceShareMin(t,regi,te)) * sum(teVRE, v32_shSeEl(t,regi,teVRE))/100
@@ -306,7 +298,7 @@ q32_flexPriceShare(t,regi,te)$(teFlex(te) AND (cm_DTcoup_eq = 0))..
 *** which are part of teFlexTax but not of teFlex. The weighted sum of
 *** flexible/inflexible electricity prices (v32_flexPriceShare) and electricity demand must be one.
 *** Note: this is only on if cm_FlexTaxFeedback = 1. Otherwise, there is no change in electricity prices for inflexible technologies.
-q32_flexPriceBalance(t,regi)$((cm_FlexTaxFeedback eq 1) AND (cm_DTcoup_eq = 0))..
+q32_flexPriceBalance(t,regi)$((cm_FlexTaxFeedback eq 1) AND (cm_flex_tax = 1))..
   sum(en2en(enty,enty2,te)$(teFlexTax(te)),
   	vm_demSe(t,regi,enty,enty2,te))
   =e=
@@ -322,10 +314,8 @@ q32_flexPriceBalance(t,regi)$((cm_FlexTaxFeedback eq 1) AND (cm_DTcoup_eq = 0)).
 *** Flexible technologies benefit (v32_flexPriceShare < 1),
 *** while inflexible technologies are penalized (v32_flexPriceShare > 1).
 *** Flexibility tax is switched only if cm_flex_tax = 1 and is active from 2025 onwards.
-q32_flexAdj(t,regi,te)$(teFlexTax(te) AND (cm_DTcoup_eq = 0))..
+q32_flexAdj(t,regi,te)$(teFlexTax(te) AND (cm_flex_tax = 1))..
 	vm_flexAdj(t,regi,te)
 	=e=
 	(1 - v32_flexPriceShare(t,regi,te)) * pm_SEPrice(t,regi,"seel")$(cm_flex_tax eq 1 AND t.val ge 2025)
 ;
-
-$ENDIF.DTcoup

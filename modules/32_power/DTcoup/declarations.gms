@@ -55,8 +55,9 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** CG: storage related parameters
     p32_DIETER_curtailmentratio(ttot,all_regi,all_te)               "ratio of curtailed energy to usable energy for VRE from DIETER"
     p32_DIETER_curtailmentratio_last_iter(ttot,all_regi,all_te)     "ratio of curtailed energy to usable energy for VRE from DIETER from last iteration DIETER"
-    p32_cf_last_iter(ttot,all_regi,all_te)                          "pm_cf of last iteration, used for averaging"
-
+    p32_cf_next_iter(ttot,all_regi,all_te)                          "pm_cf of next iteration"
+    p32_cf_curr_iter(ttot,all_regi,all_te)                          "pm_cf of current iteration"
+    pm_prodSe(tall,all_regi,all_enty,all_enty,all_te)               "vm_prodSe of last iteration"
 $ENDIF.DTcoup
 
     p32_fuelprice_lastiter(ttot,all_regi,all_enty)                      "fuel cost of the last iteration"

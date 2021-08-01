@@ -60,15 +60,15 @@ p32_seelTotDem(t,regi,enty2)$(sameas(enty2,"seel")) =
 *** as well as distributing and transporting them (p32_prod4dtFE) and doing CCS (p32_prod4CCS)
 *** and exclude curtailment
 *** (note: p32_prod4dtFE and p32_prod4CCS are negative)
-p32_seelUsableDem(t,regi,enty2)$(sameas(enty2,"seel")) =
-p32_seelTotDem(t,regi,enty2) - sum(teVRE, v32_storloss.l(t,regi,teVRE) )
-- p32_prod4dtFE(t,regi,enty2) - p32_prod4CCS(t,regi,enty2)
+p32_seelUsableDem(t,regi,enty)$(sameas(enty,"seel")) = 0.5 * ( p32_seelUsableDem_last_iter(t,regi,enty) +
+(p32_seelTotDem(t,regi,enty) - sum(teVRE, v32_storloss.l(t,regi,teVRE) )
+- p32_prod4dtFE(t,regi,enty) - p32_prod4CCS(t,regi,enty)) )
 ;
 
 *** CG: vm_demSe.l(t,regi,"seel","seh2","elh2") is how much electricity is needed to produse seh2 (green h2)
 *** p32_seh2elh2Dem < p32_seelUsableDem (p32_seh2elh2Dem is part of the total usable demand p32_seelUsableDem)
-p32_seh2elh2Dem(t,regi,enty2)$(sameas(enty2,"seh2")) =
-  0.5 * (vm_demSe.l(t,regi,"seel","seh2","elh2") + p32_seh2elh2Dem_last_iter(t,regi,enty2));
+p32_seh2elh2Dem(t,regi,enty)$(sameas(enty,"seh2")) =
+  0.5 * (vm_demSe.l(t,regi,"seel","seh2","elh2") + p32_seh2elh2Dem_last_iter(t,regi,enty));
 
 *** total curtailment
 p32_seelCurt(t,regi) = sum(teVRE, v32_storloss.l(t,regi,teVRE) );
@@ -112,6 +112,10 @@ display "iteration", sm32_tmp;
         cm_DTcoup_eq = 1;
     );
 
+    if( (ord(iteration) eq 10) ,
+        cm_DTcoup_eq = 2;
+    );
+
     execute "./DIETER_parallel.sh";
 		put "running DIETER iteration", sm32_tmp:0:0;
 
@@ -152,7 +156,7 @@ logfile.nr = 2;
 *   ONLY pass on the disptachable capacity factors, since the VRE's capfac are treated differently in REMIND
 *   sum over gdxfile set removes this extra index that comes from gdxmerge algorithm
 *   optional: averaging capfac over 2 iterations
-    p32_cf_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = pm_cf(t,regi,te);
+    p32_cf_curr_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = pm_cf(t,regi,te);
     p32_DIETER_curtailmentratio_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = p32_DIETER_curtailmentratio(t,regi,te);
 
 * pm_cf(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
@@ -165,21 +169,21 @@ logfile.nr = 2;
 * 			= sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"OCGT_eff","capfac")$(tDT32(t) AND regDTCoup(regi)));
 * pm_cf(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi))
 * 			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","capfac")$(tDT32(t) AND regDTCoup(regi)));
+    p32_cf_next_iter(t,regi,te)$(COALte32(te)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac")$(tDT32(t) AND regDTCoup(regi)));
+    p32_cf_next_iter(t,regi,te)$(NonPeakGASte32(te)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"CCGT","capfac")$(tDT32(t) AND regDTCoup(regi)));
 
     pm_cf(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
-					= 0.5 * ( p32_cf_last_iter(t,regi,te)$(COALte32(te))
-					+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac")$(tDT32(t) AND regDTCoup(regi))) );
+					= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(COALte32(te)) + p32_cf_next_iter(t,regi,te)$(COALte32(te))  );
 		pm_cf(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi))
-					= 0.5 * ( p32_cf_last_iter(t,regi,te)$(NonPeakGASte32(te))
-					+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"CCGT","capfac")$(tDT32(t) AND regDTCoup(regi))) );
+					= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(NonPeakGASte32(te)) + p32_cf_next_iter(t,regi,te)$(NonPeakGASte32(te)) );
 		pm_cf(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi))
-					= 0.5 * ( p32_cf_last_iter(t,regi,te)$(BIOte32(te))
+					= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(BIOte32(te))
 					+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"bio","capfac")$(tDT32(t) AND regDTCoup(regi))) );
 		pm_cf(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi))
-					= 0.5 * ( p32_cf_last_iter(t,regi,"ngt")
+					= 0.5 * ( p32_cf_curr_iter(t,regi,"ngt")
 					+ sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"OCGT_eff","capfac")$(tDT32(t) AND regDTCoup(regi))) );
 		pm_cf(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi))
-					= 0.5 * ( p32_cf_last_iter(t,regi,te)$(NUCte32(te))
+					= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(NUCte32(te))
 					+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","capfac")$(tDT32(t) AND regDTCoup(regi))) );
 
 *   pass peak demand from DIETER to REMIND as a fraction of the total demand
