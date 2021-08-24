@@ -808,7 +808,7 @@ iso_regi "all iso countries and EU and greater China region" /  EUR,CHA,
 ***###############################################################################
 
 set alt_regions "alternative region names initialization to allow conditionals use in code for different regional aggregations"
-  / ENC, NES, EWN, ECS, ESC, ECE, UKI, NEN, ESW  /;
+  / ENC, NES, EWN, ECS, ESC, ECE, UKI, NEN, ESW, EU27_regi, NEU_UKI_regi /;
 
 *** FS: definition of regional sensitivity/scenario sets
 
@@ -1285,6 +1285,7 @@ teEtaIncr(all_te)       "Technologies with time variable efficiency parameter et
   ngt
   bioigcc
   bioigccc
+  elh2
 /
 
 teEtaConst(all_te)      "Technologies with constant eta"
