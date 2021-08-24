@@ -14,6 +14,8 @@
 p32_budget(t,regi) = qm_budget.m(t,regi);
 pm_SEPrice(t,regi,"seel") = q32_balSe.m(t,regi,"seel")/(qm_budget.m(t,regi) + sm_eps);
 pm_prodSe(t,regi,enty,enty2,te) = vm_prodSe.l(t,regi,enty,enty2,te);
+pm_demSe(t,regi,enty,enty2,te) = vm_demSe.l(t,regi,enty,enty2,te);
+p32_shSeElDem(t,regi,te) = v32_shSeElDem.l(t,regi,te);
 *Display "electricity price", pm_SEPrice(t,"DEU","seel");
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"

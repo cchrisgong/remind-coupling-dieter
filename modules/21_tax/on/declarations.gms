@@ -104,7 +104,8 @@ v21_taxrevBioImport(ttot,all_regi)           "bioenergy import tax"
 Positive Variable
 v21_emiALLco2neg(ttot,all_regi)              "negative part of total CO2 emissions"
 v21_emiALLco2neg_slack(ttot,all_regi)        "dummy variable to extract negatice CO2 emissions from emiAll"
-v21_prodse_dampen(ttot,all_regi)                 "dampening cf"
+*v21_prodse_dampen(ttot,all_regi)             "dampening prodse for coal and gas"
+v21_greenh2dem_dampen(ttot,all_regi)         "dampening dem for green h2"
 ;
 
 equations
@@ -128,7 +129,8 @@ q21_priceCap(ttot,all_regi)                  "calculation of subsidy for dispatc
 q21_implicitDiscRate(ttot,all_regi)          "calculation of the implicit discount rate on energy efficiency capital"
 q21_taxemiMkt(ttot,all_regi,all_emiMkt)      "calculation of specific emission market tax on CO2 emissions"
 q21_taxrevBioImport(ttot,all_regi)           "calculation of bioenergy import tax"
-q21_dampen(ttot,all_regi)                    "dampening cf"
+*q21_prodse_dampen(ttot,all_regi)             "dampening prodse"
+q21_greenh2dem_dampen(ttot,all_regi)         "dampening dem for green h2"
 ;
 
 *** EOF ./modules/21_tax/on/declarations.gms

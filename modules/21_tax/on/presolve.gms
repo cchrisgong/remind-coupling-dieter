@@ -22,12 +22,12 @@ p21_taxrevCCS0(ttot,regi) = cm_frac_CCS * pm_data(regi,"omf","ccsinje") * pm_inc
                             * ( sum(teCCS2rlf(te,rlf), sum(ccs2te(ccsCO2(enty),enty2,te), vm_co2CCS.l(ttot,regi,enty,enty2,te,rlf) ) ) )
                             * (1/sm_ccsinjecrate) * sum(teCCS2rlf(te,rlf), sum(ccs2te(ccsCO2(enty),enty2,te), vm_co2CCS.l(ttot,regi,enty,enty2,te,rlf) ) ) / pm_dataccs(regi,"quan","1");
 p21_taxrevNetNegEmi0(ttot,regi) = cm_frac_NetNegEmi * pm_taxCO2eq(ttot,regi) * v21_emiALLco2neg.l(ttot,regi);
-p21_emiALLco2neg0(ttot,regi)  = v21_emiALLco2neg.l(ttot,regi);		
+p21_emiALLco2neg0(ttot,regi)  = v21_emiALLco2neg.l(ttot,regi);
 p21_taxrevFE0(ttot,regi) = sum((entyFe,sector)$entyFe2Sector(entyFe,sector),
-    ( pm_tau_fe_tax(ttot,regi,sector,entyFe) + pm_tau_fe_sub(ttot,regi,sector,entyFe) ) 
-    * 
-    sum(emiMkt$sector2emiMkt(sector,emiMkt), 
-      sum(se2fe(entySe,entyFe,te),   
+    ( pm_tau_fe_tax(ttot,regi,sector,entyFe) + pm_tau_fe_sub(ttot,regi,sector,entyFe) )
+    *
+    sum(emiMkt$sector2emiMkt(sector,emiMkt),
+      sum(se2fe(entySe,entyFe,te),
         vm_demFeSector.l(ttot,regi,entySe,entyFe,sector,emiMkt)
       )
     )
@@ -43,8 +43,8 @@ p21_taxrevSO20(ttot,regi) = p21_tau_so2_tax(ttot,regi) * vm_emiTe.l(ttot,regi,"s
 p21_taxrevBio0(ttot,regi) = v21_tau_bio.l(ttot) * vm_fuExtr.l(ttot,regi,"pebiolc","1") * vm_pebiolc_price.l(ttot,regi);
 p21_implicitDiscRate0(ttot,regi) = sum(ppfKap(in),  p21_implicitDiscRateMarg(ttot,regi,in) * vm_cesIO.l(ttot,regi,in) );
 p21_taxemiMkt0(ttot,regi,emiMkt) = pm_taxemiMkt(ttot,regi,emiMkt) * vm_co2eqMkt.l(ttot,regi,emiMkt);
-*p21_taxrevFlex0(ttot,regi)   =  sum(en2en(enty,enty2,te)$(teFlexTax(te)),
-*                                        -vm_flexAdj.l(ttot,regi,te) * vm_demSe.l(ttot,regi,enty,enty2,te));
+p21_taxrevFlex0(ttot,regi)   =  sum(en2en(enty,enty2,te)$(teFlexTax(te)),
+                                        -vm_flexAdj.l(ttot,regi,te) * vm_demSe.l(ttot,regi,enty,enty2,te));
 
 p21_taxrevMrkup0(t,regi) = sum(en2en(enty,enty2,te)$(teDTCoupSupp(te)),
                                         - vm_Mrkup.l(t,regi,te) * vm_prodSe.l(t,regi,enty,enty2,te));

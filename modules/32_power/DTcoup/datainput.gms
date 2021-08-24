@@ -66,6 +66,7 @@ p32_minVF_spv = 0.1;
 
 p32_peakDemand_relFac(t,regi) = 0;
 p32_DIETER_MV(t,regi,te) = 0;
+p32_DIETER_MP(t,regi,te) = 0;
 p32_DIETER_elecprice(t,regi) = 0;
 p32_seelUsableDem(t,regi,enty) = 0;
 p32_seh2elh2Dem(t,regi,enty) = 0;
@@ -76,15 +77,18 @@ p32_budget(t,regi) = 0;
 p32_cf_curr_iter(t,regi,te) = 0;
 p32_cf_next_iter(t,regi,te) = 0;
 pm_prodSe(t,regi,enty,enty2,te) = 0;
+pm_demSe(t,regi,enty,enty2,te) = 0;
 
 Execute_Loadpoint 'input_DIETER' p32_report4RM;
 p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_share")$(tDT32(t) AND regDTCoup(regi)));
 p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_share")$(tDT32(t) AND regDTCoup(regi)));
 
+$ENDIF.DTcoup
+
 Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;
+
 p32_fuelprice_lastiter(t,regi,entyPe) = q_balPe.m(t,regi,entyPe);
 p32_fuelprice_lastx2iter(t,regi,entyPe) = q_balPe.m(t,regi,entyPe);
-$ENDIF.DTcoup
 
 *** initialize p32_PriceDurSlope parameter
 p32_PriceDurSlope(regi,"elh2") = cm_PriceDurSlope_elh2;

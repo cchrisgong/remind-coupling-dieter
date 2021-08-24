@@ -36,13 +36,18 @@ parameters
     p32_totProd(ttot,all_regi,all_enty)     "total seel production (both coupled and uncoupled production)"
     p32_seelCurt(ttot,all_regi)             "total curtailment"
 
+    pm_prodSe(tall,all_regi,all_enty,all_enty,all_te)               "vm_prodSe of last iteration"
+    pm_demSe(tall,all_regi,all_enty,all_enty,all_te)                "vm_demSe of last iteration"
+    p32_shSeElDem(ttot,all_regi,all_te)	                          	"share of electricity demand in % [%] in last iter"
+    
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_report4RM(gdxfile32,ttot,all_regi,DIETERte32,DIETERvarname32)    "load report from DIETER"
     p32_reportmk_4RM(gdxfile32,ttot,all_regi,DIETERte32,DIETERvarname32) "load markup report from DIETER"
 
     p32_peakDemand_relFac(ttot,all_regi)         "annual peak demand as a relative ratio of total annual power demand from DIETER"
     p32_DIETER_VF(ttot,all_regi,all_te)          "multiplicative value factor from DIETER that indicates the multiplicative price mark up of technology"
-    p32_DIETER_MV(ttot,all_regi,all_te)          "absolute markup from DIETER"
+    p32_DIETER_MV(ttot,all_regi,all_te)          "market value for power generating technology rom DIETER"
+    p32_DIETER_MP(ttot,all_regi,all_te)          "market price for power consumption technology DIETER"
     p32_DIETER_elecprice(ttot,all_regi)          "elec price in DIETER"
     p32_DIETER_shSeEl(ttot,all_regi,all_te)      "electricity generation share of technology from DIETER"
     p32_DIETER_shSeElDem(ttot,all_regi,all_te)   "electricity demand share of technology from DIETER"
@@ -57,7 +62,8 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_DIETER_curtailmentratio_last_iter(ttot,all_regi,all_te)     "ratio of curtailed energy to usable energy for VRE from DIETER from last iteration DIETER"
     p32_cf_next_iter(ttot,all_regi,all_te)                          "pm_cf of next iteration"
     p32_cf_curr_iter(ttot,all_regi,all_te)                          "pm_cf of current iteration"
-    pm_prodSe(tall,all_regi,all_enty,all_enty,all_te)               "vm_prodSe of last iteration"
+
+
 $ENDIF.DTcoup
 
     p32_fuelprice_lastiter(ttot,all_regi,all_enty)                      "fuel cost of the last iteration"
@@ -87,26 +93,22 @@ equations
     q32_balSe(ttot,all_regi,all_enty)			        "balance equation for electricity secondary energy for non-DIETER coupled regions"
     q32_usableSe(ttot,all_regi,all_enty)			    "calculate usable se before se2se and MP/XP (without storage) for non-DIETER coupled regions"
     q32_usableSeTe(ttot,all_regi,entySe,all_te)   "calculate usable se produced by one technology (vm_usableSeTe) for non-DIETER coupled regions"
-* q32_limitCapTeStor(ttot,all_regi,teStor)		  "calculate the storage capacity required by vm_storloss"
-* q32_h2turbVREcapfromTestor(tall,all_regi)     "calculate capacities of dummy seel<--h2 technology from storXXX technologies"
-* q32_elh2VREcapfromTestor(tall,all_regi)       "calculate capacities of dummy seel-->h2 technology from storXXX technologies"
+*   q32_limitCapTeStor(ttot,all_regi,teStor)		  "calculate the storage capacity required by vm_storloss"
+*   q32_h2turbVREcapfromTestor(tall,all_regi)     "calculate capacities of dummy seel<--h2 technology from storXXX technologies"
+*   q32_elh2VREcapfromTestor(tall,all_regi)       "calculate capacities of dummy seel-->h2 technology from storXXX technologies"
     q32_limitCapTeChp(ttot,all_regi)              "capacitiy constraint for chp electricity generation"
     q32_limitCapTeGrid(ttot,all_regi)          		"calculate the additional grid capacity required by VRE"
     q32_shSeEl(ttot,all_regi,all_te)         		  "calculate share of electricity production of a technology (v32_shSeEl)"
     q32_shSeElDem(ttot,all_regi,all_te)         	"calculate share of electricity demand of a technology (v32_shSeElDem)"
-q32_shStor(ttot,all_regi,all_te)              "equation to calculate v32_shStor for non-DIETER coupled regions"
-q32_storloss(ttot,all_regi,all_te)            "equation to calculate vm_storloss for non-DIETER coupled regions"
+    q32_shStor(ttot,all_regi,all_te)                  "equation to calculate v32_shStor for non-DIETER coupled regions"
+    q32_storloss(ttot,all_regi,all_te)                "equation to calculate vm_storloss for non-DIETER coupled regions"
 *** disabling flexibility constraint q32_operatingReserve in coupled mode
 *   q32_operatingReserve(ttot,all_regi)  			    "operating reserve for necessary flexibility"
 
-    q32_limitSolarWind(ttot,all_regi)           	"limits on fluctuating renewables, only turned on for special EMF27 scenarios"
-    q32_flexAdj(tall,all_regi,all_te)               "calculate flexibility used in flexibility tax for technologies with electricity input"
-    q32_flexPriceShareMin                           "calculatae miniumum share of average electricity that flexible technologies can see"
-    q32_flexPriceShare(tall,all_regi,all_te)        "calculate share of average electricity price that flexible technologies see"
-    q32_flexPriceBalance(tall,all_regi)             "constraint such that flexible electricity prices balanance to average electricity price"
+    q32_limitSolarWind(ttot,all_regi)             "limits on fluctuating renewables, only turned on for special EMF27 scenarios"
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-    q32_flexAdj_DT(tall,all_regi,all_te)          "from DIETER coupling: calculate flexibility used in flexibility tax for technologies with electricity input"
+    q32_flexAdj(tall,all_regi,all_te)             "from DIETER coupling: calculate flexibility used in flexibility tax for technologies with electricity input"
     q32_mkup(ttot,all_regi,all_te)                "calculate markup or markdown of generation technology value"
 $IFTHEN.hardcap %cm_softcap% == "off"
     q32_peakDemand_DT(ttot,all_regi,all_enty)     "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"

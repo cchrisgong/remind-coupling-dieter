@@ -60,15 +60,24 @@ p32_seelTotDem(t,regi,enty2)$(sameas(enty2,"seel")) =
 *** as well as distributing and transporting them (p32_prod4dtFE) and doing CCS (p32_prod4CCS)
 *** and exclude curtailment
 *** (note: p32_prod4dtFE and p32_prod4CCS are negative)
-p32_seelUsableDem(t,regi,enty)$(sameas(enty,"seel")) = 0.5 * ( p32_seelUsableDem_last_iter(t,regi,enty) +
-(p32_seelTotDem(t,regi,enty) - sum(teVRE, v32_storloss.l(t,regi,teVRE) )
-- p32_prod4dtFE(t,regi,enty) - p32_prod4CCS(t,regi,enty)) )
+* p32_seelUsableDem(t,regi,enty)$(sameas(enty,"seel")) = 0.5 * ( p32_seelUsableDem_last_iter(t,regi,enty) +
+* (p32_seelTotDem(t,regi,enty) - sum(teVRE, v32_storloss.l(t,regi,teVRE) )
+* - p32_prod4dtFE(t,regi,enty) - p32_prod4CCS(t,regi,enty)) )
+* ;
+
+p32_seelUsableDem(t,regi,enty)$(sameas(enty,"seel")) = p32_seelTotDem(t,regi,enty)
+- sum(teVRE, v32_storloss.l(t,regi,teVRE) )
+- p32_prod4dtFE(t,regi,enty) - p32_prod4CCS(t,regi,enty)
 ;
 
 *** CG: vm_demSe.l(t,regi,"seel","seh2","elh2") is how much electricity is needed to produse seh2 (green h2)
 *** p32_seh2elh2Dem < p32_seelUsableDem (p32_seh2elh2Dem is part of the total usable demand p32_seelUsableDem)
-p32_seh2elh2Dem(t,regi,enty)$(sameas(enty,"seh2")) =
-  0.5 * (vm_demSe.l(t,regi,"seel","seh2","elh2") + p32_seh2elh2Dem_last_iter(t,regi,enty));
+*with averaging
+* p32_seh2elh2Dem(t,regi,enty)$(sameas(enty,"seh2")) =
+*   0.5 * (vm_demSe.l(t,regi,"seel","seh2","elh2") + p32_seh2elh2Dem_last_iter(t,regi,enty));
+
+*without averaging
+p32_seh2elh2Dem(t,regi,enty)$(sameas(enty,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
 
 *** total curtailment
 p32_seelCurt(t,regi) = sum(teVRE, v32_storloss.l(t,regi,teVRE) );
@@ -104,8 +113,8 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 * if( ((ord(iteration) ge 1) and ( mod(ord(iteration), 5) eq 0)),
 if( ((ord(iteration) ge 2) and ( mod(ord(iteration), 1) eq 0)),
 
-sm32_tmp = iteration.val;
-display "iteration", sm32_tmp;
+sm32_tmp = iteration.val - 1;
+display "DIETER iteration", sm32_tmp;
 
 *   switch on second coupling switch when coupling actually begins
     if( (ord(iteration) eq 2) ,
@@ -222,8 +231,8 @@ logfile.nr = 2;
 					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","gen_share")$(tDT32(t) AND regDTCoup(regi)))
 				    	* p32_tech_category_genshare(t,regi,te)$(COALte32(te) AND regDTCoup(regi)) ;
 
-    p32_DIETER_shSeElDem(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi))
-					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","dem_share")) ;
+*    p32_DIETER_shSeElDem(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi))
+*					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","dem_share")) ;
 
 *   supply side tech market value
     p32_DIETER_MV(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"bio","market_value")$(tDT32(t) AND regDTCoup(regi)));
@@ -235,23 +244,26 @@ logfile.nr = 2;
     p32_DIETER_MV(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"ror","market_value")$(tDT32(t) AND regDTCoup(regi)));
     p32_DIETER_MV(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Wind_on","market_value")$(tDT32(t) AND regDTCoup(regi)));
 *   flexible demand side tech market value (electricity price that the flex tech "sees")
-    p32_DIETER_MV(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"elh2","market_value")$(tDT32(t) AND regDTCoup(regi)));
+    p32_DIETER_MP(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"elh2","market_price")$(tDT32(t) AND regDTCoup(regi)));
+    p32_DIETER_MP(t,regi,"tdels")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"el","market_price")$(tDT32(t) AND regDTCoup(regi)));
+    p32_DIETER_MP(t,regi,"tdelt")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"el","market_price")$(tDT32(t) AND regDTCoup(regi)));
+
 *   DIETER electricity price
     p32_DIETER_elecprice(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"all_te","elec_price")$(tDT32(t) AND regDTCoup(regi)));
 
 *** CG: storage related coupling parameters
 ** no curt_ratio averaging
-* p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
-* p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
+p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
+p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
 
 * with curt_ratio averaging
-p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) =
-      0.5 * (p32_DIETER_curtailmentratio_last_iter(t,regi,"spv")
-      + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio")$(tDT32(t) AND regDTCoup(regi))));
-
-p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) =
-      0.5* (p32_DIETER_curtailmentratio_last_iter(t,regi,"wind")
-      + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio")$(tDT32(t) AND regDTCoup(regi))));
+* p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) =
+*       0.5 * (p32_DIETER_curtailmentratio_last_iter(t,regi,"spv")
+*       + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio")$(tDT32(t) AND regDTCoup(regi))));
+*
+* p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) =
+*       0.5* (p32_DIETER_curtailmentratio_last_iter(t,regi,"wind")
+*       + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio")$(tDT32(t) AND regDTCoup(regi))));
 
 * no curtailment for ror right now from DIETER
 *p32_DIETER_curtailmentratio(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"ror","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
