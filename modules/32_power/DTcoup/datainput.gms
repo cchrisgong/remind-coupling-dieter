@@ -67,6 +67,7 @@ p32_minVF_spv = 0.1;
 p32_peakDemand_relFac(t,regi) = 0;
 p32_DIETER_MV(t,regi,te) = 0;
 p32_DIETER_MP(t,regi,te) = 0;
+p32_DIETER_VF(t,regi,te) = 0;
 p32_DIETER_elecprice(t,regi) = 0;
 p32_seelUsableDem(t,regi,enty) = 0;
 p32_seh2elh2Dem(t,regi,enty) = 0;

@@ -45,33 +45,41 @@
     + v21_taxrevFlex(t,regi)$((cm_flex_tax eq 1) OR (cm_DTcoup_eq ne 0))
     + v21_taxrevMrkup(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
     + v21_taxrevCap(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
-*   + v21_prodse_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 2))
-*   + v21_greenh2dem_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq eq 3))
-*    + v21_greenh2dem_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
+    + v21_prodse_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
+    + v21_greenh2dem_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
     + v21_taxrevBioImport(t,regi)
 $ifthen.cm_implicitFE not "%cm_implicitFE%" == "off"
     + vm_taxrevimplFETax(t,regi)
 $endif.cm_implicitFE
  ;
 
-* q21_prodse_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)))..
+*q21_prodse_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq eq 3))..
+q21_prodse_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))..
 *   v21_prodse_dampen(t,regi) =e= power( (pm_prodSe(t,regi,"pecoal","seel","pc")
-*  - vm_prodSe(t,regi,"pecoal","seel","pc")), 2 ) +
+*  - vm_prodSe(t,regi,"pecoal","seel","pc")) / (pm_prodSe(t,regi,"pecoal","seel","pc") + 0.00001), 2 ) +
 *  power( (pm_prodSe(t,regi,"pegas","seel","ngcc")
-* - vm_prodSe(t,regi,"pegas","seel","ngcc")), 2 )
-* sum(pe2se(enty,enty2,te),
-* power( ( pm_prodSe(t,regi,enty,"seel",te)$(COALte32(te) AND NonPeakGASte32(te))
-* - vm_prodSe(t,regi,enty,"seel",te)$(COALte32(te) AND NonPeakGASte32(te)) ), 2 )
-*)
-  ;
+* - vm_prodSe(t,regi,"pegas","seel","ngcc")) / (pm_prodSe(t,regi,"pegas","seel","ngcc") + 0.00001), 2 )
+* ;
 
-* q21_greenh2dem_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))..
- q21_greenh2dem_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq eq 3))..
-   v21_greenh2dem_dampen(t,regi) =e= power(
-      (pm_demSe(t,regi,"seel","seh2","elh2")
-    - vm_demSe(t,regi,"seel","seh2","elh2")) / (pm_demSe(t,regi,"seel","seh2","elh2") + 0.00001)
-    , 2)
-    ;
+  v21_prodse_dampen(t,regi) =e= power( (pm_prodSe(t,regi,"pecoal","seel","pc")
+ - vm_prodSe(t,regi,"pecoal","seel","pc")) , 2 ) +
+ power( (pm_prodSe(t,regi,"pegas","seel","ngcc")
+- vm_prodSe(t,regi,"pegas","seel","ngcc")) , 2 )
+;
+
+  q21_greenh2dem_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))..
+*q21_greenh2dem_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq eq 3))..
+* v21_greenh2dem_dampen(t,regi) =e= power(
+*    (pm_demSe(t,regi,"seel","seh2","elh2")
+*  - vm_demSe(t,regi,"seel","seh2","elh2")) / (pm_demSe(t,regi,"seel","seh2","elh2") + 0.00001)
+*  , 2)
+*  ;
+
+v21_greenh2dem_dampen(t,regi) =e= power(
+   (pm_demSe(t,regi,"seel","seh2","elh2")
+ - vm_demSe(t,regi,"seel","seh2","elh2")) , 2)
+ ;
+
 ***---------------------------------------------------------------------------
 *'  Calculation of greenhouse gas taxes: tax rate (combination of 3 components) times ghg emissions
 *'  Documentation of overall tax approach is above at q21_taxrev.

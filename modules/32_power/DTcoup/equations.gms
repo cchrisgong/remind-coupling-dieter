@@ -131,7 +131,8 @@ q32_shSeElDem(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi))..
 *** ONLY for non-DIETER-coupled regions
 ***---------------------------------------------------------------------------
 
-q32_shStor(t,regi,teVRE)$(t.val ge 2015 AND (regNoDTCoup(regi)))..
+* q32_shStor(t,regi,teVRE)$(t.val ge 2015 AND (regNoDTCoup(regi)))..
+q32_shStor(t,regi,teVRE)$(t.val ge 2015)..
 	v32_shStor(t,regi,teVRE)
 	=g=
 	p32_factorStorage(regi,teVRE) * 100
@@ -139,7 +140,14 @@ q32_shStor(t,regi,teVRE)$(t.val ge 2015 AND (regNoDTCoup(regi)))..
 		(1.e-10 + (v32_shSeEl(t,regi,teVRE)+ sum(VRE2teVRElinked(teVRE,teVRE2), v32_shSeEl(t,regi,teVRE2)) /s32_storlink)/100 ) ** p32_storexp(regi,teVRE)    !! offset of 1.e-10 for numerical reasons: gams doesn't like 0 if the exponent is not integer
 		- (1.e-10 ** p32_storexp(regi,teVRE) )       !! offset correction
 		- 0.07                                      !! first 7% of VRE share bring no negative effects
-	)
+	) * 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 0))
+
+	+ 	p32_factorStorage(regi,teVRE) * 100
+		* (
+			(1.e-10 + (v32_shSeEl(t,regi,teVRE)+ sum(VRE2teVRElinked(teVRE,teVRE2), v32_shSeEl(t,regi,teVRE2)) /s32_storlink)/100 ) ** p32_storexp(regi,teVRE)    !! offset of 1.e-10 for numerical reasons: gams doesn't like 0 if the exponent is not integer
+			- (1.e-10 ** p32_storexp(regi,teVRE) )       !! offset correction
+			- 0.07                                      !! first 7% of VRE share bring no negative effects
+		)* 1$(regNoDTCoup(regi))
 ;
 
 q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
@@ -148,8 +156,14 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
 	(v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
 	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
 	* vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regNoDTCoup(regi))
-* + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi))
-	+ 0 * 1$(regDTCoup(regi))
+
+	+ (v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
+	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
+	* vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi) AND (cm_DTcoup_eq ne 2))
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+ + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 2))
+*	+ 0 * 1$(regDTCoup(regi)) !! turn off curtailment for coupled region
+$ENDIF.DTcoup
 ;
 
 ***---------------------------------------------------------------------------
@@ -239,13 +253,15 @@ q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_D
 * no prefactor: this seems the more reasonable option: since more h2 (flexible) demand allow more VRE, which lower overall seel price,
 * so it is not like VRE with decreasing market value with increasing share
 * (p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MP(t,regi,te)$( regDTCoup(regi) ))	/ 1e12 * sm_TWa_2_MWh / 1.2
-* v21_greenh2dem_dampen(t,regi)
-* with prefactor
- ( p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MP(t,regi,te)$( regDTCoup(regi) )
+* with prefactor (absolute markup)
+( p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MP(t,regi,te)$( regDTCoup(regi) )
  * ( 1 - ( v32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 ) )
- )
- / 1e12 * sm_TWa_2_MWh / 1.2
-* * v21_greenh2dem_dampen(t,regi)
+)
+/ 1e12 * sm_TWa_2_MWh / 1.2
+
+*** with prefactor (multiplicative value factor, blowup)
+* pm_SEPrice(t,regi,"seel")$( regDTCoup(regi) ) - p32_DIETER_VF(t,regi,te)$( regDTCoup(regi) ) * pm_SEPrice(t,regi,"seel")
+* * ( 1 - ( v32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 ) )
 ;
 
 $ENDIF.DTcoup

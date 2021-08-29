@@ -31,7 +31,9 @@ vm_usableSe.lo(t,regi,"seel")  = 1e-6;
 
 ***CG: disable storage for coupled regions:
 *v32_shStor.fx(t,regi,teVRE)$regDTCoup(regi) = 0;
-***CG: bound it between 0 and 1
+v32_shStor.fx(t,regi,teVRE)$(regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
+
+***CG: bound it between 0 and 100
 v32_shStor.up(t,regi,teVRE) = 100;
 v32_shStor.lo(t,regi,teVRE) = 0;
 
