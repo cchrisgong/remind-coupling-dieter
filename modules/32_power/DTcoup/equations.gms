@@ -135,33 +135,25 @@ q32_shSeElDem(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi))..
 q32_shStor(t,regi,teVRE)$(t.val ge 2015)..
 	v32_shStor(t,regi,teVRE)
 	=g=
-	p32_factorStorage(regi,teVRE) * 100
-	* (
-		(1.e-10 + (v32_shSeEl(t,regi,teVRE)+ sum(VRE2teVRElinked(teVRE,teVRE2), v32_shSeEl(t,regi,teVRE2)) /s32_storlink)/100 ) ** p32_storexp(regi,teVRE)    !! offset of 1.e-10 for numerical reasons: gams doesn't like 0 if the exponent is not integer
-		- (1.e-10 ** p32_storexp(regi,teVRE) )       !! offset correction
-		- 0.07                                      !! first 7% of VRE share bring no negative effects
-	) * 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 0))
-
-	+ 	p32_factorStorage(regi,teVRE) * 100
-		* (
+	  p32_factorStorage(regi,teVRE) * 100
+	  * (
 			(1.e-10 + (v32_shSeEl(t,regi,teVRE)+ sum(VRE2teVRElinked(teVRE,teVRE2), v32_shSeEl(t,regi,teVRE2)) /s32_storlink)/100 ) ** p32_storexp(regi,teVRE)    !! offset of 1.e-10 for numerical reasons: gams doesn't like 0 if the exponent is not integer
 			- (1.e-10 ** p32_storexp(regi,teVRE) )       !! offset correction
-			- 0.07                                      !! first 7% of VRE share bring no negative effects
-		)* 1$(regNoDTCoup(regi))
+			- 0.07 )                                   !! first 7% of VRE share bring no negative effects
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+	     * 1$((regDTCoup(regi) AND (cm_DTcoup_eq le 1)) OR regNoDTCoup(regi))
+$ENDIF.DTcoup
 ;
 
 q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
 	v32_storloss(t,regi,teVRE)
 	=e=
 	(v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
-	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
-	* vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regNoDTCoup(regi))
-
-	+ (v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
-	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
-	* vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi) AND (cm_DTcoup_eq ne 2))
+		* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
+		* vm_usableSeTe(t,regi,"seel",teVRE) )
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
- + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 2))
+		* 1$((regDTCoup(regi) AND (cm_DTcoup_eq le 1)) OR regNoDTCoup(regi))
+	 + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 2))
 *	+ 0 * 1$(regDTCoup(regi)) !! turn off curtailment for coupled region
 $ENDIF.DTcoup
 ;
