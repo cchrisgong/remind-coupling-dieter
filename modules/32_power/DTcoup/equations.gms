@@ -35,7 +35,8 @@ q32_usableSe(t,regi,entySe)$(sameas(entySe,"seel"))..
 	- sum(teVRE, v32_storloss(t,regi,teVRE) )
 ;
 
-q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND teVRE(te))..
+* q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND teVRE(te))..
+q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel"))..
  	vm_usableSeTe(t,regi,entySe,te)
  	=e=
  	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
@@ -153,7 +154,8 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
 		* vm_usableSeTe(t,regi,"seel",teVRE) )
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 		* 1$((regDTCoup(regi) AND (cm_DTcoup_eq le 1)) OR regNoDTCoup(regi))
-	 + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 2))
+* + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 2))
+	 + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) ) * 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 1))
 *	+ 0 * 1$(regDTCoup(regi)) !! turn off curtailment for coupled region
 $ENDIF.DTcoup
 ;
