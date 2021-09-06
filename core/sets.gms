@@ -696,7 +696,7 @@ sets
         JPN_regi .(JPN)
         USA_regi .(USA)
       /
- 
+
    iso "list of iso countries" /
        AFG,ALA,ALB,DZA,ASM,AND,AGO,AIA,ATA,ATG,
        ARG,ARM,ABW,AUS,AUT,AZE,BHS,BHR,BGD,BRB,
@@ -792,7 +792,7 @@ iso_regi "all iso countries and EU and greater China region" /  EUR,CHA,
        TUV,UGA,UKR,ARE,GBR,USA,UMI,URY,UZB,VUT,
        VEN,VNM,VGB,VIR,WLF,ESH,YEM,ZMB,ZWE /
 
-   map_iso_regi(iso_regi,all_regi) "mapping from iso countries to regions that represent country" 
+   map_iso_regi(iso_regi,all_regi) "mapping from iso countries to regions that represent country"
          /
        CHA . CHA
        FRA . FRA
@@ -1527,10 +1527,6 @@ ngt
 tnrs
 fnrs
 /
-
-* DTcoupDemte(all_te)       "all demand technologies to which markup coupling with DIETER applies"
-* /
-* /
 
 feForUe(all_enty)    "final energy types that are transformed into useful energys - is filled automatically from the content of fe2ue"
 ppfenFromUe(all_in)  "all ppfEn that are equivalent to UE - is filled automatically from the content of fe2ue"
