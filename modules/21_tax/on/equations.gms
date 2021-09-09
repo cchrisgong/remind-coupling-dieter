@@ -42,17 +42,23 @@
     - vm_costSubsidizeLearning(t,regi)
     + v21_implicitDiscRate(t,regi)
     + sum(emiMkt, v21_taxemiMkt(t,regi,emiMkt))
-    + v21_taxrevFlex(t,regi)$((cm_flex_tax eq 1) OR (cm_DTcoup_eq ne 0))
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+    + v21_taxrevFlex(t,regi)$(cm_DTcoup_eq ne 0)
     + v21_taxrevMrkup(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
     + v21_taxrevCap(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
     + v21_prodse_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
     + v21_greenh2dem_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
+$ENDIF.DTcoup
+$IFTHEN.DTcoup_off %cm_DTcoup% == "off"
+    + v21_taxrevFlex(t,regi)$(cm_flex_tax eq 1)
+$ENDIF.DTcoup_off
     + v21_taxrevBioImport(t,regi)
 $ifthen.cm_implicitFE not "%cm_implicitFE%" == "off"
     + vm_taxrevimplFETax(t,regi)
 $endif.cm_implicitFE
  ;
 
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
 *q21_prodse_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq eq 3))..
 q21_prodse_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))..
 *   v21_prodse_dampen(t,regi) =e= power( (pm_prodSe(t,regi,"pecoal","seel","pc")
@@ -60,11 +66,8 @@ q21_prodse_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 
 *  power( (pm_prodSe(t,regi,"pegas","seel","ngcc")
 * - vm_prodSe(t,regi,"pegas","seel","ngcc")) / (pm_prodSe(t,regi,"pegas","seel","ngcc") + 0.00001), 2 )
 * ;
-
-  v21_prodse_dampen(t,regi) =e= power( (pm_prodSe(t,regi,"pecoal","seel","pc")
- - vm_prodSe(t,regi,"pecoal","seel","pc")) , 2 ) +
- power( (pm_prodSe(t,regi,"pegas","seel","ngcc")
-- vm_prodSe(t,regi,"pegas","seel","ngcc")) , 2 )
+  v21_prodse_dampen(t,regi) =e= power( (pm_prodSe(t,regi,"pecoal","seel","pc") - vm_prodSe(t,regi,"pecoal","seel","pc")) , 2 )
+                              + power( (pm_prodSe(t,regi,"pegas","seel","ngcc") - vm_prodSe(t,regi,"pegas","seel","ngcc")) , 2 )
 ;
 
   q21_greenh2dem_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))..
@@ -74,12 +77,9 @@ q21_prodse_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 
 *  - vm_demSe(t,regi,"seel","seh2","elh2")) / (pm_demSe(t,regi,"seel","seh2","elh2") + 0.00001)
 *  , 2)
 *  ;
-
-v21_greenh2dem_dampen(t,regi) =e= power(
-   (pm_demSe(t,regi,"seel","seh2","elh2")
- - vm_demSe(t,regi,"seel","seh2","elh2")) , 2)
- ;
-
+  v21_greenh2dem_dampen(t,regi) =e= power((pm_demSe(t,regi,"seel","seh2","elh2") - vm_demSe(t,regi,"seel","seh2","elh2")) , 2)
+;
+$ENDIF.DTcoup
 ***---------------------------------------------------------------------------
 *'  Calculation of greenhouse gas taxes: tax rate (combination of 3 components) times ghg emissions
 *'  Documentation of overall tax approach is above at q21_taxrev.
@@ -236,6 +236,7 @@ q21_taxrevFlex(t,regi)$(t.val ge max(2010,cm_startyear))..
   - p21_taxrevFlex0(t,regi)
 ;
 
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
 ***---------------------------------------------------------------------------
 *'  CG: Calculation of tax/subsidy on technologies with variable/firm electricity onput
 ***---------------------------------------------------------------------------
@@ -257,7 +258,7 @@ q21_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0))..
       - vm_priceCap(t,regi) * vm_reqCap(t,regi)
       - p21_taxrevCap0(t,regi)
 ;
-
+$ENDIF.DTcoup
 ***---------------------------------------------------------------------------
 *'  FS: bioenergy import tax
 *'  adjusts bioenergy import price, adresses sustainability concerns about the biomass world market

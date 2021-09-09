@@ -104,8 +104,10 @@ v21_taxrevBioImport(ttot,all_regi)           "bioenergy import tax"
 Positive Variable
 v21_emiALLco2neg(ttot,all_regi)              "negative part of total CO2 emissions"
 v21_emiALLco2neg_slack(ttot,all_regi)        "dummy variable to extract negatice CO2 emissions from emiAll"
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
 v21_prodse_dampen(ttot,all_regi)            "dampening prodse for coal and gas"
 v21_greenh2dem_dampen(ttot,all_regi)         "dampening dem for green h2"
+$ENDIF.DTcoup
 ;
 
 equations
@@ -124,13 +126,15 @@ q21_taxrevXport(ttot,all_regi)               "calculation of tax on exports"
 q21_taxrevSO2(ttot,all_regi)                 "calculation of tax on SO2"
 q21_taxrevBio(ttot,all_regi)                 "calculation of tax on bioenergy"
 q21_taxrevFlex(ttot,all_regi)                "tax on technologies with flexible or inflexible electricity input"
-q21_taxrevMrkup(ttot,all_regi)               "calculation for markup of electricity generation technologies from DIETER coupling"
-q21_priceCap(ttot,all_regi)                  "calculation of subsidy for dispatchable electricity generation technologies"
 q21_implicitDiscRate(ttot,all_regi)          "calculation of the implicit discount rate on energy efficiency capital"
 q21_taxemiMkt(ttot,all_regi,all_emiMkt)      "calculation of specific emission market tax on CO2 emissions"
 q21_taxrevBioImport(ttot,all_regi)           "calculation of bioenergy import tax"
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
 q21_prodse_dampen(ttot,all_regi)             "dampening prodse"
 q21_greenh2dem_dampen(ttot,all_regi)         "dampening dem for green h2"
+q21_taxrevMrkup(ttot,all_regi)               "calculation for markup of electricity generation technologies from DIETER coupling"
+q21_priceCap(ttot,all_regi)                  "calculation of subsidy for dispatchable electricity generation technologies"
+$ENDIF.DTcoup
 ;
 
 *** EOF ./modules/21_tax/on/declarations.gms
