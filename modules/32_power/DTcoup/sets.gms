@@ -8,7 +8,7 @@ tDT32s(ttot) "time points that are coupled to DIETER" /2025,2030,2035,2040,2045,
 
 * DIETER_te_stor "technologies for storage in DIETER" /Sto1*Sto7/
 
-DIETERte32 "technologies in DIETER" /coal,hc,lig,nuc,CCGT,OCGT_eff,bio,Wind_on,Solar,ror,all_te,elh2,el/
+DIETERte32 "technologies in DIETER" /coal,hc,lig,nuc,CCGT,OCGT_eff,bio,Wind_on,Solar,ror,all_te,elh2,el,vregrid/
 
 DIETERvarname32 "DIETER name" /capfac,ResPeakDem_relFac,peakDem,value_factor,gen_share,market_value,market_price,elec_price,curt_share,curt_ratio,dem_share/
 

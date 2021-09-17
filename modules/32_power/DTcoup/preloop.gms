@@ -9,5 +9,7 @@
 
 *** read marginal of seel balance equation
 Execute_Loadpoint 'input' q32_balSe.m = q32_balSe.m;
+
 Execute_Loadpoint 'input' vm_demSe.l = vm_demSe.l;
+
 *** EOF ./modules/32_power/DTcoup/preloop.gms
