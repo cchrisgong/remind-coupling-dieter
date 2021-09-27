@@ -56,7 +56,7 @@ $ENDIF.DTcoup_off
 $ifthen.cm_implicitFE not "%cm_implicitFE%" == "off"
     + vm_taxrevimplFETax(t,regi)
 $endif.cm_implicitFE
- ;
+;
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *q21_prodse_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq eq 3))..
@@ -69,13 +69,13 @@ q21_prodse_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 
                              + power( (pm_prodSe(t,regi,"pegas","seel","ngcc") - vm_prodSe(t,regi,"pegas","seel","ngcc")) , 2 )
 ;
 
-  q21_greenh2dem_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))..
+q21_greenh2dem_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))..
 * q21_greenh2dem_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq eq 3))..
-v21_greenh2dem_dampen(t,regi) =e= power(
-   (pm_demSe(t,regi,"seel","seh2","elh2")
- - vm_demSe(t,regi,"seel","seh2","elh2")) / (pm_demSe(t,regi,"seel","seh2","elh2") + 0.00001)
- , 2)
-* v21_greenh2dem_dampen(t,regi) =e= power((pm_demSe(t,regi,"seel","seh2","elh2") - vm_demSe(t,regi,"seel","seh2","elh2")) , 2)
+* v21_greenh2dem_dampen(t,regi) =e= power(
+*   (pm_demSe(t,regi,"seel","seh2","elh2")
+* - vm_demSe(t,regi,"seel","seh2","elh2")) / (pm_demSe(t,regi,"seel","seh2","elh2") + 0.00001)
+* , 2)
+v21_greenh2dem_dampen(t,regi) =e= power((pm_demSe(t,regi,"seel","seh2","elh2") - vm_demSe(t,regi,"seel","seh2","elh2")) , 2)
 ;
 $ENDIF.DTcoup
 ***---------------------------------------------------------------------------
@@ -245,7 +245,7 @@ q21_taxrevMrkup(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0))..
 *** vm_Mrkup is markup or markdown for generation technologies (positive if market value above
 *** wholesale annual price, negative if below)
    - vm_Mrkup(t,regi,te) * vm_prodSe(t,regi,enty,enty2,te))
-      - p21_taxrevMrkup0(t,regi)
+   - p21_taxrevMrkup0(t,regi)
 ;
 ***---------------------------------------------------------------------------
 *'  CG: Calculation of subsidy on dispatchable technology

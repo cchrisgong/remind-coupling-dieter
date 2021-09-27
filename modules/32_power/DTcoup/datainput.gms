@@ -38,7 +38,7 @@ $offdelim
 ;
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
 f32_factorStorage(all_regi,"windoff") = f32_factorStorage(all_regi,"wind");
-f32_factorStorage(all_regi,"wind")      = 1.35 * f32_factorStorage(all_regi,"wind"); 
+f32_factorStorage(all_regi,"wind")      = 1.35 * f32_factorStorage(all_regi,"wind");
 $ENDIF.WindOff
 p32_factorStorage(all_regi,all_te) = f32_factorStorage(all_regi,all_te);
 
@@ -66,7 +66,7 @@ $include "./modules/32_power/DTcoup/input/f32_storageCap.prn"
 
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
 f32_storageCap(char,"windoff") = f32_storageCap(char,"wind");
-$ENDIF.WindOff 
+$ENDIF.WindOff
 
 p32_storageCap(te,char) = f32_storageCap(char,te);
 display p32_storageCap;
@@ -78,7 +78,7 @@ $ondelim
 $include "./modules/32_power/DTcoup/input/p32_flex_maxdiscount.cs4r"
 $offdelim
 /
-; 
+;
 *** convert from USD2015/MWh to trUSD2005/TWa
 p32_flex_maxdiscount(regi,te) = p32_flex_maxdiscount(regi,te) * sm_TWa_2_MWh * sm_D2015_2_D2005 * 1e-12;
 display p32_flex_maxdiscount;
@@ -87,10 +87,13 @@ $offtext
 *** initialize p32_PriceDurSlope parameter
 p32_PriceDurSlope(regi,"elh2") = cm_PriceDurSlope_elh2;
 
+Execute_Loadpoint 'input' p32_seelUsableDem = p32_seelUsableDem;
+Execute_Loadpoint 'input' p32_seh2elh2Dem = p32_seh2elh2Dem;
+Execute_Loadpoint 'input' p32_seh2elh2Dem_last_iter = p32_seh2elh2Dem_last_iter;
 
-p32_seelUsableDem(t,regi,enty) = 0;
-p32_seh2elh2Dem(t,regi,enty) = 0;
-p32_seh2elh2Dem_last_iter(t,regi,enty) = 0;
+Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;
+p32_fuelprice_lastiter(t,regi,entyPe) = q_balPe.m(t,regi,entyPe);
+p32_fuelprice_lastx2iter(t,regi,entyPe) = q_balPe.m(t,regi,entyPe);
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_minVF_spv = 0.1;
@@ -111,10 +114,5 @@ p32_shSeElDem(t,regi,te) = 0;
 Execute_Loadpoint 'input_DIETER' p32_report4RM;
 p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_share")$(tDT32(t) AND regDTCoup(regi)));
 p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_share")$(tDT32(t) AND regDTCoup(regi)));
-
-Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;
-
-p32_fuelprice_lastiter(t,regi,entyPe) = q_balPe.m(t,regi,entyPe);
-p32_fuelprice_lastx2iter(t,regi,entyPe) = q_balPe.m(t,regi,entyPe);
 
 $ENDIF.DTcoup
