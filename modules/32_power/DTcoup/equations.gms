@@ -36,7 +36,7 @@ q32_usableSe(t,regi,entySe)$(sameas(entySe,"seel"))..
 	- sum(teVRE, v32_storloss(t,regi,teVRE) )
 ;
 
-q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND teVRE(te))..
+q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel"))..
  	vm_usableSeTe(t,regi,entySe,te)
  	=e=
  	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
@@ -161,7 +161,7 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 		* 1$((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))
 	  + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) )
- * ( 1 - (p32_DIETER_shSeEl(t,regi,teVRE) / 100 - v32_shSeEl(t,regi,teVRE) / 100) )
+* ( 1 - (p32_DIETER_shSeEl(t,regi,teVRE) / 100 - v32_shSeEl(t,regi,teVRE) / 100) )
 	  * 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 1))
 *	+ 0 * 1$(regDTCoup(regi)) !! turn off curtailment for coupled region
 $ENDIF.DTcoup
@@ -209,10 +209,10 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 $IFTHEN.hardcap %cm_softcap% == "off"
 *** hard capacity constraint to peak residual load demand
 
-q32_peakDemand_DT(t,regi,enty2)$(tDT32s(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
+q32_peakDemand_DT(t,regi,"seel")$(tDT32s(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=e=
-	p32_peakDemand_relFac(t,regi) * (p32_seelUsableDem(t,regi,enty2) - p32_seh2elh2Dem(t,regi,enty2)) * 8760
+	p32_peakDemand_relFac(t,regi) * (p32_seelUsableDem(t,regi,"seel") - p32_seh2elh2Dem(t,regi,"seh2")) * 8760
 	;
 
 $ENDIF.hardcap
@@ -226,13 +226,6 @@ $IFTHEN.softcap %cm_softcap% == "on"
 *  "x" value (vm_reqCap). At the same time we want this slack variable to be used only if necessary, so we add a penalization term
 *  in the main equation q32_priceCap (v32_expSlack(t,regi)*1e-8), such that the result variable is a
 *  investment cost variable and the model will try to keep its value at the minimal possible.
-
-*** CG: for debugging:
-* q32_peakDemand_DT(t,regi,enty2)$(tDT32_aux(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
-* 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
-* 	=l=
-* 	p32_peakDemand_relFac(t,regi) * p32_seelUsableDem(t,regi,enty2) * 8760 * 0.95
-* 	;
 
 q32_reqCap(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
 	vm_reqCap(t,regi)
@@ -283,7 +276,7 @@ q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te) AND (cm_D
 * (p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MP(t,regi,te)$( regDTCoup(regi) ))	/ 1e12 * sm_TWa_2_MWh / 1.2
 * with prefactor (absolute markup)
 ( p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MP(t,regi,te)$( regDTCoup(regi) )
- * ( 1 - ( v32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 ) )
+ * ( 1 + ( v32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 ) )
 )
 / 1e12 * sm_TWa_2_MWh / 1.2
 * 0

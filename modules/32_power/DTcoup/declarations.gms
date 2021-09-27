@@ -67,12 +67,14 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_cf_next_iter(ttot,all_regi,all_te)                          "pm_cf of next iteration"
     p32_cf_curr_iter(ttot,all_regi,all_te)                          "pm_cf of current iteration"
 
+$ENDIF.DTcoup
+
     p32_fuelprice_lastiter(ttot,all_regi,all_enty)                      "fuel cost of the last iteration"
     p32_fuelprice_lastx2iter(ttot,all_regi,all_enty)                    "fuel cost of the second to last iteration"
     p32_fuelprice_curriter(ttot,all_regi,all_enty)                      "fuel cost of the current iteration"
     p32_fuelprice_avgiter(ttot,all_regi,all_enty)                       "fuel cost over the three iterations averaged through a low pass filter"
-    
-$ENDIF.DTcoup
+
+
 ;
 
 scalars
@@ -145,4 +147,3 @@ v32_flexPriceShare(tall,all_regi,all_te)            "share of average electricit
 v32_flexPriceShareMin(tall,all_regi,all_te)         "possible minimum of share of average electricity price that flexible technologies see [share: 0...1]"
 ;
 $ENDIF.DTcoup_off
-
