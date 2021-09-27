@@ -12,4 +12,5 @@ Execute_Loadpoint 'input' q32_balSe.m = q32_balSe.m;
 
 Execute_Loadpoint 'input' vm_demSe.l = vm_demSe.l;
 
+Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;
 *** EOF ./modules/32_power/DTcoup/preloop.gms

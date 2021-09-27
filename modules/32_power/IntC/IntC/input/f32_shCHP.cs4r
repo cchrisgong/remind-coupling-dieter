@@ -1,7 +1,7 @@
 * description: share of electricity from chp on total electricity
 * unit: ratio
-* origin: calcOutput(type = "ShareCHP", file = "f32_shCHP.cs4r", round = 3) (madrat 1.102.8 | mrremind 0.60.3)
-* creation date: Thu May 20 19:04:45 2021
+* origin: calcOutput(type = "ShareCHP", file = "f32_shCHP.cs4r", round = 3) (madrat 2.2.1 | mrremind 0.69.6)
+* creation date: Tue Aug 31 19:03:42 2021
 OAS,bscu,0.223
 ENC,bscu,0.28
 NES,bscu,0.153
