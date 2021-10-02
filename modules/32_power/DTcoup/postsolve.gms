@@ -6,8 +6,10 @@
 *** |  Contact: remind@pik-potsdam.de
 *** SOF ./modules/32_power/DTcoup/postsolve.gms
 
+
 ***CG: fuel price to pass to DIETER (3 iter after coupling starts, can smooth over 3 iterations and overwrite this)
 * p32_fuelprice_avgiter(t,regi,entyPe)$regDTCoup(regi) = q_balPe.m(t,regi,entyPe)$regDTCoup(regi);
+** CG: smoothing fuel cost over iterations to pass to DIETER
 p32_fuelprice_avgiter(t,regi,entyPe)$regDTCoup(regi)
           = (q_balPe.m(t,regi,entyPe)$regDTCoup(regi)
     		   + 2 * p32_fuelprice_lastiter(t,regi,entyPe)$regDTCoup(regi)
@@ -128,26 +130,23 @@ display "DIETER iteration", sm32_iter;
         cm_DTcoup_eq = 1;
     );
 
-** CG: smoothing fuel cost over iterations to pass to DIETER
-* if( (ord(iteration) gt sm32_DTiter + 1) ,
-
-* );
-
 *** with demand averaging
 *** CG: smoothing fuel cost over iterations to pass to DIETER
-if( (ord(iteration) gt sm32_DTiter) ,
-    p32_seh2elh2Dem(t,regi,enty)$(sameas(enty,"seh2")) =
-      0.5 * (vm_demSe.l(t,regi,"seel","seh2","elh2") + p32_seh2elh2Dem_last_iter(t,regi,enty));
+* if( (ord(iteration) gt sm32_DTiter) ,
+p32_seh2elh2Dem_avg(t,regi,enty)$(sameas(enty,"seh2")) =
+  0.5 * (p32_seh2elh2Dem(t,regi,enty) + p32_seh2elh2Dem_last_iter(t,regi,enty));
 
-    p32_seelUsableDem(t,regi,enty)$(sameas(enty,"seel")) = 0.5 * ( p32_seelUsableDem_last_iter(t,regi,enty) +
-    (p32_seelTotDem(t,regi,enty) - sum(teVRE, v32_storloss.l(t,regi,teVRE) )
-    - p32_prod4dtFE(t,regi,enty) - p32_prod4CCS(t,regi,enty)) )
-    ;
-);
+p32_seelUsableDem_avg(t,regi,enty)$(sameas(enty,"seel")) = 0.5 * ( p32_seelUsableDem_last_iter(t,regi,enty) +
+p32_seelUsableDem(t,regi,enty));
+* );
+
+* p32_seh2elh2Dem_avg(t,regi,enty)$(sameas(enty,"seh2")) = p32_seh2elh2Dem(t,regi,enty);
+*
+* p32_seelUsableDem_avg(t,regi,enty)$(sameas(enty,"seel")) = p32_seelUsableDem_last_iter(t,regi,enty);
 
 
 * REMIND data for DIETER
-    execute_unload "RMdata_4DT.gdx", vm_cap, sm32_iter, qm_budget, p32_budget, p32_seelUsableDem, p32_seh2elh2Dem,p32_fuelprice_avgiter,
+    execute_unload "RMdata_4DT.gdx", vm_cap, sm32_iter, qm_budget, p32_budget, p32_seelUsableDem_avg, p32_seh2elh2Dem_avg,p32_fuelprice_avgiter,
     f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
     pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, pm_cf, pm_dataren, vm_capDistr;
 
