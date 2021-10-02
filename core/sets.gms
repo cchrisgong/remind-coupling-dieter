@@ -1528,6 +1528,8 @@ tnrs
 fnrs
 /
 
+teNoDTCoupSupp(all_te)    "supply technologies that are not coupled"
+
 feForUe(all_enty)    "final energy types that are transformed into useful energys - is filled automatically from the content of fe2ue"
 ppfenFromUe(all_in)  "all ppfEn that are equivalent to UE - is filled automatically from the content of fe2ue"
 

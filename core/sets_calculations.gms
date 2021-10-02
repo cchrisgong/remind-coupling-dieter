@@ -28,6 +28,7 @@ teNoLearn(te)   = not teLearn(te);
 teEtaConst(te)  = not teEtaIncr(te);
 teNoCCS(te)     = not teCCS(te);
 regNoDTCoup(regi) = not regDTCoup(regi);
+teNoDTCoupSupp(te) = not teDTCoupSupp(te);
 
 entyFe(enty)         = entyFeStat(enty) + entyFeTrans(enty);
 trade(enty)          = tradePe(enty) + tradeSe(enty) + tradeMacro(enty);
