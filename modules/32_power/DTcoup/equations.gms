@@ -46,6 +46,18 @@ q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel"))..
  	- sum(teVRE$sameas(te,teVRE), v32_storloss(t,regi,teVRE) )
 ;
 
+* q32_seelUsableDem(t,regi,enty2)$(sameas(enty2,"seel"))..
+* 	v32_seelUsableDem(t,regi,enty2)
+* 	=e=
+* 	sum(se2fe(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
+* 	+ sum(se2se(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
+* * own consumption: electricity used for extracting fossil fuel, ususally negative
+* 	+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! do not use in 2005 because this demand is not contained in 05_initialCap
+* * subtract negative consumption terms
+* 	- sum(pc2te(enty4,entyFE(enty5),te,enty2), pm_prodCouple(regi,enty4,enty5,te,enty2) * vm_prodFe(t,regi,enty4,enty5,te) )
+* 	- sum(pc2te(enty,enty3,te,enty2), sum(teCCS2rlf(te,rlf), pm_prodCouple(regi,enty,enty3,te,enty2) * vm_co2CCS(t,regi,enty,enty3,te,rlf) ) )
+* ;
+
 ***---------------------------------------------------------------------------
 *** Definition of capacity constraints for storage:
 ***---------------------------------------------------------------------------
@@ -69,7 +81,6 @@ q32_limitCapTeStor(t,regi,teStor)$( t.val ge 2015 AND ((regDTCoup(regi) AND (cm_
 *** represent H2 storage. This is implemented by automatically scaling up capacities of
 *** elh2VRE (electrolysis from VRE, seel -> seh2) and H2 turbines (h2turbVRE, seh2 -> seel)
 *** with VRE capacities which require storage (according to q32_limitCapTeStor):
-
 
 *** build additional electrolysis capacities with stored VRE electricity
 q32_elh2VREcapfromTestor(t,regi)..
@@ -109,9 +120,6 @@ q32_limitCapTeGrid(t,regi)$( t.val ge 2015 ) ..
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
     + 3 * vm_prodSe(t,regi,"pewin","seel","windoff")
 $ENDIF.WindOff
-$IFTHEN.DTcoup %cm_DTcoup% == "on"
-* 0$(regDTCoup(regi))
-$ENDIF.DTcoup
 ;
 
 ***---------------------------------------------------------------------------
@@ -155,14 +163,14 @@ $ENDIF.DTcoup
 q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
 	v32_storloss(t,regi,teVRE)
 	=e=
-	(v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
+	( v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
 	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
-	* vm_usableSeTe(t,regi,"seel",teVRE))
+	* vm_usableSeTe(t,regi,"seel",teVRE) )
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-		* 1$((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))
-	  + (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) )
-* ( 1 - (p32_DIETER_shSeEl(t,regi,teVRE) / 100 - v32_shSeEl(t,regi,teVRE) / 100) )
-	  * 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 1))
+	* 1$((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))
+	+ (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) )
+      * ( 1 - (p32_DIETER_shSeEl(t,regi,teVRE) / 100 - v32_shSeEl(t,regi,teVRE) / 100) )   !!! this is important to keep for stability
+	* 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 1))
 *	+ 0 * 1$(regDTCoup(regi)) !! turn off curtailment for coupled region
 $ENDIF.DTcoup
 ;
@@ -212,7 +220,10 @@ $IFTHEN.hardcap %cm_softcap% == "off"
 q32_peakDemand_DT(t,regi,"seel")$(tDT32s(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=e=
-	p32_peakDemand_relFac(t,regi) * (p32_seelUsableDem(t,regi,"seel") - p32_seh2elh2Dem(t,regi,"seh2")) * 8760
+*	p32_peakDemand_relFac(t,regi) * (p32_seelUsableDem(t,regi,"seel") - p32_seh2elh2Dem(t,regi,"seh2")) * 8760
+* use in-iteration variable
+* p32_peakDemand_relFac(t,regi) * (v32_seelUsableDem(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2")) * 8760
+  p32_peakDemand_relFac(t,regi) * (vm_demSe(t,regi,"seel","feels","tdels") + vm_demSe(t,regi,"seel","feelt","tdelt")) * 8760
 	;
 
 $ENDIF.hardcap
@@ -233,12 +244,19 @@ q32_reqCap(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) 
  	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
  	;
 
+q32_capEndStart(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) )..
+	v32_capDecayEnd(t,regi)
+	=e=
+  p32_peakDemand_relFac(t,regi) * (vm_demSe(t,regi,"seel","feels","tdels") + vm_demSe(t,regi,"seel","feelt","tdelt")) * 8760 *1.1
+;
+
+
 q32_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) )..
   vm_priceCap(t,regi)
   =e=
 	1 / 1.2 *( -p32_budget(t,regi)) !! 0.1 = 100$/kW * 1e9 / 1e12, this is the capacity subsidy per kW of dispatchable, kW -> TW, USD -> trUSD
-  * ( 1 / ( 1 + ( 3 ** ( (10 / ( p32_capDecayEnd(t,regi) - p32_capDecayStart(t,regi) ))
-		* ( vm_reqCap(t,regi) + 1e-11 - ( p32_capDecayEnd(t,regi) + p32_capDecayStart(t,regi) ) / 2	) ) ) )	)
+  * ( 1 / ( 1 + ( 3 ** ( (10 / ( v32_capDecayEnd(t,regi) - v32_capDecayEnd(t,regi)/1.1 ))
+		* ( vm_reqCap(t,regi) + 1e-11 - ( v32_capDecayEnd(t,regi) + v32_capDecayEnd(t,regi)/1.1 ) / 2	) ) ) )	)
 * + ( v32_expSlack(t,regi) * 1e-8 )
 ;
 
@@ -282,23 +300,22 @@ q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te) AND (cm_D
 * 0
 *** with prefactor (multiplicative value factor, blowup)
 * pm_SEPrice(t,regi,"seel")$( regDTCoup(regi) ) - p32_DIETER_VF(t,regi,te)$( regDTCoup(regi) ) * pm_SEPrice(t,regi,"seel")
-* * ( 1 - ( v32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 ) )
+* * ( 1 + ( v32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 ) )
 ;
 
 
 ***---------------------------------------------------------------------------
 *** Capacity factor for dispatchable power plants
 ***---------------------------------------------------------------------------
-** CG: is prefactor for dispatchable capfac necessary?
-* 1) markup is imposed on generation, so generation is already adjusted, is capfac is adjusted again, then cap would have
-* been doubly adjusted, since cap = generation * capFac
-* 2)
-* q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq ne 0))..
-*     vm_capFac(t,regi,te)
-*     =e=
-* 		pm_cf(t,regi,te)
-* 		* (1 - (v32_shSeEl(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_DIETER_shSeEl(t,regi,te)$( regDTCoup(regi) ) / 100 )  )
-* ;
+** CG: prefactor for dispatchable capfac necessary, since if generation share in current REMIND iteration is low
+** then capfac should be lower (since VRE share is high, depressing utilization rate of dispatchable plants)
+q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq ne 0))..
+*q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq eq 3))..
+    vm_capFac(t,regi,te)
+    =e=
+	 pm_cf(t,regi,te) * (1 + (v32_shSeEl(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 )  )
+			* 1$( tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq ne 0))
+;
 
 $ENDIF.DTcoup
 
