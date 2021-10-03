@@ -67,7 +67,7 @@ loop(regi$(p32_factorStorage(regi,"csp") < 1),
 );
 
 *** Lower bounds on VRE use (more than 0.01% of electricity demand) after 2015 to prevent the model from overlooking spv and wind and csp
-loop(regi,
+loop(regi$(regNoDTCoup(regi)),
   loop(te$(teVRE(te)),
     if ( (sum(rlf, pm_dataren(regi,"maxprod",rlf,te)) > 0.01 * pm_IO_input(regi,"seel","feels","tdels")) ,
          v32_shSeEl.lo(t,regi,te)$(t.val>2020) = 0.01;
