@@ -16,7 +16,18 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 if ((cm_DTcoup_eq eq 1),
 		loop(regi$(regDTCoup(regi)),
 			loop(t$(tDT32(t)),
-				loop(te$(teDTCoupSupp(te)),
+				loop(te$(CFcoupSuppte32(te)),
+				vm_capFac.lo(t,regi,te)=0;
+				vm_capFac.up(t,regi,te)=INF;
+				);
+			);
+		);
+);
+
+if ((cm_DTcoup_eq eq 1),
+		loop(regi$(regDTCoup(regi)),
+			loop(t$(tDT32(t)),
+				loop(te$(CFcoupDemte32(te)),
 				vm_capFac.lo(t,regi,te)=0;
 				vm_capFac.up(t,regi,te)=INF;
 				);
@@ -33,6 +44,9 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 * vm_capFac.fx(t,regi,te) = pm_cf_linear(t,regi,te);
 $ENDIF.DTcoup
 
+*** =====================================
+*** IntC bounds: important - do NOT change the orders of the lines!!
+*** =====================================
 *** FS: for historically limited biomass production scenario (cm_bioprod_histlim >= 0)
 *** to avoid infeasibilities with vintage biomass capacities
 *** allow bio techs to reduce capacity factor
@@ -40,6 +54,7 @@ if ( cm_bioprod_histlim ge 0,
 	vm_capFac.lo(t,regi_sensscen,teBioPebiolc)$(t.val ge 2030) = 0;
 );
 
+$IFTHEN.DTcoup_off %cm_DTcoup% == "off"
 *** FS: if flexibility tax on, let capacity factor be endogenuously determined between 0.1 and 1
 *** for technologies that get flexibility tax/subsity (teFlexTax)
 if ( cm_flex_tax eq 1,
@@ -55,19 +70,30 @@ if ( cm_flex_tax eq 1,
   );
 );
 
-*RP* upper bound of 90% on share of electricity produced by a single VRE technology, and lower bound on usablese to prevent the solver from dividing by 0
-v32_shSeEl.up(t,regi,teVRE) = 90;
+$ENDIF.DTcoup_off
 
-vm_usableSe.lo(t,regi,"seel")= 1e-6;
-*RP To ensure that the REMIND model doesn't overlook CSP due to gdx effects, ensure some minimum use in regions with good solar insolation, here proxied from the csp storage factor:
-loop(regi$(p32_factorStorage(regi,"csp") < 1),
-  v32_shSeEl.lo(t,regi,"csp")$(t.val > 2025) = 0.5;
-  v32_shSeEl.lo(t,regi,"csp")$(t.val > 2050) = 1;
-  v32_shSeEl.lo(t,regi,"csp")$(t.val > 2100) = 2;
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+*** FS: if flexibility tax on, let capacity factor be endogenuously determined between 0.1 and 1
+*** for technologies that get flexibility tax/subsity (teFlexTax)
+if ( cm_flex_tax eq 1,
+  if ( cm_FlexTaxFeedback eq 1,
+*** if flexibility tax feedback is on, let model choose capacity factor of flexible technologies freely
+	  vm_capFac.lo(t,regi,teFlexTax)$((t.val ge 2010) AND regNoDTCoup(regi)) = 0.1;
+    vm_capFac.up(t,regi,teFlexTax)$((t.val ge 2010) AND regNoDTCoup(regi)) = pm_cf(t,regi,teFlexTax);
+  else
+*** if flexibility tax feedback is off, only flexibliity tax benefit for flexible technologies and 0.5 capacity factor
+    vm_capFac.fx(t,regi,teFlex)$(t.val ge 2010 AND regNoDTCoup(regi)) = 0.5;
+*** electricity price of inflexible technologies the same w/o feedback
+    v32_flexPriceShare.fx(t,regi,te)$(teFlexTax(te) AND NOT(teFlex(te)) AND regNoDTCoup(regi)) = 1;
+  );
 );
+
+$ENDIF.DTcoup
+
 
 *** Lower bounds on VRE use (more than 0.01% of electricity demand) after 2015 to prevent the model from overlooking spv and wind and csp
 loop(regi$(regNoDTCoup(regi)),
+*loop(regi,
   loop(te$(teVRE(te)),
     if ( (sum(rlf, pm_dataren(regi,"maxprod",rlf,te)) > 0.01 * pm_IO_input(regi,"seel","feels","tdels")) ,
          v32_shSeEl.lo(t,regi,te)$(t.val>2020) = 0.01;
@@ -75,12 +101,29 @@ loop(regi$(regNoDTCoup(regi)),
   );
 );
 
+
+
+*RP* upper bound of 90% on share of electricity produced by a single VRE technology, and lower bound on usablese to prevent the solver from dividing by 0
+v32_shSeEl.up(t,regi,teVRE) = 90;
+
+vm_usableSe.lo(t,regi,"seel")= 1e-6;
+
 *** Fix capacity for h2curt technology (modeled only in RLDC)
 vm_cap.fx(t,regi,"h2curt",rlf) = 0;
 
+*RP To ensure that the REMIND model doesn't overlook CSP due to gdx effects, ensure some minimum use in regions with good solar insolation, here proxied from the csp storage factor:
+loop(regi$(p32_factorStorage(regi,"csp") < 1),
+  v32_shSeEl.lo(t,regi,"csp")$(t.val > 2025) = 0.5;
+  v32_shSeEl.lo(t,regi,"csp")$(t.val > 2050) = 1;
+  v32_shSeEl.lo(t,regi,"csp")$(t.val > 2100) = 2;
+);
 
 *** Fix capacity to 0 for elh2VRE now that the equation q32_elh2VREcapfromTestor pushes elh2, not anymore elh2VRE, and capital costs are 1
 vm_cap.fx(t,regi,"elh2VRE",rlf) = 0;
+
+*** =====================================
+*** END OF IntC bounds
+*** =====================================
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 

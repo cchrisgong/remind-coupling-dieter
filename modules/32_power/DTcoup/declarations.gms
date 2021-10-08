@@ -42,7 +42,7 @@ parameters
     p32_marketValue(ttot,all_regi,all_te)               "market value seen by REMIND"
     p32_marketPrice(ttot,all_regi,all_te)               "market price seen by REMIND"
     p32_valueFactor(ttot,all_regi,all_te)               "value factor seen by REMIND"
-    p32_peakDemand_relFac(ttot,all_regi)                "annual peak demand as a relative ratio of total annual power demand from DIETER"
+*    p32_peakDemand_relFac(ttot,all_regi)                "annual peak demand as a relative ratio of total annual power demand from DIETER"
 
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
@@ -133,8 +133,9 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     q32_shSeElDem(ttot,all_regi,all_te)         	"calculate share of electricity demand of a technology (v32_shSeElDem)"
 		q32_flexAdj(tall,all_regi,all_te)             "from DIETER coupling: calculate flexibility used in flexibility tax for technologies with electricity input"
     q32_mkup(ttot,all_regi,all_te)                "calculate markup or markdown of generation technology value"
-    q32_capFac(ttot,all_regi,all_te)        	    "Calculate resulting capacity factor for all power technologies"
-
+    q32_capFac(ttot,all_regi,all_te)        	    "Calculate resulting capacity factor for supply-side technologies"
+    q32_capFac_dem(ttot,all_regi,all_te)        	"Calculate resulting capacity factor for demand-side technologies"
+    
 $IFTHEN.hardcap %cm_softcap% == "off"
     q32_peakDemand_DT(ttot,all_regi,all_enty)     "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"
 $ENDIF.hardcap

@@ -278,7 +278,6 @@ q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_D
  (p32_DIETER_MV(t,regi,te)$( regDTCoup(regi) )
   * (1 - (v32_shSeEl(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_DIETER_shSeEl(t,regi,te)$( regDTCoup(regi) ) / 100 )  ) - p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) )
 	 / 1e12 * sm_TWa_2_MWh / 1.2
-* 0
 * no prefactor
 * ( (p32_DIETER_MV(t,regi,te)  - p32_DIETER_elecprice(t,regi) ) / 1e12 * sm_TWa_2_MWh / 1.2 ) * 1$( regDTCoup(regi) )
 ;
@@ -308,12 +307,20 @@ q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te) AND (cm_D
 ***---------------------------------------------------------------------------
 ** CG: prefactor for dispatchable capfac necessary, since if generation share in current REMIND iteration is low
 ** then capfac should be lower (since VRE share is high, depressing utilization rate of dispatchable plants)
-q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq ne 0))..
-*q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq eq 3))..
-    vm_capFac(t,regi,te)
+q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te) AND (cm_DTcoup_eq ne 0))..
+*q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te) AND (cm_DTcoup_eq eq 3))..
+    vm_capFac(t,regi,te) * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te))
     =e=
-	 pm_cf(t,regi,te) * (1 + (v32_shSeEl(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 )  )
-			* 1$( tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq ne 0))
+	  pm_cf(t,regi,te) * ( 1 - 0.7 * (v32_shSeEl(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 ) )
+	  * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te))
+;
+
+q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) AND (cm_DTcoup_eq ne 0))..
+*q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) AND (cm_DTcoup_eq eq 3))..
+    vm_capFac(t,regi,te) * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te))
+    =e=
+	  pm_cf(t,regi,te) * ( 1 + 0.7 * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
+	  * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te))
 ;
 
 $ENDIF.DTcoup

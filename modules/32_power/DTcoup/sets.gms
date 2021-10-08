@@ -24,3 +24,8 @@ NUCte32(all_te) "nuclear to seel tech in REMIND" /tnrs,fnrs/
 
 DISPATCHte32(all_te) "dispatchable technologies in REMIND" /igcc,igccc,pc,pcc,pco,coalchp,
 ngcc,ngccc,gaschp,biochp,bioigcc,bioigccc,ngt,tnrs,fnrs/
+
+CFcoupSuppte32(all_te) "technologies in REMIND which have prefactors to capacity factor" /igcc,igccc,pc,pcc,pco,coalchp,
+ngcc,ngccc,gaschp,biochp,bioigcc,bioigccc,ngt,tnrs,fnrs/
+
+CFcoupDemte32(all_te) "demand-side technologies in REMIND which have prefactors to capacity factor" /elh2/
