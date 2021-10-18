@@ -43,11 +43,15 @@
     + v21_implicitDiscRate(t,regi)
     + sum(emiMkt, v21_taxemiMkt(t,regi,emiMkt))
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
     + v21_taxrevFlex(t,regi)$(cm_DTcoup_eq ne 0)
+$ENDIF.elh2_coup
     + v21_taxrevMrkup(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
     + v21_taxrevCap(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
     + v21_prodse_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
     + v21_greenh2dem_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
+$ENDIF.elh2_coup
 $ENDIF.DTcoup
 $IFTHEN.DTcoup_off %cm_DTcoup% == "off"
     + v21_taxrevFlex(t,regi)$(cm_flex_tax eq 1)
@@ -67,6 +71,7 @@ q21_prodse_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 
 * - vm_prodSe(t,regi,"pegas","seel","ngcc")) / (pm_prodSe(t,regi,"pegas","seel","ngcc") + 0.00001), 2 )
  v21_prodse_dampen(t,regi) =e= power( (pm_prodSe(t,regi,"pecoal","seel","pc") - vm_prodSe(t,regi,"pecoal","seel","pc")) , 2 )
                              + power( (pm_prodSe(t,regi,"pegas","seel","ngcc") - vm_prodSe(t,regi,"pegas","seel","ngcc")) , 2 )
+*                             + power( (pm_prodSe(t,regi,"pebiolc","seel","bioigcc") - vm_prodSe(t,regi,"pebiolc","seel","bioigcc")) , 2 )
 ;
 
 q21_greenh2dem_dampen(t,regi)$(tDT32s(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))..
@@ -253,8 +258,8 @@ q21_taxrevMrkup(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0))..
 q21_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0))..
   v21_taxrevCap(t,regi)
   =e=
-      - vm_priceCap(t,regi) * vm_reqCap(t,regi)
-      - p21_taxrevCap0(t,regi)
+    - vm_priceCap(t,regi) * vm_reqCap(t,regi)
+    - p21_taxrevCap0(t,regi)
 ;
 $ENDIF.DTcoup
 ***---------------------------------------------------------------------------

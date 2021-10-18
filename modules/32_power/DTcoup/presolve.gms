@@ -20,23 +20,17 @@ p32_budget(t,regi) = qm_budget.m(t,regi);
 pm_prodSe(t,regi,enty,enty2,te) = vm_prodSe.l(t,regi,enty,enty2,te);
 pm_demSe(t,regi,enty,enty2,te) = vm_demSe.l(t,regi,enty,enty2,te);
 
-*** CG:load fuel prices from two previous iterations
+*** CG:load fuel prices from two previous iterations, avoid using marginals in case they are 0
 p32_fuelprice_lastx2iter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_lastiter(t,regi,entyPe);
-p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = q_balPe.m(t,regi,entyPe);
+p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
 
 p32_seelUsableDem_last_iter(t,regi,enty)$(sameas(enty,"seel")) = p32_seelUsableDem(t,regi,enty);
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 p32_shSeElDem(t,regi,te)$regDTCoup(regi) = v32_shSeElDem.l(t,regi,te)$regDTCoup(regi);
 p32_seh2elh2Dem_last_iter(t,regi,enty)$(sameas(enty,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
-
-p32_reqCap(t,regi)$(regDTCoup(regi)) = p32_peakDemand_relFac(t,regi) * p32_seelUsableDem(t,regi,"seel") * 8760;
-p32_capDecayStart(t,regi)$(regDTCoup(regi)) = p32_reqCap(t,regi) * 1.0;
-p32_capDecayEnd(t,regi)$(regDTCoup(regi)) = p32_reqCap(t,regi) * 1.1;
-Display p32_capDecayStart;
-Display p32_capDecayEnd;
-
+$ENDIF.elh2_coup
 $ENDIF.DTcoup
 
 *** EOF ./modules/32_power/DTcoup/presolve.gms

@@ -134,6 +134,7 @@ q32_shSeEl(t,regi,te)..
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** CG: Calculation of share of electricity demand, e.g. of green h2 using elh2
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 ***---------------------------------------------------------------------------
 q32_shSeElDem(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi))..
     v32_shSeElDem(t,regi,te) / 100 * vm_usableSe(t,regi,"seel")
@@ -141,6 +142,7 @@ q32_shSeElDem(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi))..
     sum(en2en(enty,enty2,te),
 			vm_demSe(t,regi,enty,enty2,te)$(sameas(enty, "seel")))
 ;
+$ENDIF.elh2_coup
 $ENDIF.DTcoup
 
 ***---------------------------------------------------------------------------
@@ -220,8 +222,8 @@ $IFTHEN.hardcap %cm_softcap% == "off"
 q32_peakDemand_DT(t,regi,"seel")$(tDT32s(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=e=
-*	p32_peakDemand_relFac(t,regi) * (p32_seelUsableDem(t,regi,"seel") - p32_seh2elh2Dem(t,regi,"seh2")) * 8760
 * use in-iteration variable
+*	p32_peakDemand_relFac(t,regi) * (p32_seelUsableDem(t,regi,"seel") - p32_seh2elh2Dem(t,regi,"seh2")) * 8760
 * p32_peakDemand_relFac(t,regi) * (v32_seelUsableDem(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2")) * 8760
   p32_peakDemand_relFac(t,regi) * (vm_demSe(t,regi,"seel","feels","tdels") + vm_demSe(t,regi,"seel","feelt","tdelt")) * 8760
 	;
@@ -232,7 +234,7 @@ $IFTHEN.softcap %cm_softcap% == "on"
 ** CG: implementing a softer capacity bound, with a flat capacity subsidy, once the sum of dispatchable capacity exceeds
 ** the bound which is the peak demand from last iteration, the subsidy rapidly drops according to logistic function
 ** Logistic function exponent for additional dispatchable capacity, LHS bound up to 20 to reduce computational intensity
-*  because the exponent v32_capPriceExponent is capped by 20, we introduce
+*  because the exponent is capped by 20, we introduce
 *  v32_expSlack, to save the remaining values if the exponent value on equation q32_auxPriceCap is bigger due to the
 *  "x" value (vm_reqCap). At the same time we want this slack variable to be used only if necessary, so we add a penalization term
 *  in the main equation q32_priceCap (v32_expSlack(t,regi)*1e-8), such that the result variable is a
@@ -254,10 +256,10 @@ q32_capEndStart(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ).
 q32_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) )..
   vm_priceCap(t,regi)
   =e=
-	1 / 1.2 *( -p32_budget(t,regi)) !! 0.1 = 100$/kW * 1e9 / 1e12, this is the capacity subsidy per kW of dispatchable, kW -> TW, USD -> trUSD
+	1 / 1.2 * ( -p32_budget(t,regi)) !! 0.1 = 100$/kW * 1e9 / 1e12, this is the capacity subsidy per kW of dispatchable, kW -> TW, USD -> trUSD
   * ( 1 / ( 1 + ( 3 ** ( (10 / ( v32_capDecayEnd(t,regi) - v32_capDecayEnd(t,regi)/1.1 ))
 		* ( vm_reqCap(t,regi) + 1e-11 - ( v32_capDecayEnd(t,regi) + v32_capDecayEnd(t,regi)/1.1 ) / 2	) ) ) )	)
-* + ( v32_expSlack(t,regi) * 1e-8 )
+		 + ( v32_expSlack(t,regi) * 1e-8 )
 ;
 
 $ENDIF.softcap
@@ -282,7 +284,11 @@ q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_D
 * ( (p32_DIETER_MV(t,regi,te)  - p32_DIETER_elecprice(t,regi) ) / 1e12 * sm_TWa_2_MWh / 1.2 ) * 1$( regDTCoup(regi) )
 ;
 
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 *** CG: giving flexible demand side technology, e.g. electrolyzer a subsidy, non DIETER coupled version is q32_flexAdj below
+*** on prefactor: beacuse if v32_shSeElDem is low for elh2 compared to last iter p32_shSeElDem, to balance out oscillation for elh2
+*** we want flexadj to be high, so f has to be <1. if v32_shSeElDem - p32_shSeElDem is negative, then f is larger
+*** than one. so the sign has to be changed
 
 *q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te) AND (cm_DTcoup_eq eq 3))..
 q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te) AND (cm_DTcoup_eq ne 0))..
@@ -296,32 +302,34 @@ q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te) AND (cm_D
  * ( 1 + ( v32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 ) )
 )
 / 1e12 * sm_TWa_2_MWh / 1.2
-* 0
-*** with prefactor (multiplicative value factor, blowup)
-* pm_SEPrice(t,regi,"seel")$( regDTCoup(regi) ) - p32_DIETER_VF(t,regi,te)$( regDTCoup(regi) ) * pm_SEPrice(t,regi,"seel")
-* * ( 1 + ( v32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 ) )
 ;
-
+$ENDIF.elh2_coup
 ***---------------------------------------------------------------------------
 *** Capacity factor for dispatchable power plants
 ***---------------------------------------------------------------------------
-** CG: prefactor for dispatchable capfac necessary, since if generation share in current REMIND iteration is low
+** CG: prefactor for dispatchable capfac necessary, since if generation share in current REMIND iteration is higher than last iteration
 ** then capfac should be lower (since VRE share is high, depressing utilization rate of dispatchable plants)
 q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te) AND (cm_DTcoup_eq ne 0))..
 *q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te) AND (cm_DTcoup_eq eq 3))..
     vm_capFac(t,regi,te) * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te))
     =e=
-	  pm_cf(t,regi,te) * ( 1 - 0.7 * (v32_shSeEl(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 ) )
+	  pm_cf(t,regi,te)
+ * ( 1 + 0.5 * (v32_shSeEl(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 ) )
 	  * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te))
 ;
 
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+** CG: if elh2 demand share is high, then capfac should be increased..
 q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) AND (cm_DTcoup_eq ne 0))..
 *q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) AND (cm_DTcoup_eq eq 3))..
     vm_capFac(t,regi,te) * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te))
     =e=
-	  pm_cf(t,regi,te) * ( 1 + 0.7 * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
+	  pm_cf(t,regi,te)
+ * ( 1 - 0.7 * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
 	  * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te))
 ;
+
+$ENDIF.elh2_coup
 
 $ENDIF.DTcoup
 

@@ -58,7 +58,6 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_DIETER_MP(ttot,all_regi,all_te)          "market price for power consumption technology DIETER"
     p32_DIETER_elecprice(ttot,all_regi)          "elec price in DIETER"
     p32_DIETER_shSeEl(ttot,all_regi,all_te)      "electricity generation share of technology from DIETER"
-    p32_DIETER_shSeElDem(ttot,all_regi,all_te)   "electricity demand share of technology from DIETER"
 
     p32_reqCap(ttot,all_regi)                    "required total dispatchable capacity to meet peak demand (from last iteration)"
     p32_capDecayStart(ttot,all_regi)             "where capacity subsidy cost function starts to decay, it is a portion of the total required dispatchable capacities"
@@ -93,8 +92,7 @@ positive variables
     v32_testdemSeShare(ttot,all_regi,all_te)    "test variable for tech share of SE electricity demand"
 		v32_shSeElDem(ttot,all_regi,all_te)		      "new share of electricity demand in % [%]"
     v32_seelUsableDem(ttot,all_regi,all_enty)   "demand of usable seel in current iteration"
-*   v32_capPriceExponent(ttot,all_regi)   "exponent for the cost of additional dispatchable capacity"
-*   v32_expSlack(ttot,all_regi)           "slack variable to make sure the exponent is bounded"
+    v32_expSlack(ttot,all_regi)           "slack variable to make sure the exponent is bounded"
     v32_capDecayEnd(ttot,all_regi)              "the end decay point of the logit function for required dispatchable capacity as a function of electricity demand"
     v32_flexPriceShare(tall,all_regi,all_te)            "share of average electricity price that flexible technologies see [share: 0...1]"
     v32_flexPriceShareMin(tall,all_regi,all_te)         "possible minimum of share of average electricity price that flexible technologies see [share: 0...1]"
@@ -130,12 +128,17 @@ $IFTHEN.DTcoup_off %cm_DTcoup% == "off"
 $ENDIF.DTcoup_off
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
     q32_shSeElDem(ttot,all_regi,all_te)         	"calculate share of electricity demand of a technology (v32_shSeElDem)"
-		q32_flexAdj(tall,all_regi,all_te)             "from DIETER coupling: calculate flexibility used in flexibility tax for technologies with electricity input"
+$ENDIF.elh2_coup
     q32_mkup(ttot,all_regi,all_te)                "calculate markup or markdown of generation technology value"
     q32_capFac(ttot,all_regi,all_te)        	    "Calculate resulting capacity factor for supply-side technologies"
+
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
     q32_capFac_dem(ttot,all_regi,all_te)        	"Calculate resulting capacity factor for demand-side technologies"
-    
+    q32_flexAdj(tall,all_regi,all_te)             "from DIETER coupling: calculate flexibility used in flexibility tax for technologies with electricity input"
+$ENDIF.elh2_coup
+
 $IFTHEN.hardcap %cm_softcap% == "off"
     q32_peakDemand_DT(ttot,all_regi,all_enty)     "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"
 $ENDIF.hardcap
@@ -144,7 +147,6 @@ $IFTHEN.softcap %cm_softcap% == "on"
     q32_reqCap(ttot,all_regi,all_enty)            "sum of total dispatchable capacities"
     q32_capEndStart(ttot,all_regi)                "required dispatchable capacities"
     q32_priceCap(ttot,all_regi)                   "calculates subsidy for disptachable capacity / capacity shadow price"
-
 $ENDIF.softcap
 
 $ENDIF.DTcoup

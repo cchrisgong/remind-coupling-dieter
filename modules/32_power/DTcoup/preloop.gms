@@ -13,4 +13,13 @@ Execute_Loadpoint 'input' q32_balSe.m = q32_balSe.m;
 Execute_Loadpoint 'input' vm_demSe.l = vm_demSe.l;
 
 Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;
+
+Execute_Loadpoint "RMdata_4RM" p21_taxrevMrkup0 = p21_taxrevMrkup0;
+
+Execute_Loadpoint "RMdata_4RM" p21_taxrevFlex0 = p21_taxrevFlex0;
+
+Execute_Loadpoint "RMdata_4RM" v21_taxrevFlex.l = v21_taxrevFlex.l;
+
+Execute_Loadpoint "RMdata_4RM" v21_taxrevMrkup.l = v21_taxrevMrkup.l;
+
 *** EOF ./modules/32_power/DTcoup/preloop.gms

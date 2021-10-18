@@ -18,12 +18,13 @@ if ((cm_DTcoup_eq eq 1),
 			loop(t$(tDT32(t)),
 				loop(te$(CFcoupSuppte32(te)),
 				vm_capFac.lo(t,regi,te)=0;
-				vm_capFac.up(t,regi,te)=INF;
+				vm_capFac.up(t,regi,te)=INF;  !! should not be capped as one, as some vm_capFac are larger than 1 due to scaling
 				);
 			);
 		);
 );
 
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 if ((cm_DTcoup_eq eq 1),
 		loop(regi$(regDTCoup(regi)),
 			loop(t$(tDT32(t)),
@@ -34,6 +35,8 @@ if ((cm_DTcoup_eq eq 1),
 			);
 		);
 );
+$ENDIF.elh2_coup
+
 $ENDIF.DTcoup
 
 
@@ -75,6 +78,8 @@ $ENDIF.DTcoup_off
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** FS: if flexibility tax on, let capacity factor be endogenuously determined between 0.1 and 1
 *** for technologies that get flexibility tax/subsity (teFlexTax)
+*** in case cm_FlexTaxFeedback ne 1, but cm_flex_tax is on and DIETER coupling is on ,then set the second two
+*** statements only for non-coupled regions
 if ( cm_flex_tax eq 1,
   if ( cm_FlexTaxFeedback eq 1,
 *** if flexibility tax feedback is on, let model choose capacity factor of flexible technologies freely
@@ -84,7 +89,12 @@ if ( cm_flex_tax eq 1,
 *** if flexibility tax feedback is off, only flexibliity tax benefit for flexible technologies and 0.5 capacity factor
     vm_capFac.fx(t,regi,teFlex)$(t.val ge 2010 AND regNoDTCoup(regi)) = 0.5;
 *** electricity price of inflexible technologies the same w/o feedback
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
     v32_flexPriceShare.fx(t,regi,te)$(teFlexTax(te) AND NOT(teFlex(te)) AND regNoDTCoup(regi)) = 1;
+$ENDIF.elh2_coup
+$IFTHEN.elh2_coup %cm_elh2_coup% == "off"
+    v32_flexPriceShare.fx(t,regi,te)$(teFlexTax(te)) = 1;
+$ENDIF.elh2_coup
   );
 );
 
@@ -92,16 +102,13 @@ $ENDIF.DTcoup
 
 
 *** Lower bounds on VRE use (more than 0.01% of electricity demand) after 2015 to prevent the model from overlooking spv and wind and csp
-loop(regi$(regNoDTCoup(regi)),
-*loop(regi,
+loop(regi,
   loop(te$(teVRE(te)),
     if ( (sum(rlf, pm_dataren(regi,"maxprod",rlf,te)) > 0.01 * pm_IO_input(regi,"seel","feels","tdels")) ,
          v32_shSeEl.lo(t,regi,te)$(t.val>2020) = 0.01;
     );
   );
 );
-
-
 
 *RP* upper bound of 90% on share of electricity produced by a single VRE technology, and lower bound on usablese to prevent the solver from dividing by 0
 v32_shSeEl.up(t,regi,teVRE) = 90;
@@ -137,7 +144,7 @@ v32_shStor.fx(t,regi,te)$(regDTCoup(regi) AND cm_DTcoup_eq eq 1) = 0;
 v32_shSeElDem.up(t,regi,teFlexTax) = 100;
 v32_shSeElDem.lo(t,regi,teFlexTax) = 0;
 
-*** Fix capacity for seh2 -> seel for DEU for now (no H2 as grid storage)
+*** Fix capacity for seh2 -> seel for coupled region for now (no H2 as grid storage)
 vm_cap.fx(t,regi,"h2turbVRE","1")$(regDTCoup(regi) AND cm_DTcoup_eq eq 1) = 0;
 
 *fixing some less used technologies (at least for Germany) to 0 to avoid distortions
