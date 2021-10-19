@@ -123,15 +123,15 @@ p32_seh2elh2Dem(t,regi,enty)$(sameas(enty,"seh2")) = vm_demSe.l(t,regi,"seel","s
 *if( ((ord(iteration) ge sm32_DTiter) and ( mod(ord(iteration), 3) eq 0)),
 
  sm32_DTiter = 2
- if( ((ord(iteration) ge sm32_DTiter) and ( mod(ord(iteration), 5) eq 0)),
+ if( ((ord(iteration) ge sm32_DTiter) and ( mod(ord(iteration), 2) eq 0)),
 
 sm32_iter = iteration.val;
 display "DIETER iteration", sm32_iter;
 
 *   switch on second coupling switch when coupling actually begins
-    if( (ord(iteration) eq sm32_DTiter) ,
+* if( (ord(iteration) eq sm32_DTiter) ,
         cm_DTcoup_eq = 1;
-    );
+* );
 
 *** CG: smoothing demand over iterations to pass to DIETER
 *without demand averaging
@@ -201,7 +201,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *   optional: averaging capfac over 2 iterations
 
 ***CG:noCF averaging
-* if( (ord(iteration) le (sm32_DTiter + 1)) ,
+if( (ord(iteration) le (sm32_DTiter + 1)) ,
     pm_cf(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
     			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac")$(tDT32(t) AND regDTCoup(regi)));
     pm_cf(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi))
@@ -216,33 +216,33 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
     pm_cf(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi))
     			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","capfac")$(tDT32(t) AND regDTCoup(regi)));
 $ENDIF.elh2_coup
-* );
+);
 
 ***CG:CF averaging, only after DT is coupled for one iteration (to avoid pm_cf being distorted by default high values)
-* if( (ord(iteration) gt (sm32_DTiter + 1)),
-*     p32_cf_curr_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = pm_cf(t,regi,te);
-*
-*     pm_cf(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
-*     			= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(COALte32(te))
-*           + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac")$(tDT32(t) AND regDTCoup(regi))) );
-*     pm_cf(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi))
-*     			= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(NonPeakGASte32(te))
-*           + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"CCGT","capfac")$(tDT32(t) AND regDTCoup(regi))) );
-*     pm_cf(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi))
-*     			= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(BIOte32(te))
-*     			+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"bio","capfac")$(tDT32(t) AND regDTCoup(regi))) );
-*     pm_cf(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi))
-*     			= 0.5 * ( p32_cf_curr_iter(t,regi,"ngt")
-*     			+ sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"OCGT_eff","capfac")$(tDT32(t) AND regDTCoup(regi))) );
-*     pm_cf(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi))
-*     			= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(NUCte32(te))
-*     			+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","capfac")$(tDT32(t) AND regDTCoup(regi))) );
-* $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-*     pm_cf(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi))
-*           = 0.5 * ( p32_cf_curr_iter(t,regi,"elh2")
-*     			+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","capfac")$(tDT32(t) AND regDTCoup(regi))) );
-* $ENDIF.elh2_coup
-* );
+if( (ord(iteration) gt (sm32_DTiter + 1)),
+    p32_cf_curr_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = pm_cf(t,regi,te);
+
+    pm_cf(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
+    			= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(COALte32(te))
+          + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac")$(tDT32(t) AND regDTCoup(regi))) );
+    pm_cf(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi))
+    			= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(NonPeakGASte32(te))
+          + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"CCGT","capfac")$(tDT32(t) AND regDTCoup(regi))) );
+    pm_cf(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi))
+    			= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(BIOte32(te))
+    			+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"bio","capfac")$(tDT32(t) AND regDTCoup(regi))) );
+    pm_cf(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi))
+    			= 0.5 * ( p32_cf_curr_iter(t,regi,"ngt")
+    			+ sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"OCGT_eff","capfac")$(tDT32(t) AND regDTCoup(regi))) );
+    pm_cf(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi))
+    			= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(NUCte32(te))
+    			+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","capfac")$(tDT32(t) AND regDTCoup(regi))) );
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+    pm_cf(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi))
+          = 0.5 * ( p32_cf_curr_iter(t,regi,"elh2")
+    			+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","capfac")$(tDT32(t) AND regDTCoup(regi))) );
+$ENDIF.elh2_coup
+);
 
 *   pass peak demand from DIETER to REMIND as a fraction of the total demand
     p32_peakDemand_relFac(t,regi)$(tDT32(t) AND regDTCoup(regi))
