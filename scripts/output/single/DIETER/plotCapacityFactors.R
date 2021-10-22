@@ -69,7 +69,7 @@ for (i in 1:length(remind.files)){
 out.dieter.capfac <- NULL
 for (i in 1:length(dieter.files)){
   dieter.data <- file.path(outputdir, dieter.files[i]) %>% 
-    read.gdx("report4RM", squeeze=F, colNames=c("file", "tall", "all_regi", "technology", "var", "value")) %>% 
+    read.gdx("p32_report4RM", squeeze=F, colNames=c("file", "tall", "all_regi", "technology", "var", "value")) %>% 
     select(!c(file, all_regi)) %>% 
     filter(tall %in% report.periods) %>% 
     mutate(tall = as.numeric(as.character(tall))) %>%

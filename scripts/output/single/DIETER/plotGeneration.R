@@ -28,7 +28,7 @@ for (i in 1:length(remind.files)){
 out.dieter <- NULL
 for (i in 1:length(dieter.files)){
   dieter.data <- file.path(outputdir, dieter.files[i]) %>% 
-    read.gdx("report4RM", squeeze=F) %>% 
+    read.gdx("p32_report4RM", squeeze=F) %>% 
     select(X..1, X..3, X..4, value) %>% 
     rename(tall = X..1, technology=X..3, var=X..4) %>%
     mutate(tall = as.numeric(as.character(tall))) %>% 
