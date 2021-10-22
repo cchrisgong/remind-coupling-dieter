@@ -157,6 +157,9 @@ authors:
   given-names:  Falko
   affiliation: "Potsdam Institute for Climate Impact Research"
 
+- family-names: Gong
+  given-names:  Chen Chris
+  affiliation: "Potsdam Institute for Climate Impact Research"
 
 title: REMIND - REgional Model of INvestments and Development
 version: "2.2.0"
