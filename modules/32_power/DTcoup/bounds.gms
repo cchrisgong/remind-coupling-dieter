@@ -144,6 +144,9 @@ v32_shStor.fx(t,regi,te)$(regDTCoup(regi) AND cm_DTcoup_eq eq 1) = 0;
 v32_shSeElDem.up(t,regi,teFlexTax) = 100;
 v32_shSeElDem.lo(t,regi,teFlexTax) = 0;
 
+v32_shSeEl.up(t,regi,te) = 100;
+v32_shSeEl.lo(t,regi,te) = 0;
+
 *** Fix capacity for seh2 -> seel for coupled region for now (no H2 as grid storage)
 vm_cap.fx(t,regi,"h2turbVRE","1")$(regDTCoup(regi) AND cm_DTcoup_eq eq 1) = 0;
 

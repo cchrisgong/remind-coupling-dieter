@@ -133,7 +133,8 @@ q32_shSeEl(t,regi,te)..
 
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-*** CG: Calculation of share of electricity demand, e.g. of green h2 using elh2
+*** CG: Calculation of share of electricity demand, e.g. of green h2 using elh2 (note: v32_shSeElDem right now don't add up to 100
+***since vm_usableSe also includes energy for fuel extraction, etc... can be improved later)
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 ***---------------------------------------------------------------------------
 q32_shSeElDem(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi))..
@@ -219,7 +220,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 $IFTHEN.hardcap %cm_softcap% == "off"
 *** hard capacity constraint to peak residual load demand
 
-q32_peakDemand_DT(t,regi,"seel")$(tDT32s(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
+q32_peakDemand_DT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=e=
 * use in-iteration variable

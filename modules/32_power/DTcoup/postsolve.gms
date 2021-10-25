@@ -43,11 +43,10 @@ p32_marketPrice(t,regi,te)$regDTCoup(regi)
 p32_valueFactor(t,regi,te)$regDTCoup(regi)
       = p32_marketValue(t,regi,te)$regDTCoup(regi)/(pm_SEPrice(t,regi,"seel")$regDTCoup(regi) + sm_eps);
 
-p32_shSeEl(t,regi,te)$regDTCoup(regi) = v32_shSeEl.l(t,regi,te)$regDTCoup(regi);
+*p32_shSeEl(t,regi,te)$regDTCoup(regi) = v32_shSeEl.l(t,regi,te)$regDTCoup(regi);
 
 *** CG: calculate budget from last iteration
 p32_budget(t,regi) = qm_budget.m(t,regi);
-
 
 *** CG: Total power produced (including curtailment, co-production, own consumption)
 p32_totProd(t,regi,enty2)$(sameas(enty2,"seel")) =
@@ -96,6 +95,9 @@ p32_seelTotDem(t,regi,enty2)$(sameas(enty2,"seel")) =
 + sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr.l(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! do not use in 2005 because this demand is not contained in 05_initialCap
 ;
 
+p32_DIETER_curtailmentratio_last_iter(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETER_curtailmentratio(t,regi,"spv");
+p32_DIETER_curtailmentratio_last_iter(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETER_curtailmentratio(t,regi,"wind");
+
 *** CG: total usable demand to pass on to DIETER: this has to
 *** include the electricity consumed for extracting fuels (included in p32_seelTotDem),
 *** as well as distributing and transporting them (p32_prod4dtFE) and doing CCS (p32_prod4CCS)
@@ -122,41 +124,48 @@ p32_seh2elh2Dem(t,regi,enty)$(sameas(enty,"seh2")) = vm_demSe.l(t,regi,"seel","s
 *sm32_DTiter = 15
 *if( ((ord(iteration) ge sm32_DTiter) and ( mod(ord(iteration), 3) eq 0)),
 
- sm32_DTiter = 2
- if( ((ord(iteration) ge sm32_DTiter) and ( mod(ord(iteration), 2) eq 0)),
+sm32_DTiter = 1;
+ if( ((ord(iteration) ge sm32_DTiter) and ( mod(ord(iteration), 1) eq 0)),
 
 sm32_iter = iteration.val;
 display "DIETER iteration", sm32_iter;
 
-*   switch on second coupling switch when coupling actually begins
-* if( (ord(iteration) eq sm32_DTiter) ,
-        cm_DTcoup_eq = 1;
-* );
-
 *** CG: smoothing demand over iterations to pass to DIETER
 *without demand averaging
-if( (ord(iteration) le (sm32_DTiter + 1)) ,
-p32_seh2elh2Dem_avg(t,regi,enty)$(sameas(enty,"seh2")) = p32_seh2elh2Dem(t,regi,enty);
-p32_seelUsableDem_avg(t,regi,enty)$(sameas(enty,"seel")) = p32_seelUsableDem(t,regi,enty);
-);
+* if( (ord(iteration) le (sm32_DTiter + 1)) ,
+*$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+* p32_seh2elh2Dem_avg(t,regi,enty)$(regDTCoup(regi) AND sameas(enty,"seh2")) = p32_seh2elh2Dem(t,regi,enty);
+*$ENDIF.elh2_coup
+
+* p32_seelUsableDem_avg(t,regi,enty)$(regDTCoup(regi) AND sameas(enty,"seel")) = p32_seelUsableDem(t,regi,enty);
+* );
 
 *** with demand averaging
-if( (ord(iteration) gt (sm32_DTiter + 1)) ,
+* if( (ord(iteration) gt (sm32_DTiter + 1)) ,
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 p32_seh2elh2Dem_avg(t,regi,enty)$(sameas(enty,"seh2")) =
   0.5 * (p32_seh2elh2Dem(t,regi,enty) + p32_seh2elh2Dem_last_iter(t,regi,enty));
+$ENDIF.elh2_coup
 
 p32_seelUsableDem_avg(t,regi,enty)$(sameas(enty,"seel")) =
   0.5 * (p32_seelUsableDem(t,regi,enty) + p32_seelUsableDem_last_iter(t,regi,enty));
-);
+* );
+***CG:interest rate (Marian's formula) (should move this to core/postsolve at some point)
+p32_R_4DT(ttot,regi)$(tDT32s2(ttot))
+= (( (vm_cons.l(ttot+1,regi)/pm_pop(ttot+1,regi)) /
+  (vm_cons.l(ttot-1,regi)/pm_pop(ttot-1,regi)) )
+  ** (1 / ( pm_ttot_val(ttot+1)- pm_ttot_val(ttot-1))) - 1) + pm_prtp(regi);
+
+p32_R_4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
 
 * REMIND data for DIETER
-    execute_unload "RMdata_4DT.gdx", vm_cap, sm32_iter, p32_seelUsableDem_avg, p32_seh2elh2Dem_avg,p32_fuelprice_avgiter,
+    execute_unload "RMdata_4DT.gdx", vm_cap, sm32_iter, p32_R_4DT, p32_seelUsableDem_avg, p32_seh2elh2Dem_avg, p32_fuelprice_avgiter,
     f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
     pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, pm_cf, vm_capFac, pm_dataren, vm_capDistr;
 
-if( (ord(iteration) eq (sm32_DTiter + 1)) ,
-    execute_unload "RMdata_4RM.gdx", p21_taxrevMrkup0, p21_taxrevFlex0, v21_taxrevFlex.l, v21_taxrevMrkup.l;
-);
+* if( (ord(iteration) eq (sm32_DTiter + 1)) ,
+*     execute_unload "RMdata_4RM.gdx", p21_taxrevMrkup0, p21_taxrevFlex0, v21_taxrevFlex.l, v21_taxrevMrkup.l;
+* );
 
     execute "./DIETER_parallel.sh";
 		put "running DIETER iteration", sm32_iter:0:0;
@@ -164,7 +173,7 @@ if( (ord(iteration) eq (sm32_DTiter + 1)) ,
     execute './mergegdx.sh';
 
 *   .nr = 2 formats numbers in scientific notation (what we usually want for
-*   debugging, because small numbers get rounded to zero otherwise, although
+*   debugging, because small numbers get rounded to zero otherwise even though
 *   they are significant, e.g. for the calibration).  So there's a .nr = 1 up
 *   front to ensure "normal" numbers.
 
@@ -192,141 +201,7 @@ if ( (c_keep_iteration_gdxes eq 1) ,
 
 );
 logfile.nr = 2;
-
-$IFTHEN.DTcoup %cm_DTcoup% == "on"
-    Execute_Loadpoint 'results_DIETER' p32_report4RM;
-    Execute_Loadpoint 'results_DIETER' p32_reportmk_4RM;
-*   Couple capacity factor from DIETER to REMIND
-*   sum over gdxfile set removes this extra index that comes from gdxmerge algorithm
-*   optional: averaging capfac over 2 iterations
-
-***CG:noCF averaging
-if( (ord(iteration) le (sm32_DTiter + 1)) ,
-    pm_cf(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
-    			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac")$(tDT32(t) AND regDTCoup(regi)));
-    pm_cf(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi))
-    			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"CCGT","capfac")$(tDT32(t) AND regDTCoup(regi)));
-    pm_cf(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi))
-    			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"bio","capfac")$(tDT32(t) AND regDTCoup(regi)));
-    pm_cf(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi))
-    			= sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"OCGT_eff","capfac")$(tDT32(t) AND regDTCoup(regi)));
-    pm_cf(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi))
-    			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","capfac")$(tDT32(t) AND regDTCoup(regi)));
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-    pm_cf(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi))
-    			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","capfac")$(tDT32(t) AND regDTCoup(regi)));
-$ENDIF.elh2_coup
 );
-
-***CG:CF averaging, only after DT is coupled for one iteration (to avoid pm_cf being distorted by default high values)
-if( (ord(iteration) gt (sm32_DTiter + 1)),
-    p32_cf_curr_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = pm_cf(t,regi,te);
-
-    pm_cf(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
-    			= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(COALte32(te))
-          + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac")$(tDT32(t) AND regDTCoup(regi))) );
-    pm_cf(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi))
-    			= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(NonPeakGASte32(te))
-          + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"CCGT","capfac")$(tDT32(t) AND regDTCoup(regi))) );
-    pm_cf(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi))
-    			= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(BIOte32(te))
-    			+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"bio","capfac")$(tDT32(t) AND regDTCoup(regi))) );
-    pm_cf(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi))
-    			= 0.5 * ( p32_cf_curr_iter(t,regi,"ngt")
-    			+ sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"OCGT_eff","capfac")$(tDT32(t) AND regDTCoup(regi))) );
-    pm_cf(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi))
-    			= 0.5 * ( p32_cf_curr_iter(t,regi,te)$(NUCte32(te))
-    			+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","capfac")$(tDT32(t) AND regDTCoup(regi))) );
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-    pm_cf(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi))
-          = 0.5 * ( p32_cf_curr_iter(t,regi,"elh2")
-    			+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","capfac")$(tDT32(t) AND regDTCoup(regi))) );
-$ENDIF.elh2_coup
-);
-
-*   pass peak demand from DIETER to REMIND as a fraction of the total demand
-    p32_peakDemand_relFac(t,regi)$(tDT32(t) AND regDTCoup(regi))
-		      = sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"all_te","ResPeakDem_relFac")$(tDT32(t) AND regDTCoup(regi)));
-
-*** dividing each DIETER tech into REMIND tech, using the last iteration REMIND share within DIETER tech category to scale down the generation share
-    p32_tech_category_genshare(t,regi,te)$(BIOte32(te) AND regDTCoup(regi))
-		      = p32_shSeEl(t,regi,te)$(BIOte32(te) AND regDTCoup(regi))/sum(te2$(BIOte32(te2)),p32_shSeEl(t,regi,te2)$regDTCoup(regi) + sm_eps);
-		p32_tech_category_genshare(t,regi,te)$(NonPeakGASte32(te) AND regDTCoup(regi))
-		      = p32_shSeEl(t,regi,te)$(NonPeakGASte32(te) AND regDTCoup(regi))/sum(te2$(NonPeakGASte32(te2)),p32_shSeEl(t,regi,te2)$regDTCoup(regi) + sm_eps);
-		p32_tech_category_genshare(t,regi,te)$(NUCte32(te) AND regDTCoup(regi))
-		      = p32_shSeEl(t,regi,te)$(NUCte32(te) AND regDTCoup(regi))/sum(te2$(NUCte32(te2)),p32_shSeEl(t,regi,te2)$regDTCoup(regi) + sm_eps);
-		p32_tech_category_genshare(t,regi,te)$(COALte32(te) AND regDTCoup(regi))
-		      = p32_shSeEl(t,regi,te)$(COALte32(te) AND regDTCoup(regi))/sum(te2$(COALte32(te2)),p32_shSeEl(t,regi,te2)$regDTCoup(regi) + sm_eps);
-
-    p32_DIETER_shSeEl(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi))
-					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","gen_share")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_shSeEl(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi))
-					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","gen_share")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_shSeEl(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi))
-					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"OCGT_eff","gen_share")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_shSeEl(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi))
-					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"ror","gen_share")$(tDT32(t) AND regDTCoup(regi)));
-*CG* downscaling technology shares in REMIND
-    p32_DIETER_shSeEl(t,regi,te)$(tDT32(t) AND regDTCoup(regi)AND BIOte32(te) )
-					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"bio","gen_share")$(tDT32(t) AND regDTCoup(regi)))
-							*	p32_tech_category_genshare(t,regi,te)$(BIOte32(te) AND regDTCoup(regi)) ;
-    p32_DIETER_shSeEl(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND NonPeakGASte32(te))
-					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"CCGT","gen_share")$(tDT32(t) AND regDTCoup(regi)))
-						 	* p32_tech_category_genshare(t,regi,te)$(NonPeakGASte32(te) AND regDTCoup(regi)) ;
-    p32_DIETER_shSeEl(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND NUCte32(te))
-					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","gen_share")$(tDT32(t) AND regDTCoup(regi)))
-					  	* p32_tech_category_genshare(t,regi,te)$(NUCte32(te) AND regDTCoup(regi)) ;
-    p32_DIETER_shSeEl(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND COALte32(te))
-					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","gen_share")$(tDT32(t) AND regDTCoup(regi)))
-				    	* p32_tech_category_genshare(t,regi,te)$(COALte32(te) AND regDTCoup(regi)) ;
-
-*   supply side tech market value
-    p32_DIETER_MV(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"bio","market_value")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_MV(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"CCGT","market_value")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_MV(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"OCGT_eff","market_value")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_MV(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"nuc","market_value")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_MV(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"coal","market_value")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_MV(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Solar","market_value")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_MV(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"ror","market_value")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_MV(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Wind_on","market_value")$(tDT32(t) AND regDTCoup(regi)));
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-*   flexible demand side tech market value (electricity price that the flex tech "sees")
-    p32_DIETER_MP(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"elh2","market_price")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_MP(t,regi,"tdels")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"el","market_price")$(tDT32(t) AND regDTCoup(regi)));
-    p32_DIETER_MP(t,regi,"tdelt")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"el","market_price")$(tDT32(t) AND regDTCoup(regi)));
-* p32_DIETER_VF(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"elh2","value_factor")$(tDT32(t) AND regDTCoup(regi)));
-* p32_DIETER_VF(t,regi,"tdels")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"el","value_factor")$(tDT32(t) AND regDTCoup(regi)));
-* p32_DIETER_VF(t,regi,"tdelt")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"el","value_factor")$(tDT32(t) AND regDTCoup(regi)));
-$ENDIF.elh2_coup
-
-*** DIETER electricity price
-    p32_DIETER_elecprice(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"all_te","elec_price")$(tDT32(t) AND regDTCoup(regi)));
-
-*** CG: storage related coupling parameters
-if( (ord(iteration) le (sm32_DTiter + 1)),
-** no curt_ratio averaging
-p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
-p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio")$(tDT32(t) AND regDTCoup(regi)));
-);
-
-p32_DIETER_curtailmentratio_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = p32_DIETER_curtailmentratio(t,regi,te);
-
-* with curt_ratio averaging
-if( (ord(iteration) gt (sm32_DTiter + 1)),
-p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) =
-      0.5 * (p32_DIETER_curtailmentratio_last_iter(t,regi,"spv")
-      + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio")$(tDT32(t) AND regDTCoup(regi))));
-
-p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) =
-      0.5* (p32_DIETER_curtailmentratio_last_iter(t,regi,"wind")
-      + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio")$(tDT32(t) AND regDTCoup(regi))));
-);
-
-* ror capfac is harmonized by putting capfac in DIETER to be the same as that in REMIND
-
-$ENDIF.DTcoup
-);
-
 
 $endif.calibrate
 *** EOF ./modules/32_power/DTcoup/postsolve.gms

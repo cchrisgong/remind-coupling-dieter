@@ -4,7 +4,10 @@ gdxfile32 "gdx file names merged by mergegdx.sh" /results_DIETER_y1*results_DIET
 ***DO NOT COUPLE 2005, otherwise will result in non-optimal - because REMIND has quite stringent constraint in 2005
 * tDT32(ttot) "time points" /2010,2015,2020,2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090,2100,2110,2130,2150/
 tDT32(ttot) "time points that are coupled to DIETER" /2020,2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090,2100,2110,2130,2150/
-tDT32s(ttot) "time points that are coupled to DIETER" /2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090,2100,2110,2130,2150/
+tDT32s(ttot) "shorter list of time points that are coupled to DIETER" /2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090,2100,2110,2130,2150/
+tDT32s2(ttot) "second shorter list of time points that are coupled to DIETER" /2020, 2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090,2100,2110,2130/
+* tDT32(ttot) "time points that are coupled to DIETER" /2020,2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090,2100/
+* tDT32s(ttot) "time points that are coupled to DIETER" /2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090,2100/
 
 * DIETER_te_stor "technologies for storage in DIETER" /Sto1*Sto7/
 
@@ -19,8 +22,6 @@ NonPeakGASte32(all_te) "gas to seel tech in REMIND" /ngcc,ngccc,gaschp/
 BIOte32(all_te) "biomass to seel tech in REMIND" /biochp,bioigcc,bioigccc/
 
 NUCte32(all_te) "nuclear to seel tech in REMIND" /tnrs,fnrs/
-
-*FlexDem32(all_te) "flexible demand side technologies" /elh2,tdels,tdelt/
 
 DISPATCHte32(all_te) "dispatchable technologies in REMIND" /igcc,igccc,pc,pcc,pco,coalchp,
 ngcc,ngccc,gaschp,biochp,bioigcc,bioigccc,ngt,tnrs,fnrs/

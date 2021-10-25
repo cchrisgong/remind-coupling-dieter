@@ -88,32 +88,20 @@ $offtext
 p32_PriceDurSlope(regi,"elh2") = cm_PriceDurSlope_elh2;
 
 Execute_Loadpoint 'input' p32_seelUsableDem = p32_seelUsableDem;
-Execute_Loadpoint 'input' p32_seh2elh2Dem = p32_seh2elh2Dem;
-Execute_Loadpoint 'input' p32_seh2elh2Dem_last_iter = p32_seh2elh2Dem_last_iter;
-Execute_Loadpoint 'input' p32_peakDemand_relFac = p32_peakDemand_relFac;
+*Execute_Loadpoint 'input' p32_seh2elh2Dem = p32_seh2elh2Dem;
+* Execute_Loadpoint 'input' p32_seh2elh2Dem_last_iter = p32_seh2elh2Dem_last_iter;
 
-Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;
-p32_fuelprice_curriter(t,regi,entyPe)$regDTCoup(regi) = q_balPe.m(t,regi,entyPe);
-p32_fuelprice_lastiter(t,regi,entyPe)$regDTCoup(regi) = q_balPe.m(t,regi,entyPe);
-p32_fuelprice_lastx2iter(t,regi,entyPe)$regDTCoup(regi) = q_balPe.m(t,regi,entyPe);
+* Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;
+* p32_fuelprice_curriter(t,regi,entyPe)$regDTCoup(regi) = q_balPe.m(t,regi,entyPe);
+* p32_fuelprice_lastiter(t,regi,entyPe)$regDTCoup(regi) = q_balPe.m(t,regi,entyPe);
+* p32_fuelprice_lastx2iter(t,regi,entyPe)$regDTCoup(regi) = q_balPe.m(t,regi,entyPe);
+
+Execute_Loadpoint 'input' p32_fuelprice_curriter = p32_fuelprice_curriter;
+Execute_Loadpoint 'input' p32_fuelprice_lastiter = p32_fuelprice_lastiter;
+Execute_Loadpoint 'input' p32_DIETER_curtailmentratio_last_iter = p32_DIETER_curtailmentratio_last_iter;
+
+Display "end of 32/datainput, pm_cf", pm_cf;
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_minVF_spv = 0.1;
-p32_DIETER_MV(t,regi,te) = 0;
-p32_DIETER_MP(t,regi,te) = 0;
-p32_DIETER_VF(t,regi,te) = 0;
-p32_DIETER_elecprice(t,regi) = 0;
-p32_DIETER_shSeEl(t,regi,te) = 0;
-p32_budget(t,regi) = 0;
-p32_cf_curr_iter(t,regi,te) = 0;
-p32_cf_next_iter(t,regi,te) = 0;
-pm_prodSe(t,regi,enty,enty2,te) = 0;
-pm_demSe(t,regi,enty,enty2,te) = 0;
-p32_shSeElDem(t,regi,te) = 0;
-p32_DIETER_curtailmentratio(t,regi,te) = 0;
-
-* Execute_Loadpoint 'input_DIETER' p32_report4RM;
-* p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_share")$(tDT32(t) AND regDTCoup(regi)));
-* p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_share")$(tDT32(t) AND regDTCoup(regi)));
-
 $ENDIF.DTcoup

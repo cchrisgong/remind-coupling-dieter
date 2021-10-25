@@ -104,8 +104,8 @@ if(cm_fetaxscen ne 0,
 );
 
 
-*** FS: switch cm_FEtax_trajectory to explicitly control tax level trajectory (overwrites cm_fetaxscen settings for the respective taxes affected), 
-$ifthen.fetax not "%cm_FEtax_trajectory_abs%" == "off" 
+*** FS: switch cm_FEtax_trajectory to explicitly control tax level trajectory (overwrites cm_fetaxscen settings for the respective taxes affected),
+$ifthen.fetax not "%cm_FEtax_trajectory_abs%" == "off"
 *** from year given in cm_FEtax_trajectory_abs, set FE tax to level specified by cm_FEtax_trajectory_abs, cm_FEtax_trajectory_abs in USD/MWh -> convert to trUSD/TWa
   loop((ttot,sector,entyFe)$p21_FEtax_trajectory_abs(ttot,sector,entyFe),
 *** set FE tax to cm_FEtax_trajectory_abs to year given in cm_FEtax_trajectory_abs and after
@@ -120,8 +120,8 @@ $ifthen.fetax not "%cm_FEtax_trajectory_abs%" == "off"
 $endif.fetax
 
 
-*** FS: switch cm_FEtax_trajectory_rel to scale tax trajectory relative to tax in cm_startyear (overwrites cm_fetaxscen settings for the respective taxes affected), 
-$ifthen.fetaxRel not "%cm_FEtax_trajectory_rel%" == "off" 
+*** FS: switch cm_FEtax_trajectory_rel to scale tax trajectory relative to tax in cm_startyear (overwrites cm_fetaxscen settings for the respective taxes affected),
+$ifthen.fetaxRel not "%cm_FEtax_trajectory_rel%" == "off"
   loop((ttot,sector,entyFe)$p21_FEtax_trajectory_rel(ttot,sector,entyFe),
     loop(ttot2$(ttot2.val eq cm_startyear),
 *** set FE tax to cm_FEtax_trajectory_rel * FE tax level of cm_startyear in year given in cm_FEtax_trajectory_rel and after
@@ -134,7 +134,7 @@ $ifthen.fetaxRel not "%cm_FEtax_trajectory_rel%" == "off"
   );
 $endif.fetaxRel
 
-display pm_tau_fe_sub; 
+display pm_tau_fe_sub;
 display pm_tau_fe_tax;
 display p21_tau_pe2se_sub, p21_tau_fuEx_sub;
 
@@ -147,14 +147,14 @@ v21_emiALLco2neg.l(ttot,regi) =0;
 v21_tau_bio.l(ttot) = 0;
 
 *** FS: initizalize flexibility tax
-vm_flexAdj.l(ttot,all_regi,all_te) = 0;
-v21_taxrevFlex.l(ttot,all_regi) = 0;
-
-*** CG: initialize markup tax
-vm_Mrkup.l(ttot,all_regi,all_te) = 0;
-v21_taxrevMrkup.l(ttot,all_regi) = 0;
-display "vm_Mrkup", vm_Mrkup.l;
-
+* vm_flexAdj.l(ttot,all_regi,all_te) = 0;
+* v21_taxrevFlex.l(ttot,all_regi) = 0;
+*
+* *** CG: initialize markup tax
+* vm_Mrkup.l(ttot,all_regi,all_te) = 0;
+* v21_taxrevMrkup.l(ttot,all_regi) = 0;
+* display "vm_Mrkup", vm_Mrkup.l;
+*
 *** CG: initialize capacity subsidy
 vm_priceCap.l(ttot,all_regi) = 0;
 vm_reqCap.l(ttot,all_regi) = 0;
