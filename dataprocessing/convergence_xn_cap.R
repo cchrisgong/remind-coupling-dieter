@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "mrkup113"
+run_number = "hydro363"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 # import library
 
@@ -10,34 +10,34 @@ require(rmndt)
 igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 
 # remind output iteration gdx files
-filenames0 <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
-sorted_files0 <- paste0(mydatapath, "fulldata_", 1:length(filenames0), ".gdx")
-files0 <- paste0("fulldata_", 1:length(filenames0), ".gdx")
+filenames <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
+sorted_files <- paste0(mydatapath, "fulldata_", 1:length(filenames), ".gdx")
+files <- paste0("fulldata_", 1:length(filenames), ".gdx")
 
-maxiter = length(filenames0)-1
-
-sorted_files <- sorted_files0[1:maxiter]
-files <- files0[1:maxiter]
-
-# files_full <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
-# sorted_files_full <- paste0(mydatapath, "fulldata_", 1:length(files_full), ".gdx")
-# files_nonopt <- list.files(mydatapath, pattern="non_optimal_[0-9]+\\.gdx")
-# sorted_files_nonopt <- paste0(mydatapath, "non_optimal_", (length(files_full)+1):(length(files_full)+length(files_nonopt)), ".gdx")
-# sorted_files = c(sorted_files_full, sorted_files_nonopt)
-# files = c(files_full, files_nonopt)
+maxiter = length(filenames)
 
 # dieter output iteration gdx files
-files_DT0 <- list.files(mydatapath, pattern="results_DIETER_i[0-9]+\\.gdx")
-# sorted_files_DT <- paste0(mydatapath, "results_DIETER_i", seq(from = 5, to = length(files_DT)*5, by = 5), ".gdx")
-sorted_files_DT0 <- paste0(mydatapath, "results_DIETER_i", seq(from = 2, to = length(files_DT0)+1, by = 1), ".gdx")
+files_DT <- list.files(mydatapath, pattern="results_DIETER_i[0-9]+\\.gdx")
 
-files_DT <- files_DT0[1:maxiter]
-sorted_files_DT <- sorted_files_DT0[1:maxiter]
+id <- NULL
+for(fname in files_DT){
+  idx <- as.numeric(str_extract(fname, "[0-9]+"))
+  id = c(id, idx)
+}
+id = sort(id)
+
+if (length(files_DT) != 0) {
+  sorted_paths_DT <- paste0(mydatapath, "results_DIETER_i", id, ".gdx")
+  sorted_files_DT <- paste0("results_DIETER_i", id, ".gdx")
+}
 
 # year_toplot_list <- c(2025,2035,2045,2055)
 year_toplot_list <- c(2020,2030,2040,2050,2060,2070,2080)
+year_toplot_list <- c(2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090,2100,2110,2130)
+# year_toplot_list <- c(2050)
 
-iter_toplot = 1:length(sorted_files)
+iter_toplot_RM = 1:(length(filenames)-1)
+iter_toplot_DT = 1:length(sorted_files_DT)
 
 remind.nonvre.mapping <- c(coalchp = "Coal (Lig + HC)",
                            igcc = "Coal (Lig + HC)",
@@ -55,17 +55,19 @@ remind.nonvre.mapping <- c(coalchp = "Coal (Lig + HC)",
                            bioigccc = "Biomass",
                            NULL)
 
-
+remind.sector.coupling.mapping <- c(elh2 = "Electrolyzers",
+                                    NULL)
+                                      
 remind.vre.mapping <- c(hydro = "Hydro",
                         wind = "Wind",
                         spv = "Solar",
                         NULL)
 
 vre.names <- c("Hydro","Wind","Solar")
-nonvre.names <- c("Lignite", "Hard coal","Coal (Lig + HC)", "Nuclear","OCGT","CCGT","Biomass")
-table_ordered_name = c("Coal (Lig + HC)", "Lignite", "Hard coal","CCGT", "Solar", "Wind", "Biomass", "OCGT", "Hydro", "Nuclear")
+nonvre.names <- c("Lignite", "Hard coal","Coal (Lig + HC)", "Nuclear","OCGT","CCGT","Biomass","Electrolyzers")
+table_ordered_name = c("Coal (Lig + HC)", "Lignite", "Hard coal","CCGT", "Solar", "Wind", "Biomass", "OCGT", "Hydro", "Nuclear","Electrolyzers")
 
-remind.tech.mapping <- c(remind.nonvre.mapping, remind.vre.mapping)
+remind.tech.mapping <- c(remind.nonvre.mapping, remind.vre.mapping, remind.sector.coupling.mapping)
 
 dieter.tech.exclude <- c("OCGT_ineff", "Wind_off")
 
@@ -79,12 +81,14 @@ dieter.tech.mapping <- c(hc = "Hard coal",
                          ror = "Hydro",
                          Wind_on = "Wind",
                          Solar = "Solar",
+                         elh2 = "Electrolyzers",
                          NULL)
 
 # year_toplot = 2050
 
 VARkey1 = "vm_cap"
 REGIkey1 = "DEU"
+# REGIkey1 = "USA"
 grade = "1"
 
 VARkey1_DT = "p32_report4RM"
@@ -92,39 +96,55 @@ VARsubkey1_DT = "capacity"
 VARsubkey2_DT = "capfac"
 
 VARsubkey1_RM = "p32_peakDemand_relFac"
-VARsubkey2_RM = "p32_seelDem"
+VARsubkey2_RM = "p32_seelUsableDem"
+VARsubkey3_RM = "p32_seh2elh2Dem"
 
 color.mapping <- c("CCGT" = "#999959", "Lignite" = "#0c0c0c", "Coal (Lig + HC)" = "#0c0c0c",
                    "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
                    "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
-                   "Hard coal" = "#808080", "peak demand" = "#0c0c0c")
+                   "Hard coal" = "#808080", "peak demand" = "#0c0c0c", "Electrolyzers" = "#48D1CC")
 
 ########################################################
 ########################################################
+if (length(files_DT) != 0) {
 get_DEMvariable_RM <- function(iteration){
   gdx = sorted_files[[iteration]]
-  vrdata <- read.gdx(gdx, VARsubkey2_RM,field="l", factor = FALSE) %>% 
+  
+  resfrac <- read.gdx(gdx, VARsubkey1_RM, factor = FALSE) %>% 
+    filter(ttot %in% year_toplot_list) %>% 
+    filter(all_regi == REGIkey1) %>%
+    select(period=ttot,resfrac = value) 
+  
+  h2dem <- read.gdx(gdx, VARsubkey3_RM, factor = FALSE) %>% 
+    filter(ttot %in% year_toplot_list) %>% 
+    filter(all_regi == REGIkey1) %>%
+    select(period=ttot,h2dem = value) 
+  
+  vrdata <- read.gdx(gdx, VARsubkey2_RM, field="l", factor = FALSE) %>% 
     filter(ttot %in% year_toplot_list) %>% 
     filter(all_regi == REGIkey1) %>%
     filter(all_enty == "seel") %>%
     select(period=ttot,value) %>% 
-    mutate(value = value * 0.000155891 * 8760 * 1e3) 
+    right_join(resfrac) %>% 
+    right_join(h2dem) %>% 
+    mutate(value = (value - h2dem) * resfrac * 8760 * 1e3) 
+  
   vrdata$iter <- iteration
   vrdata$model <- "REMIND"
   return(vrdata)
 }
 
-vr1_DEM <- lapply(iter_toplot, get_DEMvariable_RM)
+vr1_DEM <- lapply(iter_toplot_RM, get_DEMvariable_RM)
 vr1_DEM <- rbindlist(vr1_DEM)
-
-get_variable <- function(iteration){
+}
+get_CAPvariable <- function(iteration){
   gdx = sorted_files[[iteration]]
   vrdata <- read.gdx(gdx, VARkey1, factors = FALSE, squeeze = FALSE) %>% 
     filter(tall %in% year_toplot_list) %>%
     filter(all_regi == REGIkey1) %>%
     filter(all_te %in% names(remind.tech.mapping)) %>%
     filter(rlf == grade) %>% 
-    mutate(value = value*1e3) %>% #TW->GW
+    mutate(value = value * 1e3) %>% #TW->GW
     select(period = tall, all_te, rlf, value) %>% 
     revalue.levels(all_te = remind.tech.mapping) %>%
     dplyr::group_by(period, all_te, rlf) %>%
@@ -138,38 +158,39 @@ get_variable <- function(iteration){
     return(vrdata)
 }
 
-vrN_RM_CAP <- lapply(iter_toplot, get_variable)
+vrN_RM_CAP <- lapply(iter_toplot_RM, get_CAPvariable)
 vrN_RM_CAP <- rbindlist(vrN_RM_CAP)
 
-get_variable_DT <- function(iteration){
-  # iteration = 5
-  gdx = sorted_files_DT[[iteration]]
+if (length(files_DT) != 0) {
+  get_variable_DT <- function(iteration){
+  # iteration = 3
+  gdx = sorted_paths_DT[[iteration]]
   vrdata <- read.gdx(gdx, VARkey1_DT, factor = FALSE, squeeze = FALSE) %>%
-    select(period = X..1, all_te = X..3,variable=X..4,value)  %>% 
+    select(period = X..1, all_te = X..3,variable=X..4,value)  %>%
     filter(period %in% year_toplot_list) %>%
-    filter(all_te %in% names(dieter.tech.mapping)) %>% 
+    filter(all_te %in% names(dieter.tech.mapping)) %>%
     filter(variable %in% c(VARsubkey1_DT,VARsubkey2_DT)) %>%
     revalue.levels(all_te = dieter.tech.mapping) %>%
-    mutate(all_te = factor(all_te, levels=rev(unique(dieter.tech.mapping)))) 
+    mutate(all_te = factor(all_te, levels=rev(unique(dieter.tech.mapping))))
 
-    vrdata$iter <- iteration
+    vrdata$iter <- id[[iteration]]
     vrdata$model <- "DIETER"
     return(vrdata)
 }
 
-vrN_DT <- lapply(iter_toplot, get_variable_DT)
+vrN_DT <- lapply(iter_toplot_DT, get_variable_DT)
 vrN_DT <- rbindlist(vrN_DT)
 
-vrN_DT_CF <- vrN_DT %>% 
+vrN_DT_CF <- vrN_DT %>%
   filter(variable == "capfac") %>%
-  mutate(value = value * 100) %>% 
+  mutate(value = value * 100) %>%
   select(period, tech=all_te, value, iter)
 
-vrN_DT_CAP<- vrN_DT %>% 
+vrN_DT_CAP<- vrN_DT %>%
   filter(variable == "capacity") %>%
   mutate(value = value/1e3) %>% #MW->GW
   select(period, all_te, value, iter)
-
+}
 CFkey1 = "vm_capFac"
 CFkey2 = "pm_dataren"
 CFkey3 = "vm_capDistr"
@@ -208,7 +229,7 @@ get_CAPFAC_variable <- function(iteration){
     filter(all_te %in% names(remind.vre.mapping)) %>% 
     revalue.levels(all_te = remind.vre.mapping) %>% 
     select(period=tall, all_te, rlf, cap_distr = value) %>% 
-    dplyr::group_by(period, all_te) %>%
+    dplyr::group_by(period, all_te) %>% 
     transmute(rlf, percentage_cap_distr = cap_distr/sum(cap_distr))
   
   vrdata2_0 = list(dataren, percentage_cap_distr) %>%
@@ -231,51 +252,61 @@ get_CAPFAC_variable <- function(iteration){
   return(vrdata_tot)
 }
 
-vrN_RM_CF <- lapply(iter_toplot, get_CAPFAC_variable)
+vrN_RM_CF <- lapply(iter_toplot_RM, get_CAPFAC_variable)
 vrN_RM_CF <- rbindlist(vrN_RM_CF)
 
 for(year_toplot in year_toplot_list){
   vrN_RM_CAP_plot <- vrN_RM_CAP %>% 
     filter(period == year_toplot)
+  
+  if (length(files_DT) != 0) {
   vr1_DEM_plot <- vr1_DEM %>% 
     filter(period == year_toplot)
   vr1_DEM_plot$tech <- "peak demand"
+  }
   
   vrN_RM_CF_plot <- vrN_RM_CF %>% 
     filter(period == year_toplot)
   
-  secAxisScale1 = max(vrN_RM_CAP_plot$value)/100
+  secAxisScale1 = max(vrN_RM_CAP_plot$value) / 100
 
   vrN_RM_CAP_plot2<- vrN_RM_CAP_plot %>% 
     dplyr::group_by(period, rlf, iter, model) %>%
     dplyr::summarise( value = sum(value) , .groups = 'keep' ) %>% 
     dplyr::ungroup(period, rlf, iter, model) 
   
-  ymax = max(vrN_RM_CAP_plot2$value)*1.1
+  ymax = max(vrN_RM_CAP_plot2$value) * 1.1
   
-p1<-ggplot() +
+p0<-ggplot() +
   geom_area(data = vrN_RM_CAP_plot, aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5) +
-  geom_line(data = vr1_DEM_plot, aes(x = iter, y = value, color = tech), size = 1.2, alpha = 0.5,linetype="dotted") +
-  geom_line(data = vrN_RM_CF_plot, aes(x = iter-1, y = value*secAxisScale1, color = tech), size = 1.2, alpha = 0.5) +
+  geom_line(data = vrN_RM_CF_plot, aes(x = iter, y = value*secAxisScale1, color = tech), size = 1.2, alpha = 0.5) + 
   scale_y_continuous(sec.axis = sec_axis(~./secAxisScale1, name = paste0("CF", "(%)")))+
   scale_fill_manual(name = "Technology", values = color.mapping) +
-  scale_color_manual(name = "tech", values = color.mapping)+
-  theme(axis.text=element_text(size=14), axis.title=element_text(size= 14,face="bold")) + 
+  scale_color_manual(name = "tech", values = color.mapping) +
+  theme(axis.text=element_text(size=14), axis.title=element_text(size = 14,face="bold")) + 
   xlab("iteration") + ylab(paste0(VARkey1, "(GW)")) +
+  # ggtitle(paste0("REMIND ", year_toplot, " (100$/tCO2)"))+
   ggtitle(paste0("REMIND ", year_toplot))+
-  coord_cartesian(xlim = c(0, max(vrN_RM_CAP_plot$iter)),ylim = c(0, ymax)) +
+  coord_cartesian(xlim = c(0, max(vrN_RM_CAP_plot$iter)+1),ylim = c(0, ymax)) +
   theme(plot.title = element_text(size = 16, face = "bold")) +
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text=element_text(size=14)) +
   theme(aspect.ratio = .5)
 
-vrN_DT_CAP_plot <- vrN_DT_CAP %>% 
+if (length(files_DT) != 0) {
+  p1 <- p0 + 
+    geom_line(data = vr1_DEM_plot, aes(x = iter+1, y = value, color = tech), size = 1.2, alpha = 0.5,linetype="dotted")
+}
+
+vrN_DT_CAP_plot <- vrN_DT_CAP %>%
   filter(period == year_toplot)
 
-vrN_DT_CF_plot <- vrN_DT_CF %>% 
+if (length(files_DT) != 0) {
+vrN_DT_CF_plot <- vrN_DT_CF %>%
   filter(period == year_toplot)
+}
+secAxisScale2 = max(vrN_RM_CAP_plot$value) / 100
 
-secAxisScale2 = max(vrN_DT_CAP_plot$value)/100
-
+if (length(files_DT) != 0) {
 p2<-ggplot() +
   geom_area(data = vrN_DT_CAP_plot, aes(x = iter + 1, y = value, fill = all_te), size = 1.2, alpha = 0.5) +
   geom_line(data = vr1_DEM_plot, aes(x = iter + 1, y = value, color = tech), size = 1.2, alpha = 1,linetype="dotted") +
@@ -286,17 +317,21 @@ p2<-ggplot() +
   theme(axis.text=element_text(size=14), axis.title=element_text(size= 14,face="bold")) +
   xlab("iteration") + ylab(paste0("capacity (GW)")) +
   coord_cartesian(xlim = c(0, max(vrN_DT_CAP_plot$iter)),ylim = c(0, ymax))+
+  # ggtitle(paste0("DIETER ", year_toplot, " (100$/tCO2)"))+
   ggtitle(paste0("DIETER ", year_toplot))+
   theme(plot.title = element_text(size = 16, face = "bold"))+
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text=element_text(size=14)) +
   theme(aspect.ratio = .5)
+}
 
 library(grid)
 grid.newpage()
+if (length(files_DT) != 0) {
 p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
+} else { p<-p1 }
+
 grid.draw(p)
 
 ggsave(filename = paste0(mypath, run_number, "_CAP_", year_toplot, "wCF.png"),  p,  width = 13, height =16, units = "in", dpi = 120)
-# ggsave(filename = paste0(mypath, "CAP_", run_number, "_uncoupl", year_toplot, ".png"),  p,  width = 12, height =16, units = "in", dpi = 120)
 }
 

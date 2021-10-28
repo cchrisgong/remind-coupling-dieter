@@ -4,20 +4,16 @@ mypath = "~/remind-coupling-dieter/dataprocessing/"
 myDIETERPLOT_path = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
 
 #fully coupled REMIND run (in validation mode
-run_number_full = "hydro42"
+run_number_full = "hydro355"
 
 # import library
 source(paste0(mypath, "library_import.R"))
 source(paste0(myDIETERPLOT_path, "GDXtoQuitte.R"))
 
-#!!!Note:run order is remind_1 -> dieter_2 -> remind_2 (not coupled) -> dieter_3
-#-> remind_3 (coupled to dieter_2)...
-# to compare runs between the 2 models, we should use dieter2 to compare with remind3, because they have
-# the same CF, however they will see different LCOE
-iter_tovalid_RM = c(30)
-iter_tovalid_DT_4RM = c(31) # the iteration of DIETER needed for reporting iteration=iter_tovalid_RM of remind
-iter_tovalid_DT = c(30) # the iteration of DIETER needed for reporting the iteration of DIETER that passes
-#CF to REMIND iteration iter_tovalid_RM
+# !!!Note:run order is remind_1 -> remind_2 (not coupled) -> dieter_1 (coupled to remind_1) -> remind_3 (coupled to dieter_1) -> dieter_2 (coupled to remind_2) ...
+## gdx in order produced: fulldata_1.gdx -> DIETER_i1.gdx -> fulldata_2.gdx -> DIETER_i2.gdx -> fulldata_3.gdx ...
+
+
 
 run_number = run_number_full
 mydatapath =  paste0("~/remind-coupling-dieter/output/", run_number, "/") 
@@ -26,15 +22,32 @@ mydatapath =  paste0("~/remind-coupling-dieter/output/", run_number, "/")
 files <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
 sorted_files <- paste0(mydatapath, "fulldata_", 1:length(files), ".gdx")
 
+maxiter = length(files)
+
+# to compare runs between the 2 models, we should use dieter1 to compare with remind2, because they have
+# the same CF, however, they will see different LCOE
+iter_tovalid_RM = c(28,29)
+iter_tovalid_DT_4RM = c(28,29) # the iteration of DIETER needed for reporting iteration=iter_tovalid_RM of remind
+iter_tovalid_DT = c(27,28) # the iteration of DIETER needed for reporting the iteration of DIETER that passes
+#CF to REMIND iteration iter_tovalid_RM
+
 #dieter output iteration gdx files
 files_DT_rep <- list.files(mydatapath, pattern="report_DIETER_i[0-9]+\\.gdx") 
-for(fname in files_DT_rep){
-gdxToQuitte_annual(mydatapath, fname, run_number)
-}
+# for(fname in files_DT_rep){
+# gdxToQuitte_annual(mydatapath, fname, run_number)
+# }
 startyear = 2020
 endyear = 2100
 
-sorted_annual_report_DT <- paste0(myDIETERPLOT_path, run_number, "_i", seq(from = 2, to = length(files_DT_rep), by = 1), "_annualreport.csv")
+id <- NULL
+for(fname in files_DT_rep){
+  idx <- as.numeric(str_extract(fname, "[0-9]+"))
+  id = c(id, idx)
+}
+
+if (length(files_DT_rep) != 0) {
+  sorted_annual_report_DT <- paste0(myDIETERPLOT_path, run_number, "_i", sort(id), "_annualreport.csv")
+}
 
 remind.nonvre.mapping <- c(coalchp = "Coal (Lig + HC)",
                            igcc = "Coal (Lig + HC)",
@@ -57,11 +70,15 @@ remind.vre.mapping <- c(hydro = "Hydro",
                         spv = "Solar",
                         NULL)
 
+remind.dem.mapping <- c(elh2 = "Electrolyser",
+                        el = "Electricity",
+                        NULL)
+
 vre.names <- c("Hydro","Wind","Solar")
 nonvre.names <- c("Lignite", "Hard coal","Coal (Lig + HC)", "Nuclear","OCGT","CCGT","Biomass")
 table_ordered_name = c("Coal (Lig + HC)", "Lignite", "Hard coal","CCGT", "Solar", "Wind", "Biomass", "OCGT", "Hydro", "Nuclear")
 
-remind.tech.mapping <- c(remind.nonvre.mapping, remind.vre.mapping)
+remind.tech.mapping <- c(remind.nonvre.mapping, remind.vre.mapping,remind.dem.mapping)
 
 dieter.tech.exclude <- c("OCGT_ineff", "Wind_off")
 
@@ -75,10 +92,28 @@ dieter.tech.mapping <- c(hc = "Hard coal",
                          ror = "Hydro",
                          Wind_on = "Wind",
                          Solar = "Solar",
-                         "all Tech" = "all Tech",
+                         elh2 = "Electrolyser",
+                         el = "Secondary Electricity (stationary or T&D)",
+                         "all Tech" = "Secondary Electricity (total)",
                          NULL)
 
-VAR_report_key1_DT = c("DIETER avg CapFac (%)","DIETER LCOE_avg ($/MWh)","DIETER marg CapFac (%)","DIETER LCOE_marg ($/kWh)","DIETER Market value ($/MWh)","DIETER Marginal market value ($/MWh)","DIETER Revenue (billionUSD)","DIETER Revenue marginal plant (millionUSD)", "DIETER added capacities (GW)", "REMIND pre-investment capacities (GW)","REMIND LCOE ($/MWh)", "REMIND CapFac (%)","REMIND added capacities (GW)","DIETER LCOE_marg ($/MWh)", "load-weighted price for fixed demand ($/MWh)", "price w/ scarcity price shaved ($/MWh)","DIETER Market value w/ scarcity price shaved ($/MWh)", "DIETER Value factor (%)", "genshares (%)")
+table_tech_order <-  c(Wind_on = "Wind",
+                       Solar = "Solar",
+                       hc = "Hard coal",
+                       lig = "Lignite",
+                       coal = "Coal (Lig + HC)",
+                       nuc = "Nuclear",
+                       OCGT_eff = "OCGT",
+                       CCGT = "CCGT",
+                       bio = "Biomass",
+                       ror = "Hydro",
+                       el = "Secondary Electricity (stationary or T&D)",
+                       "all Tech" = "Secondary Electricity (total)",
+                       elh2 = "Electrolyser",
+                       NULL)
+  
+  
+VAR_report_key1_DT = c("DIETER avg CapFac (%)","DIETER LCOE_avg ($/MWh)","DIETER LCOE_marg ($/MWh)","DIETER marg CapFac (%)","DIETER LCOE_marg ($/kWh)","DIETER Market value ($/MWh)","DIETER Marginal market value ($/MWh)","DIETER Revenue (billionUSD)","DIETER Revenue marginal plant (millionUSD)", "DIETER added capacities (GW)", "REMIND pre-investment capacities (GW)","REMIND LCOE ($/MWh)", "REMIND CapFac (%)","REMIND added capacities (GW)","DIETER LCOE_marg ($/MWh)", "load-weighted price for fixed demand ($/MWh)", "price w/ scarcity price shaved ($/MWh)","DIETER Market value w/ scarcity price shaved ($/MWh)", "DIETER Value factor (%)", "genshares (%)")
 
 # relevant cost parameters to be loaded from DIETER reporting
 VAR_report_key2_DT = c("annualized investment cost ($/kW)", "O&M cost ($/kW)")
@@ -95,16 +130,15 @@ year_tovalid_after  = c(seq(2025, 2060, 5), seq(2070, 2110, 10))
 
 BUDGETkey1 = "qm_budget"
 SEELPRICEkey = "pm_SEPrice"
-# SEELPRICEkey = "p32_priceSeel"
 CFkey1 = "vm_capFac"
 CFkey2 = "pm_dataren"
 CFkey3 = "vm_capDistr"
 grade = "1"
 
-InvAdjKEY = "o_adjCostInv"
+InvAdjKEY = "o_margAdjCostInv"
 
 CapConstraintKey = "q32_peakDemand_DT"
-# CapConstraintKey = "vm_priceCap"
+DEMkey1 = "vm_demSe"
 GENkey1 = "vm_prodSe"
 GENkey2 = "vm_usableSeTe"
 GENSHAREkey = "v32_shSeEl"
@@ -112,7 +146,9 @@ CAPkey1 = "vm_cap"
 CAPkey2 = "vm_deltaCap"
 PM_TS_Key = "pm_ts"
 ProdKEY = "seel"
+ProdKEY2 = "seh2"
 MARKUP = "vm_Mrkup"
+MARKETPRICE = "vm_flexAdj"
 
 REGIkey1 = "DEU"
 sm_TWa_2_MWh = 8760000000
@@ -127,6 +163,9 @@ TECHkeylst_nuclear = c("tnrs")
 TECHkeylst_biomass = c("biochp", "bioigccc", "bioigcc")
 
 TECHkeylst <- c(TECHkeylst_peakGas, TECHkeylst_nonPeakGas, TECHkeylst_coal, TECHkeylst_solar, TECHkeylst_wind, TECHkeylst_hydro, TECHkeylst_biomass, TECHkeylst_nuclear)
+
+TECHkeylst_dem <- c("elh2","tdels")
+
 TECHVREkeylst <- c(TECHkeylst_solar, TECHkeylst_wind,TECHkeylst_hydro)
 TECH_NONVRE_keylst <- c(TECHkeylst_peakGas, TECHkeylst_nonPeakGas, TECHkeylst_coal, TECHkeylst_biomass, TECHkeylst_nuclear)
 
@@ -140,11 +179,11 @@ TECH_NONVRE_keylst <- c(TECHkeylst_peakGas, TECHkeylst_nonPeakGas, TECHkeylst_co
 out.dieter.report_DT <- NULL
 for (i in iter_tovalid_DT){
   # i = 29
-  csv = sorted_annual_report_DT[[i-1]] # since DIETER files start from 2
+  csv = sorted_annual_report_DT[[i+1]] # since DIETER files start from 0
   annual_reportCSV = read.csv(csv, sep = ";", header = T, stringsAsFactors = F)
   annual_reportQUITT <- as.quitte(annual_reportCSV) 
   
-  dieter.data1 <- annual_reportQUITT %>% 
+  dieter.data <- annual_reportQUITT %>% 
     filter(period %in% year_tovalid) %>% 
     filter(variable %in% VAR_report_key_DT) %>% 
     filter(model == "DIETER") %>% 
@@ -153,19 +192,19 @@ for (i in iter_tovalid_DT){
     revalue.levels(tech = dieter.tech.mapping) %>% 
     replace(is.na(.), 0) 
   
-  dieter.data2 <- annual_reportQUITT %>% 
-    filter(period %in% year_tovalid) %>% 
-    filter(variable == "REMIND CapFac (%)") %>% #remind VRE capfac reported at DIETER's current iteration
-    select(period, tech, variable, value) %>% 
-    revalue.levels(tech = dieter.tech.mapping) %>% 
-    filter(tech %in% vre.names) %>% 
-    replace(is.na(.), 0) 
+  # dieter.data2 <- annual_reportQUITT %>% 
+  #   filter(period %in% year_tovalid) %>% 
+  #   filter(variable == "REMIND CapFac (%)") %>% #remind VRE capfac reported at DIETER's current iteration
+  #   select(period, tech, variable, value) %>% 
+  #   revalue.levels(tech = dieter.tech.mapping) %>% 
+  #   filter(tech %in% vre.names) %>% 
+  #   replace(is.na(.), 0) 
   
-  dieter.data <- list(dieter.data1, dieter.data2) %>%
-    reduce(full_join) 
+  # dieter.data <- list(dieter.data1, dieter.data2) %>%
+  #   reduce(full_join) 
   
   # this should match iter_tovalid_DT above
-  dieter.data$iter = i
+  dieter.data$iter = i+1
   
   out.dieter.report_DT <- rbind(out.dieter.report_DT, dieter.data)
 }
@@ -177,20 +216,21 @@ DT_LCOE <-out.dieter.report_DT %>%
   filter(variable %in% VAR_report_key4_DT)
 
 DT_rep <- out.dieter.report_DT %>% 
-  filter(!variable %in% VAR_report_key4_DT) %>% 
-  filter(!variable %in% c( "REMIND CapFac (%)"))
+  filter(!variable %in% VAR_report_key4_DT) 
+# %>% 
+  # filter(!variable %in% c( "REMIND CapFac (%)"))
 
 DT_rep_spread = spread(DT_rep, variable, value) %>% 
   replace(is.na(.), 0) 
 
-RM_capfac_VRE <- out.dieter.report_DT %>% 
-  filter(variable %in% c( "REMIND CapFac (%)") )
+# RM_capfac_VRE <- out.dieter.report_DT %>% 
+  # filter(variable %in% c( "REMIND CapFac (%)") )
 
 #===================================================
 out.dieter.report_RM <- NULL
 for (i in iter_tovalid_DT_4RM){
   # i = 2
-  cvs = sorted_annual_report_DT[[i-1]] # since DIETER files start from 2
+  cvs = sorted_annual_report_DT[[i+1]] # since DIETER files start from 0
   annual_reportCSV = read.csv(cvs, sep = ";", header = T, stringsAsFactors = F)
   annual_reportQUITT <- as.quitte(annual_reportCSV) 
   
@@ -206,17 +246,17 @@ for (i in iter_tovalid_DT_4RM){
   
   dieter.data2 <- annual_reportQUITT %>% 
     filter(period %in% year_tovalid) %>% 
-    filter(variable == "REMIND CapFac (%)") %>% #remind dispatchable CF is reported at next DIETER iteration
+    filter(variable == "REMIND CapFac (%)") %>% #remind CF is reported at next DIETER iteration
     select(period, tech, variable, value) %>% 
     revalue.levels(tech = dieter.tech.mapping) %>% 
-    filter(tech %in% nonvre.names) %>% 
+    # filter(tech %in% nonvre.names) %>% 
     replace(is.na(.), 0) 
   
   dieter.data <- list(dieter.data1, dieter.data2) %>%
     reduce(full_join) 
   
   # this should match iter_tovalid_DT, iter_tovalid_RM
-  dieter.data$iter = i-1
+  dieter.data$iter = i
   
   out.dieter.report_RM <- rbind(out.dieter.report_RM, dieter.data)
 }
@@ -225,11 +265,17 @@ for (i in iter_tovalid_DT_4RM){
 # REMIND dispatchable CF: RM_capfac_disp
 
 out.dieter.report_RM1 <-out.dieter.report_RM %>%
-  filter(!variable%in%c( "REMIND CapFac (%)") )
+  filter(!variable%in%c( "REMIND CapFac (%)") ) 
+
 dieter.data.spread_RM = spread(out.dieter.report_RM1, variable, value)
 
 RM_capfac_disp <-out.dieter.report_RM %>%
-  filter(variable%in%c( "REMIND CapFac (%)") )
+  filter(variable%in%c( "REMIND CapFac (%)") ) %>%
+  filter(tech %in% nonvre.names) 
+
+RM_capfac_VRE <- out.dieter.report_DT %>%
+  filter(variable %in% c( "REMIND CapFac (%)") ) %>% 
+  filter(tech %in% vre.names) 
 
 # combine REMIND VRE and nonVRE CF: RM_capfac_spread
 
@@ -313,14 +359,14 @@ get_PRICEvariable <- function(iteration){
   return(vrdata)
 }
 
-get_GENvariable <- function(iteration){
+get_GENvariable <- function(iteration, key, te_keylst){
   # iteration = 4
   gdx = sorted_files[[iteration]]
-  vrdata <- read.gdx(gdx, GENkey1, field="l", factors = FALSE) %>% 
+  vrdata <- read.gdx(gdx, key, field="l", factors = FALSE) %>% 
     filter(tall%in% year_tovalid) %>% 
     filter(all_regi == REGIkey1) %>%
     filter(all_enty.1 == ProdKEY)  %>% 
-    filter(all_te %in% TECHkeylst) %>% 
+    filter(all_te %in% te_keylst) %>% 
     mutate(value = value * sm_TWa_2_MWh) %>% 
     select(tall,all_te, value) %>% 
     filter(all_te %in% names(remind.tech.mapping)) %>% 
@@ -336,9 +382,38 @@ get_GENvariable <- function(iteration){
   return(vrdata)
 }
 
-vrN_GEN0 <- lapply(iter_tovalid_RM, get_GENvariable)
+get_DEMvariable <- function(iteration, key, te_keylst){
+  # iteration = 4
+  # key = DEMkey1
+  # te_keylst = TECHkeylst_dem
+  
+  gdx = sorted_files[[iteration]]
+  vrdata <- read.gdx(gdx, key, field="l", factors = FALSE) %>% 
+    filter(ttot%in% year_tovalid) %>% 
+    filter(all_regi == REGIkey1) %>%
+    filter(all_enty.1 == ProdKEY2)  %>% 
+    filter(all_te %in% te_keylst) %>% 
+    mutate(value = value * sm_TWa_2_MWh) %>% 
+    select(ttot, all_te, value) %>% 
+    filter(all_te %in% names(remind.tech.mapping)) %>% 
+    revalue.levels(all_te = remind.tech.mapping) %>% 
+    mutate(all_te = factor(all_te, levels=rev(unique(remind.tech.mapping)))) %>%
+    select(period = ttot,tech=all_te, gen = value) %>% 
+    dplyr::group_by(period,tech) %>%
+    dplyr::summarise( gen = sum(gen), .groups = "keep" ) %>% 
+    dplyr::ungroup(period,tech)
+  
+  vrdata$iter <- iteration
+  
+  return(vrdata)
+}
+
+vrN_GEN0 <- lapply(iter_tovalid_RM, get_GENvariable, key = GENkey1, te_keylst = TECHkeylst)
+vrN_DEM0 <- lapply(iter_tovalid_RM, get_DEMvariable, key = DEMkey1, te_keylst = TECHkeylst_dem)
+
 vrN_PRICE0 <- lapply(iter_tovalid_RM, get_PRICEvariable)
 vrN_GEN <- rbindlist(vrN_GEN0)
+vrN_DEM <- rbindlist(vrN_DEM0)
 vrN_PRICE<- rbindlist(vrN_PRICE0) 
 
 # -----------------------------------  generation share --------------------------------------------
@@ -388,11 +463,14 @@ get_MARKUPvariable <- function(iteration, MARKUPkey){
   return(vrdata)
 }
 
+mp0 <- lapply(iter_tovalid_RM, get_MARKUPvariable, MARKUPkey = MARKETPRICE)
+mp <- rbindlist(mp0)
+
 markup0 <- lapply(iter_tovalid_RM, get_MARKUPvariable, MARKUPkey = MARKUP)
 markup <- rbindlist(markup0)
 
-vrN_REV <- list(vrN_GEN, vrN_PRICE,markup) %>%
-  reduce(full_join) %>%
+vrN_REV <- list(vrN_GEN,vrN_PRICE,markup) %>%
+  reduce(full_join) %>% 
   replace(is.na(.), 0) %>% 
   mutate(MarketValue_RM = seelprice + markup) %>% 
   filter(!tech %in% c("Hard coal", "Lignite")) %>% 
@@ -402,6 +480,21 @@ vrN_REV <- list(vrN_GEN, vrN_PRICE,markup) %>%
   dplyr::rename("REMIND whole sale electricity price ($/MWh)" = seelprice) %>% 
   dplyr::rename("REMIND Revenue (billionUSD)" = Revenue_RM_billUSD) %>% 
   dplyr::rename("REMIND Markup ($/MWh)" = markup)
+
+vrN_COST <- list(vrN_DEM,vrN_PRICE,mp) %>%
+  reduce(full_join) %>% 
+  replace(is.na(.), 0) %>% 
+  mutate(MarketPrice_RM = seelprice - markup) %>% 
+  mutate(Cost_RM_billUSD = gen * MarketPrice_RM / 1e9) %>% 
+  select(period,tech,iter,seelprice,MarketPrice_RM, markup) %>% 
+  dplyr::rename("REMIND Market price ($/MWh)" = MarketPrice_RM) %>% 
+  dplyr::rename("REMIND whole sale electricity price ($/MWh)" = seelprice) %>% 
+  dplyr::rename("REMIND Subsidy ($/MWh)" = markup)
+
+vrN_REV <- list(vrN_REV,vrN_COST) %>%
+  reduce(full_join) %>% 
+  filter(period >2020)%>% 
+  replace(is.na(.), 0)
 
 #=================================================
 get_ADJ_COST2 <- function(iteration, years){
@@ -621,13 +714,14 @@ vrN$DT_MV_ge_LCOE <- DT_MV_ge_LCOE
   vrN$run <- "full coupled run"
 # }
 
-vrN2 <- vrN[, c("iter",	"period",	"tech", "rlf", "REMIND CapFac (%)",	"REMIND CapFac grade (%)", "REMIND Capacity Shadow Price ($/MWh)","REMIND Revenue (billionUSD)","REMIND whole sale electricity price ($/MWh)" ,"REMIND Market value ($/MWh)",	"REMIND Markup ($/MWh)", 
+vrN2 <- vrN[, c("iter",	"period",	"tech", "rlf", "REMIND CapFac (%)",	"REMIND CapFac grade (%)", "REMIND Capacity Shadow Price ($/MWh)","REMIND Revenue (billionUSD)","REMIND whole sale electricity price ($/MWh)" ,"REMIND Market value ($/MWh)","REMIND Market price ($/MWh)",	"REMIND Markup ($/MWh)", "REMIND Subsidy ($/MWh)", 
                 "genshare",
                 "genshares (%)",
                 # "DIETER Value factor (%)", "VF_REMIND", 
                 "REMIND LCOE ($/MWh)","Marginal adjustment cost ($/MWh)",
                 "REMIND LCOE grade ($/MWh)", "REMIND VRE distributed capacities (GW)", "total_MV","total_cost", "RM_MV_ge_LCOE","RM_value_ge_cost", "REMIND added capacities (GW)", "REMIND pre-investment capacities (GW)","DIETER avg CapFac (%)",	"DIETER marg CapFac (%)","DIETER LCOE_avg ($/MWh)",	
-                # "DIETER LCOE_marg ($/MWh)","DIETER Revenue marginal plant (millionUSD)", 
+                "DIETER LCOE_marg ($/MWh)",
+                "DIETER Revenue marginal plant (millionUSD)", 
                 "load-weighted price for fixed demand ($/MWh)", 
                 "price w/ scarcity price shaved ($/MWh)",
                 "DIETER Market value ($/MWh)",
@@ -673,9 +767,6 @@ vrN_final[is.na(vrN_final)] <- ""
 Ncol = ncol(vrN_final)
 
 vrN_final[,4:Ncol] <- data.frame(lapply(vrN_final[,4:Ncol], A) )
-
-# validationTABLE <- validationTABLE[order(validationTABLE$period),]
-# validationTABLE <- validationTABLE[order(validationTABLE$iter),]
 
 vrN_final <- vrN_final[order(vrN_final$period),]
 vrN_final <- vrN_final[order(vrN_final$iter),]
