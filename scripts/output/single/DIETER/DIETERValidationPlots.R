@@ -1,7 +1,7 @@
 # Main function for REMIND-DIETER plots
 
 DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
-
+  
   # Load libraries ----------------------------------------------------------
 
   library(tidyverse)
@@ -11,10 +11,10 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
   library(mip)
   library(grid)
   library(gridExtra)
-
+  
   # Configurations ----------------------------------------------------------
 
-  report.periods <- c(seq(2015, 2060, 5), seq(2070, 2100, 10))
+  report.periods <- c(seq(2020, 2060, 5), seq(2070, 2100, 10))
 
   remind.nonvre.mapping <- c(coalchp = "Coal (Lig + HC)",
                            igcc = "Coal (Lig + HC)",
@@ -29,19 +29,22 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
                            gaschp = "CCGT",
                            biochp = "Biomass",
                            bioigcc = "Biomass",
-                           bioigccc = "Biomass",
-                           NULL)
+                           bioigccc = "Biomass")
 
-  remind.vre.mapping <- c(hydro = "Hydro",
-                        wind = "Wind",
-                        spv = "Solar",
-                        NULL)
-
-  remind.tech.mapping <- c(remind.nonvre.mapping, remind.vre.mapping)
+  # shifting hydro to dispatchable because in REMIND usable energy is only defined for spv, wind, csp
+  remind.nonvre.mapping2 <- c(remind.nonvre.mapping, hydro = "Hydro")
+  
+  remind.vre.mapping <- c(wind = "Wind",
+                          spv = "Solar")
+  
+  table_ordered_name = c("Solar", "Wind", "Biomass", "Hydro", "Nuclear","CCGT", "OCGT", "Coal (Lig + HC)", "Lignite", "Hard coal")
+  table_ordered_name_dem = c("Electricity used for Electrolysis","Electricity")
+  
+  remind.tech.mapping <- c(remind.nonvre.mapping2, remind.vre.mapping)
 
   dieter.tech.exclude <- c("OCGT_ineff", "Wind_off")
 
-  dieter.tech.mapping <- c(hc = "Hard coal",
+  dieter.supply.tech.mapping <- c(hc = "Hard coal",
                          lig = "Lignite",
                          coal = "Coal (Lig + HC)",
                          nuc = "Nuclear",
@@ -50,13 +53,22 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
                          bio = "Biomass",
                          ror = "Hydro",
                          Wind_on = "Wind",
-                         Solar = "Solar",
-                         NULL)
+                         Solar = "Solar")
+  
+  dieter.demand.tech.mapping <- c(seel = "Electricity",
+                                  elh2 = "Electricity used for Electrolysis",
+                                  NULL)
+  
+  dieter.tech.mapping <- c(dieter.supply.tech.mapping, dieter.demand.tech.mapping)
 
-  color.mapping <- c("CCGT" = "#999959", "Lignite" = "#0c0c0c", "Coal (Lig + HC)" = "#0c0c0c",
-                   "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
-                   "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
-                   "Hard coal" = "#808080")
+  color.mapping1 <- c("CCGT" = "#999959", "Coal (Lig + HC)" = "#0c0c0c",
+                      "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
+                      "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff", "Electricity used for Electrolysis" = "#48D1CC", "Electricity" = "#6495ED")
+  
+  color.mapping2 <- c("CCGT" = "#999959", "Lignite" = "#0c0c0c",
+                      "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
+                      "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
+                      "Hard coal" = "#808080", "Electricity used for Electrolysis" = "#48D1CC", "Electricity" = "#6495ED")
 
   sm_TWa_2_MWh <- 8.76E9
 
@@ -67,7 +79,8 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
   remind.files <- list.files(outputdir, pattern = "fulldata_[0-9]+\\.gdx") %>%
   str_sort(numeric = TRUE)
   cat(paste0("REMIND files: ", length(remind.files), "\n"))
-
+  maxiter = length(remind.files)
+  
   dieter.files <- list.files(outputdir, pattern = "results_DIETER_i[0-9]+\\.gdx") %>%
   str_sort(numeric = TRUE)
   cat(paste0("DIETER files: ", length(dieter.files), "\n"))
@@ -77,9 +90,19 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
   cat(paste0("DIETER report files: ", length(dieter.files.report), "\n"))
 
   
-  # Determine iteration step of DIETER
-  dieter.iter.step <- floor(length(remind.files) / length(dieter.files))
-  cat(paste0("DIETER iter step: ", dieter.iter.step, "\n"))
+ 
+  id <- NULL
+  for(fname in dieter.files){
+    idx <- as.numeric(str_extract(fname, "[0-9]+"))
+    id = c(id, idx)
+  }
+  id = sort(id)
+  
+  if (length(dieter.files) != 0) {
+    sorted_paths_DT <- paste0(outputdir, "results_DIETER_i", id, ".gdx")
+    sorted_files_DT <- paste0("results_DIETER_i", id, ".gdx")
+  }
+  
 
   # LaTeX configurations ----------------------------------------------------
 
@@ -111,7 +134,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
   sw <- swopen(report.output.file, template = template)
 
   swlatex(sw, "\\tableofcontents\\newpage")
-
+  
   # Capacity factors --------------------------------------------------------
 
   source(file.path(dieter.scripts.folder, "plotCapacityFactors.R"), local=TRUE)
@@ -153,7 +176,6 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
   source(file.path(dieter.scripts.folder, "plotInverseScreeningCurve.R"), local=TRUE)
 
   # Markups -----------------------------------------------------------------
-
 
 
   # Close LaTeX PDF ---------------------------------------------------------
