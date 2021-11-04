@@ -31,45 +31,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
                            bioigcc = "Biomass",
                            bioigccc = "Biomass")
 
-  # shifting hydro to dispatchable because in REMIND usable energy is only defined for spv, wind, csp
-  remind.nonvre.mapping2 <- c(remind.nonvre.mapping, hydro = "Hydro")
   
-  remind.vre.mapping <- c(wind = "Wind",
-                          spv = "Solar")
-  
-  table_ordered_name = c("Solar", "Wind", "Biomass", "Hydro", "Nuclear","CCGT", "OCGT", "Coal (Lig + HC)", "Lignite", "Hard coal")
-  table_ordered_name_dem = c("Electricity used for Electrolysis","Electricity")
-  
-  remind.tech.mapping <- c(remind.nonvre.mapping2, remind.vre.mapping)
-
-  dieter.tech.exclude <- c("OCGT_ineff", "Wind_off")
-
-  dieter.supply.tech.mapping <- c(hc = "Hard coal",
-                         lig = "Lignite",
-                         coal = "Coal (Lig + HC)",
-                         nuc = "Nuclear",
-                         OCGT_eff = "OCGT",
-                         CCGT = "CCGT",
-                         bio = "Biomass",
-                         ror = "Hydro",
-                         Wind_on = "Wind",
-                         Solar = "Solar")
-  
-  dieter.demand.tech.mapping <- c(seel = "Electricity",
-                                  elh2 = "Electricity used for Electrolysis",
-                                  NULL)
-  
-  dieter.tech.mapping <- c(dieter.supply.tech.mapping, dieter.demand.tech.mapping)
-
-  color.mapping1 <- c("CCGT" = "#999959", "Coal (Lig + HC)" = "#0c0c0c",
-                      "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
-                      "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff", "Electricity used for Electrolysis" = "#48D1CC", "Electricity" = "#6495ED")
-  
-  color.mapping2 <- c("CCGT" = "#999959", "Lignite" = "#0c0c0c",
-                      "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
-                      "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
-                      "Hard coal" = "#808080", "Electricity used for Electrolysis" = "#48D1CC", "Electricity" = "#6495ED")
-
   sm_TWa_2_MWh <- 8.76E9
 
   # Directories -------------------------------------------------------------
