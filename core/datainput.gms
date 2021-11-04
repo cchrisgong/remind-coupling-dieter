@@ -1544,5 +1544,4 @@ $ifthen.subsectors "%industry%" == "subsectors"   !! industry
 s_histBioShareTolerance = 0.3;
 $endif.subsectors
 
-
 *** EOF ./core/datainput.gms

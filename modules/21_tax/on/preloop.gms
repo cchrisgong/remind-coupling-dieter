@@ -146,15 +146,18 @@ v21_emiALLco2neg.l(ttot,regi) =0;
 *DK initialize bioenergy tax
 v21_tau_bio.l(ttot) = 0;
 
+$IFTHEN.DTcoup_off %cm_DTcoup% == "off"
 *** FS: initizalize flexibility tax
-* vm_flexAdj.l(ttot,all_regi,all_te) = 0;
-* v21_taxrevFlex.l(ttot,all_regi) = 0;
-*
-* *** CG: initialize markup tax
-* vm_Mrkup.l(ttot,all_regi,all_te) = 0;
-* v21_taxrevMrkup.l(ttot,all_regi) = 0;
-* display "vm_Mrkup", vm_Mrkup.l;
-*
+vm_flexAdj.l(ttot,all_regi,all_te) = 0;
+v21_taxrevFlex.l(ttot,all_regi) = 0;
+
+*** CG: initialize markup tax
+vm_Mrkup.l(ttot,all_regi,all_te) = 0;
+v21_taxrevMrkup.l(ttot,all_regi) = 0;
+display "vm_Mrkup", vm_Mrkup.l;
+
+$ENDIF.DTcoup_off
+
 *** CG: initialize capacity subsidy
 vm_priceCap.l(ttot,all_regi) = 0;
 vm_reqCap.l(ttot,all_regi) = 0;

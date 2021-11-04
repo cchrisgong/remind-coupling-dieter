@@ -24,6 +24,7 @@ q30_costFuBio(ttot,regi)$(ttot.val ge cm_startyear)..
          =e= sum(peren2rlf30(enty,rlf), p30_datapebio(regi,enty,rlf,"cost",ttot) * vm_fuExtr(ttot,regi,enty,rlf))
          +
 $if %cm_MAgPIE_coupling% == "on"  (v30_pebiolc_costs(ttot,regi) * v30_multcost(ttot,regi))
+$if %cm_DTcoup% == "on"            * v30_multcostDIETER(ttot,regi))
 $if %cm_MAgPIE_coupling% == "off" (v30_pebiolc_costs(ttot,regi))
          - p30_pebiolc_costs_emu_preloop(ttot,regi) !! Need to be substracted since they are also inculded in the total agricultural production costs
          + 
@@ -95,6 +96,17 @@ q30_costAdj(ttot,regi)$(ttot.val ge cm_startyear)..
          v30_multcost(ttot,regi)
          =e=
          power((vm_fuExtr(ttot,regi,"pebiolc","1")-p30_pebiolc_demandmag(ttot,regi))/ (p30_pebiolc_demandmag(ttot,regi) + 0.15),2) * 0.4 + 1
+;
+
+q30_costAdjDIETER(ttot,regi)$(ttot.val ge cm_startyear)..
+         v30_multcostDIETER(ttot,regi)
+         =e=
+*         power((vm_fuExtr(ttot,regi,"pebiolc","2")-pm_fuExtr(ttot,regi,"pebiolc","2"))/ (pm_fuExtr(ttot,regi,"pebiolc","2") + 0.15),2) * 0.4  + 1     
+         power( 
+	 (  (vm_fuExtr(ttot,regi,"pebiolc","1") +vm_fuExtr(ttot,regi,"pebiolc","2")) 
+         - (pm_fuExtr(ttot,regi,"pebiolc","1")+pm_fuExtr(ttot,regi,"pebiolc","2")) ) /
+         (  (pm_fuExtr(ttot,regi,"pebiolc","1")+pm_fuExtr(ttot,regi,"pebiolc","2")) + 0.15)
+	 , 2) * 0.4 + 1
 ;
 
 ***---------------------------------------------------------------------------

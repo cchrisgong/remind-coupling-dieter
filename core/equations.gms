@@ -18,7 +18,8 @@
 q_costFu(t,regi)..
   v_costFu(t,regi)
   =e=
-  vm_costFuBio(t,regi) + sum(peEx(enty), vm_costFuEx(t,regi,enty))
+  vm_costFuBio(t,regi) + sum(peEx(enty), vm_costFuEx(t,regi,enty)
+  * v_costFuExdampen(t,regi,enty))
 ;
 
 ***---------------------------------------------------------------------------
@@ -337,6 +338,15 @@ q_windoff_high(t,regi)$(t.val > 2020)..
 ;
 
 $ENDIF.WindOff
+
+*'calculate the dampening multiplier for fuel cost to avoid oscillation of PE production and prices in coupled run of REMIND-DIETER
+ q_costFuExdampen(t,regi,enty)..
+   v_costFuExdampen(t,regi,enty)
+   =e=
+   power((vm_fuExtr(t,regi,enty,"1")-pm_fuExtr(t,regi,enty,"1"))/ (pm_fuExtr(t,regi,enty,"1") + 0.15),2) * 0.4 + 1
+ ;
+
+
 ***---------------------------------------------------------------------------
 *' Technological change is an important driver of the evolution of energy systems.
 *' For mature technologies, such as coal-fired power plants, the evolution

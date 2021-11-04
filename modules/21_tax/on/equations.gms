@@ -48,7 +48,8 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 $ENDIF.elh2_coup
     + v21_taxrevMrkup(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
     + v21_taxrevCap(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
-    + v21_prodse_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
+* + v21_prodse_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
+    + v21_prodse_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq eq 3))
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
     + v21_greenh2dem_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
 $ENDIF.elh2_coup

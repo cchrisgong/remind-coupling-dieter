@@ -19,9 +19,13 @@ parameters
     p32_seelUsableDem(ttot,all_regi,all_enty)           "total usable secondary electricity demand"
     p32_seelUsableDem_avg(ttot,all_regi,all_enty)       "total usable secondary electricity demand averaged over 2 iterations"
     p32_seelUsableDem_last_iter(ttot,all_regi,all_enty) "total usable secondary electricity demand from last iteration"
+    p32_seelUsableProd(ttot,all_regi,all_enty)          "total usable secondary electricity production (no co-production included)"
+    p32_seelUsableProd_avg(ttot,all_regi,all_enty)       "total usable secondary electricity production averaged over 2 iterations (no co-production included)"
+    p32_seelUsableProd_last_iter(ttot,all_regi,all_enty) "total usable secondary electricity production from last iteration (no co-production included)"
     p32_seh2elh2Dem(ttot,all_regi,all_enty)             "total green H2 demand"
     p32_seh2elh2Dem_avg(ttot,all_regi,all_enty)         "total green H2 demand averaged over 2 iterations"
     p32_seh2elh2Dem_last_iter(ttot,all_regi,all_enty)   "total green H2 demand from last iteration"
+    p32_extrEnergyUsage(ttot,all_regi,all_enty)         "Energy used in extraction"
 
     p32_shSeEl(ttot,all_regi,all_te)                    "generation share of the last iteration"
     p32_budget(ttot,all_regi)                           "budget from last iteration"
@@ -64,14 +68,12 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_capDecayEnd(ttot,all_regi)               "where capacity subsidy cost function decaying ends, it is a portion of the total required dispatchable capacities"
     p32_tech_category_genshare(ttot,all_regi,all_te)                 "generation share of sub-technology within a DIETER tech category from last REMIND iteration"
 
-*** CG: storage related parameters
-    p32_DIETER_curtailmentratio(ttot,all_regi,all_te)               "ratio of curtailed energy to usable energy for VRE from DIETER"
-    p32_DIETER_curtailmentratio_last_iter(ttot,all_regi,all_te)     "ratio of curtailed energy to usable energy for VRE from DIETER from last iteration DIETER"
     p32_cf_last_iter(ttot,all_regi,all_te)                          "pm_cf of current iteration"
 
-    p32_R_4DT(ttot,all_regi)                                            "interest rate to be passed on to DIETER"
 $ENDIF.DTcoup
-
+    p32_DIETER_curtailmentratio(ttot,all_regi,all_te)               "ratio of curtailed energy to usable energy for VRE from DIETER"
+    p32_DIETER_curtailmentratio_last_iter(ttot,all_regi,all_te)     "ratio of curtailed energy to usable energy for VRE from DIETER from last iteration DIETER"
+    p32_R_4DT(ttot,all_regi)                                            "interest rate to be passed on to DIETER"
     p32_fuelprice_lastiter(ttot,all_regi,all_enty)                      "fuel cost of the last iteration"
     p32_fuelprice_lastx2iter(ttot,all_regi,all_enty)                    "fuel cost of the second to last iteration"
     p32_fuelprice_curriter(ttot,all_regi,all_enty)                      "fuel cost of the current iteration"

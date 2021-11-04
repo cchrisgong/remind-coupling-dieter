@@ -879,5 +879,5 @@ o_carbon_reemitted(ttot,regi,"co2")$(ttot.val ge 2005) =
      *o_emi_conv("co2") 	
 ;
 
-
+pm_fuExtr(ttot,all_regi,all_enty,rlf) = vm_fuExtr.l(ttot,all_regi,all_enty,rlf);
 *** EOF ./core/postsolve.gms

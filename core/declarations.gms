@@ -226,6 +226,7 @@ pm_damageMarginal(tall,all_regi)                     "damage function derivative
 pm_taxCO2eqSCC(ttot,all_regi)                        "carbon tax component due to damages (social cost of carbon) "
 
 pm_GDPGross(tall,all_regi)                           "gross GDP (before damages)"
+pm_fuExtr(ttot,all_regi,all_enty,rlf)                "fuel use [TWa]"
 ***----------------------------------------------------------------------------------------
 *** ----- Parameters needed for MAGICC ----------------------------------------------------
 p_MAGICC_emi(tall,RCP_regions_world_bunkers,emiRCP)  "emission data to export"
@@ -314,6 +315,7 @@ vm_taxrevimplFETax(ttot,all_regi)                    "implicit efficiency direct
 vm_Mrkup(tall,all_regi,all_te)                       "markup adjustment used for subsidy (tax) to emulate market value of power generation technologies produces either below or above annual average elec. prices [trUSD/TWa]"
 vm_reqCap(tall,all_regi)                             "required total dispatchable capacities"
 vm_priceCap(tall,all_regi)                           "shadow price of capacity"
+v_costFuExdampen(ttot,all_regi,all_enty)	     "dampening term for non-biomass PE fuel cost"
 ;
 
 ***----------------------------------------------------------------------------------------
@@ -419,6 +421,8 @@ q_transSe2se(ttot,all_regi,all_enty,all_enty,all_te) "energy transformation se t
 qm_fuel2pe(ttot,all_regi,all_enty)                   "constraint on cumulative fuel use"
 
 q_limitProd(ttot,all_regi,all_te,rlf)                "constraint on annual production"
+
+q_costFuExdampen(ttot,all_regi,all_enty)             "calculate dampening term for non-biomass PE fuel cost"
 
 q_emiTeDetail(ttot,all_regi,all_enty,all_enty,all_te,all_enty) "determination of emissions"
 q_macBase(tall,all_regi,all_enty)                    "baseline emissions for all emissions subject to MACCs (type emiMacSector)"
