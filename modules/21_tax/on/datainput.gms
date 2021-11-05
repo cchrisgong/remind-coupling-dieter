@@ -231,5 +231,5 @@ elseif (cm_DiscRateScen eq 4),
 p21_tau_BioImport(t,regi) = 0;
 p21_tau_BioImport(t,regi)$(regi_group("EUR_regi",regi) AND t.val ge 2030) = cm_BioImportTax_EU;
 
-p21_taxrevFlex0(t,regi) = 0;
+*p21_taxrevFlex0(t,regi) = 0;
 *** EOF ./modules/21_tax/on/datainput.gms
