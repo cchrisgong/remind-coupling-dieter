@@ -22,7 +22,7 @@ input/
 
 # Ignore everything in root "output" folders
 output/
-
+dataprocessing/
 # Ignore everything in "doc" folders, except for 3 specific files
 doc/
 !doc/literature.bib
