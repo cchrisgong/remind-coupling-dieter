@@ -30,7 +30,6 @@ teNoCCS(te)     = not teCCS(te);
 regNoDTCoup(regi) = not regDTCoup(regi);
 teNoDTCoupSupp(te) = not teDTCoupSupp(te);
 
-entyFe(enty)         = entyFeStat(enty) + entyFeTrans(enty);
 trade(enty)          = tradePe(enty) + tradeSe(enty) + tradeMacro(enty);
 emi(enty)            = emiTe(enty) + emiMac(enty) + emiExog(enty); 
 emiMacMagpie(enty)   = emiMacMagpieCH4(enty) + emiMacMagpieN2O(enty) + emiMacMagpieCO2(enty);
@@ -172,6 +171,7 @@ display "ES layer sets:", ppfenFromEs, feForEs, feViaEs2ppfen;
 
 loop ( se2fe(entySe,entyFe,te),
 fete(entyFe,te) = YES;
+sefe(entySe,entyFe) = YES;
 );
 
 *** MAGICC related sets
