@@ -159,6 +159,7 @@ display "vm_Mrkup", vm_Mrkup.l;
 $ENDIF.DTcoup_off
 
 *** CG: initialize capacity subsidy
+vm_Mrkup.l(ttot,all_regi,all_te) = 0;
 vm_priceCap.l(ttot,all_regi) = 0;
 vm_reqCap.l(ttot,all_regi) = 0;
 v21_taxrevCap.l(ttot,all_regi) = 0;
