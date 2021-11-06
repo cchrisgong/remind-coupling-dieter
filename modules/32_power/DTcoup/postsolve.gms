@@ -129,10 +129,10 @@ display "DIETER iteration", sm32_iter;
 * without demand averaging
 * if( (ord(iteration) le (sm32_DTiter + 1)) ,
 * $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-* p32_seh2elh2Dem_avg(t,regi,enty)$(regDTCoup(regi) AND sameas(enty,"seh2")) = p32_seh2elh2Dem(t,regi,enty);
+* p32_seh2elh2DemAvg(t,regi,enty)$(regDTCoup(regi) AND sameas(enty,"seh2")) = p32_seh2elh2Dem(t,regi,enty);
 * $ENDIF.elh2_coup
 *
-* p32_seelUsableDem_avg(t,regi,enty)$(regDTCoup(regi) AND sameas(enty,"seel")) = p32_seelUsableDem(t,regi,enty);
+* p32_seelUsableDemAvg(t,regi,enty)$(regDTCoup(regi) AND sameas(enty,"seel")) = p32_seelUsableDem(t,regi,enty);
 * );
 
 *** with demand averaging
@@ -152,32 +152,32 @@ p32_fuelprice_avgiter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,
 
 
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-p32_seh2elh2Dem_avg(t,regi,enty)$(sameas(enty,"seh2")) =
-  0.5 * (p32_seh2elh2Dem(t,regi,enty) + p32_seh2elh2Dem_last_iter(t,regi,enty));
+p32_seh2elh2DemAvg(t,regi,enty)$(sameas(enty,"seh2")) =
+  0.5 * (p32_seh2elh2Dem(t,regi,enty) + p32_seh2elh2DemLaIter(t,regi,enty));
 $ENDIF.elh2_coup
 
 * $IFTHEN.elh2_coup_off %cm_elh2_coup% == "off"
-* p32_seh2elh2Dem_avg(t,regi,enty)$(sameas(enty,"seh2")) = 0;
+* p32_seh2elh2DemAvg(t,regi,enty)$(sameas(enty,"seh2")) = 0;
 * $ENDIF.elh2_coup_off
 
-p32_seelUsableDem_avg(t,regi,enty)$(sameas(enty,"seel")) =
-  0.5 * (p32_seelUsableDem(t,regi,enty) + p32_seelUsableDem_last_iter(t,regi,enty));
+p32_seelUsableDemAvg(t,regi,enty)$(sameas(enty,"seel")) =
+  0.5 * (p32_seelUsableDem(t,regi,enty) + p32_seelUsableDemLaIter(t,regi,enty));
 
-p32_seelUsableProd_avg(t,regi,enty)$(sameas(enty,"seel")) =
-  0.5 * (p32_seelUsableProd(t,regi,enty) + p32_seelUsableProd_last_iter(t,regi,enty));
+p32_seelUsableProdAvg(t,regi,enty)$(sameas(enty,"seel")) =
+  0.5 * (p32_seelUsableProd(t,regi,enty) + p32_seelUsableProdLaIter(t,regi,enty));
 
 * );
 ***CG:interest rate (Marian's formula) (should move this to core/postsolve at some point)
-p32_R_4DT(ttot,regi)$(tDT32s2(ttot))
+p32_r4DT(ttot,regi)$(tDT32s2(ttot))
 = (( (vm_cons.l(ttot+1,regi)/pm_pop(ttot+1,regi)) /
   (vm_cons.l(ttot-1,regi)/pm_pop(ttot-1,regi)) )
   ** (1 / ( pm_ttot_val(ttot+1)- pm_ttot_val(ttot-1))) - 1) + pm_prtp(regi);
 
 ***CG: to avoid distortion at later years where interest rate is no longer accurate
-p32_R_4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
+p32_r4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
 
 * REMIND data for DIETER
-    execute_unload "RMdata_4DT.gdx", vm_cap, sm32_iter, p32_R_4DT, p32_seelUsableProd_avg, p32_seh2elh2Dem_avg, p32_fuelprice_avgiter,
+    execute_unload "RMdata_4DT.gdx", vm_cap, sm32_iter, p32_r4DT, p32_seelUsableProdAvg, p32_seh2elh2DemAvg, p32_fuelprice_avgiter,
     f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
     pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, pm_cf, vm_capFac, pm_dataren, vm_capDistr;
 
@@ -224,13 +224,13 @@ $ENDIF.DTcoup
 
 ** such that an uncoupled run have this variable to act as input.gdx for a coupled run -is this needed?
 $IFTHEN.DTcoup_off %cm_DTcoup% == "off"
-p32_DIETER_curtailmentratio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = v32_storloss.l(t,regi,"spv")/vm_usableSeTe.l(t,regi,"seel","spv");
-p32_DIETER_curtailmentratio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = v32_storloss.l(t,regi,"wind")/vm_usableSeTe.l(t,regi,"seel","wind");
+p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = v32_storloss.l(t,regi,"spv")/vm_usableSeTe.l(t,regi,"seel","spv");
+p32_DIETERCurtRatio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = v32_storloss.l(t,regi,"wind")/vm_usableSeTe.l(t,regi,"seel","wind");
 $ENDIF.DTcoup_off
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-p32_DIETER_curtailmentratio_last_iter(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETER_curtailmentratio(t,regi,"spv");
-p32_DIETER_curtailmentratio_last_iter(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETER_curtailmentratio(t,regi,"wind");
+p32_DIETERCurtRatioLaIter(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"spv");
+p32_DIETERCurtRatioLaIter(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"wind");
 $ENDIF.DTcoup
 
 $endif.calibrate

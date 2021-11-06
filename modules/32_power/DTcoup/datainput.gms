@@ -66,7 +66,7 @@ $include "./modules/32_power/DTcoup/input/f32_storageCap.prn"
 
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
 f32_storageCap(char,"windoff") = f32_storageCap(char,"wind");
-$ENDIF.WindOff 
+$ENDIF.WindOff
 
 p32_storageCap(te,char) = f32_storageCap(char,te);
 display p32_storageCap;
@@ -87,14 +87,10 @@ $offtext
 *** initialize p32_PriceDurSlope parameter
 p32_PriceDurSlope(regi,"elh2") = cm_PriceDurSlope_elh2;
 
-Display "end of 32/datainput, pm_cf", pm_cf;
+*Display "end of 32/datainput, pm_cf", pm_cf;
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-* Execute_Loadpoint 'input' p32_DIETER_curtailmentratio_last_iter = p32_DIETER_curtailmentratio_last_iter;
 p32_minVF_spv = 0.1;
-
-* Execute_Loadpoint 'input' p32_seelUsableDem = p32_seelUsableDem;
-* Execute_Loadpoint 'input' p32_seelUsableProd = p32_seelUsableDem; !!! edit later correctly
 ** loading variable without .l is ok
 
 Execute_Loadpoint 'input' p32_fuelprice_curriter = q_balPe.m;
@@ -131,8 +127,8 @@ p32_seelUsableProd(t,regi,enty2)$(sameas(enty2,"seel")) = sum( pe2se(enty,enty2,
 
 p32_seelUsableDem(t,regi,enty2)$(sameas(enty2,"seel")) = p32_seelUsableProd(t,regi,enty2);
 p32_seh2elh2Dem(t,regi,enty)$(regDTCoup(regi) AND sameas(enty,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
-p32_DIETER_curtailmentratio_last_iter(t,regi,"spv") = v32_storloss.l(t,regi,"spv")/(vm_usableSeTe.l(t,regi,"seel","spv")+sm_eps);
-p32_DIETER_curtailmentratio_last_iter(t,regi,"wind") = v32_storloss.l(t,regi,"wind")/(vm_usableSeTe.l(t,regi,"seel","wind")+sm_eps);
+p32_DIETERCurtRatioLaIter(t,regi,"spv") = v32_storloss.l(t,regi,"spv")/(vm_usableSeTe.l(t,regi,"seel","spv")+sm_eps);
+p32_DIETERCurtRatioLaIter(t,regi,"wind") = v32_storloss.l(t,regi,"wind")/(vm_usableSeTe.l(t,regi,"seel","wind")+sm_eps);
 
 execute_unload "RMdata_4DT_input.gdx", vm_cap, p32_seelUsableProd, p32_seh2elh2Dem, p32_fuelprice_curriter,
 f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,

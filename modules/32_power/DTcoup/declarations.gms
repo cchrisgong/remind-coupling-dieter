@@ -18,14 +18,14 @@ parameters
 *** for diagnostics and reporting (calculation of p32_seelUsableDem)
     p32_seelTotDem(ttot,all_regi,all_enty)              "total secondary electricity demand (including curtailment)"
     p32_seelUsableDem(ttot,all_regi,all_enty)           "total usable secondary electricity demand"
-    p32_seelUsableDem_avg(ttot,all_regi,all_enty)       "total usable secondary electricity demand averaged over 2 iterations"
-    p32_seelUsableDem_last_iter(ttot,all_regi,all_enty) "total usable secondary electricity demand from last iteration"
+    p32_seelUsableDemAvg(ttot,all_regi,all_enty)       "total usable secondary electricity demand averaged over 2 iterations"
+    p32_seelUsableDemLaIter(ttot,all_regi,all_enty) "total usable secondary electricity demand from last iteration"
     p32_seelUsableProd(ttot,all_regi,all_enty)          "total usable secondary electricity production (no co-production included)"
-    p32_seelUsableProd_avg(ttot,all_regi,all_enty)       "total usable secondary electricity production averaged over 2 iterations (no co-production included)"
-    p32_seelUsableProd_last_iter(ttot,all_regi,all_enty) "total usable secondary electricity production from last iteration (no co-production included)"
+    p32_seelUsableProdAvg(ttot,all_regi,all_enty)       "total usable secondary electricity production averaged over 2 iterations (no co-production included)"
+    p32_seelUsableProdLaIter(ttot,all_regi,all_enty) "total usable secondary electricity production from last iteration (no co-production included)"
     p32_seh2elh2Dem(ttot,all_regi,all_enty)             "total green H2 demand"
-    p32_seh2elh2Dem_avg(ttot,all_regi,all_enty)         "total green H2 demand averaged over 2 iterations"
-    p32_seh2elh2Dem_last_iter(ttot,all_regi,all_enty)   "total green H2 demand from last iteration"
+    p32_seh2elh2DemAvg(ttot,all_regi,all_enty)         "total green H2 demand averaged over 2 iterations"
+    p32_seh2elh2DemLaIter(ttot,all_regi,all_enty)   "total green H2 demand from last iteration"
     p32_extrEnergyUsage(ttot,all_regi,all_enty)         "Energy used in extraction"
 
     p32_shSeEl(ttot,all_regi,all_te)                    "generation share of the last iteration"
@@ -54,7 +54,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_report4RM(gdxfile32,ttot,all_regi,DIETERte32,DIETERvarname32)    "load report from DIETER"
     p32_reportmk_4RM(gdxfile32,ttot,all_regi,DIETERte32,DIETERvarname32) "load markup report from DIETER"
 
-    p32_peakDemand_relFac(ttot,all_regi)         "annual peak demand as a relative ratio of total annual power demand from DIETER"
+    p32_peakDemand_RelFac(ttot,all_regi)         "annual peak demand as a relative ratio of total annual power demand from DIETER"
     p32_DIETER_VF(ttot,all_regi,all_te)          "multiplicative value factor from DIETER that indicates the multiplicative price mark up of technology"
     p32_DIETER_MV(ttot,all_regi,all_te)          "market value for power generating technology rom DIETER"
     p32_DIETER_MP(ttot,all_regi,all_te)          "market price for power consumption technology DIETER"
@@ -69,9 +69,9 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_cf_last_iter(ttot,all_regi,all_te)                 "pm_cf of current iteration"
 $ENDIF.DTcoup
 
-    p32_DIETER_curtailmentratio(ttot,all_regi,all_te)                   "ratio of curtailed energy to usable energy for VRE from DIETER"
-    p32_DIETER_curtailmentratio_last_iter(ttot,all_regi,all_te)         "ratio of curtailed energy to usable energy for VRE from DIETER from last iteration DIETER"
-    p32_R_4DT(ttot,all_regi)                                            "interest rate to be passed on to DIETER"
+    p32_DIETERCurtRatio(ttot,all_regi,all_te)              "ratio of curtailed energy to usable energy for VRE from DIETER"
+    p32_DIETERCurtRatioLaIter(ttot,all_regi,all_te)        "ratio of curtailed energy to usable energy for VRE from DIETER from last iteration DIETER"
+    p32_r4DT(ttot,all_regi)                                            "interest rate to be passed on to DIETER"
     p32_fuelprice_lastiter(ttot,all_regi,all_enty)                      "fuel cost of the last iteration"
     p32_fuelprice_lastx2iter(ttot,all_regi,all_enty)                    "fuel cost of the second to last iteration"
     p32_fuelprice_curriter(ttot,all_regi,all_enty)                      "fuel cost of the current iteration"
@@ -141,7 +141,7 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 $ENDIF.elh2_coup
 
 $IFTHEN.hardcap %cm_softcap% == "off"
-    q32_peakDemand_DT(ttot,all_regi,all_enty)      "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"
+    q32_peakDemandDT(ttot,all_regi,all_enty)      "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"
 $ENDIF.hardcap
 
 $IFTHEN.softcap %cm_softcap% == "on"
