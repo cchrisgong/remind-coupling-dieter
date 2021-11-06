@@ -10,16 +10,16 @@
 ***---------------------------------------------------------------------------
 
 *' @equations
-*' 
-*' **Total fuel costs for biomass**  
+*'
+*' **Total fuel costs for biomass**
 *' The first part, summing over *peren2rlf30*, represents costs for biomass with fixed prices.
-*' The second part that includes *v30_pebiolc_costs* represents costs for biomass with continous 
-*' supply curves from MAgPIE. In coupled runs *v30_multcost* is a cost markup factor improving 
-*' the convergence by penalizing large jumps in the demand between two coupling 
-*' iterations. It converges to 1 and therefore does not affect the outcome. The last part, containing 
+*' The second part that includes *v30_pebiolc_costs* represents costs for biomass with continous
+*' supply curves from MAgPIE. In coupled runs *v30_multcost* is a cost markup factor improving
+*' the convergence by penalizing large jumps in the demand between two coupling
+*' iterations. It converges to 1 and therefore does not affect the outcome. The last part, containing
 *' *pm_costsTradePeFinancial*, represents additional tradecosts (only for purpose grown lignocellulosic biomass).
 
-q30_costFuBio(ttot,regi)$(ttot.val ge cm_startyear).. 
+q30_costFuBio(ttot,regi)$(ttot.val ge cm_startyear)..
          vm_costFuBio(ttot,regi)
          =e= sum(peren2rlf30(enty,rlf), p30_datapebio(regi,enty,rlf,"cost",ttot) * vm_fuExtr(ttot,regi,enty,rlf))
          +
@@ -27,34 +27,34 @@ $if %cm_MAgPIE_coupling% == "on"  (v30_pebiolc_costs(ttot,regi) * v30_multcost(t
 $if %cm_DTcoup% == "on"            * v30_multcostDIETER(ttot,regi))
 $if %cm_MAgPIE_coupling% == "off" (v30_pebiolc_costs(ttot,regi))
          - p30_pebiolc_costs_emu_preloop(ttot,regi) !! Need to be substracted since they are also inculded in the total agricultural production costs
-         + 
+         +
          sum(peren2cont30(enty,rlf), vm_fuExtr(ttot,regi,enty,rlf) * pm_costsTradePeFinancial(regi,"use",enty));
 
 ***---------------------------------------------------------------------------
 ***                      MAgPIE EMULATOR
 ***---------------------------------------------------------------------------
 
-*' **MAgPIE EMULATOR: PRICE**  
+*' **MAgPIE EMULATOR: PRICE**
 *' This equation calculates the price for purpose grown lignocellulosic biomass as a (linear) function of demand according to the supplycurve as it was derived
-*' from MAgPIE. The equation is used by the shift factor calculation in the preloop stage. In the main solve stage the price is only 
-*' used to apply the bioenergy tax. It contains optional shift and scaling of supply curves in coupled runs. 
+*' from MAgPIE. The equation is used by the shift factor calculation in the preloop stage. In the main solve stage the price is only
+*' used to apply the bioenergy tax. It contains optional shift and scaling of supply curves in coupled runs.
 
 q30_pebiolc_price(ttot,regi)$(ttot.val ge cm_startyear)..
          vm_pebiolc_price(ttot,regi)
          =e=
-         (v30_priceshift(ttot,regi) 
-       + i30_bioen_price_a(ttot,regi) 
+         (v30_priceshift(ttot,regi)
+       + i30_bioen_price_a(ttot,regi)
        + i30_bioen_price_b(ttot,regi) * (vm_fuExtr(ttot,regi,"pebiolc","1") + sm_eps) )
        * v30_pricemult(ttot,regi)
 ;
 
-*' **MAgPIE EMULATOR: COST**  
+*' **MAgPIE EMULATOR: COST**
 *' Calculates bioenergy costs of purpose grown lignocellulosic biomass by integrating the linear price supply curve (see above).
-*' It contains optional shift and scaling of supply curves in coupled runs. 
+*' It contains optional shift and scaling of supply curves in coupled runs.
 *' The equation is used both in preloop and main solve.
 
 q30_pebiolc_costs(ttot,regi)$(ttot.val ge cm_startyear)..
-         v30_pebiolc_costs(ttot,regi) 
+         v30_pebiolc_costs(ttot,regi)
          =e=
         (v30_priceshift(ttot,regi)
        + i30_bioen_price_a(ttot,regi)
@@ -67,10 +67,10 @@ q30_pebiolc_costs(ttot,regi)$(ttot.val ge cm_startyear)..
 ***                   SHIFT FACTOR CALCULATOIN
 ***---------------------------------------------------------------------------
 
-*' **Calculate shift factor for bioenergy costs**  
-*' This applies in coupled runs only to shift the supplycurve according to the price response of MAgPIE. The factor is computed 
-*' by minimizing least squares (*v30_shift_r2*) of price differences between actual MAgPIE output (from coupled runs) and the 
-*' supply curve (aka MAgPIE emulator). 
+*' **Calculate shift factor for bioenergy costs**
+*' This applies in coupled runs only to shift the supplycurve according to the price response of MAgPIE. The factor is computed
+*' by minimizing least squares (*v30_shift_r2*) of price differences between actual MAgPIE output (from coupled runs) and the
+*' supply curve (aka MAgPIE emulator).
 *' It is solved in presolve (*s30_switch_shiftcalc* = 1) and deactivated in main solve (*s30_switch_shiftcalc* = 0).
 *' *pm_ts* is used as a weight factor, representing the time step length.
 
@@ -84,12 +84,12 @@ q30_priceshift$(s30_switch_shiftcalc eq 1)..
 ***                      COUPLING CONVERGENCE
 ***---------------------------------------------------------------------------
 
-*' **Calculate cost markup factor for coupled runs**  
-*' Improve convergence of the REMIND-MAgPIE coupling by penalizing deviations from last coupling iteration. 
-*' This applies in coupled runs only to prevent large jumps in bioenergy demand between coupling iterations. 
-*' It penalizes deviations in the demand for purpose grown bioenergy from the previous coupling iteration 
-*' by increasing the costs proportional to the deviation. The factor converges to 1, as the 
-*' difference between *vm_fuExtr* and *p30_pebiolc_demandmag* vanishes when the coupling converges over 
+*' **Calculate cost markup factor for coupled runs**
+*' Improve convergence of the REMIND-MAgPIE coupling by penalizing deviations from last coupling iteration.
+*' This applies in coupled runs only to prevent large jumps in bioenergy demand between coupling iterations.
+*' It penalizes deviations in the demand for purpose grown bioenergy from the previous coupling iteration
+*' by increasing the costs proportional to the deviation. The factor converges to 1, as the
+*' difference between *vm_fuExtr* and *p30_pebiolc_demandmag* vanishes when the coupling converges over
 *' iterations.
 
 q30_costAdj(ttot,regi)$(ttot.val ge cm_startyear)..
@@ -98,22 +98,23 @@ q30_costAdj(ttot,regi)$(ttot.val ge cm_startyear)..
          power((vm_fuExtr(ttot,regi,"pebiolc","1")-p30_pebiolc_demandmag(ttot,regi))/ (p30_pebiolc_demandmag(ttot,regi) + 0.15),2) * 0.4 + 1
 ;
 
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
 q30_costAdjDIETER(ttot,regi)$(ttot.val ge cm_startyear)..
          v30_multcostDIETER(ttot,regi)
          =e=
-*         power((vm_fuExtr(ttot,regi,"pebiolc","2")-pm_fuExtr(ttot,regi,"pebiolc","2"))/ (pm_fuExtr(ttot,regi,"pebiolc","2") + 0.15),2) * 0.4  + 1     
-         power( 
-	 (  (vm_fuExtr(ttot,regi,"pebiolc","1") +vm_fuExtr(ttot,regi,"pebiolc","2")) 
+*         power((vm_fuExtr(ttot,regi,"pebiolc","2")-pm_fuExtr(ttot,regi,"pebiolc","2"))/ (pm_fuExtr(ttot,regi,"pebiolc","2") + 0.15),2) * 0.4  + 1
+         power(
+	 (  (vm_fuExtr(ttot,regi,"pebiolc","1") +vm_fuExtr(ttot,regi,"pebiolc","2"))
          - (pm_fuExtr(ttot,regi,"pebiolc","1")+pm_fuExtr(ttot,regi,"pebiolc","2")) ) /
          (  (pm_fuExtr(ttot,regi,"pebiolc","1")+pm_fuExtr(ttot,regi,"pebiolc","2")) + 0.15)
 	 , 2) * 0.4 + 1
 ;
-
+$ENDIF.DTcoup
 ***---------------------------------------------------------------------------
 ***          Definition of resource constraints for biomass
 ***---------------------------------------------------------------------------
 
-*' **Limit export of biomass**  
+*' **Limit export of biomass**
 *' Only purpose grown lignocellulosic biomass may be exported, no residues.
 
 q30_limitXpBio(t,regi)..
@@ -147,5 +148,5 @@ q30_limitProdtoHist(t,regi)$(cm_bioprod_histlim ge 0 AND t.val ge cm_startyear A
 ;
 
 
- 
+
 *** EOF ./modules/30_biomass/magpie_4/equations.gms
