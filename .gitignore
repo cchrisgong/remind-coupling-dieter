@@ -20,7 +20,7 @@ scripts/iterative/DIETER/
 # Ignore everything in "input" folders
 input/
 
-# Ignore everything in root "output" folders
+# Ignore everything in root "output" folder
 output/
 dataprocessing/
 # Ignore everything in "doc" folders, except for 3 specific files
