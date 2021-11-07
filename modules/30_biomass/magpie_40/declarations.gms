@@ -66,7 +66,9 @@ q30_pebiolc_costs(ttot,all_regi)   "MAgPIE emulator: calculates the costs of peb
 q30_priceshift                     "Calculates shift factor by minimizing least squares of price differences between MAgPIE output and MAgPIE emulator"
 q30_limitXpBio(ttot,all_regi)      "Only purpose grown bioenergy may be exported, no residues"
 q30_costAdj(ttot,all_regi)         "Improve convergence penalizing deviations from last coupling iteration"
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
 q30_costAdjDIETER(ttot,all_regi)   "Improve convergence penalizing deviations from last coupling iteration for DIETER coupling"
+$ENDIF.DTcoup
 q30_limitTeBio(ttot,all_regi)      "Limit BECCS in policy runs relative to reference scenario"
 q30_limitProdtoHist(ttot,all_regi) "Limit regional energy crop production to multiple of cm_bioprod_histlim times 2015 level, active if cm_bioprod_histlim >= 0"
 q30_BioPEProdTotal(ttot,all_regi)  "Calculate total domestic PE biomass production"

@@ -102,7 +102,6 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 q30_costAdjDIETER(ttot,regi)$(ttot.val ge cm_startyear)..
          v30_multcostDIETER(ttot,regi)
          =e=
-*         power((vm_fuExtr(ttot,regi,"pebiolc","2")-pm_fuExtr(ttot,regi,"pebiolc","2"))/ (pm_fuExtr(ttot,regi,"pebiolc","2") + 0.15),2) * 0.4  + 1
          power(
 	 (  (vm_fuExtr(ttot,regi,"pebiolc","1") +vm_fuExtr(ttot,regi,"pebiolc","2"))
          - (pm_fuExtr(ttot,regi,"pebiolc","1")+pm_fuExtr(ttot,regi,"pebiolc","2")) ) /
