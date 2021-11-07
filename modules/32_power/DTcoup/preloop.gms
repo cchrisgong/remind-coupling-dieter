@@ -17,7 +17,6 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 ***  switch on second coupling switch when coupling actually begins
 cm_DTcoup_eq = 1;
 *** CG: start a first iteration DIETER
-sm32_iter = 0;
 execute "./DIETER_parallel.sh";
 put "running DIETER iteration", sm32_iter:0:0;
 execute './mergegdx.sh';

@@ -142,13 +142,13 @@ display "DIETER iteration", sm32_iter;
 *** fuel cost to be passed on to DIETER
 *** sometimes for some reason the marginals of the PE equation is 0
 ** if condition not satisfied, last iteration values of p32_fuelprice_curriter will be automatically taken
-p32_fuelprice_curriter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps)) = q_balPe.m(t,regi,entyPe);
+p32_fuelprice_curriter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps) AND (abs(qm_budget.m(t,regi)) gt sm_eps)) = q_balPe.m(t,regi,entyPe)/ (qm_budget.m(t,regi));
 ** if condition not satisfied, last iteration values of p32_fuelprice_avgiter will be automatically taken
-p32_fuelprice_avgiter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps) AND (abs(qm_budget.m(t,regi)) gt sm_eps))
+p32_fuelprice_avgiter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps))
           = (p32_fuelprice_curriter(t,regi,entyPe)
     		   + 2 * p32_fuelprice_lastiter(t,regi,entyPe)
     			 + p32_fuelprice_lastx2iter(t,regi,entyPe))
-    			 / 4 / (qm_budget.m(t,regi));
+    			 / 4 ;
 
 
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
@@ -156,15 +156,16 @@ p32_seh2elh2DemAvg(t,regi,enty)$(sameas(enty,"seh2")) =
   0.5 * (p32_seh2elh2Dem(t,regi,enty) + p32_seh2elh2DemLaIter(t,regi,enty));
 $ENDIF.elh2_coup
 
-* $IFTHEN.elh2_coup_off %cm_elh2_coup% == "off"
-* p32_seh2elh2DemAvg(t,regi,enty)$(sameas(enty,"seh2")) = 0;
-* $ENDIF.elh2_coup_off
-
+* demand averaging
+* p32_seelUsableDemAvg = p32_seelUsableProdAvg
 p32_seelUsableDemAvg(t,regi,enty)$(sameas(enty,"seel")) =
   0.5 * (p32_seelUsableDem(t,regi,enty) + p32_seelUsableDemLaIter(t,regi,enty));
 
-p32_seelUsableProdAvg(t,regi,enty)$(sameas(enty,"seel")) =
-  0.5 * (p32_seelUsableProd(t,regi,enty) + p32_seelUsableProdLaIter(t,regi,enty));
+* demand averaging
+* p32_seelUsableProdAvg(t,regi,enty)$(sameas(enty,"seel")) =
+*  0.5 * (p32_seelUsableProd(t,regi,enty) + p32_seelUsableProdLaIter(t,regi,enty));
+
+p32_seelUsableProdAvg(t,regi,enty)$(sameas(enty,"seel")) = p32_seelUsableProd(t,regi,enty);
 
 * );
 ***CG:interest rate (Marian's formula) (should move this to core/postsolve at some point)
@@ -177,7 +178,7 @@ p32_r4DT(ttot,regi)$(tDT32s2(ttot))
 p32_r4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
 
 * REMIND data for DIETER
-    execute_unload "RMdata_4DT.gdx", vm_cap, sm32_iter, p32_r4DT, p32_seelUsableProdAvg, p32_seh2elh2DemAvg, p32_fuelprice_avgiter,
+    execute_unload "RMdata_4DT.gdx", vm_cap, sm32_iter, p32_r4DT, p32_seelUsableProdAvg, p32_fuelprice_avgiter,
     f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
     pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, pm_cf, vm_capFac, pm_dataren, vm_capDistr;
 

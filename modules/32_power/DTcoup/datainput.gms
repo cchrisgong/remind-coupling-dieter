@@ -93,9 +93,11 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_minVF_spv = 0.1;
 ** loading variable without .l is ok
 
-Execute_Loadpoint 'input' p32_fuelprice_curriter = q_balPe.m;
-Execute_Loadpoint 'input' p32_fuelprice_lastiter = q_balPe.m;
-Execute_Loadpoint 'input' p32_fuelprice_avgiter = q_balPe.m;
+*** initialize REMIND iteration scalar
+sm32_iter = 0;
+
+Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;
+Execute_Loadpoint 'input' qm_budget.m = qm_budget.m;
 Execute_Loadpoint 'input' v32_storloss = v32_storloss;
 Execute_Loadpoint 'input' vm_prodSe = vm_prodSe;
 Execute_Loadpoint 'input' vm_cap = vm_cap;
@@ -120,6 +122,10 @@ Execute_Loadpoint 'input' vm_demSe = vm_demSe;
 
 Display "vm_cap for DIETER datainput", vm_cap.l;
 
+p32_fuelprice_curriter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps) AND (abs(qm_budget.m(t,regi)) gt sm_eps)) = q_balPe.m(t,regi,entyPe) / qm_budget.m(t,regi);
+p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
+p32_fuelprice_avgiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
+
 p32_seelUsableProd(t,regi,enty2)$(sameas(enty2,"seel")) = sum( pe2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
                                                         + sum(se2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
                                                         - sum(teVRE, v32_storloss.l(t,regi,teVRE) )
@@ -130,7 +136,7 @@ p32_seh2elh2Dem(t,regi,enty)$(regDTCoup(regi) AND sameas(enty,"seh2")) = vm_demS
 p32_DIETERCurtRatioLaIter(t,regi,"spv") = v32_storloss.l(t,regi,"spv")/(vm_usableSeTe.l(t,regi,"seel","spv")+sm_eps);
 p32_DIETERCurtRatioLaIter(t,regi,"wind") = v32_storloss.l(t,regi,"wind")/(vm_usableSeTe.l(t,regi,"seel","wind")+sm_eps);
 
-execute_unload "RMdata_4DT_input.gdx", vm_cap, p32_seelUsableProd, p32_seh2elh2Dem, p32_fuelprice_curriter,
+execute_unload "RMdata_4DT_input.gdx", vm_cap, sm32_iter, p32_seelUsableProd, p32_seh2elh2Dem, p32_fuelprice_curriter,
 f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
 pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, vm_capFac, pm_dataren, vm_capDistr;
 $ENDIF.DTcoup
