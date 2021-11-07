@@ -182,7 +182,7 @@ for (year_toplot in report.periods) {
     if (max(dieter.consumption$value) == 0) {
       ymin = 0
     } else {
-      ymin = -max(plot.dieter.consumption$value) * 1.7
+      ymin = -max(plot.dieter.consumption$value) * 1.3
     }
   }
   
@@ -219,11 +219,8 @@ for (year_toplot in report.periods) {
     ggtitle(paste0("REMIND", year_toplot)) +
     coord_cartesian(ylim = c(ymin, ymax), xlim = c(0, max(out.remind$iteration))) +
     theme(
-      legend.position = "bottom",
-      legend.direction = "horizontal",
       legend.title = element_blank()
-    ) +
-    theme(aspect.ratio = .5)
+    ) 
   
   
   if (length(sorted_files_DT) != 0) {
@@ -260,11 +257,8 @@ for (year_toplot in report.periods) {
       coord_cartesian(ylim = c(ymin, ymax), xlim = c(0, max(out.remind$iteration))) +
       ggtitle(paste0("DIETER", year_toplot)) +
       theme(
-        legend.position = "bottom",
-        legend.direction = "horizontal",
         legend.title = element_blank()
-      ) +
-      theme(aspect.ratio = .5)
+      ) 
     
   }
   
@@ -333,11 +327,8 @@ p1 <- ggplot() +
   ggtitle(paste0("REMIND (last iteration)")) +
   # coord_cartesian(ylim = c(ymin,ymax), xlim = c(0, max(out.remind$period)))+
   theme(
-    legend.position = "bottom",
-    legend.direction = "horizontal",
     legend.title = element_blank()
-  ) +
-  theme(aspect.ratio = .5)
+  ) 
 
 
 if (length(sorted_files_DT) != 0) {
@@ -382,11 +373,8 @@ if (length(sorted_files_DT) != 0) {
     #coord_cartesian( xlim = c(min(out.dieter$period), max(out.dieter$period)))+
     ggtitle(paste0("DIETER(last iteration)")) +
     theme(
-      legend.position = "bottom",
-      legend.direction = "horizontal",
       legend.title = element_blank()
-    ) +
-    theme(aspect.ratio = .5)
+    ) 
   
 }
 
