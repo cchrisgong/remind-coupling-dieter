@@ -120,6 +120,7 @@ if (length(dieter.files) != 0) {
     out.remind.capfac <- rbind(out.remind.capfac,vrdata_tot)
     
   }
+  out.remind.capfac$model <- "REMIND"
 }
 
 # Data preparation (DIETER) -----------------------------------------------
@@ -143,7 +144,8 @@ if (length(dieter.files) != 0) {
   out.dieter.capfac <- out.dieter.data %>%
     filter(variable == "capfac") %>%
     mutate(value = value * 100) %>%
-    select(period, tech=all_te, value, iter)
+    mutate(model = "DIETER") %>%
+    select(period, tech=all_te, value, iter,model)
   
   out.dieter.capacity <- out.dieter.data %>%
     filter(variable == "capacity") %>%
@@ -300,3 +302,43 @@ p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
 
 swfigure(sw,grid.draw,p)
 
+swlatex(sw, paste0("\\section{Capacity factors}"))
+
+for(year_toplot in report.periods){
+  plot.remind <- out.remind.capfac %>% 
+    filter(period == year_toplot)
+  
+  plot.dieter <- out.dieter.capfac %>% 
+    filter(period == year_toplot) %>% 
+    filter(!tech %in% c("Lignite", "Hard coal"))
+  
+  swlatex(sw, paste0("\\subsection{Capacity factors in ", year_toplot, "}"))
+  
+  p <- ggplot() + 
+    geom_line(data=plot.remind, aes(x=iter, y=value, color=model)) + 
+    geom_point(data=plot.dieter, aes(x=iter, y=value, color=model)) +
+    xlab("Iteration") + 
+    ylab("Capacity factor") + 
+    facet_wrap(~tech, nrow=3)
+  
+  swfigure(sw,print,p)
+}
+
+
+swlatex(sw, "\\subsection{Capacity factors over time (last iteration)}")
+
+plot.remind <- out.remind.capfac %>% 
+  filter(iter == max(iter))
+
+plot.dieter <- out.dieter.capfac %>% 
+  filter(iter == max(iter)) %>% 
+  filter(!tech %in% c("Lignite", "Hard coal"))
+
+p <- ggplot() + 
+  geom_line(data=plot.remind, aes(x=as.integer(period), y=value, color=model)) +
+  geom_line(data=plot.dieter, aes(x=as.integer(period), y=value, color=model)) +
+  facet_wrap(~tech, nrow=3) +
+  xlab("Time") + 
+  ylab("Capacity factor")
+
+swfigure(sw,print,p)
