@@ -316,7 +316,7 @@ for(year_toplot in report.periods){
   
   p <- ggplot() + 
     geom_line(data=plot.remind, aes(x=iter, y=value, color=model)) + 
-    geom_point(data=plot.dieter, aes(x=iter, y=value, color=model)) +
+    geom_line(data=plot.dieter, aes(x=iter, y=value, color=model)) +
     xlab("Iteration") + 
     ylab("Capacity factor") + 
     facet_wrap(~tech, nrow=3)
