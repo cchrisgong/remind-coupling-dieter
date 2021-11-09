@@ -119,8 +119,20 @@ Execute_Loadpoint 'input' pm_dataren = pm_dataren;
 Execute_Loadpoint 'input' vm_capDistr = vm_capDistr;
 Execute_Loadpoint 'input' p32_shSeEl = v32_shSeEl.l;
 Execute_Loadpoint 'input' vm_demSe = vm_demSe;
+Execute_Loadpoint 'input' vm_cons = vm_cons;
+Execute_Loadpoint 'input' pm_pop = pm_pop;
+Execute_Loadpoint 'input' pm_ttot_val = pm_ttot_val;
+Execute_Loadpoint 'input' pm_prtp = pm_prtp;
+Execute_Loadpoint 'input' v32_storloss = v32_storloss;
 
-Display "vm_cap for DIETER datainput", vm_cap.l;
+*Display "vm_cap for DIETER datainput", vm_cap.l;
+
+p32_r4DT(ttot,regi)$(tDT32s2(ttot) AND regDTCoup(regi))
+= (( (vm_cons.l(ttot+1,regi)/pm_pop(ttot+1,regi)) /
+  (vm_cons.l(ttot-1,regi)/pm_pop(ttot-1,regi)) )
+  ** (1 / ( pm_ttot_val(ttot+1)- pm_ttot_val(ttot-1))) - 1) + pm_prtp(regi);
+
+p32_r4DT(ttot,regi)$(ttot.val gt 2100 AND regDTCoup(regi)) = 0.05;
 
 p32_fuelprice_curriter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps) AND (abs(qm_budget.m(t,regi)) gt sm_eps)) = q_balPe.m(t,regi,entyPe) / qm_budget.m(t,regi);
 p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
@@ -136,7 +148,7 @@ p32_seh2elh2Dem(t,regi,enty)$(regDTCoup(regi) AND sameas(enty,"seh2")) = vm_demS
 p32_DIETERCurtRatioLaIter(t,regi,"spv") = v32_storloss.l(t,regi,"spv")/(vm_usableSeTe.l(t,regi,"seel","spv")+sm_eps);
 p32_DIETERCurtRatioLaIter(t,regi,"wind") = v32_storloss.l(t,regi,"wind")/(vm_usableSeTe.l(t,regi,"seel","wind")+sm_eps);
 
-execute_unload "RMdata_4DT_input.gdx", vm_cap, sm32_iter, p32_seelUsableProd, p32_seh2elh2Dem, p32_fuelprice_curriter,
+execute_unload "RMdata_4DT_input.gdx", vm_cap, sm32_iter, p32_r4DT, p32_seelUsableProd, p32_seh2elh2Dem, p32_fuelprice_curriter,
 f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
 pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, vm_capFac, pm_dataren, vm_capDistr;
 $ENDIF.DTcoup
