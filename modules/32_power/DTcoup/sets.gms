@@ -13,7 +13,7 @@ tDT32s2(ttot) "second shorter list of time points that are coupled to DIETER" /2
 
 DIETERte32 "technologies in DIETER" /coal,hc,lig,nuc,CCGT,OCGT_eff,bio,Wind_on,Solar,ror,all_te,elh2,el,vregrid/
 
-DIETERvarname32 "DIETER name" /capfac,ResPeakDem_relFac,peakDem,value_factor,gen_share,market_value,market_price,elec_price,curt_share,curt_ratio,dem_share/
+DIETERvarname32 "DIETER name" /capfac,ResPeakDem_relFac,peakDem,value_factor,gen_share,market_value,market_price,elec_price,curt_share,curt_ratio,dem_share,usable_generation/
 
 COALte32(all_te) "coal to seel tech in REMIND" /igcc,igccc,pc,pcc,pco,coalchp/
 

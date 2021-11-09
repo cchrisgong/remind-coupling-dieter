@@ -55,15 +55,7 @@ $IFTHEN.debug %cm_nash_mode% == "debug"
                p80_repy(all_regi,'solvestat') = hybrid.solvestat;
                p80_repy(all_regi,'modelstat') = hybrid.modelstat;
                p80_repy(all_regi,'resusd'   ) = hybrid.resusd;
-               p80_repy(all_regi,'objval')    = hybridsolve hybrid using nlp maximizing vm_welfareGlob;
-if (ord(iteration) eq 13,
-  solve hybrid using nlp maximizing vm_welfareGlob;
-  abort "lets look at logs";
-);solve hybrid using nlp maximizing vm_welfareGlob;
-if (ord(iteration) eq 13,
-  solve hybrid using nlp maximizing vm_welfareGlob;
-  abort "lets look at logs";
-);.objval;
+               p80_repy(all_regi,'objval')    = hybrid.objval;
                if(p80_repy(all_regi,'modelstat') eq 2,
                     p80_repyLastOptim(all_regi,'objval') = p80_repy(all_regi,'objval');
                );

@@ -199,11 +199,10 @@ o_avgAdjCost_2_InvCost_ratioPc(ttot,all_regi,all_te)   "ratio in % of average ad
 pm_calibrate_eff_scale(all_in,all_in,eff_scale_par)   "parameters for scaling efficiencies in CES calibration"
 /   /
 
-pm_fedemand(tall,all_regi,all_GDPscen,all_in)         "final energy demand"
+pm_fedemand(tall,all_regi,all_in)                     "final energy demand"
 pm_share_CCS_CCO2(ttot,all_regi)                      "share of stored CO2 from total captured CO2"
 
 pm_delta_histCap(tall,all_regi,all_te)                "parameter to store data of historic capacity additions [TW/yr]"
-
 
 * Fuel Prices
 pm_FEPrice(ttot,all_regi,all_enty,sector,emiMkt)      "parameter to capture all FE prices across sectors and markets (tr$2005/TWa)"
@@ -218,14 +217,11 @@ pm_globalMeanTemperature(tall)                       "global mean temperature an
 pm_globalMeanTemperatureZeroed1900(tall)             "global mean temperature anomaly, zeroed around 1900"
 pm_temperatureImpulseResponseCO2(tall,tall)          "temperature impulse response to CO2 [K/GtCO2]"
 
-pm_regionalTemperature(tall,all_regi)                "regional temperature"
-pm_tempScaleGlob2Reg(tall,all_regi)                  "scaling factor from global to regional temperature"
-pm_damage(tall,all_regi)                             "damage factor (reduces GDP)"
-pm_damageGrowthRate(tall,all_regi)                   "damage function for growth rate of GDP"
-pm_damageMarginal(tall,all_regi)                     "damage function derivative"
+*** damage related
 pm_taxCO2eqSCC(ttot,all_regi)                        "carbon tax component due to damages (social cost of carbon) "
-
 pm_GDPGross(tall,all_regi)                           "gross GDP (before damages)"
+pm_fuExtr(ttot,all_regi,all_enty,rlf)                "fuel use [TWa]"
+
 ***----------------------------------------------------------------------------------------
 *** ----- Parameters needed for MAGICC ----------------------------------------------------
 p_MAGICC_emi(tall,RCP_regions_world_bunkers,emiRCP)  "emission data to export"
@@ -292,7 +288,7 @@ vm_emiAllGlob(ttot,all_enty)                         "total global emissions - l
 vm_perm(ttot,all_regi)                               "emission allowances"
 vm_co2eqGlob(ttot)                                   "global emissions to be balanced by allowances. [GtCeq]"
 vm_co2eq(ttot,all_regi)                              "total emissions measured in co2 equivalents ATTENTION: content depends on multigasscen. [GtCeq]"
-vm_co2eqMkt(ttot,all_regi,all_emiMkt)                                         "total emissions per market measured in co2 equivalents ATTENTION: content depends on multigasscen. Unit: GtCeq"
+vm_co2eqMkt(ttot,all_regi,all_emiMkt)                                         "total emissions per market measured in co2 equivalents ATTENTION: content depends on multigasscen. [GtCeq]"
 v_co2eqCum(all_regi)                                 "cumulated vm_co2eq emissions for the first budget period.  [GtCeq]"
 vm_banking(ttot,all_regi)                            "banking of emission permits"
 v_adjFactor(tall,all_regi,all_te)                    "factor to multiply with investment costs for adjustment costs"
@@ -314,6 +310,7 @@ vm_taxrevimplFETax(ttot,all_regi)                    "implicit efficiency direct
 vm_Mrkup(tall,all_regi,all_te)                       "markup adjustment used for subsidy (tax) to emulate market value of power generation technologies produces either below or above annual average elec. prices [trUSD/TWa]"
 vm_reqCap(tall,all_regi)                             "required total dispatchable capacities"
 vm_priceCap(tall,all_regi)                           "shadow price of capacity"
+v_costFuExdampen(ttot,all_regi,all_enty)	     "dampening term for non-biomass PE fuel cost"
 ;
 
 ***----------------------------------------------------------------------------------------
@@ -340,7 +337,7 @@ vm_prodPe(ttot,all_regi,all_enty)                    "pe production. [TWa, Urani
 vm_demSe(ttot,all_regi,all_enty,all_enty,all_te)     "se demand. [TWa]"
 vm_prodSe(tall,all_regi,all_enty,all_enty,all_te)    "se production. [TWa]"
 vm_prodFe(ttot,all_regi,all_enty,all_enty,all_te)    "fe production. [TWa]"
-vm_demFeSector(ttot,all_regi,all_enty,all_enty,emi_sectors,all_emiMkt) "fe demand per sector and emission market. Unit: TWa"
+vm_demFeSector(ttot,all_regi,all_enty,all_enty,emi_sectors,all_emiMkt)          "fe demand per sector and emission market. [TWa]"
 v_costFu(ttot,all_regi)                              "fuel costs"
 vm_costFuEx(ttot,all_regi,all_enty)                  "fuel costs from exhaustible energy [tril$US]"
 vm_pebiolc_price(ttot,all_regi)                      "Bioenergy price according to MAgPIE supply curves [T$US/TWa]"
@@ -374,6 +371,10 @@ vm_emiCdrAll(ttot,all_regi)                          "all CDR emissions"
 *** ES layer variables
 vm_demFeForEs(ttot,all_regi,all_enty,all_esty,all_teEs)     "Final energy which will be used in the ES layer."
 v_prodEs(ttot,all_regi,all_enty,all_esty,all_teEs)          "Energy services (unit determined by conversion factor pm_fe2es)."
+
+*** CES markup to represent end-use technology cost
+vm_costCESMkup(ttot,all_regi,all_in)                                   "CES markup cost to represent demand-side technology cost of end-use transformation [trUSD/TWa]"
+
 ;
 ***----------------------------------------------------------------------------------------
 ***                                   EQUATIONS
@@ -410,7 +411,7 @@ q_costTeCapital(tall,all_regi,all_te)                "calculation of investment 
 
 q_balPe(ttot,all_regi,all_enty)                      "balance of primary energy (pe)"
 q_balSe(ttot,all_regi,all_enty)                      "balance of secondary energy (se)"
-qm_balFe(ttot,all_regi,all_enty,all_enty,all_te)                "balance of final energy (fe)"
+qm_balFe(ttot,all_regi,all_enty,all_enty,all_te)     "balance of final energy (fe)"
 
 q_transPe2se(ttot,all_regi,all_enty,all_enty,all_te) "energy tranformation pe to se"
 q_transSe2fe(ttot,all_regi,all_enty,all_enty,all_te) "energy tranformation se to fe"
@@ -419,6 +420,8 @@ q_transSe2se(ttot,all_regi,all_enty,all_enty,all_te) "energy transformation se t
 qm_fuel2pe(ttot,all_regi,all_enty)                   "constraint on cumulative fuel use"
 
 q_limitProd(ttot,all_regi,all_te,rlf)                "constraint on annual production"
+
+q_costFuExdampen(ttot,all_regi,all_enty)             "calculate dampening term for non-biomass PE fuel cost"
 
 q_emiTeDetail(ttot,all_regi,all_enty,all_enty,all_te,all_enty) "determination of emissions"
 q_macBase(tall,all_regi,all_enty)                    "baseline emissions for all emissions subject to MACCs (type emiMacSector)"
@@ -527,7 +530,7 @@ sm_DpGJ_2_TDpTWa                                      "multipl. factor to conver
 s_gwpCH4                                              "Global Warming Potentials of CH4, AR5 WG1 CH08 Table 8.7"     /28/
 s_gwpN2O                                              "Global Warming Potentials of N2O, AR5 WG1 CH08 Table 8.7"     /265/
 sm_dmac                                               "step in MAC functions [US$]"                                                                   /5/
-s_macChange                                           "maximum yearly increase of relative abatement in percentage points of maximum abatement. Unit: 0..1"      /0.05/
+s_macChange                                           "maximum yearly increase of relative abatement in percentage points of maximum abatement. [0..1]"      /0.05/
 sm_tgn_2_pgc                                           "conversion factor 100-yr GWP from TgN to PgCeq"
 sm_tgch4_2_pgc                                         "conversion factor 100-yr GWP from TgCH4 to PgCeq"
 
@@ -536,10 +539,10 @@ sm_MtCH4_2_TWa                                        "Energy content of methane
 sm_D2015_2_D2005                                      "Convert $2015 to $2005 by dividing by 1.2: 1/1.2 = 0.8333"      /0.8333/
 sm_DptCO2_2_TDpGtC                                    "Conversion multiplier to go from $/tCO2 to T$/GtC: 44/12/1000"     /0.00366667/
 
-s_co2pipe_leakage                                     "Leakage rate of CO2 pipelines. Unit: [0..1]"
+s_co2pipe_leakage                                     "Leakage rate of CO2 pipelines. [0..1]"
 s_tau_cement                                          "range of per capita investments for switching from short-term to long-term behavior in CO2 cement emissions"                / 12000 /
 s_c_so2                                               "constant, see S. Smith, 2004, Future Sulfur Dioxide Emissions"    /4.39445/
-sm_ccsinjecrate                                       "CCS injection rate factor. Unit: 1/a"
+sm_ccsinjecrate                                       "CCS injection rate factor. [1/a]"
 
 s_t_start                                             "start year of emission budget"
 cm_peakBudgYr                                         "date of net-zero CO2 emissions for peak budget runs without overshoot"

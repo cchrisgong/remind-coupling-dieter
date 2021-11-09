@@ -11,8 +11,8 @@
 pm_taxCO2eq_iteration(iteration,ttot,regi) = pm_taxCO2eq(ttot,regi);
 pm_taxemiMkt_iteration(iteration,ttot,regi,emiMkt) = pm_taxemiMkt(ttot,regi,emiMkt);
 
-*RP* added the historic 2010/2015 CO2 prices
-if (cm_emiscen eq 9,
+*RP* added the historic 2010/2015 CO2 prices 
+if (cm_emiscen eq 9 or (cm_emiscen eq 10),
  pm_pvpRegi(ttot,regi,"perm") = (pm_taxCO2eq(ttot,regi) + pm_taxCO2eqHist(ttot,regi) + pm_taxCO2eqSCC(ttot,regi))* pm_pvp(ttot,"good");
 elseif ((cm_emiscen eq 2) OR (cm_emiscen eq 5) OR (cm_emiscen eq 8)),
  pm_pvpRegi(ttot,regi,"perm") =  pm_pricePerm(ttot) / pm_ts(ttot) + ( pm_taxCO2eqHist(ttot,regi) * pm_pvp(ttot,"good") );
@@ -879,5 +879,5 @@ o_carbon_reemitted(ttot,regi,"co2")$(ttot.val ge 2005) =
      *o_emi_conv("co2") 	
 ;
 
-
+pm_fuExtr(ttot,all_regi,all_enty,rlf) = vm_fuExtr.l(ttot,all_regi,all_enty,rlf);
 *** EOF ./core/postsolve.gms

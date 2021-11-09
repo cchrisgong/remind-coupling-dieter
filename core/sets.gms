@@ -20,8 +20,12 @@ cm_GDPscen      "cm_GDPscen as set for use in GDX"      /%cm_GDPscen%/
 all_POPscen     " all possible population scenarios"
 /
 pop_SDP         "SDP population scenario"
+pop_SDP_EI
+pop_SDP_MC
+pop_SDP_RC
 pop_SSP1        "SSP1 population scenario"
 pop_SSP2        "SSP2 population scenario"
+pop_SSP2EU
 pop_SSP3        "SSP3 population scenario"
 pop_SSP4        "SSP4 population scenario"
 pop_SSP5        "SSP5 population scenario"
@@ -34,8 +38,12 @@ pop_b2
 all_GDPscen    "all possible GDP scenarios"
 /
 gdp_SDP         "SDP fastGROWTH medCONV"
+gdp_SDP_EI
+gdp_SDP_MC
+gdp_SDP_RC
 gdp_SSP1        "SSP1 fastGROWTH medCONV"
 gdp_SSP2        "SSP2 medGROWTH medCONV"
+gdp_SSP2EU
 gdp_SSP3        "SSP3 slowGROWTH slowCONV"
 gdp_SSP4        "SSP4  medGROWTH mixedCONV"
 gdp_SSP5        "SSP5 fastGROWTH fastCONV"
@@ -45,11 +53,30 @@ gdp_b1
 gdp_b2
 /
 
+all_demScen    "all possible demand scenarios"
+/
+gdp_SDP         "SDP fastGROWTH medCONV"
+gdp_SDP_EI
+gdp_SDP_MC
+gdp_SDP_RC
+gdp_SSP1        "SSP1 fastGROWTH medCONV"
+gdp_SSP2        "SSP2 medGROWTH medCONV"
+gdp_SSP2EU
+gdp_SSP3        "SSP3 slowGROWTH slowCONV"
+gdp_SSP4        "SSP4  medGROWTH mixedCONV"
+gdp_SSP5        "SSP5 fastGROWTH fastCONV"
+gdp_SSP2_lowEn   "SSP2 with low energy"
+/
+
 all_GDPpcScen    "all possible GDP per capita scenarios (GDP and Population from the same SSP-scenario"
 /
 SDP         "SDP scenario"
+SDP_EI
+SDP_MC
+SDP_RC
 SSP1        "SSP1 fastGROWTH medCONV"
 SSP2        "SSP2 medGROWTH medCONV"
+SSP2EU
 SSP3        "SSP3 slowGROWTH slowCONV"
 SSP4        "SSP4  medGROWTH mixedCONV"
 SSP5        "SSP5 fastGROWTH fastCONV"
@@ -96,9 +123,13 @@ SLCF_building_transport
 all_LU_emi_scen  "all emission baselines for CH4 and N2O land use emissions from MAgPIE"
 /
     SDP         "very low emissions (from SDP scenario in MAgPIE)"
+          SDP_EI
+          SDP_MC
+          SDP_RC
     SSP1        "low    emissions (from SSP1 scenario in MAgPIE)"
     SSP2        "medium emissions (from SSP2 scenario in MAgPIE)"
-    SSP3        "currently not available"
+    SSP2EU
+          SSP3        "currently not available"
     SSP4        "currently not available"
     SSP5        "high   emissions (from SSP5 scenario in MAgPIE)"
 /
@@ -677,17 +708,17 @@ teEs(all_teEs)           "ES technologies which are actually used (to be filled 
 
 sets
 
-   all_regi "all regions" /OAS,ENC,NES,MEA,SSA,LAM,REF,CAZ,EWN,ECS,CHA,ESC,ECE,FRA,DEU,UKI,NEN,IND,JPN,ESW,USA/
+   all_regi "all regions" /LAM,OAS,SSA,EUR,NEU,MEA,REF,CAZ,CHA,IND,JPN,USA/
 
-   ext_regi "extended regions list (includes subsets of H12 regions)" / LAM_regi,OAS_regi,SSA_regi,EUR_regi,NEU_regi,MEA_regi,REF_regi,CAZ_regi,CHA_regi,IND_regi,JPN_regi,USA_regi,OAS,ENC,NES,MEA,SSA,LAM,REF,CAZ,EWN,ECS,CHA,ESC,ECE,FRA,DEU,UKI,NEN,IND,JPN,ESW,USA /
+   ext_regi "extended regions list (includes subsets of H12 regions)" / LAM_regi,OAS_regi,SSA_regi,EUR_regi,NEU_regi,MEA_regi,REF_regi,CAZ_regi,CHA_regi,IND_regi,JPN_regi,USA_regi,LAM,OAS,SSA,EUR,NEU,MEA,REF,CAZ,CHA,IND,JPN,USA /
 
    regi_group(ext_regi,all_regi) "region groups (regions that together corresponds to a H12 region)"
       /
         LAM_regi .(LAM)
         OAS_regi .(OAS)
         SSA_regi .(SSA)
-        EUR_regi .(ENC,EWN,ECS,ESC,ECE,FRA,DEU,UKI,ESW)
-        NEU_regi .(NES,NEN)
+        EUR_regi .(EUR)
+        NEU_regi .(NEU)
         MEA_regi .(MEA)
         REF_regi .(REF)
         CAZ_regi .(CAZ)
@@ -696,107 +727,101 @@ sets
         JPN_regi .(JPN)
         USA_regi .(USA)
       /
-
+ 
    iso "list of iso countries" /
-       AFG,ALA,ALB,DZA,ASM,AND,AGO,AIA,ATA,ATG,
-       ARG,ARM,ABW,AUS,AUT,AZE,BHS,BHR,BGD,BRB,
-       BLR,BEL,BLZ,BEN,BMU,BTN,BOL,BES,BIH,BWA,
-       BVT,BRA,IOT,BRN,BGR,BFA,BDI,KHM,CMR,CAN,
-       CPV,CYM,CAF,TCD,CHL,CHN,CXR,CCK,COL,COM,
-       COG,COD,COK,CRI,CIV,HRV,CUB,CUW,CYP,CZE,
-       DNK,DJI,DMA,DOM,ECU,EGY,SLV,GNQ,ERI,EST,
-       ETH,FLK,FRO,FJI,FIN,FRA,GUF,PYF,ATF,GAB,
-       GMB,GEO,DEU,GHA,GIB,GRC,GRL,GRD,GLP,GUM,
-       GTM,GGY,GIN,GNB,GUY,HTI,HMD,VAT,HND,HKG,
-       HUN,ISL,IND,IDN,IRN,IRQ,IRL,IMN,ISR,ITA,
-       JAM,JPN,JEY,JOR,KAZ,KEN,KIR,PRK,KOR,KWT,
-       KGZ,LAO,LVA,LBN,LSO,LBR,LBY,LIE,LTU,LUX,
-       MAC,MKD,MDG,MWI,MYS,MDV,MLI,MLT,MHL,MTQ,
-       MRT,MUS,MYT,MEX,FSM,MDA,MCO,MNG,MNE,MSR,
-       MAR,MOZ,MMR,NAM,NRU,NPL,NLD,NCL,NZL,NIC,
-       NER,NGA,NIU,NFK,MNP,NOR,OMN,PAK,PLW,PSE,
-       PAN,PNG,PRY,PER,PHL,PCN,POL,PRT,PRI,QAT,
-       REU,ROU,RUS,RWA,BLM,SHN,KNA,LCA,MAF,SPM,
-       VCT,WSM,SMR,STP,SAU,SEN,SRB,SYC,SLE,SGP,
-       SXM,SVK,SVN,SLB,SOM,ZAF,SGS,SSD,ESP,LKA,
-       SDN,SUR,SJM,SWZ,SWE,CHE,SYR,TWN,TJK,TZA,
-       THA,TLS,TGO,TKL,TON,TTO,TUN,TUR,TKM,TCA,
-       TUV,UGA,UKR,ARE,GBR,USA,UMI,URY,UZB,VUT,
-       VEN,VNM,VGB,VIR,WLF,ESH,YEM,ZMB,ZWE /
+       ABW,AFG,AGO,AIA,ALA,ALB,AND,ARE,ARG,ARM,
+       ASM,ATA,ATF,ATG,AUS,AUT,AZE,BDI,BEL,BEN,
+       BES,BFA,BGD,BGR,BHR,BHS,BIH,BLM,BLR,BLZ,
+       BMU,BOL,BRA,BRB,BRN,BTN,BVT,BWA,CAF,CAN,
+       CCK,CHN,CHE,CHL,CIV,CMR,COD,COG,COK,COL,
+       COM,CPV,CRI,CUB,CUW,CXR,CYM,CYP,CZE,DEU,
+       DJI,DMA,DNK,DOM,DZA,ECU,EGY,ERI,ESH,ESP,
+       EST,ETH,FIN,FJI,FLK,FRA,FRO,FSM,GAB,GBR,
+       GEO,GGY,GHA,GIB,GIN,GLP,GMB,GNB,GNQ,GRC,
+       GRD,GRL,GTM,GUF,GUM,GUY,HKG,HMD,HND,HRV,
+       HTI,HUN,IDN,IMN,IND,IOT,IRL,IRN,IRQ,ISL,
+       ISR,ITA,JAM,JEY,JOR,JPN,KAZ,KEN,KGZ,KHM,
+       KIR,KNA,KOR,KWT,LAO,LBN,LBR,LBY,LCA,LIE,
+       LKA,LSO,LTU,LUX,LVA,MAC,MAF,MAR,MCO,MDA,
+       MDG,MDV,MEX,MHL,MKD,MLI,MLT,MMR,MNE,MNG,
+       MNP,MOZ,MRT,MSR,MTQ,MUS,MWI,MYS,MYT,NAM,
+       NCL,NER,NFK,NGA,NIC,NIU,NLD,NOR,NPL,NRU,
+       NZL,OMN,PAK,PAN,PCN,PER,PHL,PLW,PNG,POL,
+       PRI,PRK,PRT,PRY,PSE,PYF,QAT,REU,ROU,RUS,
+       RWA,SAU,SDN,SEN,SGP,SGS,SHN,SJM,SLB,SLE,
+       SLV,SMR,SOM,SPM,SRB,SSD,STP,SUR,SVK,SVN,
+       SWE,SWZ,SXM,SYC,SYR,TCA,TCD,TGO,THA,TJK,
+       TKL,TKM,TLS,TON,TTO,TUN,TUR,TUV,TWN,TZA,
+       UGA,UKR,UMI,URY,USA,UZB,VAT,VCT,VEN,VGB,
+       VIR,VNM,VUT,WLF,WSM,YEM,ZAF,ZMB,ZWE /
 
    regi2iso(all_regi,iso) "mapping regions to iso countries"
       /
-       OAS . (AFG,ASM,BGD,BTN,IOT,BRN,KHM,CXR,CCK,COK)
-       OAS . (FJI,PYF,ATF,GUM,IDN,KIR,PRK,KOR,LAO,MYS)
-       OAS . (MDV,MHL,FSM,MNG,MMR,NRU,NPL,NCL,NIU,NFK)
-       OAS . (MNP,PAK,PLW,PNG,PHL,PCN,WSM,SGP,SLB,LKA)
-       OAS . (THA,TLS,TKL,TON,TUV,UMI,VUT,VNM,WLF)
-       ENC . (ALA,DNK,FRO,FIN,SWE)
-       NES . (ALB,AND,BIH,VAT,MKD,MCO,MNE,SMR,SRB,TUR)
-       MEA . (DZA,BHR,EGY,IRN,IRQ,ISR,JOR,KWT,LBN,LBY)
-       MEA . (MAR,OMN,PSE,QAT,SAU,SDN,SYR,TUN,ARE,ESH)
-       MEA . (YEM)
-       SSA . (AGO,BEN,BWA,BFA,BDI,CMR,CPV,CAF,TCD,COM)
-       SSA . (COG,COD,CIV,DJI,GNQ,ERI,ETH,GAB,GMB,GHA)
-       SSA . (GIN,GNB,KEN,LSO,LBR,MDG,MWI,MLI,MRT,MUS)
-       SSA . (MYT,MOZ,NAM,NER,NGA,REU,RWA,SHN,STP,SEN)
-       SSA . (SYC,SLE,SOM,ZAF,SSD,SWZ,TZA,TGO,UGA,ZMB)
+       LAM . (ABW,AIA,ARG,ATA,ATG,BES,BHS,BLM,BLZ,BMU)
+       LAM . (BOL,BRA,BRB,BVT,CHL,COL,CRI,CUB,CUW,CYM)
+       LAM . (DMA,DOM,ECU,FLK,GLP,GRD,GTM,GUF,GUY,HND)
+       LAM . (HTI,JAM,KNA,LCA,MAF,MEX,MSR,MTQ,NIC,PAN)
+       LAM . (PER,PRI,PRY,SGS,SLV,SUR,SXM,TCA,TTO,URY)
+       LAM . (VCT,VEN,VGB,VIR)
+       OAS . (AFG,ASM,ATF,BGD,BRN,BTN,CCK,COK,CXR,FJI)
+       OAS . (FSM,GUM,IDN,IOT,KHM,KIR,KOR,LAO,LKA,MDV)
+       OAS . (MHL,MMR,MNG,MNP,MYS,NCL,NFK,NIU,NPL,NRU)
+       OAS . (PAK,PCN,PHL,PLW,PNG,PRK,PYF,SGP,SLB,THA)
+       OAS . (TKL,TLS,TON,TUV,UMI,VNM,VUT,WLF,WSM)
+       SSA . (AGO,BDI,BEN,BFA,BWA,CAF,CIV,CMR,COD,COG)
+       SSA . (COM,CPV,DJI,ERI,ETH,GAB,GHA,GIN,GMB,GNB)
+       SSA . (GNQ,KEN,LBR,LSO,MDG,MLI,MOZ,MRT,MUS,MWI)
+       SSA . (MYT,NAM,NER,NGA,REU,RWA,SEN,SHN,SLE,SOM)
+       SSA . (SSD,STP,SWZ,SYC,TCD,TGO,TZA,UGA,ZAF,ZMB)
        SSA . (ZWE)
-       LAM . (AIA,ATA,ATG,ARG,ABW,BHS,BRB,BLZ,BMU,BOL)
-       LAM . (BES,BVT,BRA,CYM,CHL,COL,CRI,CUB,CUW,DMA)
-       LAM . (DOM,ECU,SLV,FLK,GUF,GRD,GLP,GTM,GUY,HTI)
-       LAM . (HND,JAM,MTQ,MEX,MSR,NIC,PAN,PRY,PER,PRI)
-       LAM . (BLM,KNA,LCA,MAF,VCT,SXM,SGS,SUR,TTO,TCA)
-       LAM . (URY,VEN,VGB,VIR)
+       EUR . (ALA,AUT,BEL,BGR,CYP,CZE,DEU,DNK,ESP,EST)
+       EUR . (FIN,FRA,FRO,GBR,GGY,GIB,GRC,HRV,HUN,IMN)
+       EUR . (IRL,ITA,JEY,LTU,LUX,LVA,MLT,NLD,POL,PRT)
+       EUR . (ROU,SVK,SVN,SWE)
+       NEU . (ALB,AND,BIH,CHE,GRL,ISL,LIE,MCO,MKD,MNE)
+       NEU . (NOR,SJM,SMR,SRB,TUR,VAT)
+       MEA . (ARE,BHR,DZA,EGY,ESH,IRN,IRQ,ISR,JOR,KWT)
+       MEA . (LBN,LBY,MAR,OMN,PSE,QAT,SAU,SDN,SYR,TUN)
+       MEA . (YEM)
        REF . (ARM,AZE,BLR,GEO,KAZ,KGZ,MDA,RUS,TJK,TKM)
        REF . (UKR,UZB)
        CAZ . (AUS,CAN,HMD,NZL,SPM)
-       EWN . (AUT,BEL,LUX,NLD)
-       ECS . (BGR,HRV,HUN,ROU,SVN)
        CHA . (CHN,HKG,MAC,TWN)
-       ESC . (CYP,GRC,ITA,MLT)
-       ECE . (CZE,EST,LVA,LTU,POL,SVK)
-       FRA . (FRA)
-       DEU . (DEU)
-       UKI . (GIB,GGY,IRL,IMN,JEY,GBR)
-       NEN . (GRL,ISL,LIE,NOR,SJM,CHE)
        IND . (IND)
        JPN . (JPN)
-       ESW . (PRT,ESP)
        USA . (USA)
       /
 iso_regi "all iso countries and EU and greater China region" /  EUR,CHA,
-       AFG,ALA,ALB,DZA,ASM,AND,AGO,AIA,ATA,ATG,
-       ARG,ARM,ABW,AUS,AUT,AZE,BHS,BHR,BGD,BRB,
-       BLR,BEL,BLZ,BEN,BMU,BTN,BOL,BES,BIH,BWA,
-       BVT,BRA,IOT,BRN,BGR,BFA,BDI,KHM,CMR,CAN,
-       CPV,CYM,CAF,TCD,CHL,CHN,CXR,CCK,COL,COM,
-       COG,COD,COK,CRI,CIV,HRV,CUB,CUW,CYP,CZE,
-       DNK,DJI,DMA,DOM,ECU,EGY,SLV,GNQ,ERI,EST,
-       ETH,FLK,FRO,FJI,FIN,FRA,GUF,PYF,ATF,GAB,
-       GMB,GEO,DEU,GHA,GIB,GRC,GRL,GRD,GLP,GUM,
-       GTM,GGY,GIN,GNB,GUY,HTI,HMD,VAT,HND,HKG,
-       HUN,ISL,IND,IDN,IRN,IRQ,IRL,IMN,ISR,ITA,
-       JAM,JPN,JEY,JOR,KAZ,KEN,KIR,PRK,KOR,KWT,
-       KGZ,LAO,LVA,LBN,LSO,LBR,LBY,LIE,LTU,LUX,
-       MAC,MKD,MDG,MWI,MYS,MDV,MLI,MLT,MHL,MTQ,
-       MRT,MUS,MYT,MEX,FSM,MDA,MCO,MNG,MNE,MSR,
-       MAR,MOZ,MMR,NAM,NRU,NPL,NLD,NCL,NZL,NIC,
-       NER,NGA,NIU,NFK,MNP,NOR,OMN,PAK,PLW,PSE,
-       PAN,PNG,PRY,PER,PHL,PCN,POL,PRT,PRI,QAT,
-       REU,ROU,RUS,RWA,BLM,SHN,KNA,LCA,MAF,SPM,
-       VCT,WSM,SMR,STP,SAU,SEN,SRB,SYC,SLE,SGP,
-       SXM,SVK,SVN,SLB,SOM,ZAF,SGS,SSD,ESP,LKA,
-       SDN,SUR,SJM,SWZ,SWE,CHE,SYR,TWN,TJK,TZA,
-       THA,TLS,TGO,TKL,TON,TTO,TUN,TUR,TKM,TCA,
-       TUV,UGA,UKR,ARE,GBR,USA,UMI,URY,UZB,VUT,
-       VEN,VNM,VGB,VIR,WLF,ESH,YEM,ZMB,ZWE /
+       ABW,AFG,AGO,AIA,ALA,ALB,AND,ARE,ARG,ARM,
+       ASM,ATA,ATF,ATG,AUS,AUT,AZE,BDI,BEL,BEN,
+       BES,BFA,BGD,BGR,BHR,BHS,BIH,BLM,BLR,BLZ,
+       BMU,BOL,BRA,BRB,BRN,BTN,BVT,BWA,CAF,CAN,
+       CCK,CHN,CHE,CHL,CIV,CMR,COD,COG,COK,COL,
+       COM,CPV,CRI,CUB,CUW,CXR,CYM,CYP,CZE,DEU,
+       DJI,DMA,DNK,DOM,DZA,ECU,EGY,ERI,ESH,ESP,
+       EST,ETH,FIN,FJI,FLK,FRA,FRO,FSM,GAB,GBR,
+       GEO,GGY,GHA,GIB,GIN,GLP,GMB,GNB,GNQ,GRC,
+       GRD,GRL,GTM,GUF,GUM,GUY,HKG,HMD,HND,HRV,
+       HTI,HUN,IDN,IMN,IND,IOT,IRL,IRN,IRQ,ISL,
+       ISR,ITA,JAM,JEY,JOR,JPN,KAZ,KEN,KGZ,KHM,
+       KIR,KNA,KOR,KWT,LAO,LBN,LBR,LBY,LCA,LIE,
+       LKA,LSO,LTU,LUX,LVA,MAC,MAF,MAR,MCO,MDA,
+       MDG,MDV,MEX,MHL,MKD,MLI,MLT,MMR,MNE,MNG,
+       MNP,MOZ,MRT,MSR,MTQ,MUS,MWI,MYS,MYT,NAM,
+       NCL,NER,NFK,NGA,NIC,NIU,NLD,NOR,NPL,NRU,
+       NZL,OMN,PAK,PAN,PCN,PER,PHL,PLW,PNG,POL,
+       PRI,PRK,PRT,PRY,PSE,PYF,QAT,REU,ROU,RUS,
+       RWA,SAU,SDN,SEN,SGP,SGS,SHN,SJM,SLB,SLE,
+       SLV,SMR,SOM,SPM,SRB,SSD,STP,SUR,SVK,SVN,
+       SWE,SWZ,SXM,SYC,SYR,TCA,TCD,TGO,THA,TJK,
+       TKL,TKM,TLS,TON,TTO,TUN,TUR,TUV,TWN,TZA,
+       UGA,UKR,UMI,URY,USA,UZB,VAT,VCT,VEN,VGB,
+       VIR,VNM,VUT,WLF,WSM,YEM,ZAF,ZMB,ZWE /
 
-   map_iso_regi(iso_regi,all_regi) "mapping from iso countries to regions that represent country"
+   map_iso_regi(iso_regi,all_regi) "mapping from iso countries to regions that represent country" 
          /
+       EUR . EUR
        CHA . CHA
-       FRA . FRA
-       DEU . DEU
        IND . IND
        JPN . JPN
        USA . USA
@@ -1254,7 +1279,7 @@ teLearn(all_te)     "Learning technologies (investment costs can be reduced)"
 /
         wind        "wind onshore power converters"
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
-	windoff     "wind offshore power converters"
+	      windoff     "wind offshore power converters"
 $ENDIF.WindOff
         spv         "solar photovoltaic"
         csp         "concentrating solar power"
@@ -1494,9 +1519,7 @@ elh2
 teFlexTax(all_te)       "all technologies to which flexibility tax/subsidy applies, flexible technologies are those in teFlex, inflexible technologies those which are not in teFlex"
 /
 elh2
-*elh2VRE ! deprecated in module 32
 tdels
-tdelt
 /
 
 regDTCoup(all_regi)      "regions where REMIND is coupled to DIETER"
@@ -1718,7 +1741,34 @@ entySeBio(all_enty)       "biomass secondary energy types"
 	segabio      "secondary energy gas from biomass"
 /
 
-entyFe(all_enty)      "final energy types. Calculated in sets_calculations"
+entySeSyn(all_enty)       "synfuel secondary energy types"
+/
+	seliqbio     "secondary energy liquids from biomass"
+	sesobio      "secondary energy solids from biomass"
+	segabio      "secondary energy gas from biomass"
+/
+
+entySeFos(all_enty) "secondary energy types from fossil primary energy"
+/
+	seliqfos     "secondary energy liquids from fossil primary energy"
+	sesofos      "secondary energy solids from fossil primary energy"
+	segafos      "secondary energy gas from fossil primary energy"
+/
+
+entyFe(all_enty)      "final energy types."
+/
+        fegas        "FE gas stationary"
+        fehos        "FE heating oil stationary"
+        fesos        "FE solids stationary"
+        feels        "FE electricity stationary"
+        fehes        "FE district heating (including combined heat and power), and heat pumps stationary"
+        feh2s        "FE hydrogen stationary"
+        fepet        "FE petrol transport"
+        fedie        "FE diesel transport"
+        feh2t        "FE hydrogen transport"
+	feelt        "FE electricity for transport"
+        fegat        "FE gases for transport"
+/
 
 esty(all_esty)      "energy service types. Have to be added by modules."
 //
@@ -1742,6 +1792,7 @@ entyFeTrans(all_enty) "final energy types from transport sector"
         fedie        "FE diesel transport"
         feh2t        "FE hydrogen transport"
 	feelt        "FE electricity for transport"
+        fegat        "FE gases for transport"
 /
 
 feForCes(all_enty)   "limit q_balFeForCes to entyFe in fe2ppfEn"
@@ -1911,7 +1962,7 @@ emi_sectors  "comprehensive sector set used for more detailed emissions accounti
 sector_types "differentiation of energy and process emissions in each sector"
 /
         energy "fuel combustion part (and emissions) of the sector activity"
-        process "process sepecific part (and emissions) of the sector activity"
+        process "process specific part (and emissions) of the sector activity"
 /
 
 entyFe2Sector(all_enty,emi_sectors) "final energy (stationary and transportation) mapping to sectors (industry, buildings, transportation and cdr)"
@@ -1932,6 +1983,7 @@ entyFe2Sector(all_enty,emi_sectors) "final energy (stationary and transportation
 		fedie.trans
 		feh2t.trans
 		feelt.trans
+                fegat.trans
 		feels.cdr
 		fehes.cdr
                 fegas.cdr
@@ -2387,6 +2439,9 @@ se2fe(all_enty,all_enty,all_te)   "map secondary energy to end-use energy using 
         segabio.fegas.tdbiogas
         segafos.fegas.tdfosgas
         segasyn.fegas.tdsyngas
+        segabio.fegat.tdbiogat
+        segafos.fegat.tdfosgat
+        segasyn.fegat.tdsyngat
         seliqbio.fehos.tdbiohos
         seliqfos.fehos.tdfoshos
         seliqsyn.fehos.tdsynhos
@@ -2403,6 +2458,7 @@ se2fe(all_enty,all_enty,all_te)   "map secondary energy to end-use energy using 
         seliqsyn.fedie.tdsyndie
         seh2.feh2t.tdh2t
 /
+sefe(all_enty,all_enty) "map secondary energy to final energy"
 fete(all_enty,all_te) "map final energy to technologies"
 fe2ue(all_enty,all_enty,all_te)    "map FE carriers to ES via appliances"
 //
@@ -2550,6 +2606,8 @@ $endif
         seliqfos.fedie.tdfosdie.oc
         seliqbio.fepet.tdbiopet.oc
         seliqfos.fepet.tdfospet.oc
+        segabio.fegat.tdbiogat.ch4
+        segafos.fegat.tdfosgat.ch4
 
         segafos.fegas.tdfosgas.co2
         seliqfos.fehos.tdfoshos.co2
@@ -2729,6 +2787,18 @@ storwindoff,gridwindoff
 $ENDIF.WindOff
         storcsp,gridspv,gridwind,gridcsp,h2curt) . 1
 /
+
+
+sector2te_addTDCost(emi_sectors,all_te) "mapping of sectors to t&d technologies to which sector-specific t&d cost should be added"
+/
+        indst.tdh2s
+        build.tdh2s
+/
+
+ppfen_CESMkup(all_in)                   "production factors of CES function to which CES markup cost can be applied"
+/     
+/
+
 
 opTimeYr2te(all_te,opTimeYr)        "mapping for technologies to yearly lifetime - is filled automatically in generisdata.inc from the lifetime values in generisdata_tech.prn"
 tsu2opTimeYr(ttot, opTimeYr)     "mapping for opTimeYr to the used time ttot - will be filled automatically in generisdata.inc"

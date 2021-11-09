@@ -9,13 +9,14 @@
 
 *** read marginal of seel balance equation
 Execute_Loadpoint 'input' q32_balSe.m = q32_balSe.m;
-Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;
-Execute_Loadpoint 'input' p32_shSeEl = p32_shSeEl;
 
+Display "vm_cap for DIETER preloop", vm_cap.l;
+
+
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
 ***  switch on second coupling switch when coupling actually begins
 cm_DTcoup_eq = 1;
 *** CG: start a first iteration DIETER
-sm32_iter = 0;
 execute "./DIETER_parallel.sh";
 put "running DIETER iteration", sm32_iter:0:0;
 execute './mergegdx.sh';
@@ -45,5 +46,5 @@ if ( (c_keep_iteration_gdxes eq 1) ,
 );
 logfile.nr = 2;
 
-
+$ENDIF.DTcoup
 *** EOF ./modules/32_power/DTcoup/preloop.gms

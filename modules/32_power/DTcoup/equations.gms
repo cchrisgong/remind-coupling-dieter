@@ -36,7 +36,7 @@ q32_usableSe(t,regi,entySe)$(sameas(entySe,"seel"))..
 	- sum(teVRE, v32_storloss(t,regi,teVRE) )
 ;
 
-q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel"))..
+q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND teDTCoupSupp(te))..
  	vm_usableSeTe(t,regi,entySe,te)
  	=e=
  	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
@@ -46,28 +46,16 @@ q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel"))..
  	- sum(teVRE$sameas(te,teVRE), v32_storloss(t,regi,teVRE) )
 ;
 
-* q32_seelUsableDem(t,regi,enty2)$(sameas(enty2,"seel"))..
-* 	v32_seelUsableDem(t,regi,enty2)
-* 	=e=
-* 	sum(se2fe(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
-* 	+ sum(se2se(enty2,enty3,te), vm_demSe(t,regi,enty2,enty3,te) )
-* * own consumption: electricity used for extracting fossil fuel, ususally negative
-* 	+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! do not use in 2005 because this demand is not contained in 05_initialCap
-* * subtract negative consumption terms
-* 	- sum(pc2te(enty4,entyFE(enty5),te,enty2), pm_prodCouple(regi,enty4,enty5,te,enty2) * vm_prodFe(t,regi,enty4,enty5,te) )
-* 	- sum(pc2te(enty,enty3,te,enty2), sum(teCCS2rlf(te,rlf), pm_prodCouple(regi,enty,enty3,te,enty2) * vm_co2CCS(t,regi,enty,enty3,te,rlf) ) )
-* ;
-
 ***---------------------------------------------------------------------------
 *** Definition of capacity constraints for storage:
 ***---------------------------------------------------------------------------
 q32_limitCapTeStor(t,regi,teStor)$( t.val ge 2015 AND ((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))) ..
-    (( 0.5$( cm_VRE_supply_assumptions eq 1 )
+    ( 0.5$( cm_VRE_supply_assumptions eq 1 )
     + 1$( cm_VRE_supply_assumptions ne 1 )
     )
   * sum(VRE2teStor(teVRE,teStor), v32_storloss(t,regi,teVRE))
   * pm_eta_conv(t,regi,teStor)
-  / (1 - pm_eta_conv(t,regi,teStor)))
+  / (1 - pm_eta_conv(t,regi,teStor))
   =l=
   sum(te2rlf(teStor,rlf),
     vm_capFac(t,regi,teStor)
@@ -82,18 +70,19 @@ q32_limitCapTeStor(t,regi,teStor)$( t.val ge 2015 AND ((regDTCoup(regi) AND (cm_
 *** elh2VRE (electrolysis from VRE, seel -> seh2) and H2 turbines (h2turbVRE, seh2 -> seel)
 *** with VRE capacities which require storage (according to q32_limitCapTeStor):
 
+
 *** build additional electrolysis capacities with stored VRE electricity
 q32_elh2VREcapfromTestor(t,regi)..
   vm_cap(t,regi,"elh2","1")
   =g=
-  (sum(te$testor(te), p32_storageCap(te,"elh2VREcapratio") * vm_cap(t,regi,te,"1") ))
+  sum(te$testor(te), p32_storageCap(te,"elh2VREcapratio") * vm_cap(t,regi,te,"1") )
 ;
 
 *** build additional h2 to seel capacities to use stored hydrogen
 q32_h2turbVREcapfromTestor(t,regi)..
   vm_cap(t,regi,"h2turbVRE","1")
   =e=
-  (sum(te$testor(te), p32_storageCap(te,"h2turbVREcapratio") * vm_cap(t,regi,te,"1") ))
+  sum(te$testor(te), p32_storageCap(te,"h2turbVREcapratio") * vm_cap(t,regi,te,"1") )
 ;
 
 
@@ -116,7 +105,7 @@ q32_limitCapTeGrid(t,regi)$( t.val ge 2015 ) ..
     =g=
     vm_prodSe(t,regi,"pesol","seel","spv")
     + vm_prodSe(t,regi,"pesol","seel","csp")
-    + 1.5 * vm_prodSe(t,regi,"pewin","seel","wind")    !! wind has larger variations accross space, so adding grid is more important for wind (result of REMIX runs for ADVANCE project)
+    + 1.5 * vm_prodSe(t,regi,"pewin","seel","wind")                 !! wind has larger variations accross space, so adding grid is more important for wind (result of REMIX runs for ADVANCE project)
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
     + 3 * vm_prodSe(t,regi,"pewin","seel","windoff")
 $ENDIF.WindOff
@@ -125,7 +114,7 @@ $ENDIF.WindOff
 ***---------------------------------------------------------------------------
 *** Calculation of share of electricity production of a technology:
 ***---------------------------------------------------------------------------
-q32_shSeEl(t,regi,te)..
+q32_shSeEl(t,regi,te)$(teDTCoupSupp(te))..
     v32_shSeEl(t,regi,te) / 100 * vm_usableSe(t,regi,"seel")
     =e=
     vm_usableSeTe(t,regi,"seel",te)
@@ -171,7 +160,7 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
 	* vm_usableSeTe(t,regi,"seel",teVRE) )
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 	* 1$((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))
-	+ (p32_DIETER_curtailmentratio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) )
+	+ (p32_DIETERCurtRatio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) )
       * ( 1 - (p32_DIETER_shSeEl(t,regi,teVRE) / 100 - v32_shSeEl(t,regi,teVRE) / 100) )   !!! this is important to keep for stability
 	* 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 1))
 *	+ 0 * 1$(regDTCoup(regi)) !! turn off curtailment for coupled region
@@ -180,6 +169,7 @@ $ENDIF.DTcoup
 
 $IFTHEN.DTcoup_off %cm_DTcoup% == "off"
 **** without DIETER coupling
+
 ***---------------------------------------------------------------------------
 *** Operating reserve constraint
 ***---------------------------------------------------------------------------
@@ -211,7 +201,6 @@ q32_limitSolarWind(t,regi)$( (cm_solwindenergyscen = 2) OR (cm_solwindenergyscen
 	0.2 * vm_usableSe(t,regi,"seel")
 ;
 
-
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 **** with DIETER coupling
 ***---------------------------------------------------------------------------
@@ -220,7 +209,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 $IFTHEN.hardcap %cm_softcap% == "off"
 *** hard capacity constraint to peak residual load demand
 
-q32_peakDemand_DT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
+q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=e=
 * use in-iteration variable

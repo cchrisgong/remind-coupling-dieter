@@ -47,6 +47,7 @@ Execute_Loadpoint 'input' qm_budget.m = qm_budget.m;
 Execute_Loadpoint 'input' pm_pvpRegi = pm_pvpRegi;
 Execute_Loadpoint 'input' pm_pvp = pm_pvp;
 Execute_Loadpoint 'input' vm_demFeSector.l = vm_demFeSector.l;
+Execute_Loadpoint 'input' pm_fuExtr = vm_fuExtr.l;
 
 *** if startyear > 2005, overwrite prices of first years with values from input_ref.gdx
 $ifthen not "%c_fuelprice_init%" == "off"

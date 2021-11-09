@@ -7,48 +7,48 @@
 *** SOF ./main.gms
 *' @title REMIND - REgional Model of INvestments and Development
 *'
-*' @description REMIND is a global multi-regional model incorporating the economy, the climate system
-*' and a detailed representation of the energy sector. It solves for an intertemporal Pareto optimum
-*' in economic and energy investments in the model regions, fully accounting for interregional trade in
-*' goods, energy carriers and emissions allowances. REMIND enables analyses of technology options and
+*' @description REMIND is a global multi-regional model incorporating the economy, the climate system 
+*' and a detailed representation of the energy sector. It solves for an intertemporal Pareto optimum 
+*' in economic and energy investments in the model regions, fully accounting for interregional trade in 
+*' goods, energy carriers and emissions allowances. REMIND enables analyses of technology options and 
 *' policy proposals for climate change mitigation.
 *'
-*' The macro-economic core of REMIND is a Ramsey-type optimal growth model in which intertemporal global
-*' welfare is optimized subject to equilibrium constraints ([02_welfare]). Intertemporal optimization
-*' ([80_optimization]) with perfect foresight is subject to market clearing. The model explicitly represents
-*' trade in final goods, primary energy carriers, and when certain climate policies are enabled, emissions
-*' allowances ([24_trade]). The macro-economic production factors are capital, labor, and final energy.
-*' A nested production function with constant elasticity of substitution determines the final energy demand
-*' ([01_macro], [29_CES_parameters]). REMIND uses economic output for investments in the macro-economic
-*' capital stock as well as for consumption, trade, and energy system expenditures.
-*'
-*' The macro-economic core and the energy system part are hard-linked via the final energy demand and the
-*' costs incurred by the energy system. Economic activity results in demand for final energy in different
-*' sectors (transport ([35_transport]), industry ([37_industry]), buildings ([36_buildings])...) and of
-*' different type (electric ([32_power]) and non-electric). The primary energy carriers in REMIND include
-*' both exhaustible and renewable resources. Exhaustible resources comprise uranium as well as three fossil
-*' resources ([31_fossil]), namely coal, oil, and gas. Renewable resources include hydro, wind, solar,
-*' geothermal, and biomass ([30_biomass]). More than 50 technologies are available for the conversion of
-*' primary energy into secondary energy carriers as well as for the distribution of secondary energy carriers
+*' The macro-economic core of REMIND is a Ramsey-type optimal growth model in which intertemporal global 
+*' welfare is optimized subject to equilibrium constraints ([02_welfare]). Intertemporal optimization 
+*' ([80_optimization]) with perfect foresight is subject to market clearing. The model explicitly represents 
+*' trade in final goods, primary energy carriers, and when certain climate policies are enabled, emissions 
+*' allowances ([24_trade]). The macro-economic production factors are capital, labor, and final energy. 
+*' A nested production function with constant elasticity of substitution determines the final energy demand 
+*' ([01_macro], [29_CES_parameters]). REMIND uses economic output for investments in the macro-economic 
+*' capital stock as well as for consumption, trade, and energy system expenditures. 
+*' 
+*' The macro-economic core and the energy system part are hard-linked via the final energy demand and the 
+*' costs incurred by the energy system. Economic activity results in demand for final energy in different 
+*' sectors (transport ([35_transport]), industry ([37_industry]), buildings ([36_buildings])...) and of 
+*' different type (electric ([32_power]) and non-electric). The primary energy carriers in REMIND include 
+*' both exhaustible and renewable resources. Exhaustible resources comprise uranium as well as three fossil 
+*' resources ([31_fossil]), namely coal, oil, and gas. Renewable resources include hydro, wind, solar, 
+*' geothermal, and biomass ([30_biomass]). More than 50 technologies are available for the conversion of 
+*' primary energy into secondary energy carriers as well as for the distribution of secondary energy carriers 
 *' into final energy.
 *'
-*' The model accounts for the full range of anthropogenic greenhouse gas (GHG) emissions, most of which are
-*' represented by source. REMIND simulates emissions from long-lived GHGs (CO2, CH4, N2O), short-lived GHGs
-*' (CO, NOx, VOC) and aerosols (SO2, BC, OC). It accounts for these emissions with different levels of detail
-*' depending on the types and sources of emissions. It calculates CO2 emissions from fuel combustion, CH4
-*' emissions from fossil fuel extraction and residential energy use, and N2O emissions from energy supply
-*' based on sources.
+*' The model accounts for the full range of anthropogenic greenhouse gas (GHG) emissions, most of which are 
+*' represented by source. REMIND simulates emissions from long-lived GHGs (CO2, CH4, N2O), short-lived GHGs 
+*' (CO, NOx, VOC) and aerosols (SO2, BC, OC). It accounts for these emissions with different levels of detail 
+*' depending on the types and sources of emissions. It calculates CO2 emissions from fuel combustion, CH4 
+*' emissions from fossil fuel extraction and residential energy use, and N2O emissions from energy supply 
+*' based on sources. 
 *'
-*' The code is structured in a modular way, with code belonging either to the model's core, or to one of the
-*' modules. The folder structure is as follows: at the top level are the folders config, core, modules and
-*' scripts. The config folder contains the REMIND settings and configuration information. The core folder
-*' contains all the files that are part of the core. The modules folder holds all the files that belong to
-*' the modules, with numbered sub-folders for every module. The scripts folder contains helpful scripts for
+*' The code is structured in a modular way, with code belonging either to the model's core, or to one of the 
+*' modules. The folder structure is as follows: at the top level are the folders config, core, modules and 
+*' scripts. The config folder contains the REMIND settings and configuration information. The core folder 
+*' contains all the files that are part of the core. The modules folder holds all the files that belong to 
+*' the modules, with numbered sub-folders for every module. The scripts folder contains helpful scripts for 
 *' starting a model run and analysing results.
-*'
-*' REMIND is run by executing the main.gms file, which loads the configuration information and builds the model,
-*' by concatenating all necessary files from the core and modules folders into a single file called full.gms.
-*' The concatenation process starts with files from the core and continues with files from activated modules,
+*' 
+*' REMIND is run by executing the main.gms file, which loads the configuration information and builds the model, 
+*' by concatenating all necessary files from the core and modules folders into a single file called full.gms. 
+*' The concatenation process starts with files from the core and continues with files from activated modules, 
 *' in increasing order of module-number. It observes the following structure:
 *'
 *' ![Technical Structure of REMIND](technical_structure.png){ width=100% }
@@ -69,23 +69,23 @@
 *' These prefixes are extended in some cases by a second letter:
 *'
 *' * "?m_" to designate objects used in the core and in at least one module.
-*' * "?00_" to designate objects used in a single module, exclusively, with the 2-digit number corresponding
+*' * "?00_" to designate objects used in a single module, exclusively, with the 2-digit number corresponding 
 *'          to the module number.
 *'
-*' Sets are treated differently: instead of a prefix, sets exclusively used within a module get that module's
-*' number added as a suffix. If the set is used in more than one module no suffix is given.
-*'
+*' Sets are treated differently: instead of a prefix, sets exclusively used within a module get that module's 
+*' number added as a suffix. If the set is used in more than one module no suffix is given. 
+*' 
 *' The units (e.g., TWa, EJ, GtC, GtCO2, ...) of variables and parameters are documented in the declaration files.
 
 
 
 *##################### R SECTION START (VERSION INFO) ##########################
 * 
-* Regionscode: 2b1450bc
+* Regionscode: 62eff8f7
 * 
-* Input data revision: 6.241
+* Input data revision: 6.254
 * 
-* Last modification (input data): Mon Aug 30 11:13:24 2021
+* Last modification (input data): Wed Oct 20 17:30:02 2021
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -140,7 +140,7 @@ option profile = 0;
 
 
 ***---------------------    Run name    -----------------------------------------
-$setGlobal c_expname  xx_ref_FEmed
+$setGlobal c_expname  default
 
 ***------------------------------------------------------------------------------
 ***                           MODULES
@@ -183,13 +183,13 @@ $setGlobal power  DTcoup               !! def = IntC
 ***---------------------    33_cdr       ----------------------------------------
 $setGlobal CDR  DAC                   !! def = DAC
 ***---------------------    35_transport    -------------------------------------
-$setGlobal transport  complex         !! def = complex
+$setGlobal transport  edge_esm         !! def = edge_esm
 ***---------------------    36_buildings    -------------------------------------
 $setglobal buildings  simple          !! def = simple
 ***---------------------    37_industry    --------------------------------------
-$setglobal industry  fixed_shares     !! def = simple
+$setglobal industry  subsectors     !! def = subsectors
 ***---------------------    39_CCU    --------------------------------------
-$setglobal CCU  off !! def = on
+$setglobal CCU  on !! def = on
 ***---------------------    40_techpol  -----------------------------------------
 $setglobal techpol  none              !! def = none
 ***---------------------    41_emicapregi  --------------------------------------
@@ -199,7 +199,7 @@ $setglobal banking  off               !! def = off
 ***---------------------    45_carbonprice  -------------------------------------
 $setglobal carbonprice  none          !! def = none
 ***---------------------    47_regipol  -------------------------------------
-$setglobal regipol  regiCarbonPrice              !! def = none
+$setglobal regipol  none              !! def = none
 ***---------------------    50_damages    ---------------------------------------
 $setGlobal damages  off               !! def = off
 ***---------------------    51_internalizeDamages    ---------------------------------------
@@ -270,6 +270,7 @@ c_ccsinjecratescen    "CCS injection rate factor, 0.5% by default yielding a 60 
 c_ccscapratescen      "CCS capture rate"
 c_export_tax_scen    "choose which oil export tax is used in the model. 0 = none, 1 = fix"
 cm_iterative_target_adj "whether or not a tax or a budget target should be iteratively adjusted depending on actual emission or forcing level"
+cm_NDC_version        "choose version year of NDC targets as well as conditional vs. unconditional targets"
 cm_gdximport_target   "whether or not the starting value for iteratively adjusted budgets, tax scenarios, or forcing targets (emiscen 5,6,8,9) should be read in from the input.gdx"
 cm_gs_ew              "grain size (for enhanced weathering, CDR module) [micrometre]"
 cm_LimRock             "limit amount of rock spread each year [Gt]"
@@ -328,7 +329,6 @@ cm_BioImportTax_EU          "factor for EU bioenergy import tax"
 cm_import_EU                "EU switch for different scenarios of EU SE import assumptions"
 cm_logitCal_markup_conv_b   "value to which logit calibration markup of standard fe2ue technologies in detailed buildings module converges to"
 cm_logitCal_markup_newtech_conv_b "value to which logit calibration markup of new fe2ue technologies in detailed buildings module converges to"
-cm_demTcomplex              "switch used to select the source of demand trends for the complex transport realization. By default, temporary handmade trajectories; if set to fromEDGET, EDGE-T based mrremind results."
 cm_noPeFosCCDeu              "switch to suppress Pe2Se Fossil Carbon Capture in Germany"
 cm_HeatLim_b                "switch to set maximum share of district heating in FE buildings"
 cm_ElLim_b                  "switch to set maximum share of electricity in FE buildings"
@@ -355,7 +355,7 @@ cm_deuCDRmax                 "switch to limit maximum annual CDR amount in Germa
 
 cm_iteration_max       = 1;     !! def = 1
 c_solver_try_max       = 2;     !! def = 2
-c_keep_iteration_gdxes = 1;     !! def = 0
+c_keep_iteration_gdxes = 0;     !! def = 0
 cm_nash_autoconverge   = 1;     !! def = 1
 $setglobal cm_MAgPIE_coupling  off     !! def = "off"
 
@@ -393,7 +393,8 @@ cm_cprice_red_factor  = 1;         !! def = 1
 
 $setglobal cm_POPscen  pop_SSP2  !! def = pop_SSP2
 $setglobal cm_GDPscen  gdp_SSP2  !! def = gdp_SSP2
-$setglobal c_GDPpcScen  SSP2     !! def = gdp_SSP2   (automatically adjusted by start_run() based on GDPscen)
+$setglobal c_GDPpcScen  SSP2     !! def = gdp_SSP2   (automatically adjusted by start_run() based on GDPscen) 
+$setglobal cm_demScen  gdp_SSP2     !! def = gdp_SSP2
 cm_GDPcovid      = 0;            !! def = 0
 
 *AG* and *CB* for cm_startyear greater than 2005, you have to copy the fulldata.gdx (rename it to: input_ref.gdx) from the run you want to build your new run onto.
@@ -417,7 +418,7 @@ cm_rentconvgas      = 50;        !! def 50
 cm_rentdisccoal     = 0.4;       !! def 0.4
 cm_rentdisccoal2    = 0.6;       !! def 0.6
 cm_rentconvcoal     = 50;        !! def 50
-cm_earlyreti_rate   = 0.15;      !! def 0.09
+cm_earlyreti_rate   = 0.09;      !! def 0.09
 
 cm_so2tax_scen        = 1;         !! def =
 c_cint_scen           = 1;         !! def = 1
@@ -428,6 +429,7 @@ c_ccsinjecratescen    = 1;         !! def = 1
 c_ccscapratescen      = 1;         !! def = 1
 c_export_tax_scen     = 0;         !! def = 0
 cm_iterative_target_adj  = 0;      !! def = 0
+$setglobal cm_NDC_version  2021_cond   !! def = 2021_cond
 cm_gdximport_target      = 0;      !! def = 0
 $setglobal c_SSP_forcing_adjust  forcing_SSP2   !! def = forcing_SSP2
 $setglobal c_delayPolicy  SPA0           !! def = SPA0
@@ -438,7 +440,8 @@ cm_expoLinear_yearStart  = 2050;   !! def = 2050
 c_budgetCO2FFI           = 1000;   !! def = 1000
 c_abtrdy                 = 2010;   !! def = 2010
 c_abtcst                 = 1;      !! def = 1
-c_budgetCO2              = 0;   !! def = 1300
+c_budgetCO2              = 1350;   !! def = 1300
+$setGlobal cm_regiExoPrice  off    !! def = off
 $setGlobal cm_regiCO2target  off   !! def = off
 cm_postTargetIncrease    = 2;      !! def = 2
 $setGlobal cm_quantity_regiCO2target  off !! def = off
@@ -448,17 +451,17 @@ cm_CO2priceRegConvEndYr  = 2050;   !! def = 2050
 $setGlobal cm_emiMktETS  off       !! def = off
 $setGlobal cm_emiMktETS_type  off  !! def = off
 
-$setGlobal cm_ETS_postTargetIncrease  2 !! def = linear
+$setGlobal cm_ETS_postTargetIncrease  linear !! def = linear
 $setGlobal cm_ETS_post2055Increase  2      !! def = 2
 
 $setGlobal cm_emiMktES  off        !! def = off	
-$setGlobal cm_emiMktES_type  off !! def = netGHG	
+$setGlobal cm_emiMktES_type  netGHG !! def = netGHG	
 
-$setGlobal cm_ESD_postTargetIncrease  off !! def = 8
-$setGlobal cm_ESD_post2055Increase  off !! def = 2
+$setGlobal cm_ESD_postTargetIncrease  8 !! def = 8
+$setGlobal cm_ESD_post2055Increase  2 !! def = 2
 
 $setGlobal cm_emiMktEScoop  off    !! def = off	
-$setGlobal cm_emiMktES2020price  off !! def = 30
+$setGlobal cm_emiMktES2020price  30 !! def = 30
 $setGlobal cm_emiMktES2050	 off   !! def = off	
 $setGlobal cm_NucRegiPol	 off   !! def = off		
 $setGlobal cm_CoalRegiPol	 off   !! def = off		
@@ -490,7 +493,7 @@ $setGlobal cm_INNOPATHS_pushCalib  none !! def = none
 $setGlobal cm_INNOPATHS_reducCostB  none !! def = none
 $setGlobal cm_INNOPATHS_effHP  5 !! def = 5
 
-$setGlobal cm_EDGEtr_scen  ConvCase  !! def = ConvCase
+$setGlobal cm_EDGEtr_scen  Mix  !! def = ConvCase
 
 $setGlobal c_regi_nucscen  all !! def = all
 $setGlobal c_regi_capturescen  all !! def = all
@@ -499,8 +502,9 @@ $setGlobal c_regi_sensscen  all !! def = all
 
 
 
+																	  
 cm_biotrade_phaseout = 0; !! def 0
-cm_bioprod_histlim = -1; !! def -1
+cm_bioprod_histlim = -1; !! def -1	
 
 cm_H2targets = 0; !! def 0
 
@@ -533,16 +537,12 @@ cm_indst_H2costDecayEnd = 0.1;  !! def 10%
 cm_BioSupply_Adjust_EU = 3; !! def 1
 cm_BioImportTax_EU = 1; !! def 0.25
 
-$setGlobal cm_demTcomplex  temporary_trend !! def = temporary_trend
-
 cm_noPeFosCCDeu = 0; !! def 0
-
 
 cm_HeatLim_b = 1; !! def 1
 cm_ElLim_b = 1; !! def 1
 
 cm_startIter_EDGET = 14; !! def 14, by default EDGE-T is run first in iteration 14
-
 
 cm_TaxConvCheck = 0; !! def 0, which means tax convergence check is off
 
@@ -555,7 +555,6 @@ cm_ariadne_trade_syngas = 0; !! def 0
 
 $setGlobal cm_ariadne_VRECapFac_adj  off !! def = off
 
-
 $setGlobal c_VREPot_Factor  off !! def = off
 
 $setGlobal cm_FEtax_trajectory_abs  off !! def = off
@@ -564,7 +563,6 @@ $setGlobal cm_FEtax_trajectory_rel  off !! def = off
 $setGlobal cm_regipol_slope_beforeTarget  off !! def = off
 
 $setGlobal cm_altFeEmiFac  off        !! def = off	
-
 
 $setGlobal cm_CESMkup_ind  standard !! def = standard
 $setGlobal cm_CESMkup_build  standard !! def = standard
@@ -580,13 +578,14 @@ $setglobal cm_DTcoup  on         !! def = off
 cm_DTcoup_eq = 0;         !! def = 0
 $setglobal cm_softcap  on         !! def = off
 $setglobal cm_elh2_coup  on       !! def = off
+
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
 $setGlobal cm_nash_mode  parallel      !! def = parallel
 $setGLobal cm_debug_preloop  off !! def = off
 $setGlobal c_EARLYRETIRE       on         !! def = on
 $setGlobal cm_OILRETIRE  on        !! def = on
 $setglobal cm_INCONV_PENALTY  on         !! def = on
-$setglobal cm_INCONV_PENALTY_bioSwitch  on !! def = off
+$setglobal cm_INCONV_PENALTY_FESwitch  on !! def = on
 $setGlobal cm_so2_out_of_opt  on         !! def = on
 $setGlobal c_skip_output  off        !! def = off
 $setGlobal cm_MOFEX  off        !! def = off
@@ -600,16 +599,16 @@ $setGlobal cm_magicc_temperatureImpulseResponse  off           !! def = off
 
 $setGlobal cm_damage_DiceLike_specification  HowardNonCatastrophic   !! def = HowardNonCatastrophic
 
-$setglobal cm_CES_configuration  indu_fixed_shares-buil_simple-tran_complex-POP_pop_SSP2-GDP_gdp_SSP2-Kap_debt_limit-Reg_62eff8f7   !! this will be changed by start_run()
+$setglobal cm_CES_configuration  indu_subsectors-buil_simple-tran_edge_esm-demTrsp_Mix-POP_pop_SSP2-GDP_gdp_SSP2-En_gdp_SSP2-Kap_debt_limit-Reg_62eff8f7   !! this will be changed by start_run()
 
 $setglobal c_CES_calibration_new_structure  0    !! def =  0
 $setglobal c_CES_calibration_iterations  10    !! def = 10
 $setglobal c_CES_calibration_iteration          1    !! def =  1
 $setglobal c_CES_calibration_write_prices  0    !! def =  0
-$setglobal cm_CES_calibration_default_prices  0    !! def = 0
-$setglobal cm_calibration_string  FE_med      !! def = off
+$setglobal cm_CES_calibration_default_prices  0.01    !! def = 0.01
+$setglobal cm_calibration_string  off      !! def = off
 
-$setglobal c_testOneRegi_region  DEU       !! def = EUR
+$setglobal c_testOneRegi_region  EUR       !! def = EUR
 
 $setglobal cm_cooling_shares  static    !! def = static
 $setglobal cm_techcosts  REG       !! def = REG
@@ -622,7 +621,7 @@ $setglobal cm_INNOPATHS_eni  off!! def = off
 $setglobal cm_INNOPATHS_enb  off!! def = off
 
 $setglobal cm_INNOPATHS_LDV_mkt_share  off !! def = off
-
+$setglobal cm_share_LDV_sales  off !! def = off
 $setglobal cm_INNOPATHS_incolearn  off !! def = off
 $setglobal cm_INNOPATHS_storageFactor  off !! def = off
 
@@ -634,15 +633,15 @@ $setglobal cm_INNOPATHS_adj_coeff_cont  off
 $setglobal cm_INNOPATHS_adj_seed_multiplier  off
 $setglobal cm_INNOPATHS_adj_coeff_multiplier  off
 
-$setglobal cm_INNOPATHS_inco0Factor  apcardiEfft 0.8, apcardiEffH2t 0.675 !! def = off
+$setglobal cm_INNOPATHS_inco0Factor  off !! def = off
 
 $setglobal cm_INNOPATHS_CCS_markup  off !! def = off
 $setglobal cm_INNOPATHS_Industry_CCS_markup  off !! def = off
-$setglobal cm_INNOPATHS_renewables_floor_cost  off !! def = off
+$setglobal cm_INNOPATHS_renewables_floor_cost  off !! def = off 
 
-$setglobal cm_INNOPATHS_DAC_eff  off !! def = off
+$setglobal cm_INNOPATHS_DAC_eff  off !! def = off 
 
-$setglobal cm_INNOPATHS_sehe_upper  off !! def = off
+$setglobal cm_INNOPATHS_sehe_upper  off !! def = off 
 
 $setglobal cm_fixCO2price  off !! def = off
 
