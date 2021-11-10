@@ -156,6 +156,7 @@ dieter.gen.wCurt$tech <- "total generation w/ curtailment"
 swlatex(sw, paste0("\\section{Generation}"))
 
 for (year_toplot in report.periods) {
+  if(year_toplot >= 2020){
   plot.remind <- out.remind %>%
     filter(period == year_toplot)
   
@@ -272,7 +273,7 @@ for (year_toplot in report.periods) {
   
   swfigure(sw, grid.draw, p)
 }
-
+}
 
 swlatex(sw, "\\subsection{Generation over time (last iteration)}")
 

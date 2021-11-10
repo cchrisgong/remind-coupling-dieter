@@ -157,6 +157,8 @@ if (length(dieter.files) != 0) {
 swlatex(sw, paste0("\\section{Capacities}"))
 
 for(year_toplot in report.periods){
+  if(year_toplot >= 2020){
+    
   plot.remind.capacity <- out.remind.capacity %>% 
     filter(period == year_toplot)
   
@@ -226,7 +228,7 @@ for(year_toplot in report.periods){
   
   swfigure(sw,grid.draw,p)
 }
-
+}
 
 swlatex(sw, "\\subsection{Capacities over time (last iteration)}")
 

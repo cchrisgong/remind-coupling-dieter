@@ -14,7 +14,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
   
   # Configurations ----------------------------------------------------------
 
-  report.periods <- c(seq(2020, 2060, 5), seq(2070, 2100, 10))
+  report.periods <- c(seq(2005, 2060, 5), seq(2070, 2100, 10), seq(2110, 2150, 20))
 
   remind.nonvre.mapping <- c(coalchp = "Coal (Lig + HC)",
                              igcc = "Coal (Lig + HC)",
@@ -89,8 +89,8 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
 
   # Directories -------------------------------------------------------------
 
-  #report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_", str_sub(outputdir, start=8), ".pdf"))
-  report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_",".pdf"))
+  report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_", str_sub(outputdir, start=8), ".pdf"))
+  #report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_",".pdf"))
   
   remind.files <- list.files(outputdir, pattern = "fulldata_[0-9]+\\.gdx") %>%
   str_sort(numeric = TRUE)
@@ -171,7 +171,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
 
   # Price: Secondary electricity --------------------------------------------
 
- # source(file.path(dieter.scripts.folder, "plotSeelPrice.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotSeelPrice.R"), local=TRUE)
 
   # Price: Peak demand ------------------------------------------------------
 
@@ -197,12 +197,3 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
   swclose(sw)
 
 }
-
-#outputdir <- "C:/Users/agrawal/Documents/xx_ref_FEmed_2021-10-27_14.25.16"
-#outputdir <- "C:/Users/agrawal/Documents/xx_ref_FEmed_2021-10-19_10.00.16/"
-outputdir <- "C:/Users/agrawal/Documents/xx_ref_FEmed_2021-10-29_20.14.19"
-
-dieter.scripts.folder <- "C:/remind-coupling-dieter/scripts/output/single/DIETER/"
-
-
-DIETERValidationPlots(outputdir, dieter.scripts.folder)
