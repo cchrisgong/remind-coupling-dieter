@@ -220,7 +220,7 @@ pm_temperatureImpulseResponseCO2(tall,tall)          "temperature impulse respon
 *** damage related
 pm_taxCO2eqSCC(ttot,all_regi)                        "carbon tax component due to damages (social cost of carbon) "
 pm_GDPGross(tall,all_regi)                           "gross GDP (before damages)"
-pm_fuExtr(ttot,all_regi,all_enty,rlf)                "fuel use [TWa]"
+pm_fuExtr(ttot,all_regi,all_enty,rlf)                "fuel use [TWa] of last iteration"
 
 ***----------------------------------------------------------------------------------------
 *** ----- Parameters needed for MAGICC ----------------------------------------------------
