@@ -351,7 +351,7 @@ $ENDIF.WindOff
  q_costFuExdampen(t,regi,enty)$(regDTCoup(regi))..
    v_costFuExdampen(t,regi,enty) * 1$(regDTCoup(regi))
    =e=
-   (power((vm_fuExtr(t,regi,enty,"1")-pm_fuExtr(t,regi,enty,"1"))/ (pm_fuExtr(t,regi,enty,"1") + 0.15),2) * 0.4 + 1) * 1$(regDTCoup(regi))
+   (power((vm_fuExtr(t,regi,enty,"1")-pm_fuExtr(t,regi,enty,"1"))/ (pm_fuExtr(t,regi,enty,"1") + 0.15),2) * 0.4 + 1) * 1$$(regDTCoup(regi))
  ;
 
 
