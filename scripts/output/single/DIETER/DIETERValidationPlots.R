@@ -14,67 +14,83 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
   
   # Configurations ----------------------------------------------------------
 
-  report.periods <- c(seq(2020, 2060, 5), seq(2070, 2100, 10))
+  report.periods <- c(seq(2005, 2060, 5), seq(2070, 2100, 10), seq(2110, 2150, 20))
 
   remind.nonvre.mapping <- c(coalchp = "Coal (Lig + HC)",
-                           igcc = "Coal (Lig + HC)",
-                           igccc = "Coal (Lig + HC)",
-                           pcc = "Coal (Lig + HC)",
-                           pco = "Coal (Lig + HC)",
-                           pc = "Coal (Lig + HC)",
-                           tnrs = "Nuclear",
-                           ngt = "OCGT",
-                           ngcc = "CCGT",
-                           ngccc = "CCGT",
-                           gaschp = "CCGT",
-                           biochp = "Biomass",
-                           bioigcc = "Biomass",
-                           bioigccc = "Biomass")
-
+                             igcc = "Coal (Lig + HC)",
+                             igccc = "Coal (Lig + HC)",
+                             pcc = "Coal (Lig + HC)",
+                             pco = "Coal (Lig + HC)",
+                             pc = "Coal (Lig + HC)",
+                             tnrs = "Nuclear",
+                             ngt = "OCGT",
+                             ngcc = "CCGT",
+                             ngccc = "CCGT",
+                             gaschp = "CCGT",
+                             biochp = "Biomass",
+                             bioigcc = "Biomass",
+                             bioigccc = "Biomass")
+  
   # shifting hydro to dispatchable because in REMIND usable energy is only defined for spv, wind, csp
   remind.nonvre.mapping2 <- c(remind.nonvre.mapping, hydro = "Hydro")
   
   remind.vre.mapping <- c(wind = "Wind",
                           spv = "Solar")
-  
-  table_ordered_name = c("Solar", "Wind", "Biomass", "Hydro", "Nuclear","CCGT", "OCGT", "Coal (Lig + HC)", "Lignite", "Hard coal")
+  remind.sector.coupling.mapping <- c(elh2 = "Electrolyzers")
+  remind.tech.mapping <- c(remind.nonvre.mapping2, remind.vre.mapping,remind.sector.coupling.mapping)
+  table_ordered_name = c("Coal (Lig + HC)", "Lignite", "Hard coal","CCGT", "Solar", "Wind", "Biomass", "OCGT", "Hydro", "Nuclear","Electrolyzers")
+  #table_ordered_name = c("Solar", "Wind", "Biomass", "Hydro", "Nuclear","CCGT", "OCGT", "Coal (Lig + HC)", "Lignite", "Hard coal")
   table_ordered_name_dem = c("Electricity used for Electrolysis","Electricity")
   
-  remind.tech.mapping <- c(remind.nonvre.mapping2, remind.vre.mapping)
-
+ 
+  
   dieter.tech.exclude <- c("OCGT_ineff", "Wind_off")
-
+  
   dieter.supply.tech.mapping <- c(hc = "Hard coal",
-                         lig = "Lignite",
-                         coal = "Coal (Lig + HC)",
-                         nuc = "Nuclear",
-                         OCGT_eff = "OCGT",
-                         CCGT = "CCGT",
-                         bio = "Biomass",
-                         ror = "Hydro",
-                         Wind_on = "Wind",
-                         Solar = "Solar")
+                                  lig = "Lignite",
+                                  coal = "Coal (Lig + HC)",
+                                  nuc = "Nuclear",
+                                  OCGT_eff = "OCGT",
+                                  CCGT = "CCGT",
+                                  bio = "Biomass",
+                                  ror = "Hydro",
+                                  Wind_on = "Wind",
+                                  Solar = "Solar")
   
   dieter.demand.tech.mapping <- c(seel = "Electricity",
-                                  elh2 = "Electricity used for Electrolysis",
-                                  NULL)
+                                  elh2 = "Electrolyzers")
   
   dieter.tech.mapping <- c(dieter.supply.tech.mapping, dieter.demand.tech.mapping)
-
+  
   color.mapping1 <- c("CCGT" = "#999959", "Coal (Lig + HC)" = "#0c0c0c",
                       "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
-                      "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff", "Electricity used for Electrolysis" = "#48D1CC", "Electricity" = "#6495ED")
+                      "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff", "Electrolyzers" = "#48D1CC", "Electricity" = "#6495ED")
   
   color.mapping2 <- c("CCGT" = "#999959", "Lignite" = "#0c0c0c",
                       "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
                       "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
-                      "Hard coal" = "#808080", "Electricity used for Electrolysis" = "#48D1CC", "Electricity" = "#6495ED")
-
+                      "Hard coal" = "#808080", "Electrolyzers" = "#48D1CC", "Electricity" = "#6495ED", "peak demand" = "#0c0c0c")
+  
+  vre.names <- c("Hydro","Wind","Solar")
+  nonvre.names <- c("Lignite", "Hard coal","Coal (Lig + HC)", "Nuclear","OCGT","CCGT","Biomass","Electrolyzers")
+  
+  TECHkeylst_DT = c("CCGT",
+                    "lig",
+                    "Solar",
+                    "Wind_on",
+                    "bio",
+                    "OCGT_eff",
+                    "ror",
+                    "nuc",
+                    "hc",
+                    "elh2",
+                    "seel")
   sm_TWa_2_MWh <- 8.76E9
 
   # Directories -------------------------------------------------------------
 
   report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_", str_sub(outputdir, start=8), ".pdf"))
+  #report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_",".pdf"))
   
   remind.files <- list.files(outputdir, pattern = "fulldata_[0-9]+\\.gdx") %>%
   str_sort(numeric = TRUE)
@@ -137,11 +153,9 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
   
   # Capacity factors --------------------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotCapacityFactors.R"), local=TRUE)
-
   # Capacities --------------------------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotCapacities.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotCapAndCF.R"), local=TRUE)
 
   # Generation --------------------------------------------------------------
 
@@ -149,11 +163,11 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
 
   # Added capacities --------------------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotAddedCapacities.R"), local=TRUE)
+  #source(file.path(dieter.scripts.folder, "plotAddedCapacities.R"), local=TRUE)
 
   # LCOEs -------------------------------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
+  #source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
 
   # Price: Secondary electricity --------------------------------------------
 
@@ -161,19 +175,19 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
 
   # Price: Peak demand ------------------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotPeakDemandPrice.R"), local=TRUE)
+  #source(file.path(dieter.scripts.folder, "plotPeakDemandPrice.R"), local=TRUE)
 
   # (Residual) load duration curves -----------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotRLDCs.R"), local=TRUE) # Attention: computationally heavy on standard PC
+  #source(file.path(dieter.scripts.folder, "plotRLDCs.R"), local=TRUE) # Attention: computationally heavy on standard PC
 
   # Price duration curves ---------------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotPriceDurationCurve.R"), local=TRUE)
+  #source(file.path(dieter.scripts.folder, "plotPriceDurationCurve.R"), local=TRUE)
 
   # (Inverse) screening curves ----------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotInverseScreeningCurve.R"), local=TRUE)
+  #source(file.path(dieter.scripts.folder, "plotInverseScreeningCurve.R"), local=TRUE)
 
   # Markups -----------------------------------------------------------------
 
