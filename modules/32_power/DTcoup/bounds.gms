@@ -31,7 +31,7 @@ if ((cm_DTcoup_eq eq 1),
 			loop(t$(tDT32(t)),
 				loop(te$(CFcoupSuppte32(te)),
 				vm_capFac.lo(t,regi,te)=0;
-				vm_capFac.up(t,regi,te)=INF;  !! must not be capped by one, as some vm_capFac are larger than 1 due to scaling
+				vm_capFac.up(t,regi,te)=INF;  !! should not be capped as one, as some vm_capFac are larger than 1 due to scaling
 				);
 			);
 		);
@@ -135,20 +135,20 @@ vm_cap.fx(t,regi,"elh2VRE",rlf) = 0;
 *** END OF IntC bounds
 *** =====================================
 
-***CG: bound shares between 0 and 100
-v32_shStor.up(t,regi,teVRE) = 100;
-v32_shStor.lo(t,regi,teVRE) = 0;
-
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
+***CG: bound shares between 0 and 100
+v32_shStor.up(t,regi,te) = 100;
+v32_shStor.lo(t,regi,te) = 0;
+
 *this turns off storage for coupled region, no need to put any additional switches on the storage equations
-v32_shStor.fx(t,regi,teVRE)$(regDTCoup(regi) AND cm_DTcoup_eq eq 1) = 0;
+v32_shStor.fx(t,regi,te)$(regDTCoup(regi) AND cm_DTcoup_eq eq 1) = 0;
 
 v32_shSeElDem.up(t,regi,teFlexTax) = 100;
 v32_shSeElDem.lo(t,regi,teFlexTax) = 0;
 
-v32_shSeEl.up(t,regi,teDTCoupSupp) = 100;
-v32_shSeEl.lo(t,regi,teDTCoupSupp) = 0;
+v32_shSeEl.up(t,regi,te) = 100;
+v32_shSeEl.lo(t,regi,te) = 0;
 
 *** Fix capacity for seh2 -> seel for coupled region for now (no H2 as grid storage)
 vm_cap.fx(t,regi,"h2turbVRE","1")$(regDTCoup(regi) AND cm_DTcoup_eq eq 1) = 0;
