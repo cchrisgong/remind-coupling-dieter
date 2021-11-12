@@ -52,12 +52,15 @@ p21_implicitDiscRate_iter(iteration,ttot,all_regi)         "reference level valu
 p21_taxrevFlex_iter(iteration,ttot,all_regi)               "reference level value of flexibility tax revenue"
 p21_taxrevBioImport_iter(iteration,ttot,all_regi)          "reference level value of bioenergy import tax"
 
-p21_deltarev(iteration,all_regi)             "convergence criteria for iteration on tax revenue recycling"
+p21_deltarev(iteration,all_regi)              "convergence criteria for iteration on tax revenue recycling"
 
 p21_tau_CO2_tax_gdx(ttot,all_regi)              "tax path from gdx, may overwrite default values"
 p21_tau_CO2_tax_gdx_bau(ttot,all_regi)          "tax path from gdx, may overwrite default values"
 
 p21_implicitDiscRateMarg(ttot,all_regi,all_in)  "Difference between the normal discount rate and the implicit discount rate"
+
+p21_prodSe(tall,all_regi,all_enty,all_enty,all_te)    "vm_prodSe of last iteration"
+p21_demSe(tall,all_regi,all_enty,all_enty,all_te)     "vm_demSe of last iteration"
 ;
 
 
