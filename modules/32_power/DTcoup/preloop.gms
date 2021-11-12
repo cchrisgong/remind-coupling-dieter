@@ -45,6 +45,6 @@ if ( (c_keep_iteration_gdxes eq 1) ,
 
 );
 logfile.nr = 2;
-
+v32_shStor.l(t,regi,te) = 0;
 $ENDIF.DTcoup
 *** EOF ./modules/32_power/DTcoup/preloop.gms
