@@ -76,7 +76,6 @@ p32_extrEnergyUsage(t,regi,enty2)$(sameas(enty2,"seel")) =
 *** CG: total curtailment
 p32_seelCurt(t,regi) = sum(teVRE, v32_storloss.l(t,regi,teVRE) );
 
-
 *** total demand: including fuel extraction power usage (excluding curtailment)
 p32_seelTotDem(t,regi,enty2)$(sameas(enty2,"seel")) =
   sum(se2fe(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) )
@@ -91,20 +90,22 @@ p32_seelTotDem(t,regi,enty2)$(sameas(enty2,"seel")) =
 *** and exclude curtailment
 *** (note: p32_prod4dtFE and p32_prod4CCS are negative)
 *** (we do not consider power trading for now, since vm_Xport and vm_Mport are 0)
-p32_seelUsableDem(t,regi,enty2)$(sameas(enty2,"seel")) = p32_seelTotDem(t,regi,enty2)
-- p32_prod4dtFE(t,regi,enty2) - p32_prod4CCS(t,regi,enty2) - p32_coupledProd(t,regi,enty2)
+*** for sanity checks: p32_seelUsableDemAvg = p32_seelUsableProdAvg
+
+p32_seelUsableDem(t,regi,entySE)$(sameas(entySE,"seel")) = p32_seelTotDem(t,regi,entySE)
+- p32_prod4dtFE(t,regi,entySE) - p32_prod4CCS(t,regi,entySE) - p32_coupledProd(t,regi,entySE)
 ;
 
 ** total production except co-production term (they might create distortion), subtracted by curtailment from VRE
 ** note: p32_seelUsableDem should match p32_seelUsableProd according to q32_balSe
-p32_seelUsableProd(t,regi,enty2)$(sameas(enty2,"seel")) = sum( pe2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
-                                                        + sum(se2se(enty,enty2,te), vm_prodSe.l(t,regi,enty,enty2,te) )
+p32_seelUsableProd(t,regi,entySE)$(sameas(entySE,"seel")) = sum( pe2se(enty,entySE,te), vm_prodSe.l(t,regi,enty,entySE,te) )
+                                                        + sum(se2se(enty,entySE,te), vm_prodSe.l(t,regi,enty,entySE,te) )
                                                         - sum(teVRE, v32_storloss.l(t,regi,teVRE) )
 ;
 
 ** CG: vm_demSe.l(t,regi,"seel","seh2","elh2") is how much electricity is needed to produse seh2 (green h2)
 ** p32_seh2elh2Dem < p32_seelUsableDem (p32_seh2elh2Dem is part of the total usable demand p32_seelUsableDem)
-p32_seh2elh2Dem(t,regi,enty2)$(sameas(enty2,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
+p32_seh2elh2Dem(t,regi,entySE)$(sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
 
 **** CG: DIETER coupling
 *###################################################################
@@ -135,9 +136,7 @@ display "DIETER iteration", sm32_iter;
 * p32_seelUsableDemAvg(t,regi,enty)$(regDTCoup(regi) AND sameas(enty,"seel")) = p32_seelUsableDem(t,regi,enty);
 * );
 
-*** with demand averaging
 * if( (ord(iteration) gt (sm32_DTiter + 1)) ,
-
 
 *** fuel cost to be passed on to DIETER
 *** sometimes for some reason the marginals of the PE equation is 0
@@ -150,22 +149,14 @@ p32_fuelprice_avgiter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,
     			 + p32_fuelprice_lastx2iter(t,regi,entyPe))
     			 / 4 ;
 
-
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-p32_seh2elh2DemAvg(t,regi,enty)$(sameas(enty,"seh2")) =
+p32_seh2elh2DemAvg(t,regi,enty)$(tDT32(t) AND sameas(enty,"seh2")) =
   0.5 * (p32_seh2elh2Dem(t,regi,enty) + p32_seh2elh2DemLaIter(t,regi,enty));
-$ENDIF.elh2_coup
 
 * demand averaging
-* p32_seelUsableDemAvg = p32_seelUsableProdAvg
-p32_seelUsableDemAvg(t,regi,enty)$(sameas(enty,"seel")) =
-  0.5 * (p32_seelUsableDem(t,regi,enty) + p32_seelUsableDemLaIter(t,regi,enty));
+ p32_seelUsableProdAvg(t,regi,enty)$(tDT32(t) AND sameas(enty,"seel")) =
+  0.5 * (p32_seelUsableProd(t,regi,enty) + p32_seelUsableProdLaIter(t,regi,enty));
 
-* demand averaging
-* p32_seelUsableProdAvg(t,regi,enty)$(sameas(enty,"seel")) =
-*  0.5 * (p32_seelUsableProd(t,regi,enty) + p32_seelUsableProdLaIter(t,regi,enty));
-
-p32_seelUsableProdAvg(t,regi,enty)$(sameas(enty,"seel")) = p32_seelUsableProd(t,regi,enty);
+*p32_seelUsableProdAvg(t,regi,enty)$(sameas(enty,"seel")) = p32_seelUsableProd(t,regi,enty);
 
 * );
 ***CG:interest rate (Marian's formula) (should move this to core/postsolve at some point)
@@ -174,7 +165,9 @@ p32_r4DT(ttot,regi)$(tDT32s2(ttot))
   (vm_cons.l(ttot-1,regi)/pm_pop(ttot-1,regi)) )
   ** (1 / ( pm_ttot_val(ttot+1)- pm_ttot_val(ttot-1))) - 1) + pm_prtp(regi);
 
-***CG: to avoid distortion at later years where interest rate is no longer accurate
+***CG:
+* since we would like to couple all years to limit distortions, but growth rate after 2100 is weird (2130 has negative growth rate) due to various artefact, we simply set interest rates
+* after 2100 to 5%, this only sets 2110, 2130, 2150 three years
 p32_r4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
 
 * REMIND data for DIETER
@@ -221,17 +214,12 @@ if ( (c_keep_iteration_gdxes eq 1) ,
 );
 logfile.nr = 2;
 );
-$ENDIF.DTcoup
 
-** such that an uncoupled run have this variable to act as input.gdx for a coupled run -is this needed?
-$IFTHEN.DTcoup_off %cm_DTcoup% == "off"
-p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = v32_storloss.l(t,regi,"spv")/vm_usableSeTe.l(t,regi,"seel","spv");
-p32_DIETERCurtRatio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = v32_storloss.l(t,regi,"wind")/vm_usableSeTe.l(t,regi,"seel","wind");
-$ENDIF.DTcoup_off
-
-$IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_DIETERCurtRatioLaIter(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"spv");
 p32_DIETERCurtRatioLaIter(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"wind");
+
+p32_cf_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) = vm_capFac.l(t,regi,te);
+
 $ENDIF.DTcoup
 
 $endif.calibrate

@@ -37,8 +37,6 @@ parameters
     p32_totProd(ttot,all_regi,all_enty)                 "total seel production (both coupled and uncoupled production)"
     p32_seelCurt(ttot,all_regi)                         "total curtailment"
 
-    pm_prodSe(tall,all_regi,all_enty,all_enty,all_te)               "vm_prodSe of last iteration"
-    pm_demSe(tall,all_regi,all_enty,all_enty,all_te)                "vm_demSe of last iteration"
     p32_shSeElDem(ttot,all_regi,all_te)	                          	"share of electricity demand in % [%] in last iter"
 
     p32_deltaCap(ttot,all_regi,all_te,rlf)              "capacity of the last iteration"

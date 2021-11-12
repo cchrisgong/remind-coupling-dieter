@@ -59,6 +59,9 @@ Display "reference in presolve", p21_taxrevCap0;
 sm21_tmp = iteration.val;
 display "iteration", sm21_tmp;
 
+p21_prodSe(t,regi,enty,entySE,te)$(regDTCoup(regi) AND sameas(entySE,"seel")) = vm_prodSe.l(t,regi,enty,entySE,te);
+p21_demSe(t,regi,enty,entySE,te)$(regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,enty,entySE,te);
+
 p21_taxrevBioImport0(ttot,regi) = p21_tau_BioImport(ttot,regi) * pm_pvp(ttot,"pebiolc") / pm_pvp(ttot,"good") * vm_Mport.l(ttot,regi,"pebiolc");
 
 *** EOF ./modules/21_tax/on/presolve.gms
