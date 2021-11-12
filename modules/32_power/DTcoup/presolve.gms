@@ -16,9 +16,6 @@ pm_SEPrice(t,regi,entySE)$(abs (qm_budget.m(t,regi)) gt sm_eps AND sameas(entySE
 
 
 p32_budget(t,regi) = qm_budget.m(t,regi);
-pm_prodSe(t,regi,enty,enty2,te) = vm_prodSe.l(t,regi,enty,enty2,te);
-pm_demSe(t,regi,enty,enty2,te) = vm_demSe.l(t,regi,enty,enty2,te);
-
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** CG:load fuel prices from two previous iterations, avoid using marginals in case they are 0
