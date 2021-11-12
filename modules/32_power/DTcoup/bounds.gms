@@ -138,8 +138,8 @@ vm_cap.fx(t,regi,"elh2VRE",rlf) = 0;
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
 ***CG: bound shares between 0 and 100
-v32_shStor.up(t,regi,te) = 100;
-v32_shStor.lo(t,regi,te) = 0;
+v32_shStor.up(t,regi,teVRE) = 100;
+v32_shStor.lo(t,regi,teVRE) = 0;
 
 *this turns off storage for coupled region, no need to put any additional switches on the storage equations
 v32_shStor.fx(t,regi,te)$(regDTCoup(regi) AND cm_DTcoup_eq eq 1) = 0;
