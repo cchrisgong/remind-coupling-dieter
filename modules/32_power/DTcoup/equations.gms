@@ -46,6 +46,22 @@ q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND teDTCoupSupp(te))..
  	- sum(teVRE$sameas(te,teVRE), v32_storloss(t,regi,teVRE) )
 ;
 
+q32_usableSeDisp(t,regi,entySe)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySe,"seel"))..
+	v32_usableSeDisp(t,regi,entySe)
+	=e=
+	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
+	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
+	- sum(teVRE, v32_storloss(t,regi,teVRE) )
+;
+
+q32_usableSeTeDisp(t,regi,entySe,te)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySe,"seel") AND teDTCoupSupp(te))..
+ 	v32_usableSeTeDisp(t,regi,entySe,te)
+ 	=e=
+ 	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
+	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
+ 	- sum(teVRE$sameas(te,teVRE), v32_storloss(t,regi,teVRE) )
+;
+
 ***---------------------------------------------------------------------------
 *** Definition of capacity constraints for storage:
 ***---------------------------------------------------------------------------
@@ -120,14 +136,20 @@ q32_shSeEl(t,regi,te)$(teDTCoupSupp(te))..
     vm_usableSeTe(t,regi,"seel",te)
 ;
 
+q32_shSeElDisp(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))..
+    v32_shSeElDisp(t,regi,te) / 100 * v32_usableSeDisp(t,regi,"seel")
+    =e=
+    v32_usableSeTeDisp(t,regi,"seel",te)
+;
+
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-*** CG: Calculation of share of electricity demand, e.g. of green h2 using elh2 (note: v32_shSeElDem right now don't add up to 100
-***since vm_usableSe also includes energy for fuel extraction, etc... can be improved later)
+*** CG: Calculation of share of electricity demand, e.g. of green h2 using elh2 (note: RHS of demSe contains also deamand met by co-production, which
+*** is not coupled to DIETER, ways to improve? v32_shSeElDem probably add up to more than 100%)
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 ***---------------------------------------------------------------------------
 q32_shSeElDem(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi))..
-    v32_shSeElDem(t,regi,te) / 100 * vm_usableSe(t,regi,"seel")
+    v32_shSeElDem(t,regi,te) / 100 * vm_usableSeDisp(t,regi,"seel")
     =e=
     sum(en2en(enty,enty2,te),
 			vm_demSe(t,regi,enty,enty2,te)$(sameas(enty, "seel")))

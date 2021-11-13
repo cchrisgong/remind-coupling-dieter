@@ -22,21 +22,22 @@ $ifthen.calibrate %CES_parameters% == "load"
 ***************************************************************
 
 *** CG: market value as seen by REMIND
-p32_marketValue(t,regi,te)$regDTCoup(regi)
+p32_marketValue(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))
       = pm_SEPrice(t,regi,"seel")$regDTCoup(regi) + vm_Mrkup.l(t,regi,te)$regDTCoup(regi);
 *** CG: market price seen by sector coupling usage of power (e.g. green H2)
 
-p32_marketPrice(t,regi,te)$regDTCoup(regi)
+p32_marketPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))
       = pm_SEPrice(t,regi,"seel")$regDTCoup(regi) - vm_flexAdj.l(t,regi,te)$regDTCoup(regi);
 
 *** CG: value factor in REMIND
-p32_valueFactor(t,regi,te)$regDTCoup(regi)
+p32_valueFactor(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))
       = p32_marketValue(t,regi,te)$regDTCoup(regi)/(pm_SEPrice(t,regi,"seel")$regDTCoup(regi) + sm_eps);
 
-p32_shSeEl(t,regi,te)$regDTCoup(regi) = v32_shSeEl.l(t,regi,te)$regDTCoup(regi);
+p32_shSeElDisp(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) = v32_shSeElDisp.l(t,regi,te);
+p32_shSeEl(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) = v32_shSeEl.l(t,regi,te);
 
 *** CG: calculate budget from last iteration
-p32_budget(t,regi) = qm_budget.m(t,regi);
+p32_budget(t,regi)$(tDT32(t) AND regDTCoup(regi)) = qm_budget.m(t,regi);
 
 *** CG: Total power produced (including curtailment, co-production, own consumption)
 p32_totProd(t,regi,enty2)$(sameas(enty2,"seel")) =

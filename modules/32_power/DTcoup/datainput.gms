@@ -118,6 +118,7 @@ Execute_Loadpoint 'input' vm_capFac = vm_capFac;
 Execute_Loadpoint 'input' pm_dataren = pm_dataren;
 Execute_Loadpoint 'input' vm_capDistr = vm_capDistr;
 Execute_Loadpoint 'input' p32_shSeEl = v32_shSeEl.l;
+Execute_Loadpoint 'input' p32_shSeElDisp = v32_shSeEl.l;
 Execute_Loadpoint 'input' vm_demSe = vm_demSe;
 Execute_Loadpoint 'input' vm_cons = vm_cons;
 Execute_Loadpoint 'input' pm_pop = pm_pop;
@@ -125,13 +126,15 @@ Execute_Loadpoint 'input' pm_ttot_val = pm_ttot_val;
 Execute_Loadpoint 'input' pm_prtp = pm_prtp;
 Execute_Loadpoint 'input' v32_storloss = v32_storloss;
 
-*Display "vm_cap for DIETER datainput", vm_cap.l;
-
+***CG:interest rate (Marian's formula) (should move this to core/postsolve at some point)
 p32_r4DT(ttot,regi)$(tDT32s2(ttot) AND regDTCoup(regi))
-= (( (vm_cons.l(ttot+1,regi)/pm_pop(ttot+1,regi)) /
-  (vm_cons.l(ttot-1,regi)/pm_pop(ttot-1,regi)) )
-  ** (1 / ( pm_ttot_val(ttot+1)- pm_ttot_val(ttot-1))) - 1) + pm_prtp(regi);
+    = (( (vm_cons.l(ttot+1,regi)/pm_pop(ttot+1,regi)) /
+      (vm_cons.l(ttot-1,regi)/pm_pop(ttot-1,regi)) )
+      ** (1 / ( pm_ttot_val(ttot+1)- pm_ttot_val(ttot-1))) - 1) + pm_prtp(regi);
 
+***CG:
+* since we would like to couple all years to limit distortions, but growth rate after 2100 is weird (2130 has negative growth rate) due to various artefact, we simply set interest rates
+* after 2100 to 5%, this only sets 2110, 2130, 2150 three years
 p32_r4DT(ttot,regi)$(ttot.val gt 2100 AND regDTCoup(regi)) = 0.05;
 
 * calculate fuel prices (only prices in REMIND in the form of marginals need to be divided by qm_budget.m)

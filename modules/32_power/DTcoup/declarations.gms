@@ -29,6 +29,7 @@ parameters
     p32_extrEnergyUsage(ttot,all_regi,all_enty)         "Energy used in extraction"
 
     p32_shSeEl(ttot,all_regi,all_te)                    "generation share of the last iteration"
+    p32_shSeElDisp(ttot,all_regi,all_te)                "generation share (dispatched, no co-production) of the last iteration"
     p32_budget(ttot,all_regi)                           "budget from last iteration"
     p32_nonSEPE2SE(ttot,all_regi,all_enty)              "all non SE2SE PE2SE terms"
     p32_coupledProd(ttot,all_regi,all_enty)             "coupled production"
@@ -88,6 +89,7 @@ positive variables
     v32_shStor(ttot,all_regi,all_te)         	   "share of seel production from renewables that needs to be stored, range 0..1 [0,1]"
     v32_storloss(ttot,all_regi,all_te)         	   "total energy loss from storage for a given technology [TWa]"
     v32_shSeEl(ttot,all_regi,all_te)		   "new share of electricity production in % [%]"
+    v32_shSeElDisp(ttot,all_regi,all_te)		   "new share of electricity production in % [%] (exluding co-production)"
     v32_testdemSeShare(ttot,all_regi,all_te)       "test variable for tech share of SE electricity demand"
     v32_shSeElDem(ttot,all_regi,all_te)		   "new share of electricity demand in % [%]"
     v32_seelUsableDem(ttot,all_regi,all_enty)      "demand of usable seel in current iteration"
@@ -102,11 +104,15 @@ equations
     q32_balSe(ttot,all_regi,all_enty)		   "balance equation for electricity secondary energy"
     q32_usableSe(ttot,all_regi,all_enty)	   "calculate usable se before se2se and MP/XP (without storage)"
     q32_usableSeTe(ttot,all_regi,entySe,all_te)    "calculate usable se produced by one technology (vm_usableSeTe)"
+    q32_usableSeDisp(ttot,all_regi,all_enty)  "calculate usable se before se2se and MP/XP (without storage) that are dispatched by DIETER, i.e. excluding co-production"
+    q32_usableSeTeDisp(ttot,all_regi,entySe,all_te)    "calculate usable se produced by one technology (vm_usableSeTeDisp) that are dispatched by DIETER, i.e. excluding co-production"
+
 *   q32_seelUsableDem(ttot,all_regi,all_enty)      "calculate total usable seel for demand"
     q32_limitCapTeStor(ttot,all_regi,teStor)	   "calculate the storage capacity required by vm_storloss"
     q32_limitCapTeChp(ttot,all_regi)               "capacitiy constraint for chp electricity generation"
     q32_limitCapTeGrid(ttot,all_regi)          	   "calculate the additional grid capacity required by VRE"
     q32_shSeEl(ttot,all_regi,all_te)         	   "calculate share of electricity production of a technology (v32_shSeEl)"
+    q32_shSeElDisp(ttot,all_regi,all_te)         	 "calculate share of electricity production of a technology (v32_shSeElDisp)"
     q32_shStor(ttot,all_regi,all_te)               "equation to calculate v32_shStor"
     q32_storloss(ttot,all_regi,all_te)             "equation to calculate vm_storloss"
     q32_h2turbVREcapfromTestor(tall,all_regi)      "calculate capacities of dummy seel<--h2 technology from storXXX technologies"
@@ -151,9 +157,9 @@ $ENDIF.softcap
 $ENDIF.DTcoup
 ;
 
-$IFTHEN.DTcoup_off %cm_DTcoup% == "off"
 variables
+v32_usableSeDisp(ttot,all_regi,entySe)                    "usable se before se2se and MP/XP (pe2se, +positive oc from pe2se, -storage losses). [TWa]"
+v32_usableSeTeDisp(ttot,all_regi,entySe,all_te)           "usable se produced by one te (pe2se, +positive oc from pe2se, -storage losses). [TWa]"
 v32_flexPriceShare(tall,all_regi,all_te)           "share of average electricity price that flexible technologies see [share: 0...1]"
 v32_flexPriceShareMin(tall,all_regi,all_te)        "possible minimum of share of average electricity price that flexible technologies see [share: 0...1]"
 ;
-$ENDIF.DTcoup_off

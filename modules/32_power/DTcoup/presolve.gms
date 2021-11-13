@@ -21,8 +21,8 @@ p32_fuelprice_lastx2iter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_lastit
 p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
 
 *total coupled part of the seel demand/production to be passed to dieter
-p32_seelUsableProdLaIter(t,regi,entySE)$(tDT32(t) AND sameas(entySE,"seel")) = p32_seelUsableProd(t,regi,entySE);
-p32_seh2elh2DemLaIter(t,regi,entySE)$(tDT32(t) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
+p32_seelUsableProdLaIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) = p32_seelUsableProd(t,regi,entySE);
+p32_seh2elh2DemLaIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
 
 *demand share
 p32_shSeElDem(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = v32_shSeElDem.l(t,regi,te);
@@ -85,14 +85,15 @@ $ENDIF.elh2_coup
 
 *** dividing each DIETER tech into REMIND tech, using the last iteration REMIND share within DIETER tech category to scale down the generation share
     p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND BIOte32(te) )
-		      = p32_shSeEl(t,regi,te)$(BIOte32(te))/(sum(te2$(BIOte32(te2)),p32_shSeEl(t,regi,te2)) + sm_eps);
+		      = p32_shSeElDisp(t,regi,te)$(BIOte32(te))/(sum(te2$(BIOte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
 		p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND NonPeakGASte32(te) )
-		      = p32_shSeEl(t,regi,te)$(NonPeakGASte32(te))/(sum(te2$(NonPeakGASte32(te2)),p32_shSeEl(t,regi,te2)) + sm_eps);
+		      = p32_shSeElDisp(t,regi,te)$(NonPeakGASte32(te))/(sum(te2$(NonPeakGASte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
 		p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi))
-		      = p32_shSeEl(t,regi,te)$(NUCte32(te))/(sum(te2$(NUCte32(te2)),p32_shSeEl(t,regi,te2)) + sm_eps);
+		      = p32_shSeElDisp(t,regi,te)$(NUCte32(te))/(sum(te2$(NUCte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
 		p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
-		      = p32_shSeEl(t,regi,te)$(COALte32(te))/(sum(te2$(COALte32(te2)),p32_shSeEl(t,regi,te2)) + sm_eps);
+		      = p32_shSeElDisp(t,regi,te)$(COALte32(te))/(sum(te2$(COALte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
 
+*CG* writing DIETER generation share to parameters
     p32_DIETER_shSeEl(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi))
 					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","gen_share"));
     p32_DIETER_shSeEl(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi))
@@ -102,7 +103,7 @@ $ENDIF.elh2_coup
     p32_DIETER_shSeEl(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi))
 					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"ror","gen_share"));
 
-*CG* downscaling technology shares in REMIND
+*CG* for those DIETER technologies which maps to several REMIND technologies: downscaling generation shares in REMIND
     p32_DIETER_shSeEl(t,regi,te)$(tDT32(t) AND regDTCoup(regi)AND BIOte32(te) )
 					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"bio","gen_share"))
 							*	p32_tech_category_genshare(t,regi,te) ;
