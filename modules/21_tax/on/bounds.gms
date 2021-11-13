@@ -15,11 +15,9 @@ vm_Mrkup.fx(t,regi,te)$(teDTCoupSupp(te) AND regNoDTCoup(regi)) = 0;
 vm_Mrkup.fx(t,regi,te)$(teDTCoupSupp(te) AND regDTCoup(regi) AND not tDT32(t)) = 0;
 *v21_taxrevMrkup.fx(t,all_regi)$(regDTCoup(regi) AND not tDT32(t)) = 0;
 
-vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regNoDTCoup(regi)) = 0;
-vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi) AND not tDT32(t)) = 0;
 
-*** CG: set elh2 markups to 0 (Felix's input is read in in p80 from input.gdx), later this line can be removed
-vm_Mrkup.fx(t,regi,te)$(teFlexTax(te)) = 0;
+* vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regNoDTCoup(regi)) = 0;
+* vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi) AND not tDT32(t)) = 0;
 
 *** CG dislay:
 sm21_tmp = iteration.val;

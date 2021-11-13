@@ -109,6 +109,11 @@ vm_cap.fx(t,regi,"elh2VRE",rlf) = 0;
 *** =====================================
 *** END OF IntC bounds
 *** =====================================
+*** all flexible subsidies are set to 0 for non-coupled regions in DTcoup realization (regardless of whether cm_DTcoup is on, or elh2_coup is on)
+*** This is because in calibration cm_flex_tax is turned off, and only in policy runs they are turned on
+*** so one can turn off electrolysers subsidies for non coupled regions, without distortions
+vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regNoDTCoup(regi)) = 0;
+vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi) AND not tDT32(t)) = 0;
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 

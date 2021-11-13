@@ -84,4 +84,7 @@ p21_taxrevBioImport_iter(iteration+1,ttot,regi) = v21_taxrevBioImport.l(ttot,reg
 
 display p21_taxrevFE_iter;
 
+p21_prodSe(t,regi,enty,entySE,te)$(regDTCoup(regi) AND sameas(entySE,"seel")) = vm_prodSe.l(t,regi,enty,entySE,te);
+p21_demSe(t,regi,enty,entySE,te)$(regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,enty,entySE,te);
+
 *** EOF ./modules/21_tax/on/postsolve.gms
