@@ -45,7 +45,6 @@ parameters
     p32_marketPrice(ttot,all_regi,all_te)               "market price seen by REMIND"
     p32_valueFactor(ttot,all_regi,all_te)               "value factor seen by REMIND"
 
-
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *   p32_capStor_DIET(tall,all_regi)       "storage cap from DIETER"
     p32_minVF_spv                         "value factor of solar at 100% VRE shares"
@@ -125,12 +124,9 @@ $ENDIF.DTcoup_off
 
     q32_limitSolarWind(tall,all_regi)              "limits on fluctuating renewables, only turned on for special EMF27 scenarios"
 
-$IFTHEN.DTcoup_off %cm_DTcoup% == "off"
     q32_flexAdj(tall,all_regi,all_te)              "calculate flexibility used in flexibility tax for technologies with electricity input"
-    q32_flexPriceShareMin                          "calculatae miniumum share of average electricity that flexible technologies can see"
+    q32_flexPriceShareMin(tall,all_regi,all_te)    "calculatae miniumum share of average electricity that flexible technologies can see"
     q32_flexPriceShare(tall,all_regi,all_te)       "calculate share of average electricity price that flexible technologies see"
-    q32_flexPriceBalance(tall,all_regi)            "constraint such that flexible electricity prices balanance to average electricity price"
-$ENDIF.DTcoup_off
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
