@@ -37,15 +37,12 @@ parameters
     p32_totProd(ttot,all_regi,all_enty)                 "total seel production (both coupled and uncoupled production)"
     p32_seelCurt(ttot,all_regi)                         "total curtailment"
 
-    pm_prodSe(tall,all_regi,all_enty,all_enty,all_te)               "vm_prodSe of last iteration"
-    pm_demSe(tall,all_regi,all_enty,all_enty,all_te)                "vm_demSe of last iteration"
     p32_shSeElDem(ttot,all_regi,all_te)	                          	"share of electricity demand in % [%] in last iter"
 
     p32_deltaCap(ttot,all_regi,all_te,rlf)              "capacity of the last iteration"
     p32_marketValue(ttot,all_regi,all_te)               "market value seen by REMIND"
     p32_marketPrice(ttot,all_regi,all_te)               "market price seen by REMIND"
     p32_valueFactor(ttot,all_regi,all_te)               "value factor seen by REMIND"
-
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *   p32_capStor_DIET(tall,all_regi)       "storage cap from DIETER"
@@ -104,6 +101,7 @@ equations
     q32_balSe(ttot,all_regi,all_enty)		   "balance equation for electricity secondary energy"
     q32_usableSe(ttot,all_regi,all_enty)	   "calculate usable se before se2se and MP/XP (without storage)"
     q32_usableSeTe(ttot,all_regi,entySe,all_te)    "calculate usable se produced by one technology (vm_usableSeTe)"
+
 *   q32_seelUsableDem(ttot,all_regi,all_enty)      "calculate total usable seel for demand"
     q32_limitCapTeStor(ttot,all_regi,teStor)	   "calculate the storage capacity required by vm_storloss"
     q32_limitCapTeChp(ttot,all_regi)               "capacitiy constraint for chp electricity generation"
@@ -121,12 +119,9 @@ $ENDIF.DTcoup_off
 
     q32_limitSolarWind(tall,all_regi)              "limits on fluctuating renewables, only turned on for special EMF27 scenarios"
 
-$IFTHEN.DTcoup_off %cm_DTcoup% == "off"
     q32_flexAdj(tall,all_regi,all_te)              "calculate flexibility used in flexibility tax for technologies with electricity input"
-    q32_flexPriceShareMin                          "calculatae miniumum share of average electricity that flexible technologies can see"
+    q32_flexPriceShareMin(tall,all_regi,all_te)    "calculatae miniumum share of average electricity that flexible technologies can see"
     q32_flexPriceShare(tall,all_regi,all_te)       "calculate share of average electricity price that flexible technologies see"
-    q32_flexPriceBalance(tall,all_regi)            "constraint such that flexible electricity prices balanance to average electricity price"
-$ENDIF.DTcoup_off
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
