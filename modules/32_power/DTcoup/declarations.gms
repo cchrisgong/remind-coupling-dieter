@@ -40,12 +40,11 @@ parameters
 
     p32_shSeElDem(ttot,all_regi,all_te)	                          	"share of electricity demand in % [%] in last iter"
 
-    p32_deltaCap(ttot,all_regi,all_te,rlf)              "capacity of the last iteration"
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_marketValue(ttot,all_regi,all_te)               "market value seen by REMIND"
     p32_marketPrice(ttot,all_regi,all_te)               "market price seen by REMIND"
     p32_valueFactor(ttot,all_regi,all_te)               "value factor seen by REMIND"
 
-$IFTHEN.DTcoup %cm_DTcoup% == "on"
 *   p32_capStor_DIET(tall,all_regi)       "storage cap from DIETER"
     p32_minVF_spv                         "value factor of solar at 100% VRE shares"
 
@@ -81,7 +80,6 @@ scalars
     s32_storlink                              "how strong is the influence of two similar renewable energies on each other's storage requirements (1= complete, 4= rather small)" /3/
     sm32_iter                                 "iteration.val"
     sm32_DTiter                               "iteration when DIETER starts to be coupled"
-    sm32_discount_factor                      "discount factor for investment"
 ;
 
 positive variables
@@ -117,6 +115,7 @@ equations
     q32_h2turbVREcapfromTestor(tall,all_regi)      "calculate capacities of dummy seel<--h2 technology from storXXX technologies"
     q32_elh2VREcapfromTestor(tall,all_regi)        "calculate capacities of dummy seel-->h2 technology from storXXX technologies"
 
+***CG: temporarily disabling operating reserves to eliminate distortion between DIETER and REMIND
 $IFTHEN.DTcoup_off %cm_DTcoup% == "off"
 *** only enable flexibility constraint q32_operatingReserve in uncoupled mode
     q32_operatingReserve(ttot,all_regi)  	   "operating reserve for necessary flexibility"
