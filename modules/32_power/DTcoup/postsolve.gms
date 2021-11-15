@@ -91,14 +91,12 @@ p32_seelTotDem(t,regi,enty2)$(sameas(enty2,"seel")) =
 *** and exclude curtailment
 *** (note: p32_prod4dtFE and p32_prod4CCS are negative)
 *** (we do not consider power trading for now, since vm_Xport and vm_Mport are 0)
-*** for sanity checks: p32_seelUsableDemAvg = p32_seelUsableProdAvg
-
 p32_seelUsableDem(t,regi,entySE)$(sameas(entySE,"seel")) = p32_seelTotDem(t,regi,entySE)
 - p32_prod4dtFE(t,regi,entySE) - p32_prod4CCS(t,regi,entySE) - p32_coupledProd(t,regi,entySE)
 ;
 
 ** total production except co-production term (they might create distortion), subtracted by curtailment from VRE
-** note: p32_seelUsableDem should match p32_seelUsableProd according to q32_balSe
+** sanity check: p32_seelUsableDem should match p32_seelUsableProd according to q32_balSe
 p32_seelUsableProd(t,regi,entySE)$(sameas(entySE,"seel")) = sum( pe2se(enty,entySE,te), vm_prodSe.l(t,regi,enty,entySE,te) )
                                                         + sum(se2se(enty,entySE,te), vm_prodSe.l(t,regi,enty,entySE,te) )
                                                         - sum(teVRE, v32_storloss.l(t,regi,teVRE) )
@@ -127,18 +125,6 @@ sm32_DTiter = 1;
 sm32_iter = iteration.val;
 display "DIETER iteration", sm32_iter;
 
-*** CG: smoothing demand over iterations to pass to DIETER
-* without demand averaging
-* if( (ord(iteration) le (sm32_DTiter + 1)) ,
-* $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-* p32_seh2elh2DemAvg(t,regi,enty)$(regDTCoup(regi) AND sameas(enty,"seh2")) = p32_seh2elh2Dem(t,regi,enty);
-* $ENDIF.elh2_coup
-*
-* p32_seelUsableDemAvg(t,regi,enty)$(regDTCoup(regi) AND sameas(enty,"seel")) = p32_seelUsableDem(t,regi,enty);
-* );
-
-* if( (ord(iteration) gt (sm32_DTiter + 1)) ,
-
 *** fuel cost to be passed on to DIETER
 *** sometimes for some reason the marginals of the PE equation is 0
 ** if condition not satisfied, last iteration values of p32_fuelprice_curriter will be automatically taken
@@ -150,16 +136,13 @@ p32_fuelprice_avgiter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,
     			 + p32_fuelprice_lastx2iter(t,regi,entyPe))
     			 / 4 ;
 
+* demand averaging
+p32_seelUsableProdAvg(t,regi,enty)$(tDT32(t) AND sameas(enty,"seel")) =
+  0.5 * (p32_seelUsableProd(t,regi,enty) + p32_seelUsableProdLaIter(t,regi,enty));
+
 p32_seh2elh2DemAvg(t,regi,enty)$(tDT32(t) AND sameas(enty,"seh2")) =
   0.5 * (p32_seh2elh2Dem(t,regi,enty) + p32_seh2elh2DemLaIter(t,regi,enty));
 
-* demand averaging
- p32_seelUsableProdAvg(t,regi,enty)$(tDT32(t) AND sameas(enty,"seel")) =
-  0.5 * (p32_seelUsableProd(t,regi,enty) + p32_seelUsableProdLaIter(t,regi,enty));
-
-*p32_seelUsableProdAvg(t,regi,enty)$(sameas(enty,"seel")) = p32_seelUsableProd(t,regi,enty);
-
-* );
 ***CG:interest rate (Marian's formula) (should move this to core/postsolve at some point)
 p32_r4DT(ttot,regi)$(tDT32s2(ttot))
 = (( (vm_cons.l(ttot+1,regi)/pm_pop(ttot+1,regi)) /

@@ -132,13 +132,12 @@ p32_r4DT(ttot,regi)$(tDT32s2(ttot) AND regDTCoup(regi))
       (vm_cons.l(ttot-1,regi)/pm_pop(ttot-1,regi)) )
       ** (1 / ( pm_ttot_val(ttot+1)- pm_ttot_val(ttot-1))) - 1) + pm_prtp(regi);
 
-***CG:
-* since we would like to couple all years to limit distortions, but growth rate after 2100 is weird (2130 has negative growth rate) due to various artefact, we simply set interest rates
-* after 2100 to 5%, this only sets 2110, 2130, 2150 three years
-p32_r4DT(ttot,regi)$(ttot.val gt 2100 AND regDTCoup(regi)) = 0.05;
+*** CG: since we would like to couple all years to limit distortions, but growth rate after 2100 is weird (2130 has negative growth rate) due to various artefact, we simply set interest rates
+*** after 2100 to 5%, this only sets 2110, 2130, 2150 three years
+p32_r4DT(ttot,regi)$((ttot.val gt 2100) AND regDTCoup(regi)) = 0.05;
 
 * calculate fuel prices (only prices in REMIND in the form of marginals need to be divided by qm_budget.m)
-p32_fuelprice_curriter(t,regi,entyPe)$(tDT32(t) AND regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps) AND (abs(qm_budget.m(t,regi)) gt sm_eps)) =
+p32_fuelprice_curriter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps) AND (abs(qm_budget.m(t,regi)) gt sm_eps)) =
             q_balPe.m(t,regi,entyPe) / qm_budget.m(t,regi);
 
 *total coupled part of the seel demand/production to be passed to dieter
@@ -157,7 +156,7 @@ pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, vm_capFac, pm_dataren, vm_c
 
 *** initiating other parameters for averaging in loop
 
-p32_fuelprice_lastiter(t,regi,entyPe)$(tDT32(t) AND regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
+p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
 
 *p32_seelUsableDem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) = p32_seelUsableProd(t,regi,entySE);
 

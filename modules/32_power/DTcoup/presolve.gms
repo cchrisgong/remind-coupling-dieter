@@ -24,9 +24,10 @@ p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter
 p32_seelUsableProdLaIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) = p32_seelUsableProd(t,regi,entySE);
 p32_seh2elh2DemLaIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
 
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 *demand share
 p32_shSeElDem(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = v32_shSeElDem.l(t,regi,te);
-
+$ENDIF.elh2_coup
 $ENDIF.DTcoup
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
