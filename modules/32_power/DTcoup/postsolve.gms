@@ -104,7 +104,7 @@ p32_seelUsableProd(t,regi,entySE)$(sameas(entySE,"seel")) = sum( pe2se(enty,enty
 
 ** CG: vm_demSe.l(t,regi,"seel","seh2","elh2") is how much electricity is needed to produse seh2 (green h2)
 ** p32_seh2elh2Dem < p32_seelUsableDem (p32_seh2elh2Dem is part of the total usable demand p32_seelUsableDem)
-p32_seh2elh2Dem(t,regi,entySE)$(sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
+p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
 
 **** CG: DIETER coupling
 *###################################################################
@@ -137,11 +137,11 @@ p32_fuelprice_avgiter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,
     			 / 4 ;
 
 * demand averaging
-p32_seelUsableProdAvg(t,regi,enty)$(tDT32(t) AND sameas(enty,"seel")) =
-  0.5 * (p32_seelUsableProd(t,regi,enty) + p32_seelUsableProdLaIter(t,regi,enty));
+p32_seelUsableProdAvg(t,regi,entySE)$(tDT32(t) AND sameas(entySE,"seel")) =
+  0.5 * (p32_seelUsableProd(t,regi,entySE) + p32_seelUsableProdLaIter(t,regi,entySE));
 
-p32_seh2elh2DemAvg(t,regi,enty)$(tDT32(t) AND sameas(enty,"seh2")) =
-  0.5 * (p32_seh2elh2Dem(t,regi,enty) + p32_seh2elh2DemLaIter(t,regi,enty));
+p32_seh2elh2DemAvg(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) =
+  0.5 * (p32_seh2elh2Dem(t,regi,entySE) + p32_seh2elh2DemLaIter(t,regi,entySE));
 
 ***CG:interest rate (Marian's formula) (should move this to core/postsolve at some point)
 p32_r4DT(ttot,regi)$(tDT32s2(ttot))

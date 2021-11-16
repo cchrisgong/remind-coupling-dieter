@@ -152,7 +152,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 ***---------------------------------------------------------------------------
 q32_shSeElDem(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi))..
-    v32_shSeElDem(t,regi,te) / 100 * vm_usableSeDisp(t,regi,"seel")
+    v32_shSeElDem(t,regi,te) / 100 * v32_usableSeDisp(t,regi,"seel")
     =e=
     sum(en2en(enty,enty2,te),
 			vm_demSe(t,regi,enty,enty2,te)$(sameas(enty, "seel")))
@@ -184,7 +184,7 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
 	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
 	* vm_usableSeTe(t,regi,"seel",teVRE) )
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0) OR (t.val eq 2015)) ) OR regNoDTCoup(regi))
+	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0) OR (cm_DTcoup_eq eq 1 AND t.val eq 2015)) ) OR regNoDTCoup(regi))
 	+ (p32_DIETERCurtRatio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) )
       * ( 1 - (p32_DIETER_shSeEl(t,regi,teVRE) / 100 - v32_shSeEl(t,regi,teVRE) / 100) )   !!! this is important to keep for stability
 	* 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 1) AND tDT32(t))
