@@ -50,15 +50,12 @@ $ENDIF.elh2_coup
 $IFTHEN.softcap %cm_softcap% == "on"
     + v21_taxrevCap(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
 $ENDIF.softcap
-* + v21_prodse_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
-    + v21_prodse_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq eq 3))
+    + v21_prodse_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
+*    + v21_prodse_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq eq 3))
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
     + v21_greenh2dem_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
 $ENDIF.elh2_coup
 $ENDIF.DTcoup
-$IFTHEN.DTcoup_off %cm_DTcoup% == "off"
-    + v21_taxrevFlex(t,regi)$(cm_flex_tax eq 1)
-$ENDIF.DTcoup_off
     + v21_taxrevBioImport(t,regi)
 $ifthen.cm_implicitFE not "%cm_implicitFE%" == "off"
     + vm_taxrevimplFETax(t,regi)
