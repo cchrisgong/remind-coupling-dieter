@@ -140,17 +140,22 @@ p32_r4DT(ttot,regi)$((ttot.val gt 2100) AND regDTCoup(regi)) = 0.05;
 p32_fuelprice_curriter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps) AND (abs(qm_budget.m(t,regi)) gt sm_eps)) =
             q_balPe.m(t,regi,entyPe) / qm_budget.m(t,regi);
 
+p32_fuelprice_avgiter(t,regi,entyPe) = p32_fuelprice_curriter(t,regi,entyPe);
+
 *total coupled part of the seel demand/production to be passed to dieter
 p32_seelUsableProd(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) =
         sum( pe2se(enty,entySE,te), vm_prodSe.l(t,regi,enty,entySE,te) )
         + sum(se2se(enty,entySE,te), vm_prodSe.l(t,regi,enty,entySE,te) )
         - sum(teVRE, v32_storloss.l(t,regi,teVRE) )
 ;
+p32_seelUsableProdAvg(t,regi,entySE) = p32_seelUsableProd(t,regi,entySE);
 
 p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
+p32_seh2elh2DemAvg(t,regi,entySE) = p32_seh2elh2Dem(t,regi,entySE);
 
 *** dumping REMIND input for DIETER iteration
-execute_unload "RMdata_4DT_input.gdx", vm_cap, sm32_iter, p32_r4DT, p32_seelUsableProd, p32_seh2elh2Dem, p32_fuelprice_curriter,
+execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,
+p32_seelUsableProdAvg, p32_seh2elh2DemAvg, p32_fuelprice_avgiter,
 f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
 pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, vm_capFac, pm_dataren, vm_capDistr;
 
