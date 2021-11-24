@@ -75,6 +75,9 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
        vm_capFac.fx(t,regi,teFlex)$((t.val ge 2010) AND regDTCoup(regi)) = 0.5;
        v32_flexPriceShare.fx(t,regi,te)$(regDTCoup(regi) AND teFlexTax(te) AND NOT(teFlex(te))) = 1;
     );
+    if (cm_DTcoup_eq ne 0,
+       v32_flexPriceShare.fx(t,regi,te)$(regDTCoup(regi) AND teFlexTax(te) AND NOT(teFlex(te))) = 1;
+    );
 $ENDIF.elh2_coup
 $ENDIF.DTcoup
 
@@ -123,18 +126,18 @@ v32_shStor.up(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi)) = 100;
 v32_shStor.lo(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi)) = 0;
 
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-v32_shSeElDem.up(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = 100;
-v32_shSeElDem.lo(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = 0;
+v32_shSeElDem.up(t,regi,teFlexTax)$(tDT32(t) AND regDTCoup(regi)) = 100;
+v32_shSeElDem.lo(t,regi,teFlexTax)$(tDT32(t) AND regDTCoup(regi)) = 0;
 $ENDIF.elh2_coup
 
 v32_shSeEl.up(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 100;
 v32_shSeEl.lo(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 0;
 
 *this turns off storage for coupled region, no need to put any additional switches on the storage equations
-v32_shStor.fx(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq eq 1)) = 0;
+v32_shStor.fx(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
 
 *** Fix capacity for seh2 -> seel for coupled region for now (no H2 as grid storage)
-vm_cap.fx(t,regi,"h2turbVRE","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq eq 1)) = 0;
+vm_cap.fx(t,regi,"h2turbVRE","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
 
 *fixing some less used technologies (at least for Germany) to 0 to avoid distortions
 * vm_cap.fx(t,regi,"csp",rlf)$(regDTCoup(regi) AND cm_DTcoup_eq eq 1 AND (t.val > 2020))  = 0;

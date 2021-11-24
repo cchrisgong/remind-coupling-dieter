@@ -184,9 +184,9 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
 	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
 	* vm_usableSeTe(t,regi,"seel",teVRE) )
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0) OR (cm_DTcoup_eq eq 1 AND t.val eq 2015)) ) OR regNoDTCoup(regi))
+	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))
 	+ (p32_DIETERCurtRatio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) )
-      * ( 1 - (p32_DIETER_shSeEl(t,regi,teVRE) / 100 - v32_shSeEl(t,regi,teVRE) / 100) )   !!! this is important to keep for stability
+      * ( 1 + (v32_shSeElDisp(t,regi,teVRE) / 100 - p32_DIETER_shSeEl(t,regi,teVRE) / 100 ) )   !!! this is important to keep for stability
 	* 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 1) AND tDT32(t))
 *	+ 0 * 1$(regDTCoup(regi)) !! turn off curtailment for coupled region
 $ENDIF.DTcoup
@@ -305,14 +305,14 @@ q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
 	vm_flexAdj(t,regi,te)
 	=e=
 *	without prefactor
-* (p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MP(t,regi,te)$( regDTCoup(regi) ))	/ 1e12 * sm_TWa_2_MWh / 1.2
+* (p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te))	/ 1e12 * sm_TWa_2_MWh / 1.2
 * with prefactor
-	(( p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MP(t,regi,te)$( regDTCoup(regi) )
-	 * ( 1 + ( v32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 ) )
+	(( p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te)
+	 * ( 1 + ( v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
 	)
 	/ 1e12 * sm_TWa_2_MWh / 1.2 )
 	* 1$(cm_DTcoup_eq ne 0)
-*** default markup from IntC
+*** default markup from IntC (see below)
 	+ (1 - v32_flexPriceShare(t,regi,te)) * pm_SEPrice(t,regi,"seel") * 1$(cm_DTcoup_eq eq 0)
 ;
 $ENDIF.elh2_coup
@@ -351,11 +351,11 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 ** CG: if elh2 demand share is high, then capfac should be increased..
 q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) AND (cm_DTcoup_eq ne 0))..
 *q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) AND (cm_DTcoup_eq eq 3))..
-    vm_capFac(t,regi,te) * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te))
+    vm_capFac(t,regi,te) * 1$(regDTCoup(regi))
     =e=
 	  pm_cf(t,regi,te)
  * ( 1 - 0.7 * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
-	  * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te))
+	  * 1$(regDTCoup(regi))
 ;
 
 $ENDIF.elh2_coup
@@ -378,7 +378,7 @@ $ENDIF.elh2_coup
 *** v32_flexPriceShareMin = p32_PriceDurSlope * ((CF-0.5)^4-0.5^4) / (4*CF) + 1.
 *** This is the new average electricity price a technology sees if it runs on (a possibly lower than one) capacity factor CF
 *** and deliberately uses hours of low-cost electricity.
- q32_flexPriceShareMin(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND teFlex(te))..
+ q32_flexPriceShareMin(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_DTcoup_eq eq 0))..  !! teFlex only contains elh2 in default intC
   v32_flexPriceShareMin(t,regi,te) * 4 * vm_capFac(t,regi,te)
   =e=
   p32_PriceDurSlope(regi,te) * (power(vm_capFac(t,regi,te) - 0.5,4) - 0.5**4) +
@@ -388,7 +388,7 @@ $ENDIF.elh2_coup
 *** Calculates the electricity price of flexible technologies:
 *** The effective flexible price linearly decreases with VRE share
 *** from 1 (at 0% VRE share) to v32_flexPriceShareMin (at 100% VRE).
-q32_flexPriceShare(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND teFlex(te))..
+q32_flexPriceShare(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_DTcoup_eq eq 0))..
   v32_flexPriceShare(t,regi,te)
   =e=
   1 - (1-v32_flexPriceShareMin(t,regi,te)) * sum(teVRE, v32_shSeEl(t,regi,teVRE))/100

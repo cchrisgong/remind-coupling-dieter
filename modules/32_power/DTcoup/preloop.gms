@@ -15,6 +15,10 @@ Execute_Loadpoint 'input' q32_balSe.m = q32_balSe.m;
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 ***  switch on second coupling switch when coupling actually begins
 cm_DTcoup_eq = 1;
+
+*** CG: fit a polynom through oscillating fuel price data for biomass, coal and gas
+execute "Rscript fuelPriceCubRegr.R";
+
 *** CG: start a first iteration DIETER
 execute "./DIETER_parallel.sh";
 put "running DIETER iteration", sm32_iter:0:0;
