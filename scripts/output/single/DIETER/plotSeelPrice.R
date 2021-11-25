@@ -60,20 +60,6 @@ custColors <- c("CCGT" = "#999959", "lignite" = "#0c0c0c", "Coal" = "#0c0c0c", "
 swlatex(sw,"\\onecolumn")
 swlatex(sw, paste0("\\section{REMIND secondary electricity price}"))
 
-# swlatex(sw, paste0("\\subsection{Seel price and capacity factor over iterations}"))
-# 
-# p <- ggplot() +
-#   geom_line(data=out.remind.seel, aes(x=iteration, y=seel.price, size="Seel")) + 
-#   scale_size_manual(name="Shadow price", values=1) + 
-#   geom_line(data=out.remind.capfac, aes(x=iter, y=value, colour=tech)) +
-#   scale_colour_manual(name = "Capacity factor", values = color.mapping1) +
-#   scale_y_continuous(name="Seel price [$/MWh]", limits=c(0,250), sec.axis = sec_axis(~./2.5, name = paste0("CF", "(%)"))) +
-#   theme(legend.position = "bottom") +
-#   xlab("Iteration") + 
-#   facet_wrap(~tall, ncol=4)
-# 
-# swfigure(sw,print,p,sw_option="width=20, height=12")
-
 swlatex(sw, paste0("\\subsection{Secondary electricity (seel) price }"))
 
 p1<-ggplot() +
@@ -88,13 +74,13 @@ swfigure(sw,print,p1,sw_option="width=20, height=12")
 swlatex(sw,"\\onecolumn")
 swlatex(sw, paste0("\\subsection{Secondary electricity (seel) price + total demand }"))
 
-secAxisScale = 0.4
+secAxisScale1 = 0.4
 
 p5<-ggplot() +
   geom_line(data = out.pm.SEPrice, aes(x = iteration, y = value, color = model), size = 1.2, alpha = 0.5) +
-  geom_line(data = out.p32.seelUsableDem, aes(x = iteration, y = value *secAxisScale , color =legend), size = 1.2, alpha = 0.5) +
-  theme(axis.text=element_text(), axis.title=element_text()) +
-  scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0("total demand ", "(TWh)")))+
+  geom_line(data = out.p32.seelUsableDem, aes(x = iteration, y = as.integer(value) * secAxisScale1 , color =legend), size = 1.2, alpha = 0.5) +
+ # theme(axis.text=element_text(), axis.title=element_text()) +
+  scale_y_continuous(sec.axis = sec_axis(~./secAxisScale1, name = paste0("total demand ", "(TWh)")))+
   xlab("iteration") + ylab(paste0("REMIND secondary electricity price ($/MWh)"))  +
   coord_cartesian(ylim = c(-20,500))+
   facet_wrap(~period, nrow = 3)
