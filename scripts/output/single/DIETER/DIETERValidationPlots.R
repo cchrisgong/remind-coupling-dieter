@@ -104,7 +104,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
   FLEX_tech = c(TECHkeylst_solar, TECHkeylst_nonPeakGas,TECHkeylst_peakGas,TECHkeylst_coal,TECHkeylst_wind,TECHkeylst_hydro,TECHkeylst_nuclear,TECHkeylst_biomass)
   FLEX_tech2 = c(TECHkeylst_sectorCoup)
   
-  FLEX_tech_names = c("Coal",
+  FLEX_tech_names = c("Coal (Lig + HC)",
                       "Nuclear",
                       "OCGT",
                       "CCGT",
@@ -113,13 +113,14 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
                       "Wind",
                       "Solar",
                       "Electrolyzers",
-                      "Electricity (stationary)"
+                      "Electricity"
   )
   sm_TWa_2_MWh <- 8.76E9
 
   # Directories -------------------------------------------------------------
 
   report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_", str_sub(outputdir, start=8), ".pdf"))
+  #report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_",".pdf"))
  
   remind.files <- list.files(outputdir, pattern = "fulldata_[0-9]+\\.gdx") %>%
   str_sort(numeric = TRUE)
@@ -196,11 +197,11 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
 
   # Added capacities --------------------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotAddedCapacities.R"), local=TRUE)
+  #source(file.path(dieter.scripts.folder, "plotAddedCapacities.R"), local=TRUE)
 
   # LCOEs -------------------------------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
+  #source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
 
   # Price: Secondary electricity --------------------------------------------
 
@@ -212,19 +213,19 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
 
   # Price: Peak demand ------------------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotPeakDemandPrice.R"), local=TRUE)
+  #source(file.path(dieter.scripts.folder, "plotPeakDemandPrice.R"), local=TRUE)
 
   # (Residual) load duration curves -----------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotRLDCs.R"), local=TRUE) # Attention: computationally heavy on standard PC
+ # source(file.path(dieter.scripts.folder, "plotRLDCs.R"), local=TRUE) # Attention: computationally heavy on standard PC
 
   # Price duration curves ---------------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotPriceDurationCurve.R"), local=TRUE)
+  #source(file.path(dieter.scripts.folder, "plotPriceDurationCurve.R"), local=TRUE)
 
   # (Inverse) screening curves ----------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotInverseScreeningCurve.R"), local=TRUE)
+  #source(file.path(dieter.scripts.folder, "plotInverseScreeningCurve.R"), local=TRUE)
 
   # Markups -----------------------------------------------------------------
 
