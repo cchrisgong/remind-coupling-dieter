@@ -353,7 +353,7 @@ for(te in FLEX_tech_names){
   p10<-ggplot() +
     geom_line(data = out.markup.data2%>% filter(tech == te), aes(x = iter, y = markup, color = model), size = 1.2, alpha = 0.5) +
     geom_line(data = out.marketValue.data%>% filter(tech == te), aes(x = iter, y = marketvalue, color = model), size = 1.2, alpha = 0.5) +
-    geom_line(data = out.pe_price, aes(x = iter, y = value, color = variable), size = 1.2, alpha = 0.5) +
+    geom_line(data = out.pm.SEPrice, aes(x = iteration, y = value, color = model), size = 1.2, alpha = 0.5) +
     geom_line(data = dieter.data.marketValue%>% filter(TECH == te), aes(x = iter, y = VALUE, color = model), size = 1.2, alpha = 0.5) +
     geom_line(data = dieter.data.seelprice, aes(x = iter, y = VALUE, color = model), size = 1.2, alpha = 0.5) +
     theme(axis.text = element_text(size = 20), axis.title = element_text(size = 20, face = "bold")) +
