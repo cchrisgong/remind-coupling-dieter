@@ -10,12 +10,15 @@
 *** read marginal of seel balance equation
 Execute_Loadpoint 'input' q32_balSe.m = q32_balSe.m;
 
-Display "vm_cap for DIETER preloop", vm_cap.l;
-
-
+*** CG: begin DIETER coupling before REMIND starts, based on input.gdx (this might
+*** be revised later if coupling starts in the middle of the REMIND nash run)
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 ***  switch on second coupling switch when coupling actually begins
 cm_DTcoup_eq = 1;
+
+*** CG: fit a polynom through oscillating fuel price data for biomass, coal and gas
+execute "Rscript fuelPriceCubRegr.R";
+
 *** CG: start a first iteration DIETER
 execute "./DIETER_parallel.sh";
 put "running DIETER iteration", sm32_iter:0:0;
@@ -45,6 +48,8 @@ if ( (c_keep_iteration_gdxes eq 1) ,
 
 );
 logfile.nr = 2;
+
+v32_shStor.l(t,regi,te) = 0;
 
 $ENDIF.DTcoup
 *** EOF ./modules/32_power/DTcoup/preloop.gms

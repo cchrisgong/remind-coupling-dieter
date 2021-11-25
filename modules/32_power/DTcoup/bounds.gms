@@ -31,7 +31,7 @@ if ((cm_DTcoup_eq eq 1),
 			loop(t$(tDT32(t)),
 				loop(te$(CFcoupSuppte32(te)),
 				vm_capFac.lo(t,regi,te)=0;
-				vm_capFac.up(t,regi,te)=INF;  !! should not be capped as one, as some vm_capFac are larger than 1 due to scaling
+				vm_capFac.up(t,regi,te)=INF;  !! must not be capped by one, as some vm_capFac are larger than 1 due to scaling
 				);
 			);
 		);
@@ -52,55 +52,33 @@ $ENDIF.elh2_coup
 
 $ENDIF.DTcoup
 
-
-$IFTHEN.DTcoup %cm_DTcoup% == "on"
-
+*$IFTHEN.DTcoup %cm_DTcoup% == "on"
 *v32_capPriceExponent.up(t,regi)$(regDTCoup(regi)) = 20;
-
 * vm_capFac.fx(t,regi,te) = pm_cf_linear(t,regi,te);
-$ENDIF.DTcoup
+*$ENDIF.DTcoup
 
-$IFTHEN.DTcoup_off %cm_DTcoup% == "off"
-*** FS: if flexibility tax on, let capacity factor be endogenuously determined between 0.1 and 1
-*** for technologies that get flexibility tax/subsity (teFlexTax)
-if ( cm_flex_tax eq 1,
-  if ( cm_FlexTaxFeedback eq 1,
-*** if flexibility tax feedback is on, let model choose capacity factor of flexible technologies freely
-	  vm_capFac.lo(t,regi,teFlexTax)$(t.val ge 2010) = 0.1;
-    vm_capFac.up(t,regi,teFlexTax)$(t.val ge 2010) = pm_cf(t,regi,teFlexTax);
-  else 
-*** if flexibility tax feedback is off, only flexibliity tax benefit for flexible technologies and 0.5 capacity factor
-    vm_capFac.fx(t,regi,teFlex)$(t.val ge 2010) = 0.5;
-*** electricity price of inflexible technologies the same w/o feedback
-    v32_flexPriceShare.fx(t,regi,te)$(teFlexTax(te) AND NOT(teFlex(te))) = 1;
-  );
-);
-
-$ENDIF.DTcoup_off
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** FS: if flexibility tax on, let capacity factor be endogenuously determined between 0.1 and 1
 *** for technologies that get flexibility tax/subsity (teFlexTax)
 *** in case cm_FlexTaxFeedback ne 1, but cm_flex_tax is on and DIETER coupling is on ,then set the second two
 *** statements only for non-coupled regions
-if ( cm_flex_tax eq 1,
-  if ( cm_FlexTaxFeedback eq 1,
 *** if flexibility tax feedback is on, let model choose capacity factor of flexible technologies freely
-	  vm_capFac.lo(t,regi,teFlexTax)$((t.val ge 2010) AND regNoDTCoup(regi)) = 0.1;
-    vm_capFac.up(t,regi,teFlexTax)$((t.val ge 2010) AND regNoDTCoup(regi)) = pm_cf(t,regi,teFlexTax);
-  else
-*** if flexibility tax feedback is off, only flexibliity tax benefit for flexible technologies and 0.5 capacity factor
-    vm_capFac.fx(t,regi,teFlex)$(t.val ge 2010 AND regNoDTCoup(regi)) = 0.5;
+$IFTHEN.elh2_coup_off %cm_elh2_coup% == "off"
+    vm_capFac.fx(t,regi,teFlex)$((t.val ge 2010) AND regDTCoup(regi)) = 0.5;
 *** electricity price of inflexible technologies the same w/o feedback
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-    v32_flexPriceShare.fx(t,regi,te)$(teFlexTax(te) AND NOT(teFlex(te)) AND regNoDTCoup(regi)) = 1;
-$ENDIF.elh2_coup
-$IFTHEN.elh2_coup %cm_elh2_coup% == "off"
-    v32_flexPriceShare.fx(t,regi,te)$(teFlexTax(te)) = 1;
-$ENDIF.elh2_coup
-  );
-);
+    v32_flexPriceShare.fx(t,regi,te)$(regDTCoup(regi) AND (teFlexTax(te) AND NOT(teFlex(te)))) = 1;
+$ENDIF.elh2_coup_off
 
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+    if (cm_DTcoup_eq eq 0,
+       vm_capFac.fx(t,regi,teFlex)$((t.val ge 2010) AND regDTCoup(regi)) = 0.5;
+       v32_flexPriceShare.fx(t,regi,te)$(regDTCoup(regi) AND teFlexTax(te) AND NOT(teFlex(te))) = 1;
+    );
+    if (cm_DTcoup_eq ne 0,
+       v32_flexPriceShare.fx(t,regi,te)$(regDTCoup(regi) AND teFlexTax(te) AND NOT(teFlex(te))) = 1;
+    );
+$ENDIF.elh2_coup
 $ENDIF.DTcoup
 
 
@@ -135,23 +113,31 @@ vm_cap.fx(t,regi,"elh2VRE",rlf) = 0;
 *** END OF IntC bounds
 *** =====================================
 
+*** all flexible subsidies are set to 0 for non-coupled regions in DTcoup realization (regardless of whether cm_DTcoup is on, or elh2_coup is on)
+*** This is because in calibration cm_flex_tax is turned off, and only in policy runs they are turned on
+*** so one can turn off electrolysers subsidies for non coupled regions, without distortions
+vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regNoDTCoup(regi)) = 0;
+vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi) AND not tDT32(t)) = 0;
+
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
 ***CG: bound shares between 0 and 100
-v32_shStor.up(t,regi,te) = 100;
-v32_shStor.lo(t,regi,te) = 0;
+v32_shStor.up(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi)) = 100;
+v32_shStor.lo(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi)) = 0;
+
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+v32_shSeElDem.up(t,regi,teFlexTax)$(tDT32(t) AND regDTCoup(regi)) = 100;
+v32_shSeElDem.lo(t,regi,teFlexTax)$(tDT32(t) AND regDTCoup(regi)) = 0;
+$ENDIF.elh2_coup
+
+v32_shSeEl.up(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 100;
+v32_shSeEl.lo(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 0;
 
 *this turns off storage for coupled region, no need to put any additional switches on the storage equations
-v32_shStor.fx(t,regi,te)$(regDTCoup(regi) AND cm_DTcoup_eq eq 1) = 0;
-
-v32_shSeElDem.up(t,regi,teFlexTax) = 100;
-v32_shSeElDem.lo(t,regi,teFlexTax) = 0;
-
-v32_shSeEl.up(t,regi,te) = 100;
-v32_shSeEl.lo(t,regi,te) = 0;
+v32_shStor.fx(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
 
 *** Fix capacity for seh2 -> seel for coupled region for now (no H2 as grid storage)
-vm_cap.fx(t,regi,"h2turbVRE","1")$(regDTCoup(regi) AND cm_DTcoup_eq eq 1) = 0;
+vm_cap.fx(t,regi,"h2turbVRE","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
 
 *fixing some less used technologies (at least for Germany) to 0 to avoid distortions
 * vm_cap.fx(t,regi,"csp",rlf)$(regDTCoup(regi) AND cm_DTcoup_eq eq 1 AND (t.val > 2020))  = 0;

@@ -46,10 +46,30 @@ q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND teDTCoupSupp(te))..
  	- sum(teVRE$sameas(te,teVRE), v32_storloss(t,regi,teVRE) )
 ;
 
+*** CG: "Disp" here denotes the part which is "dispatched" by DIETER (i.e. used for DIETER coupling)
+*** hence excluding co-production terms to avoid distortion
+*** (current coupled technologies in teDTCoupSupp do not have co-production: so perhaps we do not need to
+*** separate the ..Disp vs. the non-Disp variables after all)
+q32_usableSeDisp(t,regi,entySe)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySe,"seel"))..
+	v32_usableSeDisp(t,regi,entySe)
+	=e=
+	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
+	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
+	- sum(teVRE, v32_storloss(t,regi,teVRE) )
+;
+
+q32_usableSeTeDisp(t,regi,entySe,te)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySe,"seel") AND teDTCoupSupp(te))..
+ 	v32_usableSeTeDisp(t,regi,entySe,te)
+ 	=e=
+ 	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
+	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
+ 	- sum(teVRE$sameas(te,teVRE), v32_storloss(t,regi,teVRE) )
+;
+
 ***---------------------------------------------------------------------------
 *** Definition of capacity constraints for storage:
 ***---------------------------------------------------------------------------
-q32_limitCapTeStor(t,regi,teStor)$( t.val ge 2015 AND ((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))) ..
+q32_limitCapTeStor(t,regi,teStor)$( (t.val ge 2015) AND ((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))) ..
     ( 0.5$( cm_VRE_supply_assumptions eq 1 )
     + 1$( cm_VRE_supply_assumptions ne 1 )
     )
@@ -85,7 +105,6 @@ q32_h2turbVREcapfromTestor(t,regi)..
   sum(te$testor(te), p32_storageCap(te,"h2turbVREcapratio") * vm_cap(t,regi,te,"1") )
 ;
 
-
 ***---------------------------------------------------------------------------
 *** Definition of capacity constraints for CHP technologies:
 ***---------------------------------------------------------------------------
@@ -120,14 +139,20 @@ q32_shSeEl(t,regi,te)$(teDTCoupSupp(te))..
     vm_usableSeTe(t,regi,"seel",te)
 ;
 
+q32_shSeElDisp(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))..
+    v32_shSeElDisp(t,regi,te) / 100 * v32_usableSeDisp(t,regi,"seel")
+    =e=
+    v32_usableSeTeDisp(t,regi,"seel",te)
+;
+
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-*** CG: Calculation of share of electricity demand, e.g. of green h2 using elh2 (note: v32_shSeElDem right now don't add up to 100
-***since vm_usableSe also includes energy for fuel extraction, etc... can be improved later)
+*** CG: Calculation of share of electricity demand, e.g. of green h2 using elh2 (note: RHS of demSe contains also deamand met by co-production, which
+*** is not coupled to DIETER, ways to improve? v32_shSeElDem probably add up to more than 100%)
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 ***---------------------------------------------------------------------------
 q32_shSeElDem(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi))..
-    v32_shSeElDem(t,regi,te) / 100 * vm_usableSe(t,regi,"seel")
+    v32_shSeElDem(t,regi,te) / 100 * v32_usableSeDisp(t,regi,"seel")
     =e=
     sum(en2en(enty,enty2,te),
 			vm_demSe(t,regi,enty,enty2,te)$(sameas(enty, "seel")))
@@ -159,10 +184,10 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
 	* sum(VRE2teStor(teVRE,teStor), (1 - pm_eta_conv(t,regi,teStor) ) /  pm_eta_conv(t,regi,teStor) )
 	* vm_usableSeTe(t,regi,"seel",teVRE) )
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-	* 1$((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))
+	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))
 	+ (p32_DIETERCurtRatio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) )
-      * ( 1 - (p32_DIETER_shSeEl(t,regi,teVRE) / 100 - v32_shSeEl(t,regi,teVRE) / 100) )   !!! this is important to keep for stability
-	* 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 1))
+      * ( 1 + (v32_shSeElDisp(t,regi,teVRE) / 100 - p32_DIETER_shSeEl(t,regi,teVRE) / 100 ) )   !!! this is important to keep for stability
+	* 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 1) AND tDT32(t))
 *	+ 0 * 1$(regDTCoup(regi)) !! turn off curtailment for coupled region
 $ENDIF.DTcoup
 ;
@@ -173,10 +198,12 @@ $IFTHEN.DTcoup_off %cm_DTcoup% == "off"
 ***---------------------------------------------------------------------------
 *** Operating reserve constraint
 ***---------------------------------------------------------------------------
-q32_operatingReserve(t,regi)$(t.val ge 2010)..
+*** CG: only applying to non-coupled region for now to avoid distortion
+q32_operatingReserve(t,regi)$((t.val ge 2010) AND regNoDTCoup(regi))..
 ***1 is the chosen load coefficient
-	vm_usableSe(t,regi,"seel")
+	vm_usableSe(t,regi,"seel")$( regNoDTCoup(regi) )
 	=l=
+	(
 ***Variable renewable coefficients could be expected to be negative because they are variable.
 ***However they are modeled positive because storage conditions make variable renewables controllable.
 	sum(pe2se(enty,"seel",te)$(NOT teVRE(te)),
@@ -189,6 +216,7 @@ q32_operatingReserve(t,regi)$(t.val ge 2010)..
 	sum(pe2se(enty,"seel",teVRE),
 		sum(VRE2teStor(teVRE,teStor),
 			pm_data(regi,"flexibility",teStor) * (vm_prodSe(t,regi,enty,"seel",teVRE)-v32_storloss(t,regi,teVRE)) ) )
+	) * 1$( regNoDTCoup(regi) )
 ;
 $ENDIF.DTcoup_off
 
@@ -202,20 +230,16 @@ q32_limitSolarWind(t,regi)$( (cm_solwindenergyscen = 2) OR (cm_solwindenergyscen
 ;
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-**** with DIETER coupling
 ***---------------------------------------------------------------------------
 *** DIETER coupling equations
 ***---------------------------------------------------------------------------
 $IFTHEN.hardcap %cm_softcap% == "off"
-*** hard capacity constraint to peak residual load demand
-
+*** hard capacity constraint to peak residual load demand (excluding flexible load such as electrolysers)
 q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=e=
-* use in-iteration variable
-*	p32_peakDemand_relFac(t,regi) * (p32_seelUsableDem(t,regi,"seel") - p32_seh2elh2Dem(t,regi,"seh2")) * 8760
-* p32_peakDemand_relFac(t,regi) * (v32_seelUsableDem(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2")) * 8760
-  p32_peakDemand_relFac(t,regi) * (vm_demSe(t,regi,"seel","feels","tdels") + vm_demSe(t,regi,"seel","feelt","tdelt")) * 8760
+ p32_peakDemand_relFac(t,regi) * (v32_usableSeDisp(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2")) * 8760
+* p32_peakDemand_relFac(t,regi) * (vm_demSe(t,regi,"seel","feels","tdels") + vm_demSe(t,regi,"seel","feelt","tdelt")) * 8760
 	;
 
 $ENDIF.hardcap
@@ -242,7 +266,6 @@ q32_capEndStart(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ).
   p32_peakDemand_relFac(t,regi) * (vm_demSe(t,regi,"seel","feels","tdels") + vm_demSe(t,regi,"seel","feelt","tdelt")) * 8760 *1.1
 ;
 
-
 q32_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) )..
   vm_priceCap(t,regi)
   =e=
@@ -264,12 +287,12 @@ $ENDIF.softcap
 ***----------------------------------------------------------------------------
 *q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq eq 3))..
 q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq ne 0))..
-	vm_Mrkup(t,regi,te)$( regDTCoup(regi) )
+	vm_Mrkup(t,regi,te)
 	=e=
 * with prefactor
- (p32_DIETER_MV(t,regi,te)$( regDTCoup(regi) )
-  * (1 - (v32_shSeEl(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_DIETER_shSeEl(t,regi,te)$( regDTCoup(regi) ) / 100 )  ) - p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) )
-	 / 1e12 * sm_TWa_2_MWh / 1.2
+  ( p32_DIETER_MV(t,regi,te) * (1 - (v32_shSeElDisp(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 )  )
+	- p32_DIETER_elecprice(t,regi) )
+	 / 1e12 * sm_TWa_2_MWh / 1.2 * 1$(regDTCoup(regi))
 * no prefactor
 * ( (p32_DIETER_MV(t,regi,te)  - p32_DIETER_elecprice(t,regi) ) / 1e12 * sm_TWa_2_MWh / 1.2 ) * 1$( regDTCoup(regi) )
 ;
@@ -277,23 +300,39 @@ q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_D
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 *** CG: giving flexible demand side technology, e.g. electrolyzer a subsidy, non DIETER coupled version is q32_flexAdj below
 *** on prefactor: beacuse if v32_shSeElDem is low for elh2 compared to last iter p32_shSeElDem, to balance out oscillation for elh2
-*** we want flexadj to be high, so f has to be <1. if v32_shSeElDem - p32_shSeElDem is negative, then f is larger
-*** than one. so the sign has to be changed
-
-*q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te) AND (cm_DTcoup_eq eq 3))..
-q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te) AND (cm_DTcoup_eq ne 0))..
-	vm_flexAdj(t,regi,te)$( regDTCoup(regi) )
+*** we want flexadj to be high (so MarketPrice elh2 sees has to be low), so f has to be <1.
+q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
+	vm_flexAdj(t,regi,te)
 	=e=
-* no prefactor: this seems the more reasonable option: since more h2 (flexible) demand allow more VRE, which lower overall seel price,
-* so it is not like VRE with decreasing market value with increasing share
-* (p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MP(t,regi,te)$( regDTCoup(regi) ))	/ 1e12 * sm_TWa_2_MWh / 1.2
-* with prefactor (absolute markup)
-( p32_DIETER_elecprice(t,regi)$( regDTCoup(regi) ) - p32_DIETER_MP(t,regi,te)$( regDTCoup(regi) )
- * ( 1 + ( v32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 - p32_shSeElDem(t,regi,te)$( regDTCoup(regi) ) / 100 ) )
-)
-/ 1e12 * sm_TWa_2_MWh / 1.2
+*	without prefactor
+* (p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te))	/ 1e12 * sm_TWa_2_MWh / 1.2
+* with prefactor
+	(( p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te)
+	 * ( 1 + ( v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
+	)
+	/ 1e12 * sm_TWa_2_MWh / 1.2 )
+	* 1$(cm_DTcoup_eq ne 0)
+*** default markup from IntC (see below)
+	+ (1 - v32_flexPriceShare(t,regi,te)) * pm_SEPrice(t,regi,"seel") * 1$(cm_DTcoup_eq eq 0)
 ;
 $ENDIF.elh2_coup
+
+$IFTHEN.elh2_coup_off %cm_elh2_coup% == "off"
+*** CG: giving flexible demand side technology, e.g. electrolyzer a subsidy, non DIETER coupled version is q32_flexAdj below
+q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
+	vm_flexAdj(t,regi,te)
+	=e=
+*** This calculates the flexibility benefit or cost per unit electricity input
+*** of flexibile or inflexibly technology.
+*** In the tax module, vm_flexAdj is then deduced from the electricity price via the flexibility tax formulation.
+*** Below, pm_SEPrice(t,regi,"seel") is the (average) electricity price from the last iteration.
+*** Flexible technologies benefit (v32_flexPriceShare < 1),
+*** while inflexible technologies are penalized (v32_flexPriceShare > 1).
+*** Flexibility tax is switched only if cm_flex_tax = 1 and is active from 2025 onwards.
+  (1 - v32_flexPriceShare(t,regi,te)) * pm_SEPrice(t,regi,"seel") * 1$(cm_flex_tax eq 1)
+;
+$ENDIF.elh2_coup_off
+
 ***---------------------------------------------------------------------------
 *** Capacity factor for dispatchable power plants
 ***---------------------------------------------------------------------------
@@ -304,7 +343,7 @@ q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te) AND 
     vm_capFac(t,regi,te) * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te))
     =e=
 	  pm_cf(t,regi,te)
- * ( 1 + 0.5 * (v32_shSeEl(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 ) )
+    * ( 1 + 0.5 * (v32_shSeElDisp(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 ) )
 	  * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te))
 ;
 
@@ -312,19 +351,15 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 ** CG: if elh2 demand share is high, then capfac should be increased..
 q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) AND (cm_DTcoup_eq ne 0))..
 *q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) AND (cm_DTcoup_eq eq 3))..
-    vm_capFac(t,regi,te) * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te))
+    vm_capFac(t,regi,te) * 1$(regDTCoup(regi))
     =e=
 	  pm_cf(t,regi,te)
  * ( 1 - 0.7 * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
-	  * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te))
+	  * 1$(regDTCoup(regi))
 ;
 
 $ENDIF.elh2_coup
 
-$ENDIF.DTcoup
-
-
-$IFTHEN.DTcoup_off %cm_DTcoup% == "off"
 ***----------------------------------------------------------------------------
 *** FS: calculate flexibility adjustment used in flexibility tax for technologies with electricity input
 ***----------------------------------------------------------------------------
@@ -343,7 +378,7 @@ $IFTHEN.DTcoup_off %cm_DTcoup% == "off"
 *** v32_flexPriceShareMin = p32_PriceDurSlope * ((CF-0.5)^4-0.5^4) / (4*CF) + 1.
 *** This is the new average electricity price a technology sees if it runs on (a possibly lower than one) capacity factor CF
 *** and deliberately uses hours of low-cost electricity.
- q32_flexPriceShareMin(t,regi,te)$(teFlex(te))..
+ q32_flexPriceShareMin(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_DTcoup_eq eq 0))..  !! teFlex only contains elh2 in default intC
   v32_flexPriceShareMin(t,regi,te) * 4 * vm_capFac(t,regi,te)
   =e=
   p32_PriceDurSlope(regi,te) * (power(vm_capFac(t,regi,te) - 0.5,4) - 0.5**4) +
@@ -353,38 +388,12 @@ $IFTHEN.DTcoup_off %cm_DTcoup% == "off"
 *** Calculates the electricity price of flexible technologies:
 *** The effective flexible price linearly decreases with VRE share
 *** from 1 (at 0% VRE share) to v32_flexPriceShareMin (at 100% VRE).
-q32_flexPriceShare(t,regi,te)$(teFlex(te))..
+q32_flexPriceShare(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND teFlex(te) AND (cm_DTcoup_eq eq 0))..
   v32_flexPriceShare(t,regi,te)
   =e=
   1 - (1-v32_flexPriceShareMin(t,regi,te)) * sum(teVRE, v32_shSeEl(t,regi,teVRE))/100
 ;
 
-*** This balance ensures that the lower electricity prices of flexible technologies are compensated
-*** by higher electricity prices of inflexible technologies. Inflexible technologies are all technologies
-*** which are part of teFlexTax but not of teFlex. The weighted sum of
-*** flexible/inflexible electricity prices (v32_flexPriceShare) and electricity demand must be one.
-*** Note: this is only on if cm_FlexTaxFeedback = 1. Otherwise, there is no change in electricity prices for inflexible technologies.
-q32_flexPriceBalance(t,regi)$(cm_FlexTaxFeedback eq 1)..
-  sum(en2en(enty,enty2,te)$(teFlexTax(te)),
-  	vm_demSe(t,regi,enty,enty2,te))
-  =e=
-  sum(en2en(enty,enty2,te)$(teFlexTax(te)),
-  	vm_demSe(t,regi,enty,enty2,te) * v32_flexPriceShare(t,regi,te))
-;
+$ENDIF.DTcoup
 
-
-*** This calculates the flexibility benefit or cost per unit electricity input
-*** of flexibile or inflexibly technology.
-*** In the tax module, vm_flexAdj is then deduced from the electricity price via the flexibility tax formulation.
-*** Below, pm_SEPrice(t,regi,"seel") is the (average) electricity price from the last iteration.
-*** Flexible technologies benefit (v32_flexPriceShare < 1),
-*** while inflexible technologies are penalized (v32_flexPriceShare > 1).
-*** Flexibility tax is switched only if cm_flex_tax = 1 and is active from 2025 onwards.
-q32_flexAdj(t,regi,te)$(teFlexTax(te))..
-	vm_flexAdj(t,regi,te)
-	=e=
-	(1-v32_flexPriceShare(t,regi,te)) * pm_SEPrice(t,regi,"seel")$(cm_flex_tax eq 1 AND t.val ge 2025)
-;
-
-$ENDIF.DTcoup_off
 *** EOF ./modules/32_power/DTcoup2/equations.gms
