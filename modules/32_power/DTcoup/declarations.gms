@@ -38,7 +38,8 @@ parameters
     p32_totProd(ttot,all_regi,all_enty)                 "total seel production (both coupled and uncoupled production)"
     p32_seelCurt(ttot,all_regi)                         "total curtailment"
 
-    p32_shSeElDem(ttot,all_regi,all_te)	                          	"share of electricity demand in % [%] in last iter"
+    p32_shSeElDem(ttot,all_regi,all_te)	                "share of electricity demand in % [%] in last iter"
+    p32_realCapfacVRE(ttot,all_regi,all_te)             "post curtailment - real VRE capfac"
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_marketValue(ttot,all_regi,all_te)               "market value seen by REMIND"
