@@ -155,11 +155,11 @@ $include "./modules/21_tax/on/input/pm_taxCO2eqHist.cs4r"
 $offdelim
 /
 ;
-f21_taxCO2eqHist(ttot,regi) = 5;
-f21_taxCO2eqHist(ttot,"DEU") = 25;
+f21_taxCO2eqHist(t,regi)$(t.val ge 2020) = 5;
+f21_taxCO2eqHist(t,"DEU")$(t.val gt 2020) = 25;
 
 ** Fixing European 2020 carbon price to 20$/t CO2 (other regions to zero)
-f21_taxCO2eqHist("2020",regi) = 0;
+*f21_taxCO2eqHist("2020",regi) = 0;
 f21_taxCO2eqHist("2020",regi)$(regi_group("EUR_regi",regi)) =  20;
 
 *** convert from $/tCO2 to T$/GtC
