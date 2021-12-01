@@ -12,7 +12,9 @@
 ** CG: smoothing fuel cost over iterations to pass to DIETER (divided by budget and unit transformed in DIETER)
 
 * calculate post curtailment "real" VRE capfac
-p32_realCapfacVRE(t,regi,teVRE)$(sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)))= v32_storloss.l(t,regi,teVRE) / sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE));
+p32_realCapfacVRE(t,regi,teVRE)$(sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)))
+    = ( sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)) - v32_storloss.l(t,regi,teVRE) )
+    / vm_cap.l(t,regi,teVRE,"1");
 
 *** calculation of SE electricity price (for internal use and reporting purposes), excluding 0 cases
 pm_SEPrice(t,regi,entySE)$(abs(qm_budget.m(t,regi)) gt sm_eps AND sameas(entySE,"seel")) =
