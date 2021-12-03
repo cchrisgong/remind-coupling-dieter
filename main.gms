@@ -81,11 +81,11 @@
 
 *##################### R SECTION START (VERSION INFO) ##########################
 * 
-* Regionscode: 62eff8f7
+* Regionscode: 2b1450bc
 * 
-* Input data revision: 6.254
+* Input data revision: 6.262
 * 
-* Last modification (input data): Wed Oct 20 17:30:02 2021
+* Last modification (input data): Thu Dec  2 18:28:47 2021
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -140,7 +140,7 @@ option profile = 0;
 
 
 ***---------------------    Run name    -----------------------------------------
-$setGlobal c_expname  default
+$setGlobal c_expname  xx_ref_FEmed
 
 ***------------------------------------------------------------------------------
 ***                           MODULES
@@ -183,13 +183,13 @@ $setGlobal power  DTcoup               !! def = IntC
 ***---------------------    33_cdr       ----------------------------------------
 $setGlobal CDR  DAC                   !! def = DAC
 ***---------------------    35_transport    -------------------------------------
-$setGlobal transport  edge_esm         !! def = edge_esm
+$setGlobal transport  complex         !! def = edge_esm
 ***---------------------    36_buildings    -------------------------------------
 $setglobal buildings  simple          !! def = simple
 ***---------------------    37_industry    --------------------------------------
-$setglobal industry  subsectors     !! def = subsectors
+$setglobal industry  fixed_shares     !! def = subsectors
 ***---------------------    39_CCU    --------------------------------------
-$setglobal CCU  on !! def = on
+$setglobal CCU  off !! def = on
 ***---------------------    40_techpol  -----------------------------------------
 $setglobal techpol  none              !! def = none
 ***---------------------    41_emicapregi  --------------------------------------
@@ -199,7 +199,7 @@ $setglobal banking  off               !! def = off
 ***---------------------    45_carbonprice  -------------------------------------
 $setglobal carbonprice  none          !! def = none
 ***---------------------    47_regipol  -------------------------------------
-$setglobal regipol  none              !! def = none
+$setglobal regipol  regiCarbonPrice              !! def = none
 ***---------------------    50_damages    ---------------------------------------
 $setGlobal damages  off               !! def = off
 ***---------------------    51_internalizeDamages    ---------------------------------------
@@ -207,7 +207,7 @@ $setGlobal internalizeDamages  off               !! def = off
 ***---------------------    70_water  -------------------------------------------
 $setglobal water  off                 !! def = off
 ***---------------------    80_optimization    ----------------------------------
-$setGlobal optimization  nash         !! def = nash
+$setGlobal optimization  testOneRegi         !! def = nash
 ***---------------------    81_codePerformance    -------------------------------
 $setGlobal codePerformance  off       !! def = off
 
@@ -355,7 +355,7 @@ cm_deuCDRmax                 "switch to limit maximum annual CDR amount in Germa
 
 cm_iteration_max       = 1;     !! def = 1
 c_solver_try_max       = 2;     !! def = 2
-c_keep_iteration_gdxes = 0;     !! def = 0
+c_keep_iteration_gdxes = 1;     !! def = 0
 cm_nash_autoconverge   = 1;     !! def = 1
 $setglobal cm_MAgPIE_coupling  off     !! def = "off"
 
@@ -418,7 +418,7 @@ cm_rentconvgas      = 50;        !! def 50
 cm_rentdisccoal     = 0.4;       !! def 0.4
 cm_rentdisccoal2    = 0.6;       !! def 0.6
 cm_rentconvcoal     = 50;        !! def 50
-cm_earlyreti_rate   = 0.09;      !! def 0.09
+cm_earlyreti_rate   = 0.15;      !! def 0.09
 
 cm_so2tax_scen        = 1;         !! def =
 c_cint_scen           = 1;         !! def = 1
@@ -440,7 +440,7 @@ cm_expoLinear_yearStart  = 2050;   !! def = 2050
 c_budgetCO2FFI           = 1000;   !! def = 1000
 c_abtrdy                 = 2010;   !! def = 2010
 c_abtcst                 = 1;      !! def = 1
-c_budgetCO2              = 1350;   !! def = 1300
+c_budgetCO2              = 0;   !! def = 1300
 $setGlobal cm_regiExoPrice  off    !! def = off
 $setGlobal cm_regiCO2target  off   !! def = off
 cm_postTargetIncrease    = 2;      !! def = 2
@@ -451,17 +451,17 @@ cm_CO2priceRegConvEndYr  = 2050;   !! def = 2050
 $setGlobal cm_emiMktETS  off       !! def = off
 $setGlobal cm_emiMktETS_type  off  !! def = off
 
-$setGlobal cm_ETS_postTargetIncrease  linear !! def = linear
+$setGlobal cm_ETS_postTargetIncrease  2 !! def = linear
 $setGlobal cm_ETS_post2055Increase  2      !! def = 2
 
 $setGlobal cm_emiMktES  off        !! def = off	
-$setGlobal cm_emiMktES_type  netGHG !! def = netGHG	
+$setGlobal cm_emiMktES_type  off !! def = netGHG	
 
-$setGlobal cm_ESD_postTargetIncrease  8 !! def = 8
-$setGlobal cm_ESD_post2055Increase  2 !! def = 2
+$setGlobal cm_ESD_postTargetIncrease  off !! def = 8
+$setGlobal cm_ESD_post2055Increase  off !! def = 2
 
 $setGlobal cm_emiMktEScoop  off    !! def = off	
-$setGlobal cm_emiMktES2020price  30 !! def = 30
+$setGlobal cm_emiMktES2020price  off !! def = 30
 $setGlobal cm_emiMktES2050	 off   !! def = off	
 $setGlobal cm_NucRegiPol	 off   !! def = off		
 $setGlobal cm_CoalRegiPol	 off   !! def = off		
@@ -493,7 +493,7 @@ $setGlobal cm_INNOPATHS_pushCalib  none !! def = none
 $setGlobal cm_INNOPATHS_reducCostB  none !! def = none
 $setGlobal cm_INNOPATHS_effHP  5 !! def = 5
 
-$setGlobal cm_EDGEtr_scen  Mix  !! def = ConvCase
+$setGlobal cm_EDGEtr_scen  ConvCase  !! def = ConvCase
 
 $setGlobal c_regi_nucscen  all !! def = all
 $setGlobal c_regi_capturescen  all !! def = all
@@ -517,7 +517,7 @@ cm_logitCal_markup_newtech_conv_b = 0.3; !! def 0.3
 cm_build_AdjCostActive = 0; !! def 0 = Adjustment cost deactivated (set to 1 to activate)
 
 *** flex tax switches
-cm_flex_tax = 1; !! def 0
+cm_flex_tax = 0; !! def 0
 cm_PriceDurSlope_elh2 = 20; !! def 10
 cm_FlexTaxFeedback = 0; !! def 0
 
@@ -562,7 +562,7 @@ $setGlobal cm_FEtax_trajectory_rel  off !! def = off
 
 $setGlobal cm_regipol_slope_beforeTarget  off !! def = off
 
-$setGlobal cm_altFeEmiFac  off        !! def = off	
+$setGlobal cm_altFeEmiFac  EUR_regi, NEU_regi        !! def = off	
 
 $setGlobal cm_CESMkup_ind  standard !! def = standard
 $setGlobal cm_CESMkup_build  standard !! def = standard
@@ -576,11 +576,11 @@ cm_deuCDRmax = -1; !! def = -1
 *--------------------flags------------------------------------------------------------
 $setglobal cm_DTcoup  on         !! def = off
 cm_DTcoup_eq = 0;         !! def = 0
-$setglobal cm_softcap  on         !! def = off
+$setglobal cm_softcap  off         !! def = off
 $setglobal cm_elh2_coup  on       !! def = off
 
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
-$setGlobal cm_nash_mode  parallel      !! def = parallel
+$setGlobal cm_nash_mode  debug      !! def = parallel
 $setGLobal cm_debug_preloop  off !! def = off
 $setGlobal c_EARLYRETIRE       on         !! def = on
 $setGlobal cm_OILRETIRE  on        !! def = on
@@ -599,16 +599,16 @@ $setGlobal cm_magicc_temperatureImpulseResponse  off           !! def = off
 
 $setGlobal cm_damage_DiceLike_specification  HowardNonCatastrophic   !! def = HowardNonCatastrophic
 
-$setglobal cm_CES_configuration  indu_subsectors-buil_simple-tran_edge_esm-demTrsp_Mix-POP_pop_SSP2-GDP_gdp_SSP2-En_gdp_SSP2-Kap_debt_limit-Reg_62eff8f7   !! this will be changed by start_run()
+$setglobal cm_CES_configuration  indu_fixed_shares-buil_simple-tran_complex-POP_pop_SSP2-GDP_gdp_SSP2-En_gdp_SSP2-Kap_debt_limit-FE_med-Reg_2b1450bc   !! this will be changed by start_run()
 
 $setglobal c_CES_calibration_new_structure  0    !! def =  0
 $setglobal c_CES_calibration_iterations  10    !! def = 10
 $setglobal c_CES_calibration_iteration          1    !! def =  1
 $setglobal c_CES_calibration_write_prices  0    !! def =  0
 $setglobal cm_CES_calibration_default_prices  0.01    !! def = 0.01
-$setglobal cm_calibration_string  off      !! def = off
+$setglobal cm_calibration_string  FE_med      !! def = off
 
-$setglobal c_testOneRegi_region  EUR       !! def = EUR
+$setglobal c_testOneRegi_region  DEU       !! def = EUR
 
 $setglobal cm_cooling_shares  static    !! def = static
 $setglobal cm_techcosts  REG       !! def = REG
@@ -633,7 +633,7 @@ $setglobal cm_INNOPATHS_adj_coeff_cont  off
 $setglobal cm_INNOPATHS_adj_seed_multiplier  off
 $setglobal cm_INNOPATHS_adj_coeff_multiplier  off
 
-$setglobal cm_INNOPATHS_inco0Factor  off !! def = off
+$setglobal cm_INNOPATHS_inco0Factor  apcardiEfft 0.8, apcardiEffH2t 0.675 !! def = off
 
 $setglobal cm_INNOPATHS_CCS_markup  off !! def = off
 $setglobal cm_INNOPATHS_Industry_CCS_markup  off !! def = off
