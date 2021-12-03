@@ -76,7 +76,6 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
        v32_flexPriceShare.fx(t,regi,te)$(regDTCoup(regi) AND teFlexTax(te) AND NOT(teFlex(te))) = 1;
     );
     if (cm_DTcoup_eq ne 0,
-       vm_capFac.fx(t,regi,teFlex)$(((t.val ge 2010 ) AND NOT tDT32(t)) AND regDTCoup(regi)) = 0.5;
        v32_flexPriceShare.fx(t,regi,te)$(regDTCoup(regi) AND teFlexTax(te) AND NOT(teFlex(te))) = 1;
     );
 $ENDIF.elh2_coup
@@ -120,11 +119,11 @@ vm_cap.fx(t,regi,"elh2VRE",rlf) = 0;
 vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regNoDTCoup(regi)) = 0;
 vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi) AND not tDT32(t)) = 0;
 
-***CG: bound shares between 0 and 100
-v32_shStor.up(t,regi,teVRE) = 100;
-v32_shStor.lo(t,regi,teVRE) = 0;
-
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
+
+***CG: bound shares between 0 and 100
+v32_shStor.up(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi)) = 100;
+v32_shStor.lo(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi)) = 0;
 
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 v32_shSeElDem.up(t,regi,teFlexTax)$(tDT32(t) AND regDTCoup(regi)) = 100;
