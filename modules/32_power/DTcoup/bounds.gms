@@ -126,8 +126,8 @@ v32_shStor.up(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi)) = 100;
 v32_shStor.lo(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi)) = 0;
 
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-v32_shSeElDem.up(t,regi,teFlexTax)$(tDT32(t) AND regDTCoup(regi)) = 100;
-v32_shSeElDem.lo(t,regi,teFlexTax)$(tDT32(t) AND regDTCoup(regi)) = 0;
+v32_shSeElDem.up(t,regi,teFlexTax)$(regDTCoup(regi)) = 100;
+v32_shSeElDem.lo(t,regi,teFlexTax)$(regDTCoup(regi)) = 0;
 $ENDIF.elh2_coup
 
 v32_shSeEl.up(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 100;

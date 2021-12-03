@@ -46,7 +46,8 @@ LOOP(iteration $(ord(iteration)<(cm_iteration_max+1)),
             OPTION solprint=on
         );
 
-* if (ord(iteration) eq 3,
+*** CG: printing out equations
+* if (ord(iteration) eq 1,
 *   option limcol    = 2147483647;
 *   option limrow    = 2147483647;
 * );
