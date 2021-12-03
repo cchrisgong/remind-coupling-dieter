@@ -50,8 +50,8 @@ q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND teDTCoupSupp(te))..
 *** hence excluding co-production terms to avoid distortion
 *** (current coupled technologies in teDTCoupSupp do not have co-production: so perhaps we do not need to
 *** separate the ..Disp vs. the non-Disp variables after all)
-q32_usableSeDisp(t,regi,entySe)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySe,"seel"))..
-*q32_usableSeDisp(t,regi,entySe)$(regDTCoup(regi) AND sameas(entySe,"seel"))..
+*q32_usableSeDisp(t,regi,entySe)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySe,"seel"))..
+q32_usableSeDisp(t,regi,entySe)$(regDTCoup(regi) AND sameas(entySe,"seel"))..
 	v32_usableSeDisp(t,regi,entySe)
 	=e=
 	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
