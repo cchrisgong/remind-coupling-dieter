@@ -71,8 +71,6 @@ q32_usableSeTeDisp(t,regi,entySe,te)$(tDT32(t) AND regDTCoup(regi) AND sameas(en
 *** Definition of capacity constraints for storage:
 ***---------------------------------------------------------------------------
 q32_limitCapTeStor(t,regi,teStor)$( (t.val ge 2015) AND ((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))) ..
-*q32_limitCapTeStor(t,regi,teStor)$( (t.val ge 2015) AND ( (not tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) OR (regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))) ..
-** above logic: apply equation when >= 2015 for non coupled region; or for coupled region when switch is off, or for coupled region when switch is on outside coupled years
     ( 0.5$( cm_VRE_supply_assumptions eq 1 )
     + 1$( cm_VRE_supply_assumptions ne 1 )
     )
@@ -154,7 +152,6 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** is not coupled to DIETER, ways to improve? v32_shSeElDem probably add up to more than 100%)
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 ***---------------------------------------------------------------------------
-* q32_shSeElDem(t,regi,te)$(tDT32(t) AND teFlexTax(te) AND regDTCoup(regi))..
 q32_shSeElDem(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi))..
     v32_shSeElDem(t,regi,te) / 100 * v32_usableSeDisp(t,regi,"seel")
     =e=
@@ -167,8 +164,7 @@ $ENDIF.DTcoup
 ***---------------------------------------------------------------------------
 *** Calculation of necessary storage electricity production:
 ***---------------------------------------------------------------------------
-*q32_limitCapTeStor(t,regi,teStor)$( (t.val ge 2015) AND ((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))) ..
-q32_shStor(t,regi,teVRE)$( (t.val ge 2020) AND ((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi)) )..
+q32_shStor(t,regi,teVRE)$(t.val ge 2015)..
 	v32_shStor(t,regi,teVRE)
 	=g=
 	(p32_factorStorage(regi,teVRE) * 100
@@ -177,9 +173,12 @@ q32_shStor(t,regi,teVRE)$( (t.val ge 2020) AND ((regDTCoup(regi) AND (cm_DTcoup_
 		- (1.e-10 ** p32_storexp(regi,teVRE) )       !! offset correction
 		- 0.07                                      !! first 7% of VRE share bring no negative effects
 	) )
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+	* 1$((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))
+$ENDIF.DTcoup
 ;
 
-q32_storloss(t,regi,teVRE)$(t.val ge 2020)..
+q32_storloss(t,regi,teVRE)$(t.val ge 2015)..
 	v32_storloss(t,regi,teVRE)
 	=e=
 	( v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
@@ -188,7 +187,7 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2020)..
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))
 	+ (p32_DIETERCurtRatio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) )
-  * ( 1 + (v32_shSeElDisp(t,regi,teVRE) / 100 - p32_DIETER_shSeEl(t,regi,teVRE) / 100 ) )   !!! this is important to keep for stability
+      * ( 1 + (v32_shSeElDisp(t,regi,teVRE) / 100 - p32_DIETER_shSeEl(t,regi,teVRE) / 100 ) )   !!! this is important to keep for stability
 	* 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 1) AND tDT32(t))
 *	+ 0 * 1$(regDTCoup(regi)) !! turn off curtailment for coupled region
 $ENDIF.DTcoup
@@ -203,7 +202,7 @@ $IFTHEN.DTcoup_off %cm_DTcoup% == "off"
 *** CG: only applying to non-coupled region for now to avoid distortion
 q32_operatingReserve(t,regi)$((t.val ge 2010) AND regNoDTCoup(regi))..
 ***1 is the chosen load coefficient
-	vm_usableSe(t,regi,"seel") * 1$( regNoDTCoup(regi) )
+	vm_usableSe(t,regi,"seel")$( regNoDTCoup(regi) )
 	=l=
 	(
 ***Variable renewable coefficients could be expected to be negative because they are variable.
@@ -240,12 +239,8 @@ $IFTHEN.hardcap %cm_softcap% == "off"
 q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=e=
-p32_peakDemand_relFac(t,regi) * (v32_usableSeDisp(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2")) * 8760
-*  p32_peakDemand_relFac(t,regi) * 8760 * ( v32_usableSeDisp(t,regi,"seel")
-* $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-*   - vm_demSe(t,regi,"seel","seh2","elh2")
-* $ENDIF.elh2_coup
-* )
+ p32_peakDemand_relFac(t,regi) * (v32_usableSeDisp(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2")) * 8760
+* p32_peakDemand_relFac(t,regi) * (vm_demSe(t,regi,"seel","feels","tdels") + vm_demSe(t,regi,"seel","feelt","tdelt")) * 8760
 	;
 
 $ENDIF.hardcap
@@ -269,7 +264,7 @@ q32_reqCap(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) 
 q32_capEndStart(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) )..
 	v32_capDecayEnd(t,regi)
 	=e=
-  p32_peakDemand_relFac(t,regi) * (v32_usableSeDisp(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2")) * 8760 *1.1
+  p32_peakDemand_relFac(t,regi) * (vm_demSe(t,regi,"seel","feels","tdels") + vm_demSe(t,regi,"seel","feelt","tdelt")) * 8760 *1.1
 ;
 
 q32_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) )..
@@ -305,7 +300,7 @@ q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_D
 
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 *** CG: giving flexible demand side technology, e.g. electrolyzer a subsidy, non DIETER coupled version is q32_flexAdj below
-*** on prefactor: beacuse if v32_shSeElDem is low for elh2 compared to last iter p32_shSeElDemDIETER, to balance out oscillation for elh2
+*** on prefactor: beacuse if v32_shSeElDem is low for elh2 compared to last iter p32_shSeElDem, to balance out oscillation for elh2
 *** we want flexadj to be high (so MarketPrice elh2 sees has to be low), so f has to be <1.
 q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
 	vm_flexAdj(t,regi,te)
@@ -314,7 +309,7 @@ q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
 * (p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te))	/ 1e12 * sm_TWa_2_MWh / 1.2
 * with prefactor
 	(( p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te)
-	 * ( 1 + ( v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDemDIETER(t,regi,te) / 100 ) )
+	 * ( 1 + ( v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
 	)
 	/ 1e12 * sm_TWa_2_MWh / 1.2 )
 	* 1$(cm_DTcoup_eq ne 0)
@@ -360,7 +355,7 @@ q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) A
     vm_capFac(t,regi,te) * 1$(regDTCoup(regi))
     =e=
 	  pm_cf(t,regi,te)
- * ( 1 - 0.7 * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDemDIETER(t,regi,te) / 100 ) )
+ * ( 1 - 0.7 * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
 	  * 1$(regDTCoup(regi))
 ;
 

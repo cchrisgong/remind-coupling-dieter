@@ -24,10 +24,10 @@ p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter
 p32_seelUsableProdLaIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) = p32_seelUsableProd(t,regi,entySE);
 p32_seh2elh2DemLaIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
 
-* $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-* *demand share
-* p32_shSeElDem(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = v32_shSeElDem.l(t,regi,te);
-* $ENDIF.elh2_coup
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+*demand share
+p32_shSeElDem(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = v32_shSeElDem.l(t,regi,te);
+$ENDIF.elh2_coup
 $ENDIF.DTcoup
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
@@ -133,14 +133,6 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
     p32_DIETER_MP(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"elh2","market_price"));
     p32_DIETER_MP(t,regi,"tdels")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"el","market_price"));
     p32_DIETER_MP(t,regi,"tdelt")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"el","market_price"));
-
-    p32_shSeElDemDIETER(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","dem_share"));
-*    downscale demand share from one type ("electricity") in DIETER to two types ("stationary electricity" and "transport electricity") in REMIND
-    p32_shSeElDemDIETER(t,regi,"tdels")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"el","dem_share")) *
-    vm_demSe.l(t,regi,"seel","feels","tdels")/(vm_demSe.l(t,regi,"seel","feels","tdels") + vm_demSe.l(t,regi,"seel","feelt","tdelt"));
-    p32_shSeElDemDIETER(t,regi,"tdelt")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"el","dem_share")) *
-    vm_demSe.l(t,regi,"seel","feelt","tdelt")/(vm_demSe.l(t,regi,"seel","feels","tdels") + vm_demSe.l(t,regi,"seel","feelt","tdelt"));
-
 $ENDIF.elh2_coup
 
 *** DIETER electricity price
