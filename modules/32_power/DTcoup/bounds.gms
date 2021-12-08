@@ -76,7 +76,7 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
        v32_flexPriceShare.fx(t,regi,te)$(regDTCoup(regi) AND teFlexTax(te) AND NOT(teFlex(te))) = 1;
     );
     if (cm_DTcoup_eq ne 0,
-       vm_capFac.fx(t,regi,teFlex)$(((t.val ge 2010 ) AND NOT tDT32(t)) AND regDTCoup(regi)) = 0.5;
+       vm_capFac.fx(t,regi,teFlex)$((t.val lt 2020) AND regDTCoup(regi)) = 0.5;
        v32_flexPriceShare.fx(t,regi,te)$(regDTCoup(regi) AND teFlexTax(te) AND NOT(teFlex(te))) = 1;
     );
 $ENDIF.elh2_coup
