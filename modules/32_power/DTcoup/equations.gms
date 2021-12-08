@@ -70,8 +70,8 @@ q32_usableSeTeDisp(t,regi,entySe,te)$(tDT32(t) AND regDTCoup(regi) AND sameas(en
 ***---------------------------------------------------------------------------
 *** Definition of capacity constraints for storage:
 ***---------------------------------------------------------------------------
-*q32_limitCapTeStor(t,regi,teStor)$( (t.val ge 2015) AND ((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))) ..
-q32_limitCapTeStor(t,regi,teStor)$( (t.val ge 2015) AND ( (not tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) OR (regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))) ..
+q32_limitCapTeStor(t,regi,teStor)$( (t.val ge 2015) AND ((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))) ..
+*q32_limitCapTeStor(t,regi,teStor)$( (t.val ge 2015) AND ( (not tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) OR (regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))) ..
 ** above logic: apply equation when >= 2015 for non coupled region; or for coupled region when switch is off, or for coupled region when switch is on outside coupled years
     ( 0.5$( cm_VRE_supply_assumptions eq 1 )
     + 1$( cm_VRE_supply_assumptions ne 1 )
