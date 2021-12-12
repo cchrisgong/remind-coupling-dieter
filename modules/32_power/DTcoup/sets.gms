@@ -13,18 +13,27 @@ DIETERte32 "technologies in DIETER" /coal,hc,lig,nuc,CCGT,OCGT_eff,bio,Wind_on,S
 
 DIETERvarname32 "DIETER name" /capfac,ResPeakDem_relFac,peakDem,value_factor,gen_share,market_value,market_price,elec_price,curt_share,curt_ratio,dem_share,usable_generation/
 
-COALte32(all_te) "coal to seel tech in REMIND" /igcc,igccc,pc,pcc,pco,coalchp/
+* COALte32(all_te) "coal to seel tech in REMIND" /igcc,igccc,pc,pcc,pco,coalchp/
+*
+* NonPeakGASte32(all_te) "gas to seel tech in REMIND" /ngcc,ngccc,gaschp/
+*
+* BIOte32(all_te) "biomass to seel tech in REMIND" /biochp,bioigcc,bioigccc/
 
-NonPeakGASte32(all_te) "gas to seel tech in REMIND" /ngcc,ngccc,gaschp/
-
-BIOte32(all_te) "biomass to seel tech in REMIND" /biochp,bioigcc,bioigccc/
+COALte32(all_te) "coal to seel tech in REMIND" /igcc,igccc,pc,pcc,pco/
+NonPeakGASte32(all_te) "gas to seel tech in REMIND" /ngcc,ngccc/
+BIOte32(all_te) "biomass to seel tech in REMIND" /bioigcc,bioigccc/
 
 NUCte32(all_te) "nuclear to seel tech in REMIND" /tnrs,fnrs/
 
-DISPATCHte32(all_te) "dispatchable technologies in REMIND" /igcc,igccc,pc,pcc,pco,coalchp,
-ngcc,ngccc,gaschp,biochp,bioigcc,bioigccc,ngt,tnrs,fnrs/
+* DISPATCHte32(all_te) "dispatchable technologies in REMIND" /igcc,igccc,pc,pcc,pco,coalchp,
+* ngcc,ngccc,gaschp,biochp,bioigcc,bioigccc,ngt,tnrs,fnrs/
 
-CFcoupSuppte32(all_te) "technologies in REMIND which have prefactors to capacity factor" /igcc,igccc,pc,pcc,pco,coalchp,
-ngcc,ngccc,gaschp,biochp,bioigcc,bioigccc,ngt,tnrs,fnrs/
+DISPATCHte32(all_te) "dispatchable technologies in REMIND" /igcc,igccc,pc,pcc,pco,ngcc,ngccc,bioigcc,bioigccc,ngt,tnrs,fnrs/
+
+
+* CFcoupSuppte32(all_te) "technologies in REMIND which have prefactors to capacity factor" /igcc,igccc,pc,pcc,pco,coalchp,
+* ngcc,ngccc,gaschp,biochp,bioigcc,bioigccc,ngt,tnrs,fnrs/
+
+CFcoupSuppte32(all_te) "technologies in REMIND which have prefactors to capacity factor" /igcc,igccc,pc,pcc,pco,ngcc,ngccc,bioigcc,bioigccc,ngt,tnrs,fnrs/
 
 CFcoupDemte32(all_te) "demand-side technologies in REMIND which have prefactors to capacity factor" /elh2/
