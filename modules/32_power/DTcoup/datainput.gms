@@ -126,6 +126,8 @@ Execute_Loadpoint 'input' pm_pop = pm_pop;
 Execute_Loadpoint 'input' pm_ttot_val = pm_ttot_val;
 Execute_Loadpoint 'input' pm_prtp = pm_prtp;
 Execute_Loadpoint 'input' v32_storloss = v32_storloss;
+Execute_Loadpoint 'input' p_teAnnuity = p_teAnnuity;
+
 
 ***CG:interest rate (Marian's formula) (should move this to core/postsolve at some point)
 p32_r4DT(ttot,regi)$(tDT32s2(ttot) AND regDTCoup(regi))
@@ -158,7 +160,7 @@ p32_seh2elh2DemAvg(t,regi,entySE) = p32_seh2elh2Dem(t,regi,entySE);
 execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,
 p32_seelUsableProdAvg, p32_seh2elh2DemAvg, p32_fuelprice_avgiter,
 f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
-pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, vm_capFac, pm_dataren, vm_capDistr;
+pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, p_teAnnuity, vm_capFac, pm_dataren, vm_capDistr;
 
 *** initiating other parameters for averaging in loop
 

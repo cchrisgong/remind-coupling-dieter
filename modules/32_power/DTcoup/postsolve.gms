@@ -14,7 +14,7 @@
 * calculate post curtailment "real" VRE capfac
 p32_realCapfacVRE(t,regi,teVRE)$(sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)))
     = ( sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)) - v32_storloss.l(t,regi,teVRE) )
-    / vm_cap.l(t,regi,teVRE,"1");
+    / vm_cap.l(t,regi,teVRE,"1") *100;
 
 *** calculation of SE electricity price (for internal use and reporting purposes), excluding 0 cases
 pm_SEPrice(t,regi,entySE)$(abs(qm_budget.m(t,regi)) gt sm_eps AND sameas(entySE,"seel")) =
@@ -163,7 +163,7 @@ p32_r4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
     execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,
     p32_seelUsableProdAvg, p32_seh2elh2DemAvg, p32_fuelprice_avgiter,
     f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
-    pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, pm_cf, vm_capFac, pm_dataren, vm_capDistr;
+    pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, p_teAnnuity, pm_cf, vm_capFac, pm_dataren, vm_capDistr;
 
 * if( (ord(iteration) eq (sm32_DTiter + 1)) ,
 *     execute_unload "RMdata_4RM.gdx", p21_taxrevMrkup0, p21_taxrevFlex0, v21_taxrevFlex.l, v21_taxrevMrkup.l;
