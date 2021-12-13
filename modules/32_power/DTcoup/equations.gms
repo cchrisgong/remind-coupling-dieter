@@ -240,12 +240,12 @@ $IFTHEN.hardcap %cm_softcap% == "off"
 q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=e=
-p32_peakDemand_relFac(t,regi) * (v32_usableSeDisp(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2")) * 8760
-*  p32_peakDemand_relFac(t,regi) * 8760 * ( v32_usableSeDisp(t,regi,"seel")
-* $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-*   - vm_demSe(t,regi,"seel","seh2","elh2")
-* $ENDIF.elh2_coup
-* )
+* p32_peakDemand_relFac(t,regi) * (v32_usableSeDisp(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2")) * 8760
+ p32_peakDemand_relFac(t,regi) * 8760 * ( v32_usableSeDisp(t,regi,"seel")
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+  - vm_demSe(t,regi,"seel","seh2","elh2")
+$ENDIF.elh2_coup
+)
 	;
 
 $ENDIF.hardcap
@@ -269,7 +269,11 @@ q32_reqCap(t,regi,enty2)$(tDT32(t) AND sameas(enty2,"seel") AND regDTCoup(regi) 
 q32_capEndStart(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) )..
 	v32_capDecayEnd(t,regi)
 	=e=
-  p32_peakDemand_relFac(t,regi) * (v32_usableSeDisp(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2")) * 8760 *1.1
+  p32_peakDemand_relFac(t,regi) * 8760 * 1.1 * ( v32_usableSeDisp(t,regi,"seel")
+	$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+	  - vm_demSe(t,regi,"seel","seh2","elh2")
+	$ENDIF.elh2_coup
+	)
 ;
 
 q32_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) )..
