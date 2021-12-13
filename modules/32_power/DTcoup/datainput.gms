@@ -92,6 +92,7 @@ p32_PriceDurSlope(regi,"elh2") = cm_PriceDurSlope_elh2;
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_minVF_spv = 0.1;
 sm32_iter = 0;  !!initialize REMIND iteration scalar
+sm32_DTiter = 0; !!the iteration of REMIND when DIETER is first coupled
 
 *** initiating parameters for first iteration of DIETER based on input.gdx
 ** loading variable directly without .l

@@ -124,7 +124,7 @@ p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"
 *if( ((ord(iteration) ge sm32_DTiter) and ( mod(ord(iteration), 3) eq 0)),
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-sm32_DTiter = 1;
+
  if( ((ord(iteration) ge sm32_DTiter) and ( mod(ord(iteration), 1) eq 0)),
 
 sm32_iter = iteration.val;
