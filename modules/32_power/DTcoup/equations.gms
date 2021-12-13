@@ -54,8 +54,8 @@ q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND teDTCoupSupp(te))..
 q32_usableSeDisp(t,regi,entySe)$(regDTCoup(regi) AND sameas(entySe,"seel"))..
 	v32_usableSeDisp(t,regi,entySe)
 	=e=
-	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
-	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
+	sum(pe2se(enty,entySe,te)$teDTCoupSupp(te), vm_prodSe(t,regi,enty,entySe,te) )
+	+ sum(se2se(enty,entySe,te)$teDTCoupSupp(te), vm_prodSe(t,regi,enty,entySe,te) )
 	- sum(teVRE, v32_storloss(t,regi,teVRE) )
 ;
 
@@ -159,7 +159,7 @@ q32_shSeElDem(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi))..
     v32_shSeElDem(t,regi,te) / 100 * v32_usableSeDisp(t,regi,"seel")
     =e=
     sum(en2en(enty,enty2,te),
-			vm_demSe(t,regi,enty,enty2,te)$(sameas(enty, "seel")))
+			vm_demSe(t,regi,enty,enty2,te)$(sameas(enty,"seel")))
 ;
 $ENDIF.elh2_coup
 $ENDIF.DTcoup

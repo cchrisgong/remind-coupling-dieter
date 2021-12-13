@@ -21,13 +21,9 @@ p32_fuelprice_lastx2iter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_lastit
 p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
 
 *total coupled part of the seel demand/production to be passed to dieter
-p32_seelUsableProdLaIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) = p32_seelUsableProd(t,regi,entySE);
+p32_seelUsableProdCoupLaIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) = p32_seelUsableProdCoup(t,regi,entySE);
 p32_seh2elh2DemLaIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
 
-* $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-* *demand share
-* p32_shSeElDem(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) = v32_shSeElDem.l(t,regi,te);
-* $ENDIF.elh2_coup
 $ENDIF.DTcoup
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"

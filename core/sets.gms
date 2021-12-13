@@ -1558,11 +1558,11 @@ igccc
 pc
 pcc
 pco
-coalchp
+*coalchp
 ngcc
 ngccc
-gaschp
-biochp
+*gaschp
+*biochp
 bioigcc
 bioigccc
 ngt
