@@ -36,7 +36,7 @@ q32_usableSe(t,regi,entySe)$(sameas(entySe,"seel"))..
 	- sum(teVRE, v32_storloss(t,regi,teVRE) )
 ;
 
-q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel") AND teDTCoupSupp(te))..
+q32_usableSeTe(t,regi,entySe,te)$(sameas(entySe,"seel"))..
  	vm_usableSeTe(t,regi,entySe,te)
  	=e=
  	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
