@@ -85,7 +85,7 @@
 * 
 * Input data revision: 6.262
 * 
-* Last modification (input data): Thu Dec  2 18:28:47 2021
+* Last modification (input data): Fri Dec 17 20:18:45 2021
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -207,7 +207,7 @@ $setGlobal internalizeDamages  off               !! def = off
 ***---------------------    70_water  -------------------------------------------
 $setglobal water  off                 !! def = off
 ***---------------------    80_optimization    ----------------------------------
-$setGlobal optimization  testOneRegi         !! def = nash
+$setGlobal optimization  nash         !! def = nash
 ***---------------------    81_codePerformance    -------------------------------
 $setGlobal codePerformance  off       !! def = off
 
@@ -578,9 +578,10 @@ $setglobal cm_DTcoup  on         !! def = off
 cm_DTcoup_eq = 0;         !! def = 0
 $setglobal cm_softcap  off         !! def = off
 $setglobal cm_elh2_coup  on       !! def = off
+$setglobal cm_CHP_coup  off       !! def = on
 
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
-$setGlobal cm_nash_mode  debug      !! def = parallel
+$setGlobal cm_nash_mode  parallel      !! def = parallel
 $setGLobal cm_debug_preloop  off !! def = off
 $setGlobal c_EARLYRETIRE       on         !! def = on
 $setGlobal cm_OILRETIRE  on        !! def = on

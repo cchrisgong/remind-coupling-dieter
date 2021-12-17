@@ -1558,11 +1558,13 @@ igccc
 pc
 pcc
 pco
-*coalchp
+$ifthen.chp "%cm_CHP_coup%" = "on"
+coalchp
+gaschp
+biochp
+$endif.chp
 ngcc
 ngccc
-*gaschp
-*biochp
 bioigcc
 bioigccc
 ngt
