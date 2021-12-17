@@ -13,7 +13,7 @@ DIETERte32 "technologies in DIETER" /coal,hc,lig,nuc,CCGT,OCGT_eff,bio,Wind_on,S
 
 DIETERvarname32 "DIETER name" /capfac,ResPeakDem_relFac,peakDem,value_factor,gen_share,market_value,market_price,elec_price,curt_share,curt_ratio,dem_share,usable_generation/
 
-$ifthen.chp "%cm_CHP_coup%" = "on"
+$ifthen.chp %cm_CHP_coup% == "on"
 COALte32(all_te) "coal to seel tech in REMIND" /igcc,igccc,pc,pcc,pco,coalchp/
 NonPeakGASte32(all_te) "gas to seel tech in REMIND" /ngcc,ngccc,gaschp/
 BIOte32(all_te) "biomass to seel tech in REMIND" /biochp,bioigcc,bioigccc/
@@ -22,7 +22,7 @@ CFcoupSuppte32(all_te) "technologies in REMIND which have prefactors to capacity
 ngcc,ngccc,gaschp,biochp,bioigcc,bioigccc,ngt,tnrs,fnrs/
 $endif.chp
 
-$ifthen.chpoff "%cm_CHP_coup%" = "off"
+$ifthen.chpoff %cm_CHP_coup% == "off"
 COALte32(all_te) "coal to seel tech in REMIND" /igcc,igccc,pc,pcc,pco/
 NonPeakGASte32(all_te) "gas to seel tech in REMIND" /ngcc,ngccc/
 BIOte32(all_te) "biomass to seel tech in REMIND" /bioigcc,bioigccc/

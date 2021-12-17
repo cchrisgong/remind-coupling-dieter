@@ -1558,7 +1558,7 @@ igccc
 pc
 pcc
 pco
-$ifthen.chp "%cm_CHP_coup%" = "on"
+$ifthen.chp %cm_CHP_coup% == "on"
 coalchp
 gaschp
 biochp
