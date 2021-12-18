@@ -92,7 +92,7 @@ p32_PriceDurSlope(regi,"elh2") = cm_PriceDurSlope_elh2;
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_minVF_spv = 0.1;
 sm32_iter = 0;  !!initialize REMIND iteration scalar
-sm32_DTiter = 0; !!the iteration of REMIND when DIETER is first coupled
+sm32_DTiter = 1; !!the iteration of REMIND when DIETER is first coupled
 
 *** initiating parameters for first iteration of DIETER based on input.gdx
 ** loading variable directly without .l
@@ -145,12 +145,13 @@ p32_fuelprice_curriter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi
 
 p32_fuelprice_avgiter(t,regi,entyPe) = p32_fuelprice_curriter(t,regi,entyPe);
 
-*total coupled part of the seel demand/production to be passed to dieter
+* total coupled part of the seel demand/production to be passed to dieter
 p32_seelUsableProdCoup(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) =
-        sum( pe2se(enty,entySE,te)$teDTCoupSupp(te), vm_prodSe.l(t,regi,enty,entySE,te) )
-        + sum(se2se(enty,entySE,te)$teDTCoupSupp(te), vm_prodSe.l(t,regi,enty,entySE,te) )
-        - sum(teVRE, v32_storloss.l(t,regi,teVRE) )
+        sum( pe2se(enty,entySE,te), vm_prodSe.l(t,regi,enty,entySE,te)$teDTCoupSupp(te) )
+        + sum(se2se(enty,entySE,te), vm_prodSe.l(t,regi,enty,entySE,te)$teDTCoupSupp(te) )
+        	- sum(te, v32_storloss.l(t,regi,te)$teDTCoupSupp(te))
 ;
+
 p32_seelUsableProdCoupAvg(t,regi,entySE) = p32_seelUsableProdCoup(t,regi,entySE);
 
 p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
@@ -166,7 +167,6 @@ pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, p_teAnnuity, vm_capFac, pm_
 
 p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
 
-*p32_seelUsableDem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) = p32_seelUsableProd(t,regi,entySE);
 
 p32_cf_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) = pm_cf(t,regi,te);
 

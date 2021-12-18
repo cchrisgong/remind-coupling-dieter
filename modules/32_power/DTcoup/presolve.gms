@@ -34,7 +34,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *   optional: averaging capfac over 2 iterations
 
 ***CG:noCF averaging
-if( (ord(iteration) le (sm32_DTiter + 1)) ,
+if( (ord(iteration) le sm32_DTiter) ,
     pm_cf(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
     			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac"));
     pm_cf(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi))
@@ -52,7 +52,7 @@ $ENDIF.elh2_coup
 );
 
 ***CG:CF averaging, only after DT is coupled for one iteration (to avoid pm_cf being distorted by default high values)
-if( (ord(iteration) gt (sm32_DTiter + 1)),
+if( (ord(iteration) gt sm32_DTiter),
 pm_cf(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND COALte32(te) )
 			= 0.5 * ( p32_cf_last_iter(t,regi,te)$(COALte32(te))
       + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac")) );
@@ -142,14 +142,14 @@ $ENDIF.elh2_coup
     p32_DIETER_elecprice(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"all_te","elec_price"));
 
 *** CG: storage related coupling parameters
-* if( (ord(iteration) le (sm32_DTiter + 1)),
+* if( (ord(iteration) le sm32_DTiter),
 * ** no curt_ratio averaging
 p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio"));
 p32_DIETERCurtRatio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio"));
 * );
 
 * with curt_ratio averaging
-* if( (ord(iteration) gt (sm32_DTiter + 1)),
+* if( (ord(iteration) gt sm32_DTiter),
 p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) =
       0.5 * (p32_DIETERCurtRatioLaIter(t,regi,"spv") + p32_DIETERCurtRatio(t,regi,"spv"));
 

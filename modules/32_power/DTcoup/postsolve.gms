@@ -104,12 +104,12 @@ p32_seelUsableDem(t,regi,entySE)$(sameas(entySE,"seel")) = p32_seelTotDem(t,regi
 ** sanity check: p32_seelUsableDem should match p32_seelUsableProd according to q32_balSe
 p32_seelUsableProd(t,regi,entySE)$(sameas(entySE,"seel")) = sum( pe2se(enty,entySE,te), vm_prodSe.l(t,regi,enty,entySE,te) )
                                                         + sum(se2se(enty,entySE,te), vm_prodSe.l(t,regi,enty,entySE,te) )
-                                                        - sum(teVRE, v32_storloss.l(t,regi,teVRE) )
+                                                      	- sum(teVRE, v32_storloss.l(t,regi,teVRE))
 ;
 
-p32_seelUsableProdCoup(t,regi,entySE)$(sameas(entySE,"seel")) = sum( pe2se(enty,entySE,te)$teDTCoupSupp(te), vm_prodSe.l(t,regi,enty,entySE,te) )
-                                                        + sum(se2se(enty,entySE,te)$teDTCoupSupp(te), vm_prodSe.l(t,regi,enty,entySE,te) )
-                                                        - sum(teVRE, v32_storloss.l(t,regi,teVRE) )
+
+p32_seelUsableProdCoup(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel"))
+                              = v32_usableSeDisp.l(t,regi,entySE)
 ;
 
 ** CG: vm_demSe.l(t,regi,"seel","seh2","elh2") is how much electricity is needed to produse seh2 (green h2)
@@ -147,7 +147,7 @@ p32_fuelprice_avgiter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,
     			 / 4 ;
 
 * demand averaging
-p32_seelUsableProdCoupAvg(t,regi,entySE)$(tDT32(t) AND sameas(entySE,"seel")) =
+p32_seelUsableProdCoupAvg(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) =
   0.5 * (p32_seelUsableProdCoup(t,regi,entySE) + p32_seelUsableProdCoupLaIter(t,regi,entySE));
 
 p32_seh2elh2DemAvg(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) =
@@ -169,10 +169,6 @@ p32_r4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
     p32_seelUsableProdCoupAvg, p32_seh2elh2DemAvg, p32_fuelprice_avgiter,
     f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
     pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, p_teAnnuity, pm_cf, vm_capFac, pm_dataren, vm_capDistr;
-
-* if( (ord(iteration) eq (sm32_DTiter + 1)) ,
-*     execute_unload "RMdata_4RM.gdx", p21_taxrevMrkup0, p21_taxrevFlex0, v21_taxrevFlex.l, v21_taxrevMrkup.l;
-* );
 
 *** CG: fit a polynom through oscillating fuel price data for biomass, coal and gas
     execute "Rscript fuelPriceCubRegr.R";
