@@ -43,7 +43,7 @@ if ((cm_DTcoup_eq eq 1),
 			loop(t$(tDT32(t)),
 				loop(te$(CFcoupDemte32(te)),
 				vm_capFac.lo(t,regi,te)=0;
-				vm_capFac.up(t,regi,te)=INF;
+				vm_capFac.up(t,regi,te)=1;   !!capped by 1
 				);
 			);
 		);
@@ -110,6 +110,15 @@ loop(regi$(p32_factorStorage(regi,"csp") < 1),
 *** Fix capacity to 0 for elh2VRE now that the equation q32_elh2VREcapfromTestor pushes elh2, not anymore elh2VRE, and capital costs are 1
 vm_cap.fx(t,regi,"elh2VRE",rlf) = 0;
 
+
+* vm_cap.fx(t,regi,"biochp",rlf)$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
+* vm_cap.fx(t,regi,"gaschp",rlf)$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
+* vm_cap.fx(t,regi,"coalchp",rlf)$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
+
+* vm_capFac.fx(t,regi,"biochp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
+* vm_capFac.fx(t,regi,"gaschp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
+* vm_capFac.fx(t,regi,"coalchp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
+
 *** =====================================
 *** END OF IntC bounds
 *** =====================================
@@ -141,8 +150,8 @@ v32_shStor.fx(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0
 vm_cap.fx(t,regi,"h2turbVRE","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
 
 *fixing some less used technologies (at least for Germany) to 0 to avoid distortions
-* vm_cap.fx(t,regi,"csp",rlf)$(regDTCoup(regi) AND cm_DTcoup_eq eq 1 AND (t.val > 2020))  = 0;
-* vm_cap.fx(t,regi,"dot",rlf)$(regDTCoup(regi) AND cm_DTcoup_eq eq 1 AND (t.val > 2020))  = 0;
-* vm_cap.fx(t,regi,"geohdr",rlf)$(regDTCoup(regi) AND cm_DTcoup_eq eq 1 AND (t.val > 2020))  = 0;
+* vm_cap.fx(t,regi,"csp",rlf)$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
+* vm_cap.fx(t,regi,"dot",rlf)$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
+* vm_cap.fx(t,regi,"geohdr",rlf)$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 
 $ENDIF.DTcoup

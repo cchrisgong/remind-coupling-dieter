@@ -157,7 +157,7 @@ p32_seelUsableProdCoupAvg(t,regi,entySE) = p32_seelUsableProdCoup(t,regi,entySE)
 p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
 p32_seh2elh2DemAvg(t,regi,entySE) = p32_seh2elh2Dem(t,regi,entySE);
 
-*** dumping REMIND input for DIETER iteration
+*** dumping REMIND input for DIETER iteration (can I export cm_elh2_coup?)
 execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,
 p32_seelUsableProdCoupAvg, p32_seh2elh2DemAvg, p32_fuelprice_avgiter,
 f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,

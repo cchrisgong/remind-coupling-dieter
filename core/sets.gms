@@ -2817,7 +2817,7 @@ sector2te_addTDCost(emi_sectors,all_te) "mapping of sectors to t&d technologies 
 /
 
 ppfen_CESMkup(all_in)                   "production factors of CES function to which CES markup cost can be applied"
-/     
+/
 /
 
 

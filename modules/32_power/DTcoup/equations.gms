@@ -156,7 +156,7 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 ***---------------------------------------------------------------------------
 * q32_shSeElDem(t,regi,te)$(tDT32(t) AND teFlexTax(te) AND regDTCoup(regi))..
 q32_shSeElDem(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi))..
-    v32_shSeElDem(t,regi,te) / 100 * v32_usableSeDisp(t,regi,"seel")
+    v32_shSeElDem(t,regi,te) / 100 * vm_usableSe(t,regi,"seel")
     =e=
     sum(en2en(enty,enty2,te),
 			vm_demSe(t,regi,enty,enty2,te)$(sameas(enty,"seel")))
@@ -295,7 +295,7 @@ $ENDIF.softcap
 *** price_DIETER = price_REMIND/budget_REMIND * 1e12 / sm_TWa_2_MWh * 1.2
 *** price_REMIND = price_DIETER * budget_REMIND/1e12 * sm_TWa_2_MWh/1.2
 ***----------------------------------------------------------------------------
-*q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq eq 3))..
+*q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq eq 3)).. !! turn off equation
 q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq ne 0))..
 	vm_Mrkup(t,regi,te)
 	=e=
@@ -318,7 +318,7 @@ q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
 * (p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te))	/ 1e12 * sm_TWa_2_MWh / 1.2
 * with prefactor
 	(( p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te)
-	 * ( 1 + ( v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDemDIETER(t,regi,te) / 100 ) )
+*	 * ( 1 + ( v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDemDIETER(t,regi,te) / 100 ) )
 	)
 	/ 1e12 * sm_TWa_2_MWh / 1.2 )
 	* 1$(cm_DTcoup_eq ne 0)
@@ -349,7 +349,7 @@ $ENDIF.elh2_coup_off
 ** CG: prefactor for dispatchable capfac necessary, since if generation share in current REMIND iteration is higher than last iteration
 ** then capfac should be lower (since VRE share is high, depressing utilization rate of dispatchable plants)
 q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te) AND (cm_DTcoup_eq ne 0))..
-*q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te) AND (cm_DTcoup_eq eq 3))..
+*q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te) AND (cm_DTcoup_eq eq 3)).. !! turn off equation
     vm_capFac(t,regi,te) * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te))
     =e=
 	  pm_cf(t,regi,te)
@@ -360,7 +360,7 @@ q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te) AND 
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 ** CG: if elh2 demand share is high, then capfac should be increased..
 q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) AND (cm_DTcoup_eq ne 0))..
-*q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) AND (cm_DTcoup_eq eq 3))..
+*q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) AND (cm_DTcoup_eq eq 3)).. !! turn off equation
     vm_capFac(t,regi,te) * 1$(regDTCoup(regi))
     =e=
 	  pm_cf(t,regi,te)
