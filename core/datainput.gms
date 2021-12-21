@@ -521,9 +521,11 @@ $include "./core/input/p_earlyRetirementAdjFactor.cs3r"
 $offdelim
 ;
 
+*p_earlyreti_lim(ttot,regi,"ngt")$(ttot.val > 2005) = 0;
 ***CG: limit all ngt early reti to 0 a year (since ngt can serve as peaker at high share of VRE)
-p_earlyreti_lim(ttot,regi,"ngt")$(ttot.val > 2005) = 0;
 *p_earlyreti_lim(ttot,regi,"ngt")$(ttot.val > 2005) = 0 - cm_earlyreti_rate;
+*** limit all tech early reti
+p_earlyreti_lim(ttot,regi,te)$(ttot.val > 2015 AND teDTCoupSupp(te)) = 0 - cm_earlyreti_rate;
 
 ***---------------------------------------------------------------------------
 *RP* calculate omegs and opTimeYr2te
