@@ -260,7 +260,8 @@ cm_rentconvgas        "[grades2poly] number of years required to converge to the
 cm_rentdisccoal       "[grades2poly] discount factor for the coal rent"
 cm_rentdisccoal2      "[grades2poly] discount factor for the coal rent achieved in 2100"
 cm_rentconvcoal       "[grades2poly] number of years required to converge to the 2100 coal rent"
-cm_earlyreti_rate     "maximum portion of capital stock that can be retired in one year"
+c_regi_earlyreti_rate  "maximum portion of capital stock that can be retired in one year for a region"
+c_tech_earlyreti_rate  "maximum portion of capital stock that can be retired in one year for a region for a technology"
 c_cint_scen           "additional GHG emissions from mining fossil fuels"
 cm_so2tax_scen         "level of SO2 tax"
 cm_damage              "cm_damage factor for forcing overshoot"
@@ -334,10 +335,6 @@ cm_HeatLim_b                "switch to set maximum share of district heating in 
 cm_ElLim_b                  "switch to set maximum share of electricity in FE buildings"
 cm_startIter_EDGET          "starting iteration of EDGE-T"
 cm_ARIADNE_FeShareBounds    "switch for minimum share of liquids and gases for industry needed for the ARIADNE project"
-cm_ariadne_trade_el         "switch for enabling electricity imports to Germany for ARIADNE project"
-cm_ariadne_trade_h2         "switch for enabling H2 imports to Germany for ARIADNE project"
-cm_ariadne_trade_synliq        "switch for enabling synfuel liquids imports to Germany for ARIADNE project"
-cm_ariadne_trade_syngas        "switch for enabling synfuel gases imports to Germany for ARIADNE project"
 cm_ariadne_VRECapFac_adj       "switch for enabling increase of VRE capacity factors for wind and solar PV in Germany until 2040 in line with ARIADNE assumptions"
 c_VREPot_Factor             "switch for rescaling renewable potentials in all grades which have not been used by 2020"
 cm_FEtax_trajectory_abs     "switch for setting the aboslute FE tax level explicitly from a given year onwards, before tax levels increases or decreases linearly to that value"
@@ -391,10 +388,10 @@ cm_1stgen_phaseout  = 0;         !! def = 0
 $setglobal cm_tradbio_phaseout  default  !! def = default
 cm_cprice_red_factor  = 1;         !! def = 1
 
-$setglobal cm_POPscen  pop_SSP2  !! def = pop_SSP2
-$setglobal cm_GDPscen  gdp_SSP2  !! def = gdp_SSP2
+$setglobal cm_POPscen  pop_SSP2EU  !! def = pop_SSP2EU
+$setglobal cm_GDPscen  gdp_SSP2EU  !! def = gdp_SSP2EU
 $setglobal c_GDPpcScen  SSP2     !! def = gdp_SSP2   (automatically adjusted by start_run() based on GDPscen) 
-$setglobal cm_demScen  gdp_SSP2     !! def = gdp_SSP2
+$setglobal cm_demScen  gdp_SSP2EU     !! def = gdp_SSP2EU
 cm_GDPcovid      = 0;            !! def = 0
 
 *AG* and *CB* for cm_startyear greater than 2005, you have to copy the fulldata.gdx (rename it to: input_ref.gdx) from the run you want to build your new run onto.
@@ -418,7 +415,8 @@ cm_rentconvgas      = 50;        !! def 50
 cm_rentdisccoal     = 0.4;       !! def 0.4
 cm_rentdisccoal2    = 0.6;       !! def 0.6
 cm_rentconvcoal     = 50;        !! def 50
-cm_earlyreti_rate   = 0.15;      !! def 0.09
+$setglobal c_regi_earlyreti_rate  GLO 0.09, EUR_regi 0.15      !! def = GLO 0.09, EUR_regi 0.15
+$setglobal c_tech_earlyreti_rate  GLO.(biodiesel 0.14, bioeths 0.14), EUR_regi.(biodiesel 0.15, bioeths 0.15), USA_regi.pc 0.13, REF_regi.pc 0.13, CHA_regi.pc 0.13 !! def = GLO.(biodiesel 0.14, bioeths 0.14), EUR_regi.(biodiesel 0.15, bioeths 0.15), USA_regi.pc 0.13, REF_regi.pc 0.13, CHA_regi.pc 0.13
 
 cm_so2tax_scen        = 1;         !! def =
 c_cint_scen           = 1;         !! def = 1
@@ -446,7 +444,7 @@ $setGlobal cm_regiCO2target  off   !! def = off
 cm_postTargetIncrease    = 2;      !! def = 2
 $setGlobal cm_quantity_regiCO2target  off !! def = off
 cm_peakBudgYr            = 2050;   !! def = 2050
-cm_taxCO2inc_after_peakBudgYr = 2; !! def = 2
+cm_taxCO2inc_after_peakBudgYr = 3; !! def = 3
 cm_CO2priceRegConvEndYr  = 2050;   !! def = 2050
 $setGlobal cm_emiMktETS  off       !! def = off
 $setGlobal cm_emiMktETS_type  off  !! def = off
@@ -548,11 +546,6 @@ cm_TaxConvCheck = 0; !! def 0, which means tax convergence check is off
 
 $setGlobal cm_ARIADNE_FeShareBounds  off !! def = off
 
-cm_ariadne_trade_el = 0; !! def 0
-cm_ariadne_trade_h2 = 0; !! def 0
-cm_ariadne_trade_synliq = 0; !! def 0
-cm_ariadne_trade_syngas = 0; !! def 0
-
 $setGlobal cm_ariadne_VRECapFac_adj  off !! def = off
 
 $setGlobal c_VREPot_Factor  off !! def = off
@@ -611,7 +604,7 @@ $setglobal cm_calibration_string  FE_med      !! def = off
 
 $setglobal c_testOneRegi_region  DEU       !! def = EUR
 
-$setglobal cm_cooling_shares  static    !! def = static
+$setglobal cm_cooling_shares  dynamic    !! def = dynamic
 $setglobal cm_techcosts  REG       !! def = REG
 $setglobal cm_regNetNegCO2  on       !! def = on
 
@@ -647,9 +640,6 @@ $setglobal cm_INNOPATHS_sehe_upper  off !! def = off
 $setglobal cm_fixCO2price  off !! def = off
 
 $setglobal cm_feShareLimits  off  !! def = off
-
-$setglobal c_fuelprice_init  off !! def = off
-$setglobal cm_seTradeScenario  off  !! def = off
 
 $setglobal cm_altTransBunkersShare  off      !! def = off
 
@@ -727,3 +717,4 @@ $include "./core/magicc.gms";    !!connection to MAGICC, needed for post-process
 $endif.c_skip_output
 
 *** EOF ./main.gms
+
