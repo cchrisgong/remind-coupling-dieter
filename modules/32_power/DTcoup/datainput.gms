@@ -102,6 +102,7 @@ Execute_Loadpoint 'input' qm_budget.m = qm_budget.m;
 Execute_Loadpoint 'input' v32_storloss = v32_storloss;
 Execute_Loadpoint 'input' vm_prodSe = vm_prodSe;
 Execute_Loadpoint 'input' vm_cap = vm_cap;
+Execute_Loadpoint 'input' vm_usableSe = vm_usableSe;
 Execute_Loadpoint 'input' vm_usableSeTe = vm_usableSeTe;
 Execute_Loadpoint 'input' f21_taxCO2eqHist = f21_taxCO2eqHist;
 Execute_Loadpoint 'input' pm_data = pm_data;
@@ -153,6 +154,11 @@ p32_seelUsableProdCoup(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(e
 ;
 
 p32_seelUsableProdCoupAvg(t,regi,entySE) = p32_seelUsableProdCoup(t,regi,entySE);
+
+
+p32_seelTotDem(t,regi,entySE) = sum(en2en(entySE,enty2,te),vm_demSe.l(t,regi,entySE,enty2,te)$(sameas(entySE,"seel")));
+
+p32_shSeElDem(t,regi,te)$(regDTCoup(regi)) = sum(en2en(enty,enty2,te),vm_demSe.l(t,regi,enty,enty2,te)$(sameas(enty,"seel")))/p32_seelTotDem(t,regi,"seel");
 
 p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
 p32_seh2elh2DemAvg(t,regi,entySE) = p32_seh2elh2Dem(t,regi,entySE);

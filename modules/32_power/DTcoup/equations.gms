@@ -156,7 +156,7 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 ***---------------------------------------------------------------------------
 * q32_shSeElDem(t,regi,te)$(tDT32(t) AND teFlexTax(te) AND regDTCoup(regi))..
 q32_shSeElDem(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi))..
-    v32_shSeElDem(t,regi,te) / 100 * vm_usableSe(t,regi,"seel")
+    v32_shSeElDem(t,regi,te) / 100 * (sum(se2fe(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) ) + sum(se2se(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) ))
     =e=
     sum(en2en(enty,enty2,te),
 			vm_demSe(t,regi,enty,enty2,te)$(sameas(enty,"seel")))
@@ -318,7 +318,7 @@ q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
 * (p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te))	/ 1e12 * sm_TWa_2_MWh / 1.2
 * with prefactor
 	(( p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te)
-*	 * ( 1 + ( v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDemDIETER(t,regi,te) / 100 ) )
+	 * ( 1 + ( v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
 	)
 	/ 1e12 * sm_TWa_2_MWh / 1.2 )
 	* 1$(cm_DTcoup_eq ne 0)
@@ -364,7 +364,7 @@ q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) A
     vm_capFac(t,regi,te) * 1$(regDTCoup(regi))
     =e=
 	  pm_cf(t,regi,te)
- * ( 1 - 0.7 * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDemDIETER(t,regi,te) / 100 ) )
+ * ( 1 - 0.7 * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
 	  * 1$(regDTCoup(regi))
 ;
 

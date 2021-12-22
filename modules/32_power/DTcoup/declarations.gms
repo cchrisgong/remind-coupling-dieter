@@ -40,8 +40,8 @@ parameters
     p32_prod4CCS(ttot,all_regi,all_enty)                "power consumption for CCS"
     p32_totProd(ttot,all_regi,all_enty)                 "total seel production (both coupled and uncoupled production)"
     p32_seelCurt(ttot,all_regi)                         "total curtailment"
-
-    p32_shSeElDemDIETER(ttot,all_regi,all_te)	          "share of electricity demand in % [%] in last iter DIETER"
+    p32_shSeElDem(ttot,all_regi,all_te)	                "share of electricity demand in % [%] in last iter REMIND"
+    p32_shSeElDemDIETER(ttot,all_regi,all_te)	          "share of electricity demand in % [%] in last iter DIETER - only as a share of dispatched tech generation"
     p32_realCapfacVRE(ttot,all_regi,all_te)             "post curtailment - real VRE capfac"
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"

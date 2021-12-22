@@ -63,8 +63,9 @@ p32_totProd(t,regi,enty2)$(sameas(enty2,"seel")) =
 
 
 *** coupled production
-p32_coupledProd(t,regi,enty2)$(sameas(enty2,"seel")) = sum(pc2te(enty,entySE(enty3),te,enty2),
-		pm_prodCouple(regi,enty,enty3,te,enty2) * vm_prodSe.l(t,regi,enty,enty3,te) );
+p32_coupledProd(t,regi,entySe)$(sameas(entySe,"seel")) = sum(pc2te(entyPe,entySe(enty3),te,enty2)$(pm_prodCouple(regi,entyPe,enty3,te,entySe) gt 0),
+		pm_prodCouple(regi,entyPe,enty3,te,entySe) * vm_prodSe.l(t,regi,entyPe,enty3,te) );
+
 *** power for d&t of FE
 p32_prod4dtFE(t,regi,enty2)$(sameas(enty2,"seel")) = sum(pc2te(enty4,entyFE(enty5),te,enty2),
 		pm_prodCouple(regi,enty4,enty5,te,enty2) * vm_prodFe.l(t,regi,enty4,enty5,te) );
@@ -82,12 +83,12 @@ p32_extrEnergyUsage(t,regi,enty2)$(sameas(enty2,"seel")) =
 *** CG: total curtailment
 p32_seelCurt(t,regi) = sum(teVRE, v32_storloss.l(t,regi,teVRE) );
 
-*** total demand: including fuel extraction power usage (excluding curtailment)
+*** total demand: excluding fuel extraction power usage for simplicity (and excluding curtailment)
 p32_seelTotDem(t,regi,enty2)$(sameas(enty2,"seel")) =
   sum(se2fe(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) )
 + sum(se2se(enty2,enty3,te), vm_demSe.l(t,regi,enty2,enty3,te) )
 * own consumption: electricity used for extracting fossil fuel, ususally negative
-+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr.l(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! do not use in 2005 because this demand is not contained in 05_initialCap
+*+ sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr.l(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! do not use in 2005 because this demand is not contained in 05_initialCap
 ;
 
 *** CG: total usable demand to pass on to DIETER: this has to
@@ -115,6 +116,8 @@ p32_seelUsableProdCoup(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(e
 ** CG: vm_demSe.l(t,regi,"seel","seh2","elh2") is how much electricity is needed to produse seh2 (green h2)
 ** p32_seh2elh2Dem < p32_seelUsableDem (p32_seh2elh2Dem is part of the total usable demand p32_seelUsableDem)
 p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
+
+p32_shSeElDem(t,regi,te)$(regDTCoup(regi)) = sum(en2en(enty,enty2,te),vm_demSe.l(t,regi,enty,enty2,te)$(sameas(enty,"seel")))/p32_seelTotDem(t,regi,"seel");
 
 **** CG: DIETER coupling
 *###################################################################
