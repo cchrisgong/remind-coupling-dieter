@@ -78,6 +78,8 @@ $ENDIF.DTcoup
     p32_fuelprice_curriter(ttot,all_regi,all_enty)                      "fuel cost of the current iteration"
     p32_fuelprice_avgiter(ttot,all_regi,all_enty)                       "fuel cost over the three iterations averaged through a low pass filter"
 
+    p32_test1(ttot,all_regi,all_te)
+    p32_test2(ttot,all_regi)
 ;
 
 scalars
@@ -98,7 +100,6 @@ positive variables
     v32_capDecayEnd(ttot,all_regi)                 "the end decay point of the logit function for required dispatchable capacity as a function of electricity demand"
     v32_flexPriceShare(tall,all_regi,all_te)       "share of average electricity price that flexible technologies see [share: 0...1]"
     v32_flexPriceShareMin(tall,all_regi,all_te)    "possible minimum of share of average electricity price that flexible technologies see [share: 0...1]"
-
 ;
 
 equations
@@ -108,7 +109,7 @@ equations
     q32_usableSeDisp(ttot,all_regi,all_enty)  "calculate usable se before se2se and MP/XP (without storage) that are dispatched by DIETER, i.e. excluding co-production"
     q32_usableSeTeDisp(ttot,all_regi,entySe,all_te)    "calculate usable se produced by one technology (vm_usableSeTeDisp) that are dispatched by DIETER, i.e. excluding co-production"
 
-*   q32_seelUsableDem(ttot,all_regi,all_enty)      "calculate total usable seel for demand"
+    q32_seelUsableDem(ttot,all_regi,all_enty)      "calculate total usable seel for demand"
     q32_limitCapTeStor(ttot,all_regi,teStor)	   "calculate the storage capacity required by vm_storloss"
     q32_limitCapTeChp(ttot,all_regi)               "capacitiy constraint for chp electricity generation"
     q32_limitCapTeGrid(ttot,all_regi)          	   "calculate the additional grid capacity required by VRE"
