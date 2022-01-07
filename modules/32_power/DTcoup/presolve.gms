@@ -16,7 +16,7 @@ pm_SEPrice(t,regi,entySE)$(abs (qm_budget.m(t,regi)) gt sm_eps AND sameas(entySE
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_budget(t,regi)$(tDT32(t) AND regDTCoup(regi)) = qm_budget.m(t,regi);
 
-*** CG:load fuel prices from two previous iterations, avoid using marginals in case they might be zero
+*** CG: load fuel prices from two previous iterations, avoid using marginals in case they might be zero
 p32_fuelprice_lastx2iter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_lastiter(t,regi,entyPe);
 p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
 
@@ -146,6 +146,9 @@ $ENDIF.elh2_coup
 * ** no curt_ratio averaging
 p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio"));
 p32_DIETERCurtRatio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio"));
+
+p32_DIETERCurtRatioCurrIter(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"spv");
+p32_DIETERCurtRatioCurrIter(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"wind");
 
 $IFTHEN.curt_avg %cm_DTcurt_avg% == "on"
 * with curt_ratio averaging

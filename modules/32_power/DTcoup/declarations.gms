@@ -26,9 +26,10 @@ parameters
 
     p32_shSeEl(ttot,all_regi,all_te)                    "generation share of the last iteration"
     p32_shSeElDisp(ttot,all_regi,all_te)                "generation share (dispatched, no co-production) of the last iteration"
-    p32_usableSeDisp(ttot,all_regi,entySe)       "solved value for usable se that are dispatched by DIETER, i.e. excluding co-production"
+    p32_usableSeDisp(ttot,all_regi,entySe)              "solved value for usable se that are dispatched by DIETER, i.e. excluding co-production"
 *    p32_usableSeDispAvg(ttot,all_regi,entySe)       "usable se that are dispatched by DIETER, i.e. excluding co-production averaged over 2 iterations"
-    p32_usableSeDispLaIter(ttot,all_regi,entySe)       "last iteration value for usable se that are dispatched by DIETER, i.e. excluding co-production"
+    p32_usableSeDispLaIter(ttot,all_regi,entySe)        "last iteration value for usable se that are dispatched by DIETER, i.e. excluding co-production"
+    p32_usableSeDispCurrIter(ttot,all_regi,entySe)      "last iteration value for usable se that are dispatched by DIETER, i.e. excluding co-production, current iteration"
     p32_usableSeTeDisp(ttot,all_regi,entySe,all_te)     "last iteration value for calculate usable se produced by one technology that are dispatched by DIETER, i.e. excluding co-production"
     p32_budget(ttot,all_regi)                           "budget from last iteration"
     p32_nonSEPE2SE(ttot,all_regi,all_enty)              "all non SE2SE PE2SE terms"
@@ -70,6 +71,7 @@ $ENDIF.DTcoup
 
     p32_DIETERCurtRatio(ttot,all_regi,all_te)              "ratio of curtailed energy to usable energy for VRE from DIETER"
     p32_DIETERCurtRatioLaIter(ttot,all_regi,all_te)        "ratio of curtailed energy to usable energy for VRE from DIETER from last iteration DIETER"
+    p32_DIETERCurtRatioCurrIter(ttot,all_regi,all_te)        "ratio of curtailed energy to usable energy for VRE from DIETER from current iteration DIETER"
     p32_r4DT(ttot,all_regi)                                            "interest rate to be passed on to DIETER"
     p32_fuelprice_lastiter(ttot,all_regi,all_enty)                      "fuel cost of the last iteration"
     p32_fuelprice_lastx2iter(ttot,all_regi,all_enty)                    "fuel cost of the second to last iteration"

@@ -18,6 +18,7 @@ COALte32(all_te) "coal to seel tech in REMIND" /igcc,igccc,pc,pcc,pco,coalchp/
 NonPeakGASte32(all_te) "gas to seel tech in REMIND" /ngcc,ngccc,gaschp/
 BIOte32(all_te) "biomass to seel tech in REMIND" /biochp,bioigcc,bioigccc/
 DISPATCHte32(all_te) "dispatchable technologies in REMIND" /igcc,igccc,pc,pcc,pco,coalchp,ngcc,ngccc,gaschp,biochp,bioigcc,bioigccc,ngt,tnrs,fnrs/
+REMINDte4DT32(all_te) "REMIND tech for DIETER" /spv,wind,hydro,elh2,coalchp,gaschp,biochp,ngcc,ngccc,ngt,bioigcc,bioigccc,igcc,igccc,pc,pcc,pco,storspv,storwind,tnrs,fnrs,gridwind/
 CFcoupSuppte32(all_te) "technologies in REMIND which have prefactors to capacity factor" /igcc,igccc,pc,pcc,pco,coalchp,
 ngcc,ngccc,gaschp,biochp,bioigcc,bioigccc,ngt,tnrs,fnrs/
 $endif.chp
@@ -27,6 +28,7 @@ COALte32(all_te) "coal to seel tech in REMIND" /igcc,igccc,pc,pcc,pco/
 NonPeakGASte32(all_te) "gas to seel tech in REMIND" /ngcc,ngccc/
 BIOte32(all_te) "biomass to seel tech in REMIND" /bioigcc,bioigccc/
 DISPATCHte32(all_te) "dispatchable technologies in REMIND" /igcc,igccc,pc,pcc,pco,ngcc,ngccc,bioigcc,bioigccc,ngt,tnrs,fnrs/
+REMINDte4DT32(all_te) "REMIND tech for DIETER" /spv,wind,hydro,elh2,ngcc,ngccc,ngt,bioigcc,bioigccc,igcc,igccc,pc,pcc,pco,storspv,storwind,tnrs,fnrs,gridwind/
 CFcoupSuppte32(all_te) "technologies in REMIND which have prefactors to capacity factor" /igcc,igccc,pc,pcc,pco,ngcc,ngccc,bioigcc,bioigccc,ngt,tnrs,fnrs/
 $endif.chpoff
 

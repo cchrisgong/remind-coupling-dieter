@@ -194,13 +194,6 @@ $IFTHEN.CHPoff %cm_CHP_coup% == "off"
 s32_CHPswitch = 0;
 $ENDIF.CHPoff
 
-execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,s32_H2switch,s32_CHPswitch,
-p32_usableSeDisp, p32_seh2elh2Dem, p32_fuelprice_avgiter,
-f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
-pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, p_teAnnuity, vm_capFac, pm_dataren, vm_capDistr, p32_shSeElDem, p32_shSeElDisp;
-
-put_utility "shell" /
-  "cp RMdata_4DT.gdx RMdata_4DT_i0.gdx";
 
 *** initiating other parameters for averaging in loop
 
@@ -212,6 +205,16 @@ $IFTHEN.curt_avg %cm_DTcurt_avg% == "on"
 p32_DIETERCurtRatioLaIter(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = v32_storloss.l(t,regi,"spv")/(vm_usableSeTe.l(t,regi,"seel","spv")+sm_eps);
 p32_DIETERCurtRatioLaIter(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = v32_storloss.l(t,regi,"wind")/(vm_usableSeTe.l(t,regi,"seel","wind")+sm_eps);
 $ENDIF.curt_avg
+
+
+execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,s32_H2switch,
+COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,
+p32_usableSeDisp, p32_seh2elh2Dem, p32_fuelprice_avgiter,
+f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
+pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, p_teAnnuity, vm_capFac, pm_dataren, vm_capDistr, p32_shSeElDem, p32_shSeElDisp, p32_DIETERCurtRatioLaIter;
+
+put_utility "shell" /
+  "cp RMdata_4DT.gdx RMdata_4DT_i0.gdx";
 
 $ENDIF.DTcoup
 ************************************************************************************************
