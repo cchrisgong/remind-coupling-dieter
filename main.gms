@@ -572,6 +572,8 @@ cm_DTcoup_eq = 0;         !! def = 0
 $setglobal cm_softcap  off         !! def = off
 $setglobal cm_elh2_coup  on       !! def = off
 $setglobal cm_CHP_coup  off       !! def = on
+$setglobal cm_DTcurt_avg on       !! def = on
+$setglobal cm_DTdem_avg  on       !! def = on
 
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
 $setGlobal cm_nash_mode  parallel      !! def = parallel
