@@ -143,21 +143,17 @@ $ENDIF.elh2_coup
     p32_DIETER_elecprice(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"all_te","elec_price"));
 
 *** CG: storage related coupling parameters
-*if( (ord(iteration) le sm32_DTiter),
 * ** no curt_ratio averaging
 p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio"));
 p32_DIETERCurtRatio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio"));
-*);
 
 $IFTHEN.curt_avg %cm_DTcurt_avg% == "on"
 * with curt_ratio averaging
-*if( (ord(iteration) gt sm32_DTiter),
 p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) =
       0.5 * (p32_DIETERCurtRatioLaIter(t,regi,"spv") + p32_DIETERCurtRatio(t,regi,"spv"));
 
 p32_DIETERCurtRatio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) =
       0.5 * (p32_DIETERCurtRatioLaIter(t,regi,"wind") + p32_DIETERCurtRatio(t,regi,"wind"));
-*);
 * ror capfac is harmonized by setting capfac in DIETER to be the same as that in REMIND
 $ENDIF.curt_avg
 
