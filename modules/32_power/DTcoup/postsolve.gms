@@ -6,15 +6,13 @@
 *** |  Contact: remind@pik-potsdam.de
 *** SOF ./modules/32_power/DTcoup/postsolve.gms
 
-
-***CG: fuel price to pass to DIETER (3 iter after coupling starts, can smooth over 3 iterations and overwrite this)
-* p32_fuelprice_avgiter(t,regi,entyPe)$regDTCoup(regi) = q_balPe.m(t,regi,entyPe)$regDTCoup(regi);
-** CG: smoothing fuel cost over iterations to pass to DIETER (divided by budget and unit transformed in DIETER)
-
 * calculate post curtailment "real" VRE capfac
 p32_realCapfacVRE(t,regi,teVRE)$(vm_cap.l(t,regi,teVRE,"1"))
     = ( sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)) - v32_storloss.l(t,regi,teVRE) )
     / vm_cap.l(t,regi,teVRE,"1") *100;
+* calculate pre curtailment "theoretical" VRE capfac
+p32_theoCapfacVRE(t,regi,teVRE)$(vm_cap.l(t,regi,teVRE,"1"))
+    = sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)) / vm_cap.l(t,regi,teVRE,"1") *100;
 
 *** calculation of SE electricity price (for internal use and reporting purposes), excluding 0 cases
 pm_SEPrice(t,regi,entySE)$(abs(qm_budget.m(t,regi)) gt sm_eps AND sameas(entySE,"seel")) =
@@ -63,7 +61,7 @@ p32_totProd(t,regi,enty2)$(sameas(enty2,"seel")) =
 
 
 *** coupled production
-p32_coupledProd(t,regi,entySe)$(sameas(entySe,"seel")) = sum(pc2te(entyPe,entySe(enty3),te,enty2)$(pm_prodCouple(regi,entyPe,enty3,te,entySe) gt 0),
+p32_coupledProd(t,regi,entySe)$(sameas(entySe,"seel")) = sum(pc2te(entyPe,entySe(enty3),te,entySe)$(pm_prodCouple(regi,entyPe,enty3,te,entySe) gt 0),
 		pm_prodCouple(regi,entyPe,enty3,te,entySe) * vm_prodSe.l(t,regi,entyPe,enty3,te) );
 
 *** power for d&t of FE
@@ -107,17 +105,21 @@ p32_seelUsableProd(t,regi,entySE)$(sameas(entySE,"seel")) = sum( pe2se(enty,enty
                                                         + sum(se2se(enty,entySE,te), vm_prodSe.l(t,regi,enty,entySE,te) )
                                                       	- sum(teVRE, v32_storloss.l(t,regi,teVRE))
 ;
-
-
-p32_seelUsableProdCoup(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel"))
+*** CG: dispatched part of the demand to be passed on to DIETER
+p32_usableSeDisp(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel"))
                               = v32_usableSeDisp.l(t,regi,entySE)
 ;
 
-** CG: vm_demSe.l(t,regi,"seel","seh2","elh2") is how much electricity is needed to produse seh2 (green h2)
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+
+*** CG: flexible H2 demand to be passed on to DIETER
+** vm_demSe.l(t,regi,"seel","seh2","elh2") is how much electricity is needed to produse seh2 (green h2)
 ** p32_seh2elh2Dem < p32_seelUsableDem (p32_seh2elh2Dem is part of the total usable demand p32_seelUsableDem)
 p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
 
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 p32_shSeElDem(t,regi,te)$(regDTCoup(regi)) = v32_shSeElDem.l(t,regi,te);
+$ENDIF.elh2_coup
 
 **** CG: DIETER coupling
 *###################################################################
@@ -127,18 +129,16 @@ p32_shSeElDem(t,regi,te)$(regDTCoup(regi)) = v32_shSeElDem.l(t,regi,te);
 *           then don't use a last fulldata.gdx from a previous run as input
 *           (this will messed up the variables and equations that are turning on later)
 
-*** start of DIETER coupling
+*** CG: start of DIETER coupling
 *sm32_DTiter = 15
 *if( ((ord(iteration) ge sm32_DTiter) and ( mod(ord(iteration), 3) eq 0)),
-
-$IFTHEN.DTcoup %cm_DTcoup% == "on"
 
  if( ((ord(iteration) ge sm32_DTiter) and ( mod(ord(iteration), 1) eq 0)),
 
 sm32_iter = iteration.val;
 display "DIETER iteration", sm32_iter;
 
-*** fuel cost to be passed on to DIETER
+*** CG: fuel cost to be passed on to DIETER
 *** sometimes for some reason the marginals of the PE equation is 0
 ** if condition not satisfied, last iteration values of p32_fuelprice_curriter will be automatically taken
 p32_fuelprice_curriter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps) AND (abs(qm_budget.m(t,regi)) gt sm_eps)) = q_balPe.m(t,regi,entyPe)/ (qm_budget.m(t,regi));
@@ -149,12 +149,15 @@ p32_fuelprice_avgiter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,
     			 + p32_fuelprice_lastx2iter(t,regi,entyPe))
     			 / 4 ;
 
-* demand averaging
-p32_seelUsableProdCoupAvg(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) =
-  0.5 * (p32_seelUsableProdCoup(t,regi,entySE) + p32_seelUsableProdCoupLaIter(t,regi,entySE));
+*** CG: demand averaging to be passed on to DIETER
+$IFTHEN.dem_avg %cm_DTdem_avg% == "on"
+p32_usableSeDisp(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) =
+  0.5 * (p32_usableSeDisp(t,regi,entySE) + p32_usableSeDispLaIter(t,regi,entySE));
 
-p32_seh2elh2DemAvg(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) =
+p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) =
   0.5 * (p32_seh2elh2Dem(t,regi,entySE) + p32_seh2elh2DemLaIter(t,regi,entySE));
+$ENDIF.dem_avg
+
 
 ***CG:interest rate (Marian's formula) (should move this to core/postsolve at some point)
 p32_r4DT(ttot,regi)$(tDT32s2(ttot))
@@ -176,10 +179,17 @@ p32_test2(t,regi) =  sum(en2en(enty,enty2,te),
 p32_r4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
 
 * REMIND data for DIETER
-    execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,
-    p32_seelUsableProdCoupAvg, p32_seh2elh2DemAvg, p32_fuelprice_avgiter,
+    execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,s32_H2switch,s32_CHPswitch,
+    p32_usableSeDisp, p32_seh2elh2Dem, p32_fuelprice_avgiter,
     f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
     pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, p_teAnnuity, pm_cf, vm_capFac, pm_dataren, vm_capDistr;
+
+logfile.nr = 1;
+if ( (c_keep_iteration_gdxes eq 1) ,
+    put_utility "shell" /
+      "cp RMdata_4DT.gdx RMdata_4DT_i" sm32_iter:0:0 ".gdx";
+);
+logfile.nr = 2;
 
 *** CG: fit a polynom through oscillating fuel price data for biomass, coal and gas
     execute "Rscript fuelPriceCubRegr.R";
@@ -218,13 +228,17 @@ if ( (c_keep_iteration_gdxes eq 1) ,
 
 );
 logfile.nr = 2;
-);
 
+$IFTHEN.curt_avg %cm_DTcurt_avg% == "on"
 p32_DIETERCurtRatioLaIter(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"spv");
 p32_DIETERCurtRatioLaIter(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"wind");
+$ENDIF.curt_avg
 
 * coupled demand side or supply side technologies:
 p32_cf_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (teDTCoupSupp(te) OR CFcoupDemte32(te))) = vm_capFac.l(t,regi,te);
+
+);
+
 
 $ENDIF.DTcoup
 

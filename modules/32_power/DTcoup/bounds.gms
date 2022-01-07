@@ -110,10 +110,9 @@ loop(regi$(p32_factorStorage(regi,"csp") < 1),
 *** Fix capacity to 0 for elh2VRE now that the equation q32_elh2VREcapfromTestor pushes elh2, not anymore elh2VRE, and capital costs are 1
 vm_cap.fx(t,regi,"elh2VRE",rlf) = 0;
 
-
-* vm_cap.fx(t,regi,"biochp",rlf)$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
-* vm_cap.fx(t,regi,"gaschp",rlf)$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
-* vm_cap.fx(t,regi,"coalchp",rlf)$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
+*** =====================================
+*** END OF IntC bounds
+*** =====================================
 
 $ifthen.chpoff %cm_CHP_coup% == "off"
 vm_capFac.fx(t,regi,"biochp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
@@ -124,10 +123,6 @@ vm_capFac.fx(t,regi,"csp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)
 vm_capFac.fx(t,regi,"dot")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 vm_capFac.fx(t,regi,"geohdr")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 
-*** =====================================
-*** END OF IntC bounds
-*** =====================================
-
 *** all flexible subsidies are set to 0 for non-coupled regions in DTcoup realization (regardless of whether cm_DTcoup is on, or elh2_coup is on)
 *** This is because in calibration cm_flex_tax is turned off, and only in policy runs they are turned on
 *** so one can turn off electrolysers subsidies for non coupled regions, without distortions
@@ -135,8 +130,8 @@ vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regNoDTCoup(regi)) = 0;
 vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi) AND not tDT32(t)) = 0;
 
 ***CG: bound shares between 0 and 100
-v32_shStor.up(t,regi,teVRE) = 100;
-v32_shStor.lo(t,regi,teVRE) = 0;
+* v32_shStor.up(t,regi,teVRE) = 100;
+* v32_shStor.lo(t,regi,teVRE) = 0;
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 

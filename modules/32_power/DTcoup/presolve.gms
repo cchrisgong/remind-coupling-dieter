@@ -20,10 +20,11 @@ p32_budget(t,regi)$(tDT32(t) AND regDTCoup(regi)) = qm_budget.m(t,regi);
 p32_fuelprice_lastx2iter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_lastiter(t,regi,entyPe);
 p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
 
-*total coupled part of the seel demand/production to be passed to dieter
-p32_seelUsableProdCoupLaIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) = p32_seelUsableProdCoup(t,regi,entySE);
-p32_seh2elh2DemLaIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
-
+$IFTHEN.dem_avg %cm_DTdem_avg% == "on"
+*** CG: last iteration total and flexible seel demand/production to be passed to dieter
+p32_usableSeDispLaIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) = p32_usableSeDisp(t,regi,entySE);
+p32_seh2elh2DemLaIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = p32_seh2elh2Dem(t,regi,entySE);
+$ENDIF.dem_avg
 $ENDIF.DTcoup
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
@@ -142,21 +143,23 @@ $ENDIF.elh2_coup
     p32_DIETER_elecprice(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"all_te","elec_price"));
 
 *** CG: storage related coupling parameters
-* if( (ord(iteration) le sm32_DTiter),
+*if( (ord(iteration) le sm32_DTiter),
 * ** no curt_ratio averaging
 p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio"));
 p32_DIETERCurtRatio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio"));
-* );
+*);
 
+$IFTHEN.curt_avg %cm_DTcurt_avg% == "on"
 * with curt_ratio averaging
-* if( (ord(iteration) gt sm32_DTiter),
+*if( (ord(iteration) gt sm32_DTiter),
 p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) =
       0.5 * (p32_DIETERCurtRatioLaIter(t,regi,"spv") + p32_DIETERCurtRatio(t,regi,"spv"));
 
 p32_DIETERCurtRatio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) =
       0.5 * (p32_DIETERCurtRatioLaIter(t,regi,"wind") + p32_DIETERCurtRatio(t,regi,"wind"));
-* );
-* ror capfac is harmonized by putting capfac in DIETER to be the same as that in REMIND
+*);
+* ror capfac is harmonized by setting capfac in DIETER to be the same as that in REMIND
+$ENDIF.curt_avg
 
 $ENDIF.DTcoup
 

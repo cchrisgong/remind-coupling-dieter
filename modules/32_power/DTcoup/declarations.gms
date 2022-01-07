@@ -18,21 +18,18 @@ parameters
 *** for diagnostics and reporting (calculation of p32_seelUsableDem)
     p32_seelTotDem(ttot,all_regi,all_enty)              "total secondary electricity demand (including curtailment)"
     p32_seelUsableDem(ttot,all_regi,all_enty)           "total usable secondary electricity demand"
-    p32_seelUsableDemAvg(ttot,all_regi,all_enty)       "total usable secondary electricity demand averaged over 2 iterations"
-    p32_seelUsableDemLaIter(ttot,all_regi,all_enty) "total usable secondary electricity demand from last iteration"
-    p32_seelUsableProd(ttot,all_regi,all_enty)          "total usable secondary electricity production (no co-production included)"
-    p32_seelUsableProdCoup(ttot,all_regi,all_enty)          "total usable secondary electricity production (no co-production included) coupled to DIETER"
-    p32_seelUsableProdCoupAvg(ttot,all_regi,all_enty)       "total usable secondary electricity production averaged over 2 iterations (no co-production included)"
-    p32_seelUsableProdCoupLaIter(ttot,all_regi,all_enty) "total usable secondary electricity production from last iteration (no co-production included)"
-* p32_seelUsableProdAvg(ttot,all_regi,all_enty)       "total usable secondary electricity production averaged over 2 iterations (no co-production included)"
-* p32_seelUsableProdLaIter(ttot,all_regi,all_enty) "total usable secondary electricity production from last iteration (no co-production included)"
+    p32_seelUsableProd(ttot,all_regi,all_enty)          "total usable secondary electricity production (no co-production included, but including not dispatched tech)"
     p32_seh2elh2Dem(ttot,all_regi,all_enty)             "total green H2 demand"
-    p32_seh2elh2DemAvg(ttot,all_regi,all_enty)          "total green H2 demand averaged over 2 iterations"
+*    p32_seh2elh2DemAvg(ttot,all_regi,all_enty)          "total green H2 demand averaged over 2 iterations"
     p32_seh2elh2DemLaIter(ttot,all_regi,all_enty)       "total green H2 demand from last iteration"
     p32_extrEnergyUsage(ttot,all_regi,all_enty)         "Energy used in extraction"
 
     p32_shSeEl(ttot,all_regi,all_te)                    "generation share of the last iteration"
     p32_shSeElDisp(ttot,all_regi,all_te)                "generation share (dispatched, no co-production) of the last iteration"
+    p32_usableSeDisp(ttot,all_regi,entySe)       "solved value for usable se that are dispatched by DIETER, i.e. excluding co-production"
+*    p32_usableSeDispAvg(ttot,all_regi,entySe)       "usable se that are dispatched by DIETER, i.e. excluding co-production averaged over 2 iterations"
+    p32_usableSeDispLaIter(ttot,all_regi,entySe)       "last iteration value for usable se that are dispatched by DIETER, i.e. excluding co-production"
+    p32_usableSeTeDisp(ttot,all_regi,entySe,all_te)     "last iteration value for calculate usable se produced by one technology that are dispatched by DIETER, i.e. excluding co-production"
     p32_budget(ttot,all_regi)                           "budget from last iteration"
     p32_nonSEPE2SE(ttot,all_regi,all_enty)              "all non SE2SE PE2SE terms"
     p32_coupledProd(ttot,all_regi,all_enty)             "coupled production"
@@ -43,6 +40,7 @@ parameters
     p32_shSeElDem(ttot,all_regi,all_te)	                "share of electricity demand in % [%] in last iter REMIND"
     p32_shSeElDemDIETER(ttot,all_regi,all_te)	          "share of electricity demand in % [%] in last iter DIETER - only as a share of dispatched tech generation"
     p32_realCapfacVRE(ttot,all_regi,all_te)             "post curtailment - real VRE capfac"
+    p32_theoCapfacVRE(ttot,all_regi,all_te)             "pre curtailment - theoretical VRE capfac"
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_marketValue(ttot,all_regi,all_te)               "market value seen by REMIND"
@@ -86,6 +84,8 @@ scalars
     s32_storlink                              "how strong is the influence of two similar renewable energies on each other's storage requirements (1= complete, 4= rather small)" /3/
     sm32_iter                                 "iteration.val"
     sm32_DTiter                               "iteration when DIETER starts to be coupled"
+    s32_H2switch                              "a binary switch for flexible H2 coupling, to be exported to DIETER"
+    s32_CHPswitch                              "a binary switch for coupling CHP plant, to be exported to DIETER"
 ;
 
 positive variables
@@ -107,7 +107,7 @@ equations
     q32_usableSe(ttot,all_regi,all_enty)	   "calculate usable se before se2se and MP/XP (without storage)"
     q32_usableSeTe(ttot,all_regi,entySe,all_te)    "calculate usable se produced by one technology (vm_usableSeTe)"
     q32_usableSeDisp(ttot,all_regi,all_enty)  "calculate usable se before se2se and MP/XP (without storage) that are dispatched by DIETER, i.e. excluding co-production"
-    q32_usableSeTeDisp(ttot,all_regi,entySe,all_te)    "calculate usable se produced by one technology (vm_usableSeTeDisp) that are dispatched by DIETER, i.e. excluding co-production"
+    q32_usableSeTeDisp(ttot,all_regi,entySe,all_te)    "calculate usable se produced by one technology (v32_usableSeTeDisp) that are dispatched by DIETER, i.e. excluding co-production"
 
     q32_seelUsableDem(ttot,all_regi,all_enty)      "calculate total usable seel for demand"
     q32_limitCapTeStor(ttot,all_regi,teStor)	   "calculate the storage capacity required by vm_storloss"
@@ -158,8 +158,8 @@ $ENDIF.DTcoup
 ;
 
 variables
-v32_usableSeDisp(ttot,all_regi,entySe)                    "usable se before se2se and MP/XP (pe2se, +positive oc from pe2se, -storage losses). [TWa]"
-v32_usableSeTeDisp(ttot,all_regi,entySe,all_te)           "usable se produced by one te (pe2se, +positive oc from pe2se, -storage losses). [TWa]"
+v32_usableSeDisp(ttot,all_regi,entySe)                    "usable se that are dispatched by DIETER, i.e. excluding co-production"
+v32_usableSeTeDisp(ttot,all_regi,entySe,all_te)           "calculate usable se produced by one technology that are dispatched by DIETER, i.e. excluding co-production"
 v32_flexPriceShare(tall,all_regi,all_te)           "share of average electricity price that flexible technologies see [share: 0...1]"
 v32_flexPriceShareMin(tall,all_regi,all_te)        "possible minimum of share of average electricity price that flexible technologies see [share: 0...1]"
 ;
