@@ -87,7 +87,6 @@ scalars
     sm32_iter                                 "iteration.val"
     sm32_DTiter                               "iteration when DIETER starts to be coupled"
     s32_H2switch                              "a binary switch for flexible H2 coupling, to be exported to DIETER"
-    s32_CHPswitch                              "a binary switch for coupling CHP plant, to be exported to DIETER"
 ;
 
 positive variables

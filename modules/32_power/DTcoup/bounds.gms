@@ -119,6 +119,7 @@ vm_capFac.fx(t,regi,"biochp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(re
 vm_capFac.fx(t,regi,"gaschp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
 vm_capFac.fx(t,regi,"coalchp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
 $endif.chpoff
+
 vm_capFac.fx(t,regi,"csp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 vm_capFac.fx(t,regi,"dot")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 vm_capFac.fx(t,regi,"geohdr")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
@@ -133,6 +134,8 @@ vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi) AND not tDT32(t)) = 
 * v32_shStor.up(t,regi,teVRE) = 100;
 * v32_shStor.lo(t,regi,teVRE) = 0;
 
+
+
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
@@ -142,6 +145,8 @@ $ENDIF.elh2_coup
 
 v32_shSeEl.up(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 100;
 v32_shSeEl.lo(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 0;
+v32_shSeElDisp.up(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 100;
+v32_shSeElDisp.lo(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 0;
 
 *this turns off storage for coupled region, no need to put any additional switches on the storage equations
 v32_shStor.fx(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
