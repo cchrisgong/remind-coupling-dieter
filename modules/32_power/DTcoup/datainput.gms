@@ -186,15 +186,6 @@ $IFTHEN.elh2_coup_off %cm_elh2_coup% == "off"
 s32_H2switch = 0;
 $ENDIF.elh2_coup_off
 
-*** CG: export CHP switch
-$IFTHEN.CHP %cm_CHP_coup% == "on"
-s32_CHPswitch = 1;
-$ENDIF.CHP
-$IFTHEN.CHPoff %cm_CHP_coup% == "off"
-s32_CHPswitch = 0;
-$ENDIF.CHPoff
-
-
 *** initiating other parameters for averaging in loop
 
 p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
