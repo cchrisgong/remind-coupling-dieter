@@ -117,6 +117,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 ** vm_demSe.l(t,regi,"seel","seh2","elh2") is how much electricity is needed to produse seh2 (green h2)
 ** p32_seh2elh2Dem < p32_seelUsableDem (p32_seh2elh2Dem is part of the total usable demand p32_seelUsableDem)
 p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
+p32_seh2elh2DemCurrIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = p32_seh2elh2Dem(t,regi,"seh2");
 
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 p32_shSeElDem(t,regi,te)$(regDTCoup(regi)) = v32_shSeElDem.l(t,regi,te);
@@ -153,10 +154,10 @@ p32_fuelprice_avgiter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,
 *** CG: demand averaging to be passed on to DIETER
 $IFTHEN.dem_avg %cm_DTdem_avg% == "on"
 p32_usableSeDisp(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) =
-  0.5 * (p32_usableSeDisp(t,regi,entySE) + p32_usableSeDispLaIter(t,regi,entySE));
+  0.5 * (p32_usableSeDispCurrIter(t,regi,entySE) + p32_usableSeDispLaIter(t,regi,entySE));
 
 p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) =
-  0.5 * (p32_seh2elh2Dem(t,regi,entySE) + p32_seh2elh2DemLaIter(t,regi,entySE));
+  0.5 * (p32_seh2elh2DemCurrIter(t,regi,entySE) + p32_seh2elh2DemLaIter(t,regi,entySE));
 $ENDIF.dem_avg
 
 
