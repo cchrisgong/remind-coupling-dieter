@@ -53,7 +53,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
     p32_report4RM(gdxfile32,ttot,all_regi,DIETERte32,DIETERvarname32)    "load report from DIETER"
     p32_reportmk_4RM(gdxfile32,ttot,all_regi,DIETERte32,DIETERvarname32) "load markup report from DIETER"
-
+    p32_DTstatus(ttot,all_regi)        "DIETER solver status"
     p32_peakDemand_RelFac(ttot,all_regi)         "annual peak demand as a relative ratio of total annual power demand from DIETER"
     p32_DIETER_VF(ttot,all_regi,all_te)          "multiplicative value factor from DIETER that indicates the multiplicative price mark up of technology"
     p32_DIETER_MV(ttot,all_regi,all_te)          "market value for power generating technology rom DIETER"

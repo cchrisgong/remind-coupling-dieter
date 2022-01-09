@@ -34,6 +34,16 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *   sum over gdxfile set removes this extra index that comes from gdxmerge algorithm
 *   optional: averaging capfac over 2 iterations
 
+*** check DIETER solver status
+p32_DTstatus(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"el","status"));
+
+loop (t(ttot),
+  loop (regDTCoup(regi),
+    if (p32_DTstatus(t,regDTCoup) ne 1,
+        abort "one or more DIETER LP have non optimal solver status";
+        );
+  );
+);
 ***CG:noCF averaging
 if( (ord(iteration) le sm32_DTiter) ,
     pm_cf(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
