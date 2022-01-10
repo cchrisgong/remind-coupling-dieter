@@ -109,7 +109,7 @@ p32_seelUsableProd(t,regi,entySE)$(sameas(entySE,"seel")) = sum( pe2se(enty,enty
 p32_usableSeDisp(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel"))
                               = v32_usableSeDisp.l(t,regi,entySE)
 ;
-p32_usableSeDispCurrIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) = p32_usableSeDisp(t,regi,entySE);
+
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
@@ -152,11 +152,13 @@ p32_fuelprice_avgiter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,
 
 *** CG: demand averaging to be passed on to DIETER
 $IFTHEN.dem_avg %cm_DTdem_avg% == "on"
+p32_usableSeDispCurrIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) = p32_usableSeDisp(t,regi,entySE);
 p32_usableSeDisp(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) =
-  0.5 * (p32_usableSeDisp(t,regi,entySE) + p32_usableSeDispLaIter(t,regi,entySE));
+  0.5 * (p32_usableSeDispCurrIter(t,regi,entySE) + p32_usableSeDispLaIter(t,regi,entySE));
 
+p32_seh2elh2DemCurrIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = p32_seh2elh2Dem(t,regi,"seh2");
 p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) =
-  0.5 * (p32_seh2elh2Dem(t,regi,entySE) + p32_seh2elh2DemLaIter(t,regi,entySE));
+  0.5 * (p32_seh2elh2DemCurrIter(t,regi,entySE) + p32_seh2elh2DemLaIter(t,regi,entySE));
 $ENDIF.dem_avg
 
 
@@ -180,7 +182,7 @@ p32_test2(t,regi) =  sum(en2en(enty,enty2,te),
 p32_r4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
 
 * REMIND data for DIETER
-    execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,s32_H2switch,
+    execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,s32_H2switch,p32_realCapfacVRE,v32_storloss,
     COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,
     p32_usableSeDisp, p32_seh2elh2Dem, p32_fuelprice_avgiter,
     f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,

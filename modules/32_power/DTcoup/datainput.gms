@@ -127,8 +127,11 @@ Execute_Loadpoint 'input' vm_cons = vm_cons;
 Execute_Loadpoint 'input' pm_pop = pm_pop;
 Execute_Loadpoint 'input' pm_ttot_val = pm_ttot_val;
 Execute_Loadpoint 'input' pm_prtp = pm_prtp;
-Execute_Loadpoint 'input' v32_storloss = v32_storloss;
 *Execute_Loadpoint 'input' p_teAnnuity = p_teAnnuity;
+
+p32_realCapfacVRE(t,regi,teVRE)$(vm_cap.l(t,regi,teVRE,"1"))
+    = ( sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)) - v32_storloss.l(t,regi,teVRE) )
+    / vm_cap.l(t,regi,teVRE,"1") *100;
 
 *** CG: calculate share of dispatched generations for postsolve
 p32_usableSeDisp(t,regi,entySe)$(regDTCoup(regi) AND sameas(entySe,"seel")) =
@@ -162,20 +165,11 @@ p32_fuelprice_curriter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi
             q_balPe.m(t,regi,entyPe) / qm_budget.m(t,regi);
 p32_fuelprice_avgiter(t,regi,entyPe) = p32_fuelprice_curriter(t,regi,entyPe);
 
-* total coupled part of the seel demand/production to be passed to dieter
-p32_usableSeDisp(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel")) =
-        sum( pe2se(enty,entySE,te), vm_prodSe.l(t,regi,enty,entySE,te)$teDTCoupSupp(te) )
-        + sum(se2se(enty,entySE,te), vm_prodSe.l(t,regi,enty,entySE,te)$teDTCoupSupp(te) )
-        	- sum(te, v32_storloss.l(t,regi,te)$teDTCoupSupp(te))
-;
-*p32_usableSeDispAvg(t,regi,entySE) = p32_usableSeDisp(t,regi,entySE);
-
 *** CG: only for reporting
 p32_seelTotDem(t,regi,entySE)$(sameas(entySE,"seel")) = sum(en2en(entySE,enty2,te),vm_demSe.l(t,regi,entySE,enty2,te)$(sameas(entySE,"seel")));
 p32_shSeElDem(t,regi,te)$(regDTCoup(regi)) = sum(en2en(enty,enty2,te),vm_demSe.l(t,regi,enty,enty2,te)$(sameas(enty,"seel")))/p32_seelTotDem(t,regi,"seel") *100;
 
 p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
-*p32_seh2elh2DemAvg(t,regi,entySE) = p32_seh2elh2Dem(t,regi,entySE);
 
 *** dumping REMIND input for DIETER iteration
 *** CG: export H2 switch
@@ -198,7 +192,7 @@ p32_DIETERCurtRatioLaIter(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = v32_st
 $ENDIF.curt_avg
 
 
-execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,s32_H2switch,
+execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,s32_H2switch,p32_realCapfacVRE,v32_storloss,
 COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,
 p32_usableSeDisp, p32_seh2elh2Dem, p32_fuelprice_avgiter,
 f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,

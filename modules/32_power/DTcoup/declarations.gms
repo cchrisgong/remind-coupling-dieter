@@ -20,6 +20,7 @@ parameters
     p32_seelUsableDem(ttot,all_regi,all_enty)           "total usable secondary electricity demand"
     p32_seelUsableProd(ttot,all_regi,all_enty)          "total usable secondary electricity production (no co-production included, but including not dispatched tech)"
     p32_seh2elh2Dem(ttot,all_regi,all_enty)             "total green H2 demand"
+    p32_seh2elh2DemCurrIter(ttot,all_regi,all_enty)     "total green H2 demand current iteration"
 *    p32_seh2elh2DemAvg(ttot,all_regi,all_enty)          "total green H2 demand averaged over 2 iterations"
     p32_seh2elh2DemLaIter(ttot,all_regi,all_enty)       "total green H2 demand from last iteration"
     p32_extrEnergyUsage(ttot,all_regi,all_enty)         "Energy used in extraction"
