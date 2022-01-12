@@ -117,7 +117,6 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 ** vm_demSe.l(t,regi,"seel","seh2","elh2") is how much electricity is needed to produse seh2 (green h2)
 ** p32_seh2elh2Dem < p32_seelUsableDem (p32_seh2elh2Dem is part of the total usable demand p32_seelUsableDem)
 p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
-p32_seh2elh2DemCurrIter(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = p32_seh2elh2Dem(t,regi,"seh2");
 
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 p32_shSeElDem(t,regi,te)$(regDTCoup(regi)) = v32_shSeElDem.l(t,regi,te);
@@ -183,7 +182,7 @@ p32_test2(t,regi) =  sum(en2en(enty,enty2,te),
 p32_r4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
 
 * REMIND data for DIETER
-    execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,s32_H2switch,p32_realCapfacVRE,v32_storloss,
+    execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,s32_H2switch,p32_realCapfacVRE,v32_storloss,o_margAdjCostInv,
     COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,
     p32_usableSeDisp, p32_seh2elh2Dem, p32_fuelprice_avgiter,
     f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,

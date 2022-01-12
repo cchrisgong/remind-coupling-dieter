@@ -127,6 +127,7 @@ Execute_Loadpoint 'input' vm_cons = vm_cons;
 Execute_Loadpoint 'input' pm_pop = pm_pop;
 Execute_Loadpoint 'input' pm_ttot_val = pm_ttot_val;
 Execute_Loadpoint 'input' pm_prtp = pm_prtp;
+Execute_Loadpoint 'input' o_margAdjCostInv = o_margAdjCostInv;
 *Execute_Loadpoint 'input' p_teAnnuity = p_teAnnuity;
 
 p32_realCapfacVRE(t,regi,teVRE)$(vm_cap.l(t,regi,teVRE,"1"))
@@ -192,7 +193,7 @@ p32_DIETERCurtRatioLaIter(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = v32_st
 $ENDIF.curt_avg
 
 
-execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,s32_H2switch,p32_realCapfacVRE,v32_storloss,
+execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,s32_H2switch,p32_realCapfacVRE,v32_storloss,o_margAdjCostInv,
 COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,
 p32_usableSeDisp, p32_seh2elh2Dem, p32_fuelprice_avgiter,
 f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
