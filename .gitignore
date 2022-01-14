@@ -24,10 +24,15 @@ input/
 output/
 dataprocessing/
 
+# Ignore xlsx files in config created by remind2::colorScenConf()
+config/scenario_config*_colorful.xlsx
+config/*/scenario_config*_colorful.xlsx
+
 # Ignore compare scenario files
 compScen-*.pdf
 compScen-*.err
 compScen-*.out
+compScen-*/*
 
 # Ignore everything in "doc" folders, except for 3 specific files
 doc/

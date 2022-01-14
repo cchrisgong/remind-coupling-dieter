@@ -83,9 +83,9 @@
 * 
 * Regionscode: 2b1450bc
 * 
-* Input data revision: 6.262
+* Input data revision: 6.276
 * 
-* Last modification (input data): Sun Dec 19 11:12:56 2021
+* Last modification (input data): Thu Dec 23 10:57:10 2021
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -390,7 +390,7 @@ cm_cprice_red_factor  = 1;         !! def = 1
 
 $setglobal cm_POPscen  pop_SSP2EU  !! def = pop_SSP2EU
 $setglobal cm_GDPscen  gdp_SSP2EU  !! def = gdp_SSP2EU
-$setglobal c_GDPpcScen  SSP2     !! def = gdp_SSP2   (automatically adjusted by start_run() based on GDPscen) 
+$setglobal c_GDPpcScen  SSP2EU     !! def = gdp_SSP2   (automatically adjusted by start_run() based on GDPscen) 
 $setglobal cm_demScen  gdp_SSP2EU     !! def = gdp_SSP2EU
 cm_GDPcovid      = 0;            !! def = 0
 
@@ -645,7 +645,7 @@ $setglobal cm_feShareLimits  off  !! def = off
 
 $setglobal cm_altTransBunkersShare  off      !! def = off
 
-$setglobal cm_wind_offshore  0      !! def = 0
+$setglobal cm_wind_offshore  1      !! def = 0
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ***                                  END OF WARNING ZONE
