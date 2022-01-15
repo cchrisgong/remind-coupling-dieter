@@ -246,14 +246,15 @@ $IFTHEN.hardcap %cm_softcap% == "off"
 *** hard capacity constraint to peak residual load demand (excluding flexible load such as electrolysers)
 q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
-	=e=
-p32_peakDemand_relFac(t,regi) * (v32_usableSeDisp(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2")) * 8760
+	=g=
+* p32_peakDemand_relFac(t,regi) * (v32_usableSeDisp(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2")) * 8760
 *p32_peakDemand_relFac(t,regi) * (v32_usableSeDisp(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2") * s32_H2switch) * 8760
-*  p32_peakDemand_relFac(t,regi) * 8760 * ( v32_usableSeDisp(t,regi,"seel")
-* $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-*   - vm_demSe(t,regi,"seel","seh2","elh2")
-* $ENDIF.elh2_coup
-* )
+* p32_peakDemand_relFac(t,regi) * 8760 * (p32_usableSeDisp(t,regi,"seel") - p32_seh2elh2Dem(t,regi,"seh2"))
+ p32_peakDemand_relFac(t,regi) * 8760 * ( v32_usableSeDisp(t,regi,"seel")
+$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+  - vm_demSe(t,regi,"seel","seh2","elh2")
+$ENDIF.elh2_coup
+)
 	;
 
 $ENDIF.hardcap

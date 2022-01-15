@@ -61,8 +61,8 @@ p32_totProd(t,regi,enty2)$(sameas(enty2,"seel")) =
 
 
 *** coupled production
-p32_coupledProd(t,regi,entySe)$(sameas(entySe,"seel")) = sum(pc2te(entyPe,entySe(enty3),te,entySe)$(pm_prodCouple(regi,entyPe,enty3,te,entySe) gt 0),
-		pm_prodCouple(regi,entyPe,enty3,te,entySe) * vm_prodSe.l(t,regi,entyPe,enty3,te) );
+p32_coupledProd(t,regi,enty2)$(sameas(enty2,"seel")) = sum(pc2te(entyPe,entySe(enty3),te,enty2),
+		pm_prodCouple(regi,entyPe,enty3,te,enty2) * vm_prodSe.l(t,regi,entyPe,enty3,te) );
 
 *** power for d&t of FE
 p32_prod4dtFE(t,regi,enty2)$(sameas(enty2,"seel")) = sum(pc2te(enty4,entyFE(enty5),te,enty2),
