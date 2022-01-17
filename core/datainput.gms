@@ -523,8 +523,8 @@ $ENDIF.tech_earlyreti
 $ifthen.Base_Cprice %carbonprice% == "none"
 $ifthen.Base_techpol %techpol% == "none"
 *** Allow very little early retirement future periods
-*pm_regiEarlyRetiRate(t,regi,"pc")$(t.val gt 2025) = 0.01;
-pm_regiEarlyRetiRate(t,regi,te)$(t.val gt 2025) = 0.001;
+pm_regiEarlyRetiRate(t,regi,"pc")$(t.val gt 2025) = 0.01;
+*pm_regiEarlyRetiRate(t,regi,te)$(t.val gt 2025) = 0.001;
 $endif.Base_techpol
 $endif.Base_Cprice
 
