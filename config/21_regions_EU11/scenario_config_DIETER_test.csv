@@ -1,0 +1,6 @@
+title;start;CES_parameters;cm_calibration_string;cm_calibration_FE;cm_INNOPATHS_inco0Factor;cm_iteration_max;regionmapping;cm_rcp_scen;cm_iterative_target_adj;c_budgetCO2;carbonprice;regipol;cm_regiCO2target;cm_NucRegiPol;cm_CoalRegiPol;cm_proNucRegiPol;cm_co2_tax_2020;optimization;c_testOneRegi_region;cm_nash_mode;buildings;transport;cm_EDGEtr_scen;CCU;cm_emiscen;cm_startyear;path_gdx;path_gdx_ref
+_____Calibration_cplx_____;0;;;;;;;;;;;;;;;;;;;;;;;;;;;
+xx_Calib_FE_med;0;calibrate;FE_med;medium;apcardiEfft 0.8, apcardiEffH2t 0.675;0;./config/21_regions_EU11/regionmapping_21_EU11.csv;none;0;0;none;regiCarbonPrice;off;off;off;off;-1;nash;DEU;parallel;simple;complex;Mix;off;1;2005;;
+_____cplx_policy_runs______;0;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DIETER_coup;1;load;FE_med;off;apcardiEfft 0.8, apcardiEffH2t 0.675;1;./config/21_regions_EU11/regionmapping_21_EU11.csv;none;0;0;none;regiCarbonPrice;off;on;on;off;-1;nash;DEU;parallel;simple;complex;Mix;off;1;2005;;
+DIETER_coup_trend;1;load;FE_med;off;apcardiEfft 0.8, apcardiEffH2t 0.675;1;./config/21_regions_EU11/regionmapping_21_EU11.csv;rcp26;5;1300;expoLinear;regiCarbonPrice;off;on;on;off;30;nash;DEU;parallel;simple;complex;Mix;off;9;2015;;
