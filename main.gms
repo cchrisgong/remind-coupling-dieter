@@ -574,6 +574,7 @@ $setglobal cm_elh2_coup  on       !! def = off
 $setglobal cm_CHP_coup  off       !! def = on
 $setglobal cm_DTcurt_avg on       !! def = on
 $setglobal cm_DTdem_avg  on       !! def = on
+cm_DTcoup_flatco2 = 25;         #def <- 25 flat CO2 price for testing dieter coupling
 
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
 $setGlobal cm_nash_mode  parallel      !! def = parallel
