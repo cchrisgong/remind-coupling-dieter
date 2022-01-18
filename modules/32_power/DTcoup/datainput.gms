@@ -167,7 +167,7 @@ p32_r4DT(ttot,regi)$((ttot.val gt 2100) AND regDTCoup(regi)) = 0.05;
 ***CG: passing the CO2 price to DIETER
 $IFTHEN.Base_Cprice %carbonprice% == "none"
 *** CG: updating CO2 price from REMIND to DIETER
-f21_taxCO2eqHist(t,"DEU")$(t.val gt 2020) = 25;
+f21_taxCO2eqHist(t,"DEU")$(t.val gt 2020) = cm_DTcoup_flatco2;
 $ENDIF.Base_Cprice
 
 p32_CO2price4DT(t,regi)$(tDT32(t) AND regDTCoup(regi)) = f21_taxCO2eqHist(t,regi);
