@@ -313,6 +313,7 @@ cm_biotrade_phaseout        "switch for phaseing out biomass trade in the respec
 cm_bioprod_histlim			"regional parameter to limit biomass (pebiolc.1) production to a multiple of the 2015 production"
 cm_flex_tax                 "switch for enabling flexibility tax"
 cm_DTcoup_eq                "switch for DIETER coupling equations"
+cm_DTcoup_flatco2           "flat CO2 price for testing dieter coupling"
 cm_flexMax_elh2             "switch for setting the maximum relative reduction of the electricity price electrolysis sees when flex. tax is enabled"
 cm_H2targets                "switches on capacity targets for electrolysis in NDC techpol following national Hydrogen Strategies"
 cm_PriceDurSlope_elh2       "slope of price duration curve of electrolysis"
@@ -574,7 +575,7 @@ $setglobal cm_elh2_coup  on       !! def = off
 $setglobal cm_CHP_coup  off       !! def = on
 $setglobal cm_DTcurt_avg on       !! def = on
 $setglobal cm_DTdem_avg  on       !! def = on
-cm_DTcoup_flatco2 = 25;         #def <- 25 flat CO2 price for testing dieter coupling
+cm_DTcoup_flatco2 = 25;           !!def <- 25 flat CO2 price for testing dieter coupling
 
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
 $setGlobal cm_nash_mode  parallel      !! def = parallel
