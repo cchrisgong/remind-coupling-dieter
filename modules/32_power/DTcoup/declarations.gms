@@ -33,6 +33,7 @@ parameters
     p32_usableSeDispCurrIter(ttot,all_regi,entySe)      "last iteration value for usable se that are dispatched by DIETER, i.e. excluding co-production, current iteration"
     p32_usableSeTeDisp(ttot,all_regi,entySe,all_te)     "last iteration value for calculate usable se produced by one technology that are dispatched by DIETER, i.e. excluding co-production"
     p32_budget(ttot,all_regi)                           "budget from last iteration"
+    p32_CO2price4DT(ttot,all_regi)                      "CO2 price in REMIND for DIETER"
     p32_nonSEPE2SE(ttot,all_regi,all_enty)              "all non SE2SE PE2SE terms"
     p32_coupledProd(ttot,all_regi,all_enty)             "coupled production"
     p32_prod4dtFE(ttot,all_regi,all_enty)               "power used in transporting and distributing FE"

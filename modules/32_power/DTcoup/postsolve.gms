@@ -181,11 +181,16 @@ p32_test2(t,regi) =  sum(en2en(enty,enty2,te),
 * after 2100 to 5%, this only sets 2110, 2130, 2150 three years
 p32_r4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
 
+$IFTHEN.policy_Cprice not %carbonprice% == "none"
+*** CG: updating CO2 price from REMIND to DIETER
+p32_CO2price4DT(t,regi)$(tDT32(t) AND regDTCoup(regi)) = pm_taxCO2eq(t,regi)/sm_DptCO2_2_TDpGtC;
+$ENDIF.policy_Cprice
+
 * REMIND data for DIETER
     execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,s32_H2switch,p32_realCapfacVRE,v32_storloss,o_margAdjCostInv,
     COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,
     p32_usableSeDisp, p32_seh2elh2Dem, p32_fuelprice_avgiter,
-    f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
+    p32_CO2price4DT, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
     pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, p_teAnnuity, pm_cf, vm_capFac, pm_dataren, vm_capDistr;
 
 logfile.nr = 1;

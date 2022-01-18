@@ -248,7 +248,7 @@ q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq 
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=g=
 * p32_peakDemand_relFac(t,regi) * (v32_usableSeDisp(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2")) * 8760
-*p32_peakDemand_relFac(t,regi) * (v32_usableSeDisp(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2") * s32_H2switch) * 8760
+* p32_peakDemand_relFac(t,regi) * (v32_usableSeDisp(t,regi,"seel") - vm_demSe(t,regi,"seel","seh2","elh2") * s32_H2switch) * 8760
 * p32_peakDemand_relFac(t,regi) * 8760 * (p32_usableSeDisp(t,regi,"seel") - p32_seh2elh2Dem(t,regi,"seh2"))
  p32_peakDemand_relFac(t,regi) * 8760 * ( v32_usableSeDisp(t,regi,"seel")
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"

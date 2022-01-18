@@ -106,7 +106,10 @@ Execute_Loadpoint 'input' vm_prodSe = vm_prodSe;
 Execute_Loadpoint 'input' vm_cap = vm_cap;
 Execute_Loadpoint 'input' vm_usableSe = vm_usableSe;
 Execute_Loadpoint 'input' vm_usableSeTe = vm_usableSeTe;
-Execute_Loadpoint 'input' f21_taxCO2eqHist = f21_taxCO2eqHist;
+**CG: can load a flat "historical CO2 tax" here, however, once loaded this parameter won't be updated by REMIND
+***(because it will overwrite f21_taxCO2eqHist in 21/datainput); in the future,
+***if we do not iterate DIETER from input.gdx, we can simply read in pm_taxCO2eq
+*Execute_Loadpoint 'input' f21_taxCO2eqHist = f21_taxCO2eqHist;
 Execute_Loadpoint 'input' pm_data = pm_data;
 Execute_Loadpoint 'input' vm_costTeCapital = vm_costTeCapital;
 Execute_Loadpoint 'input' fm_dataglob = fm_dataglob;
@@ -161,6 +164,14 @@ p32_r4DT(ttot,regi)$(tDT32s2(ttot) AND regDTCoup(regi))
 *** after 2100 to 5%, this only sets 2110, 2130, 2150 three years
 p32_r4DT(ttot,regi)$((ttot.val gt 2100) AND regDTCoup(regi)) = 0.05;
 
+***CG: passing the CO2 price to DIETER
+$IFTHEN.Base_Cprice %carbonprice% == "none"
+*** CG: updating CO2 price from REMIND to DIETER
+f21_taxCO2eqHist(t,"DEU")$(t.val gt 2020) = 25;
+$ENDIF.Base_Cprice
+
+p32_CO2price4DT(t,regi)$(tDT32(t) AND regDTCoup(regi)) = f21_taxCO2eqHist(t,regi);
+
 * calculate fuel prices (only prices in REMIND in the form of marginals need to be divided by qm_budget.m)
 p32_fuelprice_curriter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps) AND (abs(qm_budget.m(t,regi)) gt sm_eps)) =
             q_balPe.m(t,regi,entyPe) / qm_budget.m(t,regi);
@@ -196,7 +207,7 @@ $ENDIF.curt_avg
 execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,s32_H2switch,p32_realCapfacVRE,v32_storloss,o_margAdjCostInv,
 COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,
 p32_usableSeDisp, p32_seh2elh2Dem, p32_fuelprice_avgiter,
-f21_taxCO2eqHist, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
+p32_CO2price4DT, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
 pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, p_teAnnuity, vm_capFac, pm_dataren, vm_capDistr, p32_shSeElDem, p32_shSeElDisp, p32_DIETERCurtRatioLaIter;
 
 put_utility "shell" /
