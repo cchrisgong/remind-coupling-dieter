@@ -85,6 +85,7 @@ pm_macStep(tall,all_regi,all_enty)                   "step number of abatement l
 pm_macSwitch(all_enty)                               "switch to include mac option in the code"
 pm_macCostSwitch(all_enty)                           "switch to include mac costs in the code (e.g. in coupled scenarios, we want to include the costs in REMIND, but MAC effects on emissions are calculated in MAgPIE)"
 pm_priceCO2(tall,all_regi)                           "carbon price [$/tC]"
+pm_priceCO2_display(tall,all_regi)                   "carbon price [$/tC] for checking"
 p_priceCO2forMAC(tall,all_regi,all_enty)             "carbon price defined for MAC gases [$/tC]"
 p_priceGas(tall,all_regi)                            "gas price in [$/tCeq] for ch4gas MAC"
 pm_ResidualCementDemand(tall,all_regi)               "reduction in cemend demand (and thus process emissions) due to climate policy [0...1]"

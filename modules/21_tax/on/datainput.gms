@@ -156,14 +156,32 @@ $offdelim
 /
 ;
 f21_taxCO2eqHist(t,regi)$(t.val ge 2020) = 5;
-*f21_taxCO2eqHist(t,"DEU")$(t.val gt 2020) = 25;
 
 ** Fixing European 2020 carbon price to 20$/t CO2 (other regions to zero)
 *f21_taxCO2eqHist("2020",regi) = 0;
 f21_taxCO2eqHist("2020",regi)$(regi_group("EUR_regi",regi)) =  20;
+*CG* 
+Display "input data historical co2 price";
+Display f21_taxCO2eqHist;
+
+*CG*
+** flat CO2 price for testing DIETER coupling
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+$IFTHEN.Base_Cprice %carbonprice% == "none"
+*** CG: updating CO2 price from REMIND to DIETER
+f21_taxCO2eqHist(t,regi)$((t.val gt 2020) AND regDTCoup(regi)) = cm_DTcoup_flatco2;
+$ENDIF.Base_Cprice
+$ENDIF.DTcoup
+
+*CG*
+Display "input data historical co2 price after adding option for DIETER testing";
+Display f21_taxCO2eqHist;
+
 
 *** convert from $/tCO2 to T$/GtC
 pm_taxCO2eqHist(t,regi) = f21_taxCO2eqHist(t,regi) * sm_DptCO2_2_TDpGtC;
+Display "input data historical co2 price unit converted";
+Display pm_taxCO2eqHist;
 
 *JeS for SO2 tax case: tax path in 10^12$/TgS (= 10^6 $/t S) @ GDP/cap of 1000$/cap  (value gets scaled by GDP/cap)
 if((cm_so2tax_scen eq 0),

@@ -120,6 +120,9 @@ else
   = abs(pm_pvpRegi(ttot,regi,"perm") / (pm_pvp(ttot,"good") + sm_eps))
   * 1000;
 );
+Display "reported CO2 price for reportLCOE";
+pm_priceCO2_display(ttot,regi) = pm_priceCO2(ttot,regi)/3.66;
+Display pm_priceCO2_display;
 
 *** Define co2 price for entities that are used in MAC.
 p_priceCO2forMAC(ttot,regi,enty) = pm_priceCO2(ttot,regi);
