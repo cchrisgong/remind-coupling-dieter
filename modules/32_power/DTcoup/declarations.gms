@@ -45,10 +45,12 @@ parameters
     p32_realCapfacVRE(ttot,all_regi,all_te)             "post curtailment - real VRE capfac"
     p32_theoCapfacVRE(ttot,all_regi,all_te)             "pre curtailment - theoretical VRE capfac"
 
-$IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_marketValue(ttot,all_regi,all_te)               "market value seen by REMIND"
     p32_marketPrice(ttot,all_regi,all_te)               "market price seen by REMIND"
     p32_valueFactor(ttot,all_regi,all_te)               "value factor seen by REMIND"
+
+
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
 
 *   p32_capStor_DIET(tall,all_regi)       "storage cap from DIETER"
     p32_minVF_spv                         "value factor of solar at 100% VRE shares"
@@ -60,7 +62,8 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_DIETER_VF(ttot,all_regi,all_te)          "multiplicative value factor from DIETER that indicates the multiplicative price mark up of technology"
     p32_DIETER_MV(ttot,all_regi,all_te)          "market value for power generating technology rom DIETER"
     p32_DIETER_MP(ttot,all_regi,all_te)          "market price for power consumption technology DIETER"
-    p32_DIETER_elecprice(ttot,all_regi)          "elec price in DIETER"
+    p32_DIETER_elecprice(ttot,all_regi)          "elec price in DIETER as read by REMIND"
+    p32_DIETER_elecprice_orig(ttot,all_regi)     "elec price in DIETER which accounts for scarcity price"
     p32_DIETER_shSeEl(ttot,all_regi,all_te)      "electricity generation share of technology from DIETER"
 
     p32_reqCap(ttot,all_regi)                              "required total dispatchable capacity to meet peak demand (from last iteration)"
