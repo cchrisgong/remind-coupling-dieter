@@ -45,11 +45,11 @@ parameters
     p32_realCapfacVRE(ttot,all_regi,all_te)             "post curtailment - real VRE capfac"
     p32_theoCapfacVRE(ttot,all_regi,all_te)             "pre curtailment - theoretical VRE capfac"
 
-$IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_marketValue(ttot,all_regi,all_te)               "market value seen by REMIND"
     p32_marketPrice(ttot,all_regi,all_te)               "market price seen by REMIND"
     p32_valueFactor(ttot,all_regi,all_te)               "value factor seen by REMIND"
 
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
 *   p32_capStor_DIET(tall,all_regi)       "storage cap from DIETER"
     p32_minVF_spv                         "value factor of solar at 100% VRE shares"
 
