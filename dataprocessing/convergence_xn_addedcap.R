@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "hydro602"
+run_number = "hydro654"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
 myDIETERPLOT_path = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
@@ -30,7 +30,7 @@ if (length(files_DT_rep) != 0) {
   sorted_annual_report_DT <- paste0(myDIETERPLOT_path, run_number, "_i", sort(id), "_annualreport.csv")
 }
 
-# iteration_toplot_list <-  1:length(id)
+# iteration_toplot_list <-c(1,2,3,4,5)
 iteration_toplot_list <-c(5,10,20,max(id)+1)
 
 dieter.report.cap <- c("DIETER pre-investment capacities (GW)","REMIND pre-investment capacities (GW)")

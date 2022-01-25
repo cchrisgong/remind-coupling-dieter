@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "hydro606"
+run_number = "hydro654"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 # import library
 source(paste0(mypath, "library_import.R"))
@@ -15,7 +15,7 @@ sorted_paths <- paste0(mydatapath, "fulldata_", 0:(length(filenames)-1), ".gdx")
 sorted_paths1 <- paste0(mydatapath, "fulldata_", 1:(length(filenames)-1), ".gdx")
 sorted_files <- paste0("fulldata_", 0:(length(filenames)-1), ".gdx")
 sorted_files1 <- paste0("fulldata_", 1:(length(filenames)-1), ".gdx")
-maxiter = length(filenames)
+maxiter = length(filenames)-1
 # maxiter = 3
 
 # dieter output iteration gdx files
@@ -31,7 +31,7 @@ sorted_files_DT <- paste0("results_DIETER_i", sort(id), ".gdx")
 sorted_paths_DT <- paste0(mydatapath, "results_DIETER_i", sort(id), ".gdx")
 }
 
-year_toplot_list <- c(2020,2030,2040,2050,2060,2070,2080)
+# year_toplot_list <- c(2020,2030,2040,2050,2060,2070,2080)
 year_toplot_list <- c(2020,2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090,2100,2110,2130,2150)
 # year_toplot_list <- c(2025,2035)
   
@@ -56,11 +56,11 @@ ProdKEY1 = "seel"
 ProdKEY2 = "seh2"
 
 remind.nonvre.mapping <- c(
-                           igcc = "Coal (Lig + HC)",
-                           igccc = "Coal (Lig + HC)",
-                           pcc = "Coal (Lig + HC)",
-                           pco = "Coal (Lig + HC)",
-                           pc = "Coal (Lig + HC)",
+                           igcc = "Coal",
+                           igccc = "Coal",
+                           pcc = "Coal",
+                           pco = "Coal",
+                           pc = "Coal",
                            tnrs = "Nuclear",
                            ngt = "OCGT",
                            ngcc = "CCGT",
@@ -72,7 +72,7 @@ if (CHP_coup == TRUE){
   remind.nonvre.mapping = c(remind.nonvre.mapping, c(
   gaschp = "CCGT",
   biochp = "Biomass",
-  coalchp = "Coal (Lig + HC)")
+  coalchp = "Coal")
   )
 }
 # shifting hydro to dispatchable because in REMIND usable energy is only defined for spv, wind, csp
@@ -82,14 +82,12 @@ remind.vre.mapping <- c(wind = "Wind",
                         spv = "Solar",
                         NULL)
 
-table_ordered_name = c("Solar", "Wind", "Biomass", "Hydro", "Nuclear","CCGT", "OCGT", "Coal (Lig + HC)", "Lignite", "Hard coal")
+table_ordered_name = c("Solar", "Wind", "Biomass", "Hydro", "Nuclear","CCGT", "OCGT", "Coal")
 table_ordered_name_dem = c("Electricity used for Electrolysis","Electricity")
 
 remind.tech.mapping <- c(remind.nonvre.mapping2, remind.vre.mapping)
 
-dieter.supply.tech.mapping <- c(hc = "Hard coal",
-                               lig = "Lignite",
-                               coal = "Coal (Lig + HC)",
+dieter.tech.mapping <- c(lig = "Coal",
                                nuc = "Nuclear",
                                OCGT_eff = "OCGT",
                                CCGT = "CCGT",
@@ -104,20 +102,28 @@ dieter.demand.tech.mapping <- c(el = "Electricity",
                                 elh2 = "Electricity used for Electrolysis",
                                 NULL)
 
-dieter.tech.mapping <- c(dieter.supply.tech.mapping, dieter.demand.tech.mapping)
+#load H2 switch
+# h2switch0 <- read.gdx(sorted_paths[[2]], "s32_H2switch", factors = FALSE, squeeze = FALSE)
+# h2switch = as.numeric(h2switch0)
+# h2switch = 0
+
+# if (h2switch == 1){
+  dieter.tech.mapping <- c(dieter.tech.mapping, dieter.demand.tech.mapping)
+# }
+
 
 VARkey1_DT = "p32_report4RM"
 VARsubkey1_DT = c("total_generation", "usable_generation", "total_consumption")
-TECHkeylst_DT = c("CCGT", "lig", "Solar", "Wind_on", "bio", "OCGT_eff", "ror", "nuc", "hc","elh2","el")
+TECHkeylst_DT = c("CCGT", "lig", "Solar", "Wind_on", "bio", "OCGT_eff", "ror", "nuc","elh2","el")
 
-color.mapping1 <- c("CCGT" = "#999959", "Coal (Lig + HC)" = "#0c0c0c",
+color.mapping <- c("CCGT" = "#999959", "Coal" = "#0c0c0c",
                    "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
-                   "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff", "Electricity used for Electrolysis" = "#48D1CC", "Electricity" = "#6495ED")
+                   "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff")
 
-color.mapping2 <- c("CCGT" = "#999959", "Lignite" = "#0c0c0c",
-                   "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
-                   "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
-                   "Hard coal" = "#808080", "Electricity used for Electrolysis" = "#48D1CC", "Electricity" = "#6495ED")
+# if (h2switch == 1){
+color.mapping <- c(color.mapping, c("Electricity used for Electrolysis" = "#48D1CC", "Electricity" = "#6495ED"))
+# }  
+
 # Coal        Oil        Gas    Biomass    Nuclear      Hydro       Wind      Solar Geothermal 
 # "#0c0c0c"  "#cc7500"  "#999959"  "#005900"  "#ff33ff"  "#191999"  "#337fff"  "#ffcc00"  "#e51900"
 
@@ -203,7 +209,7 @@ RM_CONSM <- function(gdx){
 }
 
 get_variable_DT <- function(gdx){
-  # gdx = sorted_files_DT[[3]]
+  # gdx = sorted_paths_DT[[3]]
   
   vrdata <- read.gdx(gdx, VARkey1_DT, factors = FALSE, squeeze = FALSE) %>% 
     select(period = X..1, regi=X..2, all_te=X..3, variable = X..4, value) %>% 
@@ -219,7 +225,7 @@ get_variable_DT <- function(gdx){
 }
 
 vrN <- lapply(sorted_paths, get_variable)
-vr1_GEN_wCurt <- lapply(sorted_paths, RM_GEN_wCurt)
+GEN_wCurt <- lapply(sorted_paths, RM_GEN_wCurt)
 
 vrN_COSUM <- lapply(sorted_paths1, RM_CONSM)
 
@@ -228,7 +234,7 @@ for(fname in sorted_files){
   idx <- as.numeric(str_extract(fname, "[0-9]+"))+1
   # test <- vrN[[1]]
   vrN[[idx]]$iter <- idx -1
-  vr1_GEN_wCurt[[idx]]$iter <- idx -1
+  GEN_wCurt[[idx]]$iter <- idx -1
 }
 
 for(fname in sorted_files1){
@@ -238,10 +244,10 @@ for(fname in sorted_files1){
 }
 
 vrN <- rbindlist(vrN)
-vr1_GEN_wCurt<- rbindlist(vr1_GEN_wCurt)
+GEN_wCurt<- rbindlist(GEN_wCurt)
 vrN_COSUM<- rbindlist(vrN_COSUM)
 
-vr1_GEN_wCurt$tech <- "total generation w/ curtailment"
+GEN_wCurt$tech <- "total generation w/ curtailment"
 
 vrN_COSUM <- vrN_COSUM %>%
 mutate(all_te = fct_relevel(all_te,table_ordered_name_dem))
@@ -249,7 +255,7 @@ mutate(all_te = fct_relevel(all_te,table_ordered_name_dem))
 # vrN <- vrN%>% 
 #   filter(all_te == "Hydro") 
  
-# vr1_GEN_wCurt <- vr1_GEN_wCurt%>% 
+# GEN_wCurt <- GEN_wCurt%>% 
 #   filter(all_te == "Hydro")
 
 if (length(files_DT) != 0) {
@@ -262,53 +268,45 @@ if (length(files_DT) != 0) {
   }
   vrN_DT <- rbindlist(vrN_DT)
   
-  vr1_DT_GEN_wCurt <- vrN_DT %>%
+  DT_GEN_wCurt <- vrN_DT %>%
     filter(variable == "total_generation") %>%
     select(period,iter,all_te,value) 
   
-  vr1_DT_CONSUMP <- vrN_DT %>%
+  DT_CONSUMP <- vrN_DT %>%
     filter(variable == "total_consumption") %>%
     select(period,iter,all_te,value) 
   # %>% 
     # filter(iter == 3)
   
-  vr1_DT_GEN_wCurt_tot <- vrN_DT %>%
+  DT_GEN_wCurt_tot <- vrN_DT %>%
     filter(variable == "total_generation") %>%
     select(period, iter, all_te,value) %>%
     dplyr::group_by(period, iter) %>%
     dplyr::summarise( value = sum(value) , .groups = 'keep' ) %>%
     dplyr::ungroup(period, iter)
   
-  vr1_DT_GEN_wCurt$tech <- "total generation w/ curtailment"
+  DT_GEN_wCurt$tech <- "total generation w/ curtailment"
   
 }
 
 
 for(year_toplot in year_toplot_list){
   # year_toplot = 2040
-  vr1_GEN_wCurt_yr = vr1_GEN_wCurt %>% filter(period == year_toplot)
+  GEN_wCurt_yr = GEN_wCurt %>% filter(period == year_toplot)
   ymax = max(vrN_COSUM$value)*1.5
   ymin = -ymax
   
   if (length(files_DT) != 0) {
-  vr1_DT_GEN_wCurt_yr <- vr1_DT_GEN_wCurt %>% filter(period == year_toplot)
-  vr1_DT_GEN_wCurt_tot_yr <- vr1_DT_GEN_wCurt_tot%>% filter(period == year_toplot) 
-  vr1_DT_CONSUMP_yr <- vr1_DT_CONSUMP%>% filter(period == year_toplot) 
+  DT_GEN_wCurt_yr <- DT_GEN_wCurt %>% filter(period == year_toplot)
+  DT_CONSUMP_yr <- DT_CONSUMP%>% filter(period == year_toplot) 
   }
-  # ymax = max(vr1_DT_GEN_wCurt_tot_yr$value)*1.3
-  
-  # 
-  # if (max(vr1_DT_CONSUMP$value) == 0) {
-  #   ymin = 0
-  # } else {ymin = -max(vr1_DT_CONSUMP_yr$value)*1.7}
-  # 
-  # 
+
   p1<-ggplot() +
-  geom_area(data = vrN  %>% filter(period == year_toplot), aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5, stat = "identity") +
-  geom_area(data = vr1_GEN_wCurt_yr, aes(x = iter, y = value, color = all_te), size = 1.2, alpha = 0,linetype="dotted") +
+  geom_area(data = vrN %>% filter(period == year_toplot), aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5, stat = "identity") +
+  geom_area(data = GEN_wCurt_yr, aes(x = iter, y = value, color = all_te), size = 1.2, alpha = 0,linetype="dotted") +
   geom_area(data = vrN_COSUM %>% filter(period == year_toplot), aes(x = iter, y = -value, fill = all_te), size = 1.2, alpha = 0.5, stat = "identity") +
-  scale_fill_manual(name = "Technology", values = color.mapping1)+
-  scale_color_manual(name = "Technology", values = color.mapping1)+
+  scale_fill_manual(name = "Technology", values = color.mapping)+
+  scale_color_manual(name = "Technology", values = color.mapping)+
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
   xlab("iteration") + ylab(paste0("Usable generation (TWh)")) +
   ggtitle(paste0("REMIND", year_toplot))+
@@ -319,10 +317,10 @@ for(year_toplot in year_toplot_list){
   if (length(files_DT) != 0) {
 p2<-ggplot() +
   geom_area(data = vrN_DT%>% filter(period == year_toplot, variable == "usable_generation"), aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5) +
-  geom_area(data = vr1_DT_GEN_wCurt_yr, aes(x = iter, y = value, color = all_te), size = 1.2, alpha = 0,linetype="dotted") +
-  geom_area(data = vr1_DT_CONSUMP %>% filter(period == year_toplot), aes(x = iter, y = -value, fill = all_te), size = 1.2, alpha = 0.5, stat = "identity") +
-  scale_fill_manual(name = "Technology", values = color.mapping2)+
-  scale_color_manual(name = "Technology", values = color.mapping2)+
+  geom_area(data = DT_GEN_wCurt_yr, aes(x = iter, y = value, color = all_te), size = 1.2, alpha = 0,linetype="dotted") +
+  geom_area(data = DT_CONSUMP %>% filter(period == year_toplot), aes(x = iter, y = -value, fill = all_te), size = 1.2, alpha = 0.5, stat = "identity") +
+  scale_fill_manual(name = "Technology", values = color.mapping)+
+  scale_color_manual(name = "Technology", values = color.mapping)+
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
   xlab("iteration") + ylab(paste0(VARsubkey1_DT, "(TWh)")) +
   coord_cartesian(ylim = c(ymin,ymax), xlim = c(0, maxiter))+
@@ -343,3 +341,39 @@ ggsave(filename = paste0(mypath, run_number, "_GEN_", year_toplot, ".png"),  p, 
 
 }
 
+# timeseries plot
+
+  GEN_wCurt_i = GEN_wCurt %>% 
+    filter(iter == maxiter) %>% 
+    mutate(model = "REMIND") %>% 
+    mutate(period = as.numeric(period))
+  
+  if (length(files_DT) != 0) {
+    DT_GEN_wCurt_i <- DT_GEN_wCurt %>% 
+      filter(iter == maxiter) %>% 
+      mutate(model = "DIETER") %>% 
+      mutate(period = as.numeric(period))
+    
+    GEN_wCurt_i <- list(GEN_wCurt_i, DT_GEN_wCurt_i) %>% 
+      reduce(full_join)
+  }
+  
+  
+  p3<-ggplot() +
+    geom_area(data = GEN_wCurt_i %>% filter(period <2110) , aes(x = period, y = value, fill = all_te),  alpha = 0.5, stat = "identity") +
+    scale_fill_manual(name = "Technology", values = color.mapping)+
+    theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+    xlab("period") + ylab(paste0("Usable generation (TWh)")) +
+    ggtitle(paste0("Generation Mix"))+
+    theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank()) +
+    theme(aspect.ratio = .5) +
+    facet_wrap(~model, nrow = 2)
+  
+  # if (length(files_DT) != 0) {
+  #   p3 <- p3 + 
+  #     geom_area(data = DT_GEN_wCurt_i, aes(x = period, y = value, fill = all_te), alpha = 0.5, stat = "identity")+
+  #     
+  # }
+  
+  ggsave(filename = paste0(mypath, run_number, "_GEN_timeseries_maxiter.png"),  p3,  width = 6, height =8, units = "in", dpi = 120)
+  
