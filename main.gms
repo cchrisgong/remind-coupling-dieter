@@ -83,9 +83,9 @@
 * 
 * Regionscode: 2b1450bc
 * 
-* Input data revision: 6.276
+* Input data revision: 6.277
 * 
-* Last modification (input data): Thu Dec 23 10:57:10 2021
+* Last modification (input data): Mon Jan 24 22:36:05 2022
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -140,7 +140,7 @@ option profile = 0;
 
 
 ***---------------------    Run name    -----------------------------------------
-$setGlobal c_expname  xx_ref_FEmed
+$setGlobal c_expname  xx_Calib_FE_med
 
 ***------------------------------------------------------------------------------
 ***                           MODULES
@@ -173,13 +173,13 @@ $setGlobal trade  standard     !! def = standard
 ***---------------------    26_agCosts ------------------------------------------
 $setGlobal agCosts  costs               !! def = costs
 ***---------------------    29_CES_parameters    --------------------------------
-$setglobal CES_parameters  load       !! def = load
+$setglobal CES_parameters  calibrate       !! def = load
 ***---------------------    30_biomass    ---------------------------------------
 $setGlobal biomass  magpie_40 !! def = magpie_40
 ***---------------------    31_fossil    ----------------------------------------
 $setGlobal fossil  grades2poly        !! def = grades2poly
 ***---------------------    32_power    ----------------------------------------
-$setGlobal power  DTcoup               !! def = IntC
+$setGlobal power  IntC               !! def = IntC
 ***---------------------    33_cdr       ----------------------------------------
 $setGlobal CDR  DAC                   !! def = DAC
 ***---------------------    35_transport    -------------------------------------
@@ -313,6 +313,8 @@ cm_biotrade_phaseout        "switch for phaseing out biomass trade in the respec
 cm_bioprod_histlim			"regional parameter to limit biomass (pebiolc.1) production to a multiple of the 2015 production"
 cm_flex_tax                 "switch for enabling flexibility tax"
 cm_DTcoup_eq                "switch for DIETER coupling equations"
+cm_DT_dispatch_i1           "iteration when VRE capacities are passed to DIETER as fixed values under dispatch mode of coupling"
+cm_DT_dispatch_i2	    "iteration when all capacities are passed to DIETER as fixed values under dispatch mode of coupling"
 cm_DTcoup_flatco2           "flat CO2 price for testing dieter coupling"
 cm_flexMax_elh2             "switch for setting the maximum relative reduction of the electricity price electrolysis sees when flex. tax is enabled"
 cm_H2targets                "switches on capacity targets for electrolysis in NDC techpol following national Hydrogen Strategies"
@@ -351,7 +353,7 @@ cm_deuCDRmax                 "switch to limit maximum annual CDR amount in Germa
 ***                           YOU ARE IN THE WARNING ZONE (DON'T DO CHANGES HERE)
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-cm_iteration_max       = 1;     !! def = 1
+cm_iteration_max       = 0;     !! def = 1
 c_solver_try_max       = 2;     !! def = 2
 c_keep_iteration_gdxes = 1;     !! def = 0
 cm_nash_autoconverge   = 1;     !! def = 1
@@ -389,10 +391,10 @@ cm_1stgen_phaseout  = 0;         !! def = 0
 $setglobal cm_tradbio_phaseout  default  !! def = default
 cm_cprice_red_factor  = 1;         !! def = 1
 
-$setglobal cm_POPscen  pop_SSP2EU  !! def = pop_SSP2EU
-$setglobal cm_GDPscen  gdp_SSP2EU  !! def = gdp_SSP2EU
-$setglobal c_GDPpcScen  SSP2EU     !! def = gdp_SSP2   (automatically adjusted by start_run() based on GDPscen) 
-$setglobal cm_demScen  gdp_SSP2EU     !! def = gdp_SSP2EU
+$setglobal cm_POPscen  pop_SSP2  !! def = pop_SSP2EU
+$setglobal cm_GDPscen  gdp_SSP2  !! def = gdp_SSP2EU
+$setglobal c_GDPpcScen  SSP2     !! def = gdp_SSP2   (automatically adjusted by start_run() based on GDPscen) 
+$setglobal cm_demScen  gdp_SSP2     !! def = gdp_SSP2EU
 cm_GDPcovid      = 0;            !! def = 0
 
 *AG* and *CB* for cm_startyear greater than 2005, you have to copy the fulldata.gdx (rename it to: input_ref.gdx) from the run you want to build your new run onto.
@@ -417,7 +419,7 @@ cm_rentdisccoal     = 0.4;       !! def 0.4
 cm_rentdisccoal2    = 0.6;       !! def 0.6
 cm_rentconvcoal     = 50;        !! def 50
 $setglobal c_regi_earlyreti_rate  GLO 0.09, EUR_regi 0.15      !! def = GLO 0.09, EUR_regi 0.15
-$setglobal c_tech_earlyreti_rate  GLO.(biodiesel 0.14, bioeths 0.14), EUR_regi.(biodiesel 0.15, bioeths 0.15), USA_regi.pc 0.13, REF_regi.pc 0.13, CHA_regi.pc 0.13 !! def = GLO.(biodiesel 0.14, bioeths 0.14), EUR_regi.(biodiesel 0.15, bioeths 0.15), USA_regi.pc 0.13, REF_regi.pc 0.13, CHA_regi.pc 0.13
+$setglobal c_tech_earlyreti_rate  off !! def = GLO.(biodiesel 0.14, bioeths 0.14), EUR_regi.(biodiesel 0.15, bioeths 0.15), USA_regi.pc 0.13, REF_regi.pc 0.13, CHA_regi.pc 0.13
 
 cm_so2tax_scen        = 1;         !! def =
 c_cint_scen           = 1;         !! def = 1
@@ -428,7 +430,7 @@ c_ccsinjecratescen    = 1;         !! def = 1
 c_ccscapratescen      = 1;         !! def = 1
 c_export_tax_scen     = 0;         !! def = 0
 cm_iterative_target_adj  = 0;      !! def = 0
-$setglobal cm_NDC_version  2021_cond   !! def = 2021_cond
+$setglobal cm_NDC_version  2022_cond   !! def = 2021_cond
 cm_gdximport_target      = 0;      !! def = 0
 $setglobal c_SSP_forcing_adjust  forcing_SSP2   !! def = forcing_SSP2
 $setglobal c_delayPolicy  SPA0           !! def = SPA0
@@ -444,23 +446,23 @@ $setGlobal cm_regiExoPrice  off    !! def = off
 $setGlobal cm_regiCO2target  off   !! def = off
 cm_postTargetIncrease    = 2;      !! def = 2
 $setGlobal cm_quantity_regiCO2target  off !! def = off
-cm_peakBudgYr            = 2050;   !! def = 2050
+cm_peakBudgYr            = 2100;   !! def = 2050
 cm_taxCO2inc_after_peakBudgYr = 3; !! def = 3
 cm_CO2priceRegConvEndYr  = 2050;   !! def = 2050
 $setGlobal cm_emiMktETS  off       !! def = off
 $setGlobal cm_emiMktETS_type  off  !! def = off
 
-$setGlobal cm_ETS_postTargetIncrease  2 !! def = linear
+$setGlobal cm_ETS_postTargetIncrease  linear !! def = linear
 $setGlobal cm_ETS_post2055Increase  2      !! def = 2
 
 $setGlobal cm_emiMktES  off        !! def = off	
-$setGlobal cm_emiMktES_type  off !! def = netGHG	
+$setGlobal cm_emiMktES_type  netGHG !! def = netGHG	
 
-$setGlobal cm_ESD_postTargetIncrease  off !! def = 8
-$setGlobal cm_ESD_post2055Increase  off !! def = 2
+$setGlobal cm_ESD_postTargetIncrease  8 !! def = 8
+$setGlobal cm_ESD_post2055Increase  2 !! def = 2
 
 $setGlobal cm_emiMktEScoop  off    !! def = off	
-$setGlobal cm_emiMktES2020price  off !! def = 30
+$setGlobal cm_emiMktES2020price  30 !! def = 30
 $setGlobal cm_emiMktES2050	 off   !! def = off	
 $setGlobal cm_NucRegiPol	 off   !! def = off		
 $setGlobal cm_CoalRegiPol	 off   !! def = off		
@@ -492,7 +494,7 @@ $setGlobal cm_INNOPATHS_pushCalib  none !! def = none
 $setGlobal cm_INNOPATHS_reducCostB  none !! def = none
 $setGlobal cm_INNOPATHS_effHP  5 !! def = 5
 
-$setGlobal cm_EDGEtr_scen  ConvCase  !! def = ConvCase
+$setGlobal cm_EDGEtr_scen  Mix  !! def = ConvCase
 
 $setGlobal c_regi_nucscen  all !! def = all
 $setGlobal c_regi_capturescen  all !! def = all
@@ -547,7 +549,7 @@ cm_TaxConvCheck = 0; !! def 0, which means tax convergence check is off
 
 $setGlobal cm_ARIADNE_FeShareBounds  off !! def = off
 
-$setGlobal cm_ariadne_VRECapFac_adj  off !! def = off
+$setGlobal cm_ariadne_VRECapFac_adj  on !! def = off
 
 $setGlobal c_VREPot_Factor  off !! def = off
 
@@ -568,12 +570,15 @@ cm_deuCDRmax = -1; !! def = -1
 ***                           YOU ARE IN THE WARNING ZONE (DON'T DO CHANGES HERE)
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *--------------------flags------------------------------------------------------------
-$setglobal cm_DTcoup  on         !! def = off
+$setglobal cm_DTcoup  off         !! def = off
+$setglobal cm_DTmode  dispatch         !! def = validation
 cm_DTcoup_eq = 0;         !! def = 0
+cm_DT_dispatch_i1 = 20;           !! def <- 20
+cm_DT_dispatch_i2 = 25;           !! def <- 24
 $setglobal cm_softcap  off         !! def = off
-$setglobal cm_elh2_coup  on       !! def = off
+$setglobal cm_elh2_coup  off       !! def = off
 $setglobal cm_CHP_coup  off       !! def = on
-$setglobal cm_DTcurt_avg on       !! def = on
+$setglobal cm_DTcurt_avg  on       !! def = on
 $setglobal cm_DTdem_avg  on       !! def = on
 cm_DTcoup_flatco2 = 25;           !!def <- 25 flat CO2 price for testing dieter coupling
 
@@ -613,7 +618,7 @@ $setglobal cm_techcosts  REG       !! def = REG
 $setglobal cm_regNetNegCO2  on       !! def = on
 
 *** INNOPATHS switches
-$setglobal cm_calibration_FE  off      !! def = off
+$setglobal cm_calibration_FE  medium      !! def = off
 
 $setglobal cm_INNOPATHS_eni  off!! def = off
 $setglobal cm_INNOPATHS_enb  off!! def = off
@@ -647,7 +652,7 @@ $setglobal cm_feShareLimits  off  !! def = off
 
 $setglobal cm_altTransBunkersShare  off      !! def = off
 
-$setglobal cm_wind_offshore  1      !! def = 0
+$setglobal cm_wind_offshore  0      !! def = 0
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ***                                  END OF WARNING ZONE

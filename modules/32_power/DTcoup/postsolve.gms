@@ -59,7 +59,6 @@ p32_totProd(t,regi,enty2)$(sameas(enty2,"seel")) =
 		sum(teCCS2rlf(te,rlf), pm_prodCouple(regi,enty,enty3,te,enty2) * vm_co2CCS.l(t,regi,enty,enty3,te,rlf) ) )
 ;
 
-
 *** coupled production
 p32_coupledProd(t,regi,enty2)$(sameas(enty2,"seel")) = sum(pc2te(entyPe,entySe(enty3),te,enty2),
 		pm_prodCouple(regi,entyPe,enty3,te,enty2) * vm_prodSe.l(t,regi,entyPe,enty3,te) );
@@ -187,12 +186,17 @@ p32_CO2price4DT(t,regi)$(tDT32(t) AND regDTCoup(regi)) = pm_taxCO2eq(t,regi)/sm_
 !!p32_CO2price4DT(t,regi)$(cm_startyear AND regDTCoup(regi)) = pm_taxCO2eq(t,regi)/sm_DptCO2_2_TDpGtC;
 $ENDIF.policy_Cprice
 
+
 * REMIND data for DIETER
-    execute_unload "RMdata_4DT.gdx", tDT32, regDTCoup, sm32_iter, vm_cap, p32_r4DT,s32_H2switch,p32_realCapfacVRE,v32_storloss,o_margAdjCostInv,
-    COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,
-    p32_usableSeDisp, p32_seh2elh2Dem, p32_fuelprice_avgiter,
-    p32_CO2price4DT, pm_data, vm_costTeCapital, vm_prodSe, vm_usableSeTe, fm_dataglob, pm_dataeta, pm_eta_conv, p32_grid_factor,
-    pm_ts, vm_deltaCap, vm_capEarlyReti, fm_dataemiglob, p_teAnnuity, pm_cf, vm_capFac, pm_dataren, vm_capDistr;
+    execute_unload "RMdata_4DT.gdx", tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,
+    s32_H2switch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,           !! switches: H2 switch, dispatch iterational switches
+    COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,      !! tech sets: REMIND technology definition
+    vm_cap, vm_deltaCap, vm_capDistr, v32_storloss,vm_capEarlyReti,vm_prodSe,vm_usableSeTe, !! quantities: capacity, generation, curtailment,
+    p32_realCapfacVRE,vm_capFac,pm_cf, pm_dataren, !! CF
+    p32_usableSeDisp,p32_seh2elh2Dem, !! total demand
+    vm_costTeCapital, o_margAdjCostInv, pm_data,fm_dataglob,p32_r4DT, !! capex related tech parameters, interest rate
+    pm_dataeta, pm_eta_conv, p32_fuelprice_avgiter, p32_CO2price4DT, fm_dataemiglob, !! running cost related tech parameters
+    p32_grid_factor, pm_ts; !! misc
 
 logfile.nr = 1;
 if ( (c_keep_iteration_gdxes eq 1) ,
@@ -238,6 +242,23 @@ if ( (c_keep_iteration_gdxes eq 1) ,
 
 );
 logfile.nr = 2;
+
+*** CG: after DIETER is executed, check if they all have optimal status
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+    Execute_Loadpoint 'results_DIETER' p32_report4RM;
+    Execute_Loadpoint 'results_DIETER' p32_reportmk_4RM;
+*** check DIETER solver status
+p32_DTstatus(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"el","model_status"));
+display p32_DTstatus;
+loop (tDT32(t),
+  loop (regDTCoup(regi),
+    if (p32_DTstatus(tDT32,regDTCoup) ne 1,
+        abort "one or more DIETER LP have non optimal solver status";
+        );
+  );
+);
+$ENDIF.DTcoup
+
 
 $IFTHEN.curt_avg %cm_DTcurt_avg% == "on"
 p32_DIETERCurtRatioLaIter(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"spv");
