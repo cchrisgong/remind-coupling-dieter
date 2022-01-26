@@ -25,7 +25,7 @@ $offdelim
 *** and for pebios, pebioil (defined only for 5th grade)
 p30_datapebio(regi,"pebios","5","cost",ttot)$(ttot.val ge 2005)  = 12.4 * s30_D2TD / sm_GJ_2_TWa;
 p30_datapebio(regi,"pebioil","5","cost",ttot)$(ttot.val ge 2005) = 15.8 * s30_D2TD / sm_GJ_2_TWa;
-p30_datapebio(regi,"pebiolc","2","cost",ttot)$(ttot.val ge 2005) =    5 * s30_D2TD / sm_GJ_2_TWa;
+p30_datapebio(regi,"pebiolc","2","cost",ttot)$(ttot.val ge 2005) =    6.1 * s30_D2TD / sm_GJ_2_TWa;
 
 *** maxprod pebiolc: choose SSP and convert from PJ/yr to TWa/yr
 p30_datapebio(regi,"pebiolc",rlf,"maxprod",ttot)$(ttot.val ge 2005) = p30_biolcResidues(ttot,regi,"%cm_LU_emi_scen%") * sm_EJ_2_TWa / 1000;
