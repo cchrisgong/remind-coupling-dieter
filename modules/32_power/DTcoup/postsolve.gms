@@ -250,9 +250,9 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** check DIETER solver status
 p32_DTstatus(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"el","model_status"));
 display p32_DTstatus;
-loop (tDT32(t),
-  loop (regDTCoup(regi),
-    if (p32_DTstatus(tDT32,regDTCoup) ne 1,
+loop (t$tDT32(t),
+  loop (regi$regDTCoup(regi),
+    if (p32_DTstatus(t,regi) ne 1,
         abort "one or more DIETER LP have non optimal solver status";
         );
   );
