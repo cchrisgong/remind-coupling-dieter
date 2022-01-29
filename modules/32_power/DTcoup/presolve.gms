@@ -35,7 +35,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *   optional: averaging capfac over 2 iterations
 
 ***CG:noCF averaging
-if( (ord(iteration) le sm32_DTiter) ,
+*if( (ord(iteration) le sm32_DTiter) ,
     pm_cf(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
     			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac"));
     pm_cf(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi))
@@ -50,9 +50,10 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
     pm_cf(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi))
     			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","capfac"));
 $ENDIF.elh2_coup
-);
+*);
 
-***CG:CF averaging, only after DT is coupled for one iteration (to avoid pm_cf being distorted by default high values)
+$IFTHEN.cf_avg %cm_DTcf_avg% == "on"
+*** CG: CF averaging, only after DT is coupled for one iteration (to avoid pm_cf being distorted by default high values)
 if( (ord(iteration) gt sm32_DTiter),
 pm_cf(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND COALte32(te) )
 			= 0.5 * ( p32_cf_last_iter(t,regi,te)$(COALte32(te))
@@ -75,6 +76,7 @@ pm_cf(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi))
 			+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","capfac")) );
 $ENDIF.elh2_coup
 );
+$ENDIF.cf_avg
 
 *   pass peak demand from DIETER to REMIND as a relative fraction of the total demand
     p32_peakDemand_relFac(t,regi)$(tDT32(t) AND regDTCoup(regi))
@@ -149,11 +151,11 @@ $ENDIF.elh2_coup
 p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio"));
 p32_DIETERCurtRatio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio"));
 
+$IFTHEN.curt_avg %cm_DTcurt_avg% == "on"
+* with curt_ratio averaging
 p32_DIETERCurtRatioCurrIter(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"spv");
 p32_DIETERCurtRatioCurrIter(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"wind");
 
-$IFTHEN.curt_avg %cm_DTcurt_avg% == "on"
-* with curt_ratio averaging
 p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) =
       0.5 * (p32_DIETERCurtRatioLaIter(t,regi,"spv") + p32_DIETERCurtRatio(t,regi,"spv"));
 
