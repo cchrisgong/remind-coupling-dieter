@@ -90,6 +90,7 @@ scalars
     sm32_iter                                 "iteration.val"
     sm32_DTiter                               "iteration when DIETER starts to be coupled"
     s32_H2switch                              "a binary switch for flexible H2 coupling, to be exported to DIETER"
+    s32_DTcoupModeswitch                      "a binary switch for DIETER coupling mode - whether validation or dispatch, to be exported to DIETER"
 ;
 
 positive variables
@@ -148,11 +149,11 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
     q32_flexAdj(tall,all_regi,all_te)              "from DIETER coupling: calculate flexibility used in flexibility tax for technologies with electricity input"
 $ENDIF.elh2_coup
 
-$IFTHEN.hardcap %cm_softcap% == "off"
+$IFTHEN.hardcap %cm_DTcapcon% == "hard"
     q32_peakDemandDT(ttot,all_regi,all_enty)      "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"
 $ENDIF.hardcap
 
-$IFTHEN.softcap %cm_softcap% == "on"
+$IFTHEN.softcap %cm_DTcapcon% == "soft"
     q32_reqCap(ttot,all_regi,all_enty)             "sum of total dispatchable capacities"
     q32_capEndStart(ttot,all_regi)                 "required dispatchable capacities"
     q32_priceCap(ttot,all_regi)                    "calculates subsidy for disptachable capacity / capacity shadow price"

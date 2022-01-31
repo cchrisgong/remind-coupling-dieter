@@ -192,6 +192,15 @@ $IFTHEN.elh2_coup_off %cm_elh2_coup% == "off"
 s32_H2switch = 0;
 $ENDIF.elh2_coup_off
 
+*** CG: export validation switch
+$IFTHEN.valid %cm_DTmode% == "validation"
+s32_DTcoupModeswitch = 0;
+$ENDIF.valid
+$IFTHEN.dispatch %cm_DTmode% == "dispatch"
+s32_DTcoupModeswitch = 1;
+$ENDIF.dispatch
+
+
 *** initiating other parameters for averaging in loop
 
 p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
@@ -205,7 +214,7 @@ $ENDIF.curt_avg
 
 * REMIND data for DIETER
 execute_unload "RMdata_4DT.gdx", tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,
-    s32_H2switch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,           !! switches: H2 switch, dispatch iterational switches
+    s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,           !! switches: H2 switch, dispatch iterational switches
     COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,      !! tech sets: REMIND technology definition
     vm_cap, vm_deltaCap, vm_capDistr, v32_storloss,vm_capEarlyReti,vm_prodSe,vm_usableSeTe, !! quantities: capacity, generation, curtailment,
     p32_realCapfacVRE,vm_capFac,pm_cf, pm_dataren, !! CF

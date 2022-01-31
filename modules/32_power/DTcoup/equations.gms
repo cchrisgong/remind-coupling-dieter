@@ -238,14 +238,13 @@ q32_limitSolarWind(t,regi)$( (cm_solwindenergyscen = 2) OR (cm_solwindenergyscen
 	0.2 * vm_usableSe(t,regi,"seel")
 ;
 
-$IFTHEN.DTcoup %cm_DTcoup% == "on"
 ***---------------------------------------------------------------------------
 *** DIETER coupling equations
 ***---------------------------------------------------------------------------
-$IFTHEN.hardcap %cm_softcap% == "off"
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+$IFTHEN.hardcap %cm_DTcapcon% == "hard"
 *** hard capacity constraint to peak residual load demand (excluding flexible load such as electrolysers)
 q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
-*q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq eq 3) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=g=
  p32_peakDemand_relFac(t,regi) * 8760 * ( v32_usableSeDisp(t,regi,"seel")
@@ -257,7 +256,7 @@ $ENDIF.elh2_coup
 
 $ENDIF.hardcap
 
-$IFTHEN.softcap %cm_softcap% == "on"
+$IFTHEN.softcap %cm_DTcapcon% == "soft"
 ** CG: implementing a softer capacity bound, with a flat capacity subsidy, once the sum of dispatchable capacity exceeds
 ** the bound which is the peak demand from last iteration, the subsidy rapidly drops according to logistic function
 ** Logistic function exponent for additional dispatchable capacity, LHS bound up to 20 to reduce computational intensity
@@ -302,8 +301,10 @@ $ENDIF.softcap
 q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq ne 0))..
 	vm_Mrkup(t,regi,te)
 	=e=
-* with prefactor
-  ( p32_DIETER_MV(t,regi,te) * (1 - (v32_shSeElDisp(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 )  )
+* with prefactor, prefactor dependent on the value factor in DIETER
+  ( p32_DIETER_MV(t,regi,te) * (
+   1 - p32_DIETER_VF(t,regi,te) *	(v32_shSeElDisp(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 )
+	)
 	- p32_DIETER_elecprice(t,regi) )
 	 / 1e12 * sm_TWa_2_MWh / 1.2 * 1$(regDTCoup(regi))
 * no prefactor
@@ -356,7 +357,6 @@ q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te) AND 
     vm_capFac(t,regi,te) * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te))
     =e=
 	  pm_cf(t,regi,te)
-*   * ( 1 + 0.5 * (v32_shSeElDisp(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 ) )
     * ( 1 - 0.5 * (v32_shSeElDisp(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 ) )
 	  * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te))
 ;

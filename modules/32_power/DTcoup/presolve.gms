@@ -78,7 +78,7 @@ $ENDIF.elh2_coup
 );
 $ENDIF.cf_avg
 
-*   pass peak demand from DIETER to REMIND as a relative fraction of the total demand
+*** pass peak demand from DIETER to REMIND as a relative fraction of the total demand
     p32_peakDemand_relFac(t,regi)$(tDT32(t) AND regDTCoup(regi))
 		      = sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"all_te","ResPeakDem_relFac"));
 
@@ -92,7 +92,7 @@ $ENDIF.cf_avg
 		p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
 		      = p32_shSeElDisp(t,regi,te)$(COALte32(te))/(sum(te2$(COALte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
 
-*CG* writing DIETER generation share to parameters
+*** CG: writing DIETER generation shares to parameters
     p32_DIETER_shSeEl(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi))
 					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","gen_share"));
     p32_DIETER_shSeEl(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi))
@@ -102,7 +102,7 @@ $ENDIF.cf_avg
     p32_DIETER_shSeEl(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi))
 					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"ror","gen_share"));
 
-*CG* for those DIETER technologies which maps to several REMIND technologies: downscaling generation shares in REMIND
+*** CG: for those DIETER technologies which maps to several REMIND technologies: downscaling generation shares in REMIND
     p32_DIETER_shSeEl(t,regi,te)$(tDT32(t) AND regDTCoup(regi)AND BIOte32(te) )
 					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"bio","gen_share"))
 							*	p32_tech_category_genshare(t,regi,te) ;
@@ -116,7 +116,7 @@ $ENDIF.cf_avg
 					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","gen_share"))
 				    	* p32_tech_category_genshare(t,regi,te) ;
 
-*   supply side tech market value
+*** supply side tech market value
     p32_DIETER_MV(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"bio","market_value"));
     p32_DIETER_MV(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"CCGT","market_value"));
     p32_DIETER_MV(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"OCGT_eff","market_value"));
@@ -125,6 +125,20 @@ $ENDIF.cf_avg
     p32_DIETER_MV(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Solar","market_value"));
     p32_DIETER_MV(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"ror","market_value"));
     p32_DIETER_MV(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Wind_on","market_value"));
+
+*** supply side tech value factor
+    p32_DIETER_VF(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"bio","value_factor"));
+    p32_DIETER_VF(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"CCGT","value_factor"));
+    p32_DIETER_VF(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"OCGT_eff","value_factor"));
+    p32_DIETER_VF(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"nuc","value_factor"));
+    p32_DIETER_VF(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"coal","value_factor"));
+    p32_DIETER_VF(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Solar","value_factor"));
+    p32_DIETER_VF(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"ror","value_factor"));
+    p32_DIETER_VF(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Wind_on","value_factor"));
+
+*** CG: if value factor if lower than 1, say for solar, take the inverse, since we feed VF into prefactor of markup, and solar being a lot lower than elec price
+**  it means markup need to be adjusted more aggressively (like OCGT)
+    p32_DIETER_VF(t,regi,te)$((p32_DIETER_VF(t,regi,te) lt 1) AND (p32_DIETER_VF(t,regi,te) ne 0)) = 1 / p32_DIETER_VF(t,regi,te);
 
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 *   flexible demand side tech market value (electricity price that the flex tech "sees")

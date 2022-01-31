@@ -123,6 +123,10 @@ $endif.chpoff
 vm_capFac.fx(t,regi,"csp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 vm_capFac.fx(t,regi,"dot")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 vm_capFac.fx(t,regi,"geohdr")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
+$IFTHEN.WindOff %cm_wind_offshore% == "0"
+vm_capFac.fx(t,regi,"windoff")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
+vm_prodSe.fx(t,regi,"pewin","seel","windoff")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
+$ENDIF.WindOff
 
 *** all flexible subsidies are set to 0 for non-coupled regions in DTcoup realization (regardless of whether cm_DTcoup is on, or elh2_coup is on)
 *** This is because in calibration cm_flex_tax is turned off, and only in policy runs they are turned on
