@@ -97,6 +97,11 @@ $ENDIF.cf_avg
 					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","gen_share"));
     p32_DIETER_shSeEl(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi))
 					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","gen_share"));
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+      p32_DIETER_shSeEl(t,regi,"windoff")$(tDT32(t) AND regDTCoup(regi))
+  					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_off","gen_share"));
+$ENDIF.WindOff
+
     p32_DIETER_shSeEl(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi))
 					= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"OCGT_eff","gen_share"));
     p32_DIETER_shSeEl(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi))
@@ -125,6 +130,9 @@ $ENDIF.cf_avg
     p32_DIETER_MV(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Solar","market_value"));
     p32_DIETER_MV(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"ror","market_value"));
     p32_DIETER_MV(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Wind_on","market_value"));
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+    p32_DIETER_MV(t,regi,"windoff")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Wind_off","market_value"));
+$ENDIF.WindOff
 
 *** supply side tech value factor
     p32_DIETER_VF(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"bio","value_factor"));
@@ -136,15 +144,19 @@ $ENDIF.cf_avg
     p32_DIETER_VF(t,regi,"hydro")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"ror","value_factor"));
     p32_DIETER_VF(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Wind_on","value_factor"));
 
-*** CG: if value factor if lower than 1, say for solar, take the inverse, since we feed VF into prefactor of markup, and solar being a lot lower than elec price
-**  it means markup need to be adjusted more aggressively (like OCGT)
-    p32_DIETER_VF(t,regi,te)$((p32_DIETER_VF(t,regi,te) lt 1) AND (p32_DIETER_VF(t,regi,te) ne 0)) = 1 / p32_DIETER_VF(t,regi,te);
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+    p32_DIETER_VF(t,regi,"windoff")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Wind_off","value_factor"));
+$ENDIF.WindOff
 
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 *   flexible demand side tech market value (electricity price that the flex tech "sees")
     p32_DIETER_MP(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"elh2","market_price"));
     p32_DIETER_MP(t,regi,"tdels")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"el","market_price"));
     p32_DIETER_MP(t,regi,"tdelt")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"el","market_price"));
+
+    p32_DIETER_VF(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"elh2","value_factor"));
+    p32_DIETER_VF(t,regi,"tdels")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"el","value_factor"));
+    p32_DIETER_VF(t,regi,"tdelt")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"el","value_factor"));
 
     p32_shSeElDemDIETER(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","dem_share"));
 *    downscale demand share from one type ("electricity") in DIETER to two types ("stationary electricity" and "transport electricity") in REMIND
@@ -155,6 +167,11 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 
 $ENDIF.elh2_coup
 
+*** CG: if value factor if lower than 1, say for solar, take the inverse, since we feed VF into prefactor of markup, and solar being a lot lower than elec price
+**  it means markup need to be adjusted more aggressively (like OCGT)
+    p32_DIETER_VF(t,regi,te)$((p32_DIETER_VF(t,regi,te) lt 1) AND (p32_DIETER_VF(t,regi,te) ne 0)) = 1 / p32_DIETER_VF(t,regi,te);
+
+
 *** DIETER electricity price (when DIETER price_shave is off, then elec_price_shaved = elec_price_original)
     p32_DIETER_elecprice(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"all_te","elec_price_shaved"));
 *** only for reporting
@@ -164,19 +181,29 @@ $ENDIF.elh2_coup
 * ** no curt_ratio averaging
 p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio"));
 p32_DIETERCurtRatio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","curt_ratio"));
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+p32_DIETERCurtRatio(t,regi,"windoff")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_off","curt_ratio"));
+$ENDIF.WindOff
 
 $IFTHEN.curt_avg %cm_DTcurt_avg% == "on"
 * with curt_ratio averaging
 p32_DIETERCurtRatioCurrIter(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"spv");
 p32_DIETERCurtRatioCurrIter(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"wind");
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+p32_DIETERCurtRatioCurrIter(t,regi,"windoff")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"windoff");
+$ENDIF.WindOff
 
 p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) =
       0.5 * (p32_DIETERCurtRatioLaIter(t,regi,"spv") + p32_DIETERCurtRatio(t,regi,"spv"));
-
 p32_DIETERCurtRatio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) =
       0.5 * (p32_DIETERCurtRatioLaIter(t,regi,"wind") + p32_DIETERCurtRatio(t,regi,"wind"));
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+p32_DIETERCurtRatio(t,regi,"windoff")$(tDT32(t) AND regDTCoup(regi)) =
+      0.5 * (p32_DIETERCurtRatioLaIter(t,regi,"windoff") + p32_DIETERCurtRatio(t,regi,"windoff"));
+$ENDIF.WindOff
 * ror capfac is harmonized by setting capfac in DIETER to be the same as that in REMIND
 $ENDIF.curt_avg
+
 
 $ENDIF.DTcoup
 

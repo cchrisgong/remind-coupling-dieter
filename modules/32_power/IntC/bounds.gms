@@ -50,6 +50,7 @@ vm_usableSe.lo(t,regi,"seel")  = 1e-6;
 *** Fix capacity for h2curt technology (modeled only in RLDC)
 vm_cap.fx(t,regi,"h2curt",rlf) = 0;
 
+vm_capFac.fx(t,regi,"windoff")= 0;
 
 *RP To ensure that the REMIND model doesn't overlook CSP due to gdx effects, ensure some minimum use in regions with good solar insolation, here proxied from the csp storage factor:
 loop(regi$(p32_factorStorage(regi,"csp") < 1),
