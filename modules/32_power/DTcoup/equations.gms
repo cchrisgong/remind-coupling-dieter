@@ -312,9 +312,10 @@ q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_D
 ;
 
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
-*** CG: giving flexible demand side technology, e.g. electrolyzer a subsidy, non DIETER coupled version is q32_flexAdj below
-*** on prefactor: beacuse if v32_shSeElDem is low for elh2 compared to last iter p32_shSeElDemDIETER, to balance out oscillation for elh2
-*** we want flexadj to be high (so MarketPrice elh2 sees has to be low), so f has to be <1.
+*** CG: giving flexible demand side technology, e.g. electrolyzer, a subsidy, non DIETER coupled version is q32_flexAdj below.
+*** on prefactor: beacuse if demand share v32_shSeElDem is low for elh2 compared to last iter p32_shSeElDemDIETER,
+*** to balance out oscillation for elh2, we want flexadj to be high (so MarketPrice elh2 sees has to be low to
+*** incentive an increase in demand share)
 q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
 	vm_flexAdj(t,regi,te)
 	=e=
@@ -322,7 +323,8 @@ q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
 * (p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te))	/ 1e12 * sm_TWa_2_MWh / 1.2
 * with prefactor
 	(( p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te)
-	 * ( 1 + ( v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
+*	 * ( 1 + ( v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
+   * ( 1 + p32_DIETER_VF(t,regi,te) * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
 	)
 	/ 1e12 * sm_TWa_2_MWh / 1.2 )
 	* 1$(cm_DTcoup_eq ne 0)

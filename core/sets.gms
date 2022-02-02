@@ -1568,26 +1568,29 @@ regNoDTCoup(all_regi)    "regions which are not DIETER coupled"
 
 teDTCoupSupp(all_te)       "all supply technologies to which markup coupling with DIETER applies"
 /
-spv
-wind
-hydro
-igcc
-igccc
-pc
-pcc
-pco
+         spv
+         wind
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+         windoff
+$ENDIF.WindOff
+         hydro
+         igcc
+         igccc
+         pc
+         pcc
+         pco
 $ifthen.chp %cm_CHP_coup% == "on"
-coalchp
-gaschp
-biochp
+         coalchp
+         gaschp
+         biochp
 $endif.chp
-ngcc
-ngccc
-bioigcc
-bioigccc
-ngt
-tnrs
-fnrs
+         ngcc
+         ngccc
+         bioigcc
+         bioigccc
+         ngt
+         tnrs
+         fnrs
 /
 
 teNoDTCoupSupp(all_te)    "supply technologies that are not coupled"

@@ -203,6 +203,13 @@ $IFTHEN.nobound %cm_DTmode% == "none"
 s32_DTcoupModeswitch = 2;
 $ENDIF.nobound
 
+*** CG: export wind offshore switch
+$IFTHEN.noWindOff %cm_wind_offshore% == "0"
+s32_windoff = 0;
+$ENDIF.noWindOff
+$IFTHEN.windOff %cm_wind_offshore% == "1"
+s32_windoff = 1;
+$ENDIF.windOff
 
 *** initiating other parameters for averaging in loop
 
@@ -213,11 +220,14 @@ p32_cf_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) 
 $IFTHEN.curt_avg %cm_DTcurt_avg% == "on"
 p32_DIETERCurtRatioLaIter(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = v32_storloss.l(t,regi,"spv")/(vm_usableSeTe.l(t,regi,"seel","spv")+sm_eps);
 p32_DIETERCurtRatioLaIter(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = v32_storloss.l(t,regi,"wind")/(vm_usableSeTe.l(t,regi,"seel","wind")+sm_eps);
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+p32_DIETERCurtRatioLaIter(t,regi,"windoff")$(tDT32(t) AND regDTCoup(regi)) = v32_storloss.l(t,regi,"windoff")/(vm_usableSeTe.l(t,regi,"seel","windoff")+sm_eps);
+$ENDIF.WindOff
 $ENDIF.curt_avg
 
 * REMIND data for DIETER
 execute_unload "RMdata_4DT.gdx", tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,
-    s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,           !! switches: H2 switch, dispatch iterational switches
+    s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,s32_windoff,  !! switches: H2 switch, mode switch, dispatch iterational switches, offshore switch
     COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,      !! tech sets: REMIND technology definition
     vm_cap, vm_deltaCap, vm_capDistr, v32_storloss,vm_capEarlyReti,vm_prodSe,vm_usableSeTe, !! quantities: capacity, generation, curtailment,
     p32_realCapfacVRE,vm_capFac,pm_cf, pm_dataren, !! CF

@@ -91,6 +91,7 @@ scalars
     sm32_DTiter                               "iteration when DIETER starts to be coupled"
     s32_H2switch                              "a binary switch for flexible H2 coupling, to be exported to DIETER"
     s32_DTcoupModeswitch                      "a binary switch for DIETER coupling mode - whether validation or dispatch, to be exported to DIETER"
+    s32_windoff                               "a binary switch for wind offshore to be exported to DIETER"
 ;
 
 positive variables
