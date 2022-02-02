@@ -199,6 +199,9 @@ $ENDIF.valid
 $IFTHEN.dispatch %cm_DTmode% == "dispatch"
 s32_DTcoupModeswitch = 1;
 $ENDIF.dispatch
+$IFTHEN.nobound %cm_DTmode% == "none"
+s32_DTcoupModeswitch = 2;
+$ENDIF.nobound
 
 
 *** initiating other parameters for averaging in loop
