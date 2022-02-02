@@ -83,9 +83,9 @@
 * 
 * Regionscode: 2b1450bc
 * 
-* Input data revision: 6.277
+* Input data revision: 6.28
 * 
-* Last modification (input data): Mon Jan 24 22:36:05 2022
+* Last modification (input data): Mon Jan 31 16:27:44 2022
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -223,6 +223,7 @@ cm_nash_autoconverge  "choice of nash convergence mode"
 cm_emiscen            "policy scenario choice"
 cm_co2_tax_2020       "level of co2 tax in year 2020 in $ per t CO2eq, makes sense only for emiscen eq 9 and 45_carbonprice exponential"
 cm_co2_tax_growth     "growth rate of carbon tax"
+cm_CO2TaxSectorMarkup "CO2 tax markup in buildings or transport sector, a value of 0.5 means CO2 tax increased by 50%"
 c_macscen            "use of mac"
 cm_nucscen            "nuclear option choice"
 cm_ccapturescen       "carbon capture option choice"
@@ -272,16 +273,17 @@ c_ccscapratescen      "CCS capture rate"
 c_export_tax_scen    "choose which oil export tax is used in the model. 0 = none, 1 = fix"
 cm_iterative_target_adj "whether or not a tax or a budget target should be iteratively adjusted depending on actual emission or forcing level"
 cm_NDC_version        "choose version year of NDC targets as well as conditional vs. unconditional targets"
+cm_NDC_divergentScenario "choose scenario about convergence of CO2eq prices in NDC realization of module 45_carbonprice"
 cm_gdximport_target   "whether or not the starting value for iteratively adjusted budgets, tax scenarios, or forcing targets (emiscen 5,6,8,9) should be read in from the input.gdx"
 cm_gs_ew              "grain size (for enhanced weathering, CDR module) [micrometre]"
 cm_LimRock             "limit amount of rock spread each year [Gt]"
 c_tau_so2_xmpt       "switch for temporarily (mainly in the past) exempting chinese SO2 emissions from the SO2 tax"
 cm_expoLinear_yearStart "time at which carbon price increases lineraly instead of exponentially"
 
-c_budgetCO2FFI        "carbon budget for CO2 emissions from FFI (in GtCO2)"
+c_budgetCO2from2020FFI "carbon budget for CO2 emissions starting from 2020 from FFI (in GtCO2)"
 c_abtrdy              "first year in which advanced bio-energy technology are ready (unit is year; e.g. 2050)"
 c_abtcst              "scaling of the cost of advanced bio-energy technologies (no unit, 50% increase means 1.5)"
-c_budgetCO2        "carbon budget for all CO2 emissions (in GtCO2)"
+c_budgetCO2from2020   "carbon budget for all CO2 emissions starting from 2020 (in GtCO2)"
 
 cm_trdcst              "parameter to scale trade export cost for gas"
 cm_trdadj              "parameter scale the adjustment cost parameter for increasing gas trade export"
@@ -430,7 +432,9 @@ c_ccsinjecratescen    = 1;         !! def = 1
 c_ccscapratescen      = 1;         !! def = 1
 c_export_tax_scen     = 0;         !! def = 0
 cm_iterative_target_adj  = 0;      !! def = 0
-$setglobal cm_NDC_version  2022_cond   !! def = 2021_cond
+$setglobal cm_NDC_version  2022_cond    !! def = 2022_cond
+cm_NDC_divergentScenario = 0;           !! def = 0
+$setglobal cm_CO2TaxSectorMarkup  off   !! def = off
 cm_gdximport_target      = 0;      !! def = 0
 $setglobal c_SSP_forcing_adjust  forcing_SSP2   !! def = forcing_SSP2
 $setglobal c_delayPolicy  SPA0           !! def = SPA0
@@ -438,10 +442,10 @@ cm_gs_ew                 = 20;     !! def = 20
 cm_LimRock               = 1000;   !! def = 1000
 c_tau_so2_xmpt           = 0;      !! def = 0
 cm_expoLinear_yearStart  = 2050;   !! def = 2050
-c_budgetCO2FFI           = 1000;   !! def = 1000
+c_budgetCO2from2020FFI   = 700;    !! def = 700 
 c_abtrdy                 = 2010;   !! def = 2010
 c_abtcst                 = 1;      !! def = 1
-c_budgetCO2              = 0;   !! def = 1300
+c_budgetCO2from2020      = 1150;   !! def = 1150
 $setGlobal cm_regiExoPrice  off    !! def = off
 $setGlobal cm_regiCO2target  off   !! def = off
 cm_postTargetIncrease    = 2;      !! def = 2
@@ -605,12 +609,13 @@ $setGlobal cm_damage_DiceLike_specification  HowardNonCatastrophic   !! def = Ho
 
 $setglobal cm_CES_configuration  indu_fixed_shares-buil_simple-tran_complex-POP_pop_SSP2-GDP_gdp_SSP2-En_gdp_SSP2-Kap_debt_limit-FE_med-Reg_2b1450bc   !! this will be changed by start_run()
 
-$setglobal c_CES_calibration_new_structure  0    !! def =  0
-$setglobal c_CES_calibration_iterations  10    !! def = 10
-$setglobal c_CES_calibration_iteration          1    !! def =  1
-$setglobal c_CES_calibration_write_prices  0    !! def =  0
-$setglobal cm_CES_calibration_default_prices  0.01    !! def = 0.01
-$setglobal cm_calibration_string  FE_med      !! def = off
+$setglobal c_CES_calibration_new_structure  0     !!  def  =  0
+$setglobal c_CES_calibration_iterations  10     !!  def  =  10
+$setglobal c_CES_calibration_iteration            1     !!  def  =  1
+$setglobal c_CES_calibration_write_prices  0     !!  def  =  0
+$setglobal cm_CES_calibration_default_prices  0.01  !!  def  =  0.01
+$setglobal c_CES_calibration_industry_FE_target  0
+$setglobal cm_calibration_string  off    !!  def  =  off
 
 $setglobal c_testOneRegi_region  DEU       !! def = EUR
 
@@ -628,6 +633,7 @@ $setglobal cm_INNOPATHS_LDV_mkt_share  off !! def = off
 $setglobal cm_share_LDV_sales  off !! def = off
 $setglobal cm_INNOPATHS_incolearn  off !! def = off
 $setglobal cm_INNOPATHS_storageFactor  off !! def = off
+$setglobal cm_learnRate  off !! def = off
 
 $setglobal cm_INNOPATHS_adj_seed  off
 $setglobal cm_INNOPATHS_adj_seed_cont  off
