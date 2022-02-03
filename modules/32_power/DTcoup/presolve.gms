@@ -146,7 +146,7 @@ $ENDIF.WindOff
 
 *** CG: if value factor if lower than 1, say for solar, take the inverse, since we feed VF into prefactor of markup, and solar being a lot lower than elec price
 **  it means markup need to be adjusted more aggressively (like OCGT)
-*    p32_DIETER_VF(t,regi,te)$((p32_DIETER_VF(t,regi,te) lt 1) AND (p32_DIETER_VF(t,regi,te) ne 0)) = 1 / p32_DIETER_VF(t,regi,te);
+    p32_DIETER_VF(t,regi,te)$((p32_DIETER_VF(t,regi,te) lt 1) AND (p32_DIETER_VF(t,regi,te) ne 0)) = 1 / p32_DIETER_VF(t,regi,te);
 
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
     p32_DIETER_VF(t,regi,"windoff")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Wind_off","value_factor"));
@@ -170,10 +170,6 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
     vm_demSe.l(t,regi,"seel","feelt","tdelt")/(vm_demSe.l(t,regi,"seel","feels","tdels") + vm_demSe.l(t,regi,"seel","feelt","tdelt"));
 
 $ENDIF.elh2_coup
-
-*** CG: if value factor if lower than 1, say for solar, take the inverse, since we feed VF into prefactor of markup, and solar being a lot lower than elec price
-**  it means markup need to be adjusted more aggressively (like OCGT)
-    p32_DIETER_VF(t,regi,te)$((p32_DIETER_VF(t,regi,te) lt 1) AND (p32_DIETER_VF(t,regi,te) ne 0)) = 1 / p32_DIETER_VF(t,regi,te);
 
 
 *** DIETER electricity price (when DIETER price_shave is off, then elec_price_shaved = elec_price_original)

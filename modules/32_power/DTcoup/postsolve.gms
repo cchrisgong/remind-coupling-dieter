@@ -142,12 +142,18 @@ display "DIETER iteration", sm32_iter;
 *** sometimes for some reason the marginals of the PE equation is 0
 ** if condition not satisfied, last iteration values of p32_fuelprice_curriter will be automatically taken
 p32_fuelprice_curriter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps) AND (abs(qm_budget.m(t,regi)) gt sm_eps)) = q_balPe.m(t,regi,entyPe)/ (qm_budget.m(t,regi));
-** if condition not satisfied, last iteration values of p32_fuelprice_avgiter will be automatically taken
+$IFTHEN.fc_avg %fc_avg% == "on"
 p32_fuelprice_avgiter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps))
           = (p32_fuelprice_curriter(t,regi,entyPe)
     		   + 2 * p32_fuelprice_lastiter(t,regi,entyPe)
     			 + p32_fuelprice_lastx2iter(t,regi,entyPe))
     			 / 4 ;
+$ENDIF.fc_avg
+
+$IFTHEN.fc_avg %fc_avg% == "off"
+p32_fuelprice_avgiter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps))
+          = p32_fuelprice_curriter(t,regi,entyPe);
+$ENDIF.fc_avg
 
 *** CG: demand averaging to be passed on to DIETER
 $IFTHEN.dem_avg %cm_DTdem_avg% == "on"
@@ -196,7 +202,7 @@ $ENDIF.policy_Cprice
     p32_usableSeDisp,p32_seh2elh2Dem, !! total demand
     vm_costTeCapital, o_margAdjCostInv, pm_data,fm_dataglob,p32_r4DT, !! capex related tech parameters, interest rate
     pm_dataeta, pm_eta_conv, p32_fuelprice_avgiter, p32_CO2price4DT, fm_dataemiglob, !! running cost related tech parameters
-    p32_grid_factor, pm_ts; !! misc
+    p32_grid_factor,pm_dt; !! misc
 
 logfile.nr = 1;
 if ( (c_keep_iteration_gdxes eq 1) ,

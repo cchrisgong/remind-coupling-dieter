@@ -234,7 +234,7 @@ execute_unload "RMdata_4DT.gdx", tDT32,regDTCoup,sm32_iter, !! basic info: coupl
     p32_usableSeDisp,p32_seh2elh2Dem, !! total demand
     vm_costTeCapital, o_margAdjCostInv, pm_data,fm_dataglob,p32_r4DT, !! capex related tech parameters, interest rate
     pm_dataeta, pm_eta_conv, p32_fuelprice_avgiter, p32_CO2price4DT, fm_dataemiglob, !! running cost related tech parameters
-    p32_grid_factor, pm_ts, !! misc
+    p32_grid_factor,pm_dt, !! misc
     p32_shSeElDem, p32_shSeElDisp, p32_DIETERCurtRatioLaIter;  !! for reporting first iteration DIETER from input.gdx
 
 put_utility "shell" /
