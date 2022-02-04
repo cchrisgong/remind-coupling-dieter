@@ -358,7 +358,7 @@ q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te) AND 
 *q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te) AND (cm_DTcoup_eq eq 3)).. !! turn off equation
     vm_capFac(t,regi,te) * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te))
     =e=
-	  pm_cf(t,regi,te)
+			pm_cf(t,regi,te)
     * ( 1 - 0.5 * (v32_shSeElDisp(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 ) )
 	  * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te))
 ;
@@ -369,7 +369,7 @@ q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) A
 *q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) AND (cm_DTcoup_eq eq 3)).. !! turn off equation
     vm_capFac(t,regi,te) * 1$(regDTCoup(regi))
     =e=
-	  pm_cf(t,regi,te)
+			pm_cf(t,regi,te)
  * ( 1 + 0.7 * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
 	  * 1$(regDTCoup(regi))
 ;
