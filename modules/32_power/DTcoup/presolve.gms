@@ -172,10 +172,10 @@ $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
 $ENDIF.elh2_coup
 
 
-*** DIETER electricity price (when DIETER price_shave is off, then elec_price_shaved = elec_price_original)
-    p32_DIETER_elecprice(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"all_te","elec_price_shaved"));
+*** DIETER electricity price (when DIETER price_shave is off, then elec_price = elec_price_wscar)
+    p32_DIETER_elecprice(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"all_te","elec_price"));
 *** only for reporting
-    p32_DIETER_elecprice_orig(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"all_te","elec_price_original"));
+    p32_DIETER_elecprice_wscar(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"all_te","elec_price_wscar"));
 
 *** CG: storage related coupling parameters
 * ** no curt_ratio averaging

@@ -29,7 +29,7 @@ el
 vregrid
 /
 
-DIETERvarname32 "DIETER name" /capfac,ResPeakDem_relFac,peakDem,value_factor,gen_share,market_value,market_price,elec_price_shaved, elec_price_original,curt_share,curt_ratio,dem_share,usable_generation,model_status/
+DIETERvarname32 "DIETER name" /capfac,ResPeakDem_relFac,peakDem,value_factor,gen_share,market_value,market_price,elec_price, elec_price_wscar,curt_share,curt_ratio,dem_share,usable_generation,model_status/
 
 $ifthen.chp %cm_CHP_coup% == "on"
 COALte32(all_te) "coal to seel tech in REMIND" /igcc,igccc,pc,pcc,pco,coalchp/

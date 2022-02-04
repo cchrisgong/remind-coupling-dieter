@@ -281,7 +281,7 @@ q32_capEndStart(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ).
 q32_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) )..
   vm_priceCap(t,regi)
   =e=
-	1 / 1.2 * ( -p32_budget(t,regi)) !! 0.1 = 100$/kW * 1e9 / 1e12, this is the capacity subsidy per kW of dispatchable, kW -> TW, USD -> trUSD
+	1 * ( -p32_budget(t,regi)) !! 0.1 = 100$/kW * 1e9 / 1e12, this is the capacity subsidy per kW of dispatchable, kW -> TW, USD -> trUSD
   * ( 1 / ( 1 + ( 3 ** ( (10 / ( v32_capDecayEnd(t,regi) - v32_capDecayEnd(t,regi)/1.1 ))
 		* ( vm_reqCap(t,regi) + 1e-11 - ( v32_capDecayEnd(t,regi) + v32_capDecayEnd(t,regi)/1.1 ) / 2	) ) ) )	)
 		 + ( v32_expSlack(t,regi) * 1e-8 )
@@ -294,8 +294,8 @@ $ENDIF.softcap
 *** multiplied with a prefactor that depends on generation share of current REMIND iteration
 *** Note: price conversions between REMIND and DIETER:
 *** multiply by budget from DIETER to REMIND, but divide here again by budget
-*** price_DIETER = price_REMIND/budget_REMIND * 1e12 / sm_TWa_2_MWh * 1.2
-*** price_REMIND = price_DIETER * budget_REMIND/1e12 * sm_TWa_2_MWh/1.2
+*** price_DIETER = price_REMIND/budget_REMIND * 1e12 / sm_TWa_2_MWh
+*** price_REMIND = price_DIETER * budget_REMIND/1e12 * sm_TWa_2_MWh
 ***----------------------------------------------------------------------------
 *q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq eq 3)).. !! turn off equation
 q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq ne 0))..
@@ -306,9 +306,9 @@ q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_D
    1 - p32_DIETER_VF(t,regi,te) *	(v32_shSeElDisp(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 )
 	)
 	- p32_DIETER_elecprice(t,regi) )
-	 / 1e12 * sm_TWa_2_MWh / 1.2 * 1$(regDTCoup(regi))
+	 / 1e12 * sm_TWa_2_MWh * 1$(regDTCoup(regi))
 * no prefactor
-* ( (p32_DIETER_MV(t,regi,te)  - p32_DIETER_elecprice(t,regi) ) / 1e12 * sm_TWa_2_MWh / 1.2 ) * 1$( regDTCoup(regi) )
+* ( (p32_DIETER_MV(t,regi,te)  - p32_DIETER_elecprice(t,regi) ) / 1e12 * sm_TWa_2_MWh ) * 1$( regDTCoup(regi) )
 ;
 
 $IFTHEN.elh2_coup %cm_elh2_coup% == "on"
@@ -320,13 +320,13 @@ q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
 	vm_flexAdj(t,regi,te)
 	=e=
 *	without prefactor
-* (p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te))	/ 1e12 * sm_TWa_2_MWh / 1.2
+* (p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te))	/ 1e12 * sm_TWa_2_MWh
 * with prefactor
 	(( p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te)
 *	 * ( 1 + ( v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
    * ( 1 + p32_DIETER_VF(t,regi,te) * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
 	)
-	/ 1e12 * sm_TWa_2_MWh / 1.2 )
+	/ 1e12 * sm_TWa_2_MWh )
 	* 1$(cm_DTcoup_eq ne 0)
 *** default markup from IntC (see below)
 	+ (1 - v32_flexPriceShare(t,regi,te)) * pm_SEPrice(t,regi,"seel") * 1$(cm_DTcoup_eq eq 0)

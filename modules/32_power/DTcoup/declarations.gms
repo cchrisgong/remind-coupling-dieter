@@ -61,7 +61,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_DIETER_MV(ttot,all_regi,all_te)          "market value for power generating technology rom DIETER"
     p32_DIETER_MP(ttot,all_regi,all_te)          "market price for power consumption technology DIETER"
     p32_DIETER_elecprice(ttot,all_regi)          "elec price in DIETER as read by REMIND"
-    p32_DIETER_elecprice_orig(ttot,all_regi)     "elec price in DIETER which accounts for scarcity price"
+    p32_DIETER_elecprice_wscar(ttot,all_regi)    "elec price in DIETER which accounts for scarcity price"
     p32_DIETER_shSeEl(ttot,all_regi,all_te)      "electricity generation share of technology from DIETER"
 
     p32_reqCap(ttot,all_regi)                              "required total dispatchable capacity to meet peak demand (from last iteration)"
