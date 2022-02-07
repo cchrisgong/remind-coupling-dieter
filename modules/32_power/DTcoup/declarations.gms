@@ -139,13 +139,13 @@ $ENDIF.DTcoup_off
     q32_flexPriceShare(tall,all_regi,all_te)       "calculate share of average electricity price that flexible technologies see"
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
     q32_shSeElDem(ttot,all_regi,all_te)            "calculate share of electricity demand of a technology (v32_shSeElDem)"
 $ENDIF.elh2_coup
     q32_mkup(ttot,all_regi,all_te)                 "calculate markup or markdown of generation technology value"
     q32_capFac(ttot,all_regi,all_te)        	   "Calculate resulting capacity factor for supply-side technologies"
 
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
     q32_capFac_dem(ttot,all_regi,all_te)           "Calculate resulting capacity factor for demand-side technologies"
     q32_flexAdj(tall,all_regi,all_te)              "from DIETER coupling: calculate flexibility used in flexibility tax for technologies with electricity input"
 $ENDIF.elh2_coup

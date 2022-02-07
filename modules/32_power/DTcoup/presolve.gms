@@ -46,7 +46,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     			= sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"OCGT_eff","capfac"));
     pm_cf(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi))
     			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","capfac"));
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
     pm_cf(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi))
     			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","capfac"));
 $ENDIF.elh2_coup
@@ -70,7 +70,7 @@ pm_cf(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi))
 pm_cf(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND NUCte32(te) )
 			= 0.5 * ( p32_cf_last_iter(t,regi,te)$(NUCte32(te))
 			+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","capfac")) );
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
 pm_cf(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi))
       = 0.5 * ( p32_cf_last_iter(t,regi,"elh2")
 			+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","capfac")) );
@@ -152,7 +152,7 @@ $IFTHEN.WindOff %cm_wind_offshore% == "1"
     p32_DIETER_VF(t,regi,"windoff")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"Wind_off","value_factor"));
 $ENDIF.WindOff
 
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
 *   flexible demand side tech market value (electricity price that the flex tech "sees")
     p32_DIETER_MP(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"elh2","market_price"));
     p32_DIETER_MP(t,regi,"tdels")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"el","market_price"));

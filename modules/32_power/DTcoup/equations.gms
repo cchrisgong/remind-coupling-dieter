@@ -159,7 +159,7 @@ q32_shSeElDisp(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))..
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** CG: Calculation of share of electricity demand, e.g. of green h2 using elh2 (note: RHS of demSe contains also deamand met by co-production, which
 *** is not coupled to DIETER, ways to improve? v32_shSeElDem probably add up to more than 100%)
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
 ***---------------------------------------------------------------------------
 * q32_shSeElDem(t,regi,te)$(tDT32(t) AND teFlexTax(te) AND regDTCoup(regi))..
 q32_shSeElDem(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi))..
@@ -248,7 +248,7 @@ q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq 
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=g=
  p32_peakDemand_relFac(t,regi) * 8760 * ( v32_usableSeDisp(t,regi,"seel")
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
   - vm_demSe(t,regi,"seel","seh2","elh2")
 $ENDIF.elh2_coup
 )
@@ -311,7 +311,7 @@ q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_D
 * ( (p32_DIETER_MV(t,regi,te)  - p32_DIETER_elecprice(t,regi) ) / 1e12 * sm_TWa_2_MWh ) * 1$( regDTCoup(regi) )
 ;
 
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
 *** CG: giving flexible demand side technology, e.g. electrolyzer, a subsidy, non DIETER coupled version is q32_flexAdj below.
 *** on prefactor: beacuse if demand share v32_shSeElDem is low for elh2 compared to last iter p32_shSeElDemDIETER,
 *** to balance out oscillation for elh2, we want flexadj to be high (so MarketPrice elh2 sees has to be low to
@@ -333,7 +333,7 @@ q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
 ;
 $ENDIF.elh2_coup
 
-$IFTHEN.elh2_coup_off %cm_elh2_coup% == "off"
+$IFTHEN.elh2_coup_off %cm_DT_elh2_coup% == "off"
 *** CG: giving flexible demand side technology, e.g. electrolyzer a subsidy, non DIETER coupled version is q32_flexAdj below
 q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
 	vm_flexAdj(t,regi,te)
@@ -363,7 +363,7 @@ q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te) AND 
 	  * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te))
 ;
 
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
 ** CG: if elh2 demand share is high, then capfac should be increased..
 q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) AND (cm_DTcoup_eq ne 0))..
 *q32_capFac_dem(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupDemte32(te) AND (cm_DTcoup_eq eq 3)).. !! turn off equation

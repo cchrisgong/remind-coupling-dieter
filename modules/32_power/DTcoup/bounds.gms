@@ -38,7 +38,7 @@ if ((cm_DTcoup_eq eq 1),
 		);
 );
 
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
 if ((cm_DTcoup_eq eq 1),
 		loop(regi$(regDTCoup(regi)),
 			loop(t$(tDT32(t)),
@@ -65,13 +65,13 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** in case cm_FlexTaxFeedback ne 1, but cm_flex_tax is on and DIETER coupling is on ,then set the second two
 *** statements only for non-coupled regions
 *** if flexibility tax feedback is on, let model choose capacity factor of flexible technologies freely
-$IFTHEN.elh2_coup_off %cm_elh2_coup% == "off"
+$IFTHEN.elh2_coup_off %cm_DT_elh2_coup% == "off"
     vm_capFac.fx(t,regi,teFlex)$((t.val ge 2010) AND regDTCoup(regi)) = 0.5;
 *** electricity price of inflexible technologies the same w/o feedback
     v32_flexPriceShare.fx(t,regi,te)$(regDTCoup(regi) AND (teFlexTax(te) AND NOT(teFlex(te)))) = 1;
 $ENDIF.elh2_coup_off
 
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
     if (cm_DTcoup_eq eq 0,
        vm_capFac.fx(t,regi,teFlex)$((t.val ge 2010) AND regDTCoup(regi)) = 0.5;
        v32_flexPriceShare.fx(t,regi,te)$(regDTCoup(regi) AND teFlexTax(te) AND NOT(teFlex(te))) = 1;
@@ -143,7 +143,7 @@ vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi) AND not tDT32(t)) = 
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
 v32_shSeElDem.up(t,regi,teFlexTax)$(regDTCoup(regi)) = 100;
 v32_shSeElDem.lo(t,regi,teFlexTax)$(regDTCoup(regi)) = 0;
 $ENDIF.elh2_coup

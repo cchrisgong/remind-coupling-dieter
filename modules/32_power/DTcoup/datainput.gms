@@ -185,10 +185,10 @@ p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"
 
 *** dumping REMIND input for DIETER iteration
 *** CG: export H2 switch
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
 s32_H2switch = 1;
 $ENDIF.elh2_coup
-$IFTHEN.elh2_coup_off %cm_elh2_coup% == "off"
+$IFTHEN.elh2_coup_off %cm_DT_elh2_coup% == "off"
 s32_H2switch = 0;
 $ENDIF.elh2_coup_off
 
