@@ -205,7 +205,7 @@ $ENDIF.policy_Cprice
     pm_dataeta, pm_eta_conv, p32_fuelprice_avgiter, p32_CO2price4DT, fm_dataemiglob, !! running cost related tech parameters
     p32_grid_factor,pm_dt, !! misc
     p32_shSeElDisp; !! just for comparison
-    
+
 logfile.nr = 1;
 if ( (c_keep_iteration_gdxes eq 1) ,
     put_utility "shell" /
@@ -228,7 +228,7 @@ logfile.nr = 2;
 
 logfile.nr = 1;
 
-if ( (c_keep_iteration_gdxes eq 1) ,
+if ( (c_keep_DTiteration_gdxes eq 1) ,
 
 ***CG: make iteration copies of DIETER results
     put_utility "shell" /
@@ -242,11 +242,11 @@ if ( (c_keep_iteration_gdxes eq 1) ,
 
 ***CG: saves some lst files for diagnosis
     put_utility "shell" /
+      "cp DIETER_v1.0.2_1.lst DIETER_v1.0.2_1_i" sm32_iter:0:0 ".lst";
+    put_utility "shell" /
+      "cp DIETER_v1.0.2_5.lst DIETER_v1.0.2_5_i" sm32_iter:0:0 ".lst";
+    put_utility "shell" /
       "cp DIETER_v1.0.2_10.lst DIETER_v1.0.2_10_i" sm32_iter:0:0 ".lst";
-    put_utility "shell" /
-      "cp DIETER_v1.0.2_11.lst DIETER_v1.0.2_11_i" sm32_iter:0:0 ".lst";
-    put_utility "shell" /
-      "cp DIETER_v1.0.2_12.lst DIETER_v1.0.2_12_i" sm32_iter:0:0 ".lst";
 
 );
 logfile.nr = 2;
