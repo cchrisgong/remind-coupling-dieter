@@ -32,7 +32,7 @@ if ((cm_DTcoup_eq eq 1),
 				loop(te$(CFcoupSuppte32(te)),
 				vm_capFac.lo(t,regi,te)=0;
 				vm_capFac.up(t,regi,te)=INF;  !! must not be capped by one, as some vm_capFac are larger than 1 due to scaling
-        vm_capFac.up(t,regi,te)$(DISPATCHte32(te)) = 1; !! but set CF of dispatchables to be less than 95%
+        vm_capFac.up(t,regi,te)$(DISPATCHte32(te)) = 1; !! but set CF of dispatchables to be less than 100%
 				);
 			);
 		);
@@ -115,7 +115,7 @@ vm_cap.fx(t,regi,"elh2VRE",rlf) = 0;
 *** END OF IntC bounds
 *** =====================================
 
-$ifthen.chpoff %cm_CHP_coup% == "off"
+$ifthen.chpoff %cm_DT_CHP_coup% == "off"
 vm_capFac.fx(t,regi,"biochp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
 vm_capFac.fx(t,regi,"gaschp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
 vm_capFac.fx(t,regi,"coalchp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
