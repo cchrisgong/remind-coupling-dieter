@@ -196,7 +196,7 @@ $ENDIF.policy_Cprice
 
 * REMIND data for DIETER
     execute_unload "RMdata_4DT.gdx", tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,
-    s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,s32_windoff,  !! switches: H2 switch, mode switch, dispatch iterational switches, offshore switch
+    s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,s32_windoff, s32_scarPrice, !! switches: H2 switch, mode switch, dispatch iterational switches, offshore switch
     COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,      !! tech sets: REMIND technology definition
     vm_cap, vm_deltaCap, vm_capDistr, v32_storloss,vm_capEarlyReti,vm_prodSe,vm_usableSeTe, !! quantities: capacity, generation, curtailment,
     p32_realCapfacVRE,vm_capFac,pm_cf, pm_dataren, !! CF

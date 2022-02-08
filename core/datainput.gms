@@ -506,7 +506,7 @@ pm_cf(ttot,regi,"ngt")$(ttot.val ge 2045) = 0.4 * pm_cf(ttot,regi,"ngt");
 pm_cf(ttot,regi,"tdh2b") = pm_cf(ttot,regi,"tdh2s");
 pm_cf(ttot,regi,"tdh2i") = pm_cf(ttot,regi,"tdh2s");
 
-pm_cf_linear(ttot,regi,te) =  pm_cf(ttot,regi,te);
+*pm_cf_linear(ttot,regi,te) =  pm_cf(ttot,regi,te);
 
 *SB* Region- and tech-specific early retirement rates
 *Regional*

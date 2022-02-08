@@ -211,6 +211,14 @@ $IFTHEN.windOff %cm_wind_offshore% == "1"
 s32_windoff = 1;
 $ENDIF.windOff
 
+*** CG: export REMIND capacity constraint bound to DIETER, if REMIND has no such constraint on capacity due to residual
+** hourly demands, DIETER needs to export to REMIND a market value that includes the scarcity price
+$IFTHEN.nocapcon %cm_DTcapcon% == "none"
+s32_scarPrice = 0;  !!do not shave off scarcity price
+$ENDIF.nocapcon
+$IFTHEN.capcon not %cm_DTcapcon% == "none"
+s32_scarPrice = 1;  !! shave off scarcity price 
+$ENDIF.capcon
 *** initiating other parameters for averaging in loop
 
 p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
@@ -226,8 +234,8 @@ $ENDIF.WindOff
 $ENDIF.curt_avg
 
 * REMIND data for DIETER
-execute_unload "RMdata_4DT.gdx", tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,
-    s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,s32_windoff,  !! switches: H2 switch, mode switch, dispatch iterational switches, offshore switch
+execute_unload "RMdata_4DT.gdx",tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,
+    s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,s32_windoff,s32_scarPrice, !! switches: H2 switch, mode switch, dispatch iterational switches, offshore switch
     COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,      !! tech sets: REMIND technology definition
     vm_cap, vm_deltaCap, vm_capDistr, v32_storloss,vm_capEarlyReti,vm_prodSe,vm_usableSeTe, !! quantities: capacity, generation, curtailment,
     p32_realCapfacVRE,vm_capFac,pm_cf, pm_dataren, !! CF

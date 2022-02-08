@@ -92,6 +92,7 @@ scalars
     s32_H2switch                              "a binary switch for flexible H2 coupling, to be exported to DIETER"
     s32_DTcoupModeswitch                      "a binary switch for DIETER coupling mode - whether validation or dispatch, to be exported to DIETER"
     s32_windoff                               "a binary switch for wind offshore to be exported to DIETER"
+    s32_scarPrice                             "scarcity price switch in DIETER, to be used with situation when there is no capacity constraint in REMIND due to peak residual hourly demand"
 ;
 
 positive variables
