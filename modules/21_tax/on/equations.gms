@@ -44,7 +44,7 @@
     + v21_implicitDiscRate(t,regi)
     + sum(emiMkt, v21_taxemiMkt(t,regi,emiMkt))
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
     + v21_taxrevFlex(t,regi)$(cm_DTcoup_eq ne 0)
 $ENDIF.elh2_coup
     + v21_taxrevMrkup(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
@@ -53,7 +53,7 @@ $IFTHEN.softcap %cm_softcap% == "on"
 $ENDIF.softcap
 *    + v21_prodse_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
     + v21_prodse_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq eq 3))
-$IFTHEN.elh2_coup %cm_elh2_coup% == "on"
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
     + v21_greenh2dem_dampen(t,regi)$(tDT32(t) AND (regDTCoup(regi)) AND (cm_DTcoup_eq ne 0))
 $ENDIF.elh2_coup
 $ENDIF.DTcoup
