@@ -189,10 +189,9 @@ p32_r4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
 
 $IFTHEN.policy_Cprice not %carbonprice% == "none"
 *** CG: updating CO2 price from REMIND to DIETER
-p32_CO2price4DT(t,regi)$(tDT32(t) AND regDTCoup(regi)) = pm_taxCO2eq(t,regi)/sm_DptCO2_2_TDpGtC;
+p32_CO2price4DT(t,regi)$(tDT32(t) AND regDTCoup(regi)) = pm_priceCO2(t,regi)/sm_C_2_CO2;
 !!p32_CO2price4DT(t,regi)$(cm_startyear AND regDTCoup(regi)) = pm_taxCO2eq(t,regi)/sm_DptCO2_2_TDpGtC;
 $ENDIF.policy_Cprice
-
 
 * REMIND data for DIETER
     execute_unload "RMdata_4DT.gdx", tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,

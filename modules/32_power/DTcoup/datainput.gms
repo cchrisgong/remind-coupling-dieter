@@ -131,6 +131,7 @@ Execute_Loadpoint 'input' pm_pop = pm_pop;
 Execute_Loadpoint 'input' pm_ttot_val = pm_ttot_val;
 Execute_Loadpoint 'input' pm_prtp = pm_prtp;
 Execute_Loadpoint 'input' o_margAdjCostInv = o_margAdjCostInv;
+Execute_Loadpoint 'input' pm_priceCO2 = pm_priceCO2;
 *Execute_Loadpoint 'input' p_teAnnuity = p_teAnnuity;
 
 p32_realCapfacVRE(t,regi,teVRE)$(vm_cap.l(t,regi,teVRE,"1"))
