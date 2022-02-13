@@ -88,8 +88,8 @@ p32_seelTotDem(t,regi,enty2)$(sameas(enty2,"seel")) =
 + sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr.l(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! do not use in 2005 because this demand is not contained in 05_initialCap
 ;
 
-*** CG: total usable demand to pass on to DIETER: this has to
-*** include the electricity consumed for extracting fuels (included in p32_seelTotDem),
+*** CG: total usable demand:
+*** includes the electricity consumed for extracting fuels (included in p32_seelTotDem),
 *** as well as distributing and transporting them (p32_prod4dtFE) and doing CCS (p32_prod4CCS)
 *** and exclude curtailment
 *** (note: p32_prod4dtFE and p32_prod4CCS are negative)
@@ -186,6 +186,13 @@ p32_test2(t,regi) =  sum(en2en(enty,enty2,te),
 * since we would like to couple all years to limit distortions, but growth rate after 2100 is weird (2130 has negative growth rate) due to various artefact, we simply set interest rates
 * after 2100 to 5%, this only sets 2110, 2130, 2150 three years
 p32_r4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
+
+
+* $IFTHEN.Base_Cprice %carbonprice% == "none"
+* *** CG: updating CO2 price from REMIND to DIETER
+* p32_CO2price4DT(t,regi)$((t.val gt 2020) AND regDTCoup(regi)) = sum(regi_group(ext_regi,regi), p47_exoCo2tax(ext_regi,t));
+* $ENDIF.Base_Cprice
+
 
 $IFTHEN.policy_Cprice not %carbonprice% == "none"
 *** CG: updating CO2 price from REMIND to DIETER
