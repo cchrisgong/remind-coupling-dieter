@@ -166,6 +166,8 @@ p32_r4DT(ttot,regi)$(tDT32s2(ttot) AND regDTCoup(regi))
 p32_r4DT(ttot,regi)$((ttot.val gt 2100) AND regDTCoup(regi)) = 0.05;
 
 ***CG: passing the CO2 price to DIETER
+p32_CO2price4DT(t,regi)$((t.val le 2020) AND regDTCoup(regi)) = f21_taxCO2eqHist(t,regi);
+
 $IFTHEN.Base_Cprice %carbonprice% == "none"
 *** CG: updating CO2 price from REMIND to DIETER
 p32_CO2price4DT(t,regi)$((t.val gt 2020) AND regDTCoup(regi)) = cm_DTcoup_flatco2;
@@ -175,6 +177,7 @@ $IFTHEN.Base_Cprice not %carbonprice% == "none"
 *** CG: updating CO2 price from REMIND to DIETER
 p32_CO2price4DT(t,regi)$((t.val gt 2020) AND regDTCoup(regi)) = pm_priceCO2(t,regi)/sm_C_2_CO2;
 $ENDIF.Base_Cprice
+
 
 * calculate fuel prices (only prices in REMIND in the form of marginals need to be divided by qm_budget.m)
 p32_fuelprice_curriter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps) AND (abs(qm_budget.m(t,regi)) gt sm_eps)) =

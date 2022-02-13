@@ -40,9 +40,9 @@ REMINDte4DT32(all_te) "REMIND tech for DIETER"
 /
 spv
 wind
-$IFTHEN.WindOff %cm_wind_offshore% == "1"
+*$IFTHEN.WindOff %cm_wind_offshore% == "1"
 windoff
-$ENDIF.WindOff
+*$ENDIF.WindOff
 hydro
 elh2
 coalchp
@@ -77,9 +77,9 @@ REMINDte4DT32(all_te) "REMIND tech for DIETER"
 /
 spv
 wind
-$IFTHEN.WindOff %cm_wind_offshore% == "1"
+*$IFTHEN.WindOff %cm_wind_offshore% == "1"
 windoff
-$ENDIF.WindOff
+*$ENDIF.WindOff
 hydro
 elh2
 ngcc
