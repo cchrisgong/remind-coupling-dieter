@@ -582,6 +582,7 @@ cm_DTcoup_eq = 0;         !! def = 0
 cm_DT_dispatch_i1 = 20;           !! def <- 20
 cm_DT_dispatch_i2 = 25;           !! def <- 24
 $setglobal cm_DTcapcon  none        !! def = none
+$setglobal cm_DTnoER   on           !! def = off
 $setglobal cm_DT_elh2_coup  off       !! def = off
 $setglobal cm_DT_CHP_coup  off       !! def = on
 $setglobal cm_DTcf_avg  on         !! def = on

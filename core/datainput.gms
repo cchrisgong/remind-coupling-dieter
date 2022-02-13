@@ -526,8 +526,12 @@ $ENDIF.tech_earlyreti
 $ifthen.Base_Cprice %carbonprice% == "none"
 $ifthen.Base_techpol %techpol% == "none"
 *** Allow very little early retirement future periods
-pm_regiEarlyRetiRate(t,regi,"pc")$(t.val gt 2025) = 0.01;
-*pm_regiEarlyRetiRate(t,regi,te)$(t.val gt 2025) = 0.001;
+*pm_regiEarlyRetiRate(t,regi,"pc")$(t.val gt 2025) = 0.01;
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+$IFTHEN.noEarlyReti %cm_DTnoER% == "on"
+pm_regiEarlyRetiRate(t,regi,te)$((t.val ge 2020) AND regDTCoup(regi)) = 0;
+$ENDIF.noEarlyReti
+$ENDIF.DTcoup
 $endif.Base_techpol
 $endif.Base_Cprice
 
