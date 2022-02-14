@@ -18,6 +18,8 @@ cm_DTcoup_eq = 1;
 
 *** CG: fit a polynom through oscillating fuel price data for biomass, coal and gas
 execute "Rscript fuelPriceCubRegr.R";
+*** make sure all DIETER problems look like the first year file
+execute "python DIETER_rewrite.py";
 
 *** CG: start a first iteration DIETER
 execute "./DIETER_parallel.sh";
