@@ -32,8 +32,11 @@ if ((cm_DTcoup_eq eq 1),
 				loop(te$(CFcoupSuppte32(te)),
 				vm_capFac.lo(t,regi,te)=0;
 				vm_capFac.up(t,regi,te)=INF;  !! must not be capped by one, as some vm_capFac are larger than 1 due to scaling
+* these cause infes in DTmode = none...
+$IFTHEN.hasbound not %cm_DTmode% == "none"
         vm_capFac.up(t,regi,te)$(DISPATCHte32(te)) = 0.8; !! but set CF of non nuclear dispatchables to be less than 80% (this is consistent with eqn con2c_maxprodannual_conv in DIETER)
         vm_capFac.up(t,regi,te)$(NUCte32(te)) = 0.85; !! but set CF of nuc to be less than 85% (this is consistent with eqn con2c_maxprodannual_conv_nuc in DIETER)
+$ENDIF.hasbound
 				);
 			);
 		);
