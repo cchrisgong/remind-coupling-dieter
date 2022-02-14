@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "hydro525"
+run_number = "hydro798"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 # import library
 
@@ -42,11 +42,11 @@ iter_toplot_DT = 1:length(sorted_files_DT)
 
 remind.nonvre.mapping <- c(
                            # coalchp = "Coal (Lig + HC)",
-                           igcc = "Coal (Lig + HC)",
-                           igccc = "Coal (Lig + HC)",
-                           pcc = "Coal (Lig + HC)",
-                           pco = "Coal (Lig + HC)",
-                           pc = "Coal (Lig + HC)",
+                           igcc = "Coal",
+                           igccc = "Coal",
+                           pcc = "Coal",
+                           pco = "Coal",
+                           pc = "Coal",
                            tnrs = "Nuclear",
                            ngt = "OCGT",
                            ngcc = "CCGT",
@@ -61,30 +61,35 @@ remind.sector.coupling.mapping <- c(elh2 = "Electrolyzers",
                                     NULL)
                                       
 remind.vre.mapping <- c(hydro = "Hydro",
-                        wind = "Wind",
+                        wind = "Wind Onshore",
+                        windoff = "Wind Offshore",
                         spv = "Solar",
                         NULL)
 
-vre.names <- c("Hydro","Wind","Solar")
-nonvre.names <- c("Lignite", "Hard coal","Coal (Lig + HC)", "Nuclear","OCGT","CCGT","Biomass","Electrolyzers")
-table_ordered_name = c("Coal (Lig + HC)", "Lignite", "Hard coal","CCGT", "Solar", "Wind", "Biomass", "OCGT", "Hydro", "Nuclear","Electrolyzers")
+table_ordered_name = c("Coal", "CCGT", "Solar", "Wind Onshore", "Wind Offshore", "Biomass", "OCGT", "Hydro", "Nuclear","Electrolyzers")
 
-remind.tech.mapping <- c(remind.nonvre.mapping, remind.vre.mapping, remind.sector.coupling.mapping)
+remind.tech.mapping <- c(remind.nonvre.mapping, remind.vre.mapping)
 
-dieter.tech.exclude <- c("OCGT_ineff", "Wind_off")
+if (h2switch == 1){
+  remind.tech.mapping <- c(remind.tech.mapping, remind.sector.coupling.mapping ,NULL)
+}
 
-dieter.tech.mapping <- c(hc = "Hard coal",
-                         lig = "Lignite",
-                         coal = "Coal (Lig + HC)",
+dieter.tech.exclude <- c("OCGT_ineff")
+
+dieter.tech.mapping <- c(lig = "Coal",
                          nuc = "Nuclear",
                          OCGT_eff = "OCGT",
                          CCGT = "CCGT",
                          bio = "Biomass",
                          ror = "Hydro",
-                         Wind_on = "Wind",
+                         Wind_on = "Wind Onshore",
+                         Wind_off = "Wind Offshore",
                          Solar = "Solar",
-                         elh2 = "Electrolyzers",
                          NULL)
+
+if (h2switch == 1){
+  dieter.tech.mapping <- c(dieter.tech.mapping, elh2 = "Electrolyzers",NULL)
+}
 
 # year_toplot = 2050
 
@@ -101,10 +106,18 @@ VARsubkey1_RM = "p32_peakDemand_relFac"
 VARsubkey2_RM = "v32_usableSeDisp"
 VARsubkey3_RM = "p32_seh2elh2Dem"
 
-color.mapping <- c("CCGT" = "#999959", "Lignite" = "#0c0c0c", "Coal (Lig + HC)" = "#0c0c0c",
-                   "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
-                   "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
-                   "Hard coal" = "#808080", "peak demand" = "#0c0c0c", "Electrolyzers" = "#48D1CC")
+color.mapping <- c("CCGT" = "#999959", "Coal" = "#0c0c0c",
+                   "Solar" = "#ffcc00", "Wind Onshore" = "#337fff", "Wind Offshore" = "#334cff", "Biomass" = "#005900",
+                   "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff", NULL)
+
+color.mapping2 <- c(color.mapping,
+                   "peak hourly residual demand" = "#0c0c0c", NULL)
+
+
+if (h2switch == 1){
+  color.mapping <- c(color.mapping,c("Electrolyzers" = "#48D1CC"))
+}
+
 
 ########################################################
 ########################################################
@@ -264,13 +277,13 @@ for(year_toplot in year_toplot_list){
   if (length(files_DT) != 0) {
   vr1_DEM_plot <- vr1_DEM %>% 
     filter(period == year_toplot)
-  vr1_DEM_plot$tech <- "peak demand"
+  vr1_DEM_plot$tech <- "peak hourly residual demand"
   }
   
   vrN_RM_CF_plot <- vrN_RM_CF %>% 
     filter(period == year_toplot)
   
-  secAxisScale1 = max(vrN_RM_CAP_plot$value) / 100
+  secAxisScale1 = max(vrN_RM_CAP_plot$value) / 60
 
   vrN_RM_CAP_plot2<- vrN_RM_CAP_plot %>% 
     dplyr::group_by(period, rlf, iter, model) %>%
@@ -282,13 +295,13 @@ for(year_toplot in year_toplot_list){
 p0<-ggplot() +
   geom_area(data = vrN_RM_CAP_plot, aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5) +
   geom_line(data = vrN_RM_CF_plot, aes(x = iter, y = value*secAxisScale1, color = tech), size = 1.2, alpha = 0.5) + 
-  scale_y_continuous(sec.axis = sec_axis(~./secAxisScale1, name = paste0("CF", "(%)")))+
+  scale_y_continuous(sec.axis = sec_axis(~./secAxisScale1, name = paste0("capacity factor (%)")))+
   scale_fill_manual(name = "Technology", values = color.mapping) +
-  scale_color_manual(name = "tech", values = color.mapping) +
-  theme(axis.text=element_text(size=14), axis.title=element_text(size = 14,face="bold")) + 
-  xlab("iteration") + ylab(paste0(VARkey1, "(GW)")) +
+  scale_color_manual(name = "tech", values = color.mapping2) +
+  theme(axis.text=element_text(size=14), axis.title=element_text(size = 20,face="bold")) + 
+  xlab("iteration") + ylab(paste0("capacity (GW)")) +
   # ggtitle(paste0("REMIND ", year_toplot, " (100$/tCO2)"))+
-  ggtitle(paste0("REMIND ", year_toplot))+
+  ggtitle(paste0("REMIND: Germany ", year_toplot))+
   coord_cartesian(xlim = c(0, max(vrN_RM_CAP_plot$iter)+1),ylim = c(0, ymax)) +
   theme(plot.title = element_text(size = 16, face = "bold")) +
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text=element_text(size=14)) +
@@ -306,21 +319,21 @@ if (length(files_DT) != 0) {
 vrN_DT_CF_plot <- vrN_DT_CF %>%
   filter(period == year_toplot)
 }
-secAxisScale2 = max(vrN_RM_CAP_plot$value) / 100
+secAxisScale2 = max(vrN_RM_CAP_plot$value) / 60
 
 if (length(files_DT) != 0) {
 p2<-ggplot() +
   geom_area(data = vrN_DT_CAP_plot, aes(x = iter, y = value, fill = all_te), size = 1.2, alpha = 0.5) +
   geom_line(data = vr1_DEM_plot, aes(x = iter, y = value, color = tech), size = 1.2, alpha = 1,linetype="dotted") +
   geom_line(data = vrN_DT_CF_plot, aes(x = iter, y = value*secAxisScale2, color = tech), size = 1.2, alpha = 0.5) +
-  scale_y_continuous(sec.axis = sec_axis(~./secAxisScale2, name = paste0("CF", "(%)")))+
+  scale_y_continuous(sec.axis = sec_axis(~./secAxisScale2, name = paste0("capacity factor (%)")))+
   scale_fill_manual(name = "Technology", values = color.mapping) +
-  scale_color_manual(name = "tech", values = color.mapping)+
-  theme(axis.text=element_text(size=14), axis.title=element_text(size= 14,face="bold")) +
+  scale_color_manual(name = "tech", values = color.mapping2)+
+  theme(axis.text=element_text(size=14), axis.title=element_text(size= 20,face="bold")) +
   xlab("iteration") + ylab(paste0("capacity (GW)")) +
   coord_cartesian(xlim = c(0, max(vrN_DT_CAP_plot$iter)),ylim = c(0, ymax))+
   # ggtitle(paste0("DIETER ", year_toplot, " (100$/tCO2)"))+
-  ggtitle(paste0("DIETER ", year_toplot))+
+  ggtitle(paste0("DIETER: Germany ", year_toplot))+
   theme(plot.title = element_text(size = 16, face = "bold"))+
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text=element_text(size=14)) +
   theme(aspect.ratio = .5)
@@ -334,6 +347,6 @@ p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
 
 grid.draw(p)
 
-ggsave(filename = paste0(mypath, run_number, "_CAP_", year_toplot, "wCF.png"),  p,  width = 13, height =16, units = "in", dpi = 120)
+ggsave(filename = paste0(mypath, run_number, "_CAP_", year_toplot, "wCF.png"),  p,  width = 12, height =15, units = "in", dpi = 120)
 }
 

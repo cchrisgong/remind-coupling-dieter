@@ -1,6 +1,6 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
 myDIETERPLOT_path = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
-run_number = "hydro566"
+run_number = "hydro744"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number,"/")
 
 mifpath = paste0(mydatapath,"REMIND_generic_xx_ref_FEmed.mif")

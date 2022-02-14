@@ -1,5 +1,5 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/"
-run_number = "hydro654"
+run_number = "hydro797"
 mydatapath = paste0("~/remind-coupling-dieter/output/", run_number, "/")
 
 myDIETERPLOT_path = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
@@ -31,7 +31,7 @@ if (length(files_DT_rep) != 0) {
 }
 
 # iteration_toplot_list <-c(1,2,3,4,5)
-iteration_toplot_list <-c(5,10,20,max(id)+1)
+iteration_toplot_list <-c(5,10,20,25,max(id)+1)
 
 dieter.report.cap <- c("DIETER pre-investment capacities (GW)","REMIND pre-investment capacities (GW)")
 dieter.report.addcap <- c("DIETER added capacities (GW)", "REMIND added capacities (GW)")
@@ -39,8 +39,7 @@ dieter.report.divest <- c("REMIND divestment (GW)")
 
 dieter.report.vars <- c(dieter.report.cap, dieter.report.addcap, dieter.report.divest)
 
-# plot_DTte_names = c("combined cycle gas", "lignite", "solar", "wind", "biomass", "open cycle gas turbine", "hydro", "nuclear", "hard coal")
-plot_DTte_names = c("combined cycle gas", "coal", "solar", "wind", "biomass", "open cycle gas turbine", "hydro", "nuclear")
+
 mycolors_model = c("REMIND" = "#FF0000FF", "DIETER" = "#00FF66FF")
 
 get_report_variable_DT <- function(iteration){
@@ -66,7 +65,7 @@ vrN_rep_DT0 <- rbindlist(vrN_rep_DTlist)
 
 for(iteration in iteration_toplot_list){
 
-  # iteration = 10
+  # iteration = 20
 df.RM <- vrN_rep_DT0 %>% 
   filter(iter == iteration) %>% 
   filter(model == "REMIND") %>% 

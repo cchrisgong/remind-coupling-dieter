@@ -25,12 +25,13 @@ configure script
 ```{r}
 
 plot.scen <- c("REMIND")
-plot.period <- seq(2025,2090,5)
+# plot.period <- seq(2025,2090,5)
+plot.period <- seq(2020,2090,5)
 plot.reg <- "DEU"
 
 
 # set config
-run_number = "hydro653"
+run_number = "hydro796"
 mydatapath =  paste0("~/remind-coupling-dieter/output/", run_number, "/") 
 data.dir <- paste0("~/remind-coupling-dieter/output/", run_number, "/")
 sm_TWa_2_MWh = 8760000000
@@ -188,6 +189,7 @@ variable = c(       "Price|Secondary Energy|Hydrogen",
                     "Price|Secondary Energy|Electricity", 
                     "Price|Secondary Energy|Electricity",
                     "Price|Secondary Energy|Electricity",
+                    "Price|Secondary Energy|Electricity",
                     "Price|Secondary Energy|Electricity", 
                     "Price|Secondary Energy|Electricity"                    
                     )
@@ -204,6 +206,7 @@ tech = c(
            # "biochp",  # disable CHP
            "bioigcc","bioigccc",
            "wind",
+           "windoff",
            "spv",
            "tnrs",
            "hydro",
@@ -215,7 +218,7 @@ map.price.tech <- data.frame(
   sector = rep("supply-side",length(tech)) 
 )
 
-tech.label <- c("spv" ="Solar PV", "wind" = "Wind", "csp" = "Solar CSP", "ngt" = "OCGT",
+tech.label <- c("spv" ="Solar PV", "wind" = "Wind On","wind" = "Wind Off", "csp" = "Solar CSP", "ngt" = "OCGT",
                 "pcc" = "Coal w/ CCS", "ngccc" = "Gas CC w/ CCS", "tnrs" = "Nuclear","bioigcc" = "Biomass","bioigcc" = "Biomass w/ CCS",
                 # "biochp" = "Biomass", 
                 # "coalchp" = "Coal", 
@@ -224,7 +227,7 @@ tech.label <- c("spv" ="Solar PV", "wind" = "Wind", "csp" = "Solar CSP", "ngt" =
                 "hydro" = "Hydro", "ngcc" = "Gas","pc" = "Coal", "system" = "System", "elh2" = "Electrolyzers")
 
 # cost components
-cost.colors <- c("Additional H2 t&d Cost" = "grey",
+cost.colors.te <- c("Additional H2 t&d Cost" = "grey",
                  "FE Tax" = "darkseagreen",
                  "Flex Tax" = "lightblue",
                  "CO2 Provision Cost" = "grey80",
@@ -243,6 +246,25 @@ cost.colors <- c("Additional H2 t&d Cost" = "grey",
                  "flexibility subsidy" = "lightblue",
                  "Markup subsidy/tax" = "lightblue")
 
+cost.colors.sys <- c("Additional H2 t&d Cost" = "grey",
+                 "FE Tax" = "darkseagreen",
+                 "Flex Tax" = "lightblue",
+                 "CO2 Provision Cost" = "grey80",
+                 "Curtailment Cost" = "darkblue",
+                 "Storage Cost" = "darkorchid",
+                 "Grid Cost" = "darkolivegreen3",
+                 "CCS Cost" = "darkgoldenrod2",
+                 "Second Fuel Cost" = "violet",
+                 "CO2 Tax Cost" = "indianred",
+                 "OMV Cost" = "cyan",
+                 "OMF Cost" = "darkcyan",
+                 "Investment Cost" = "deepskyblue2",
+                 "Fuel Cost" = "orange3",
+                 "Adjustment Cost" = "darkgoldenrod1",
+                 "System Marginal LCOE" = "red",
+                 "Total Markup" = "lightblue")
+
+cost.colors.sys.wh2 <- c(cost.colors.sys, "flexibility subsidy" = "lightblue")
 
 cost.colors2 <- c("Additional H2 t&d Cost" = "grey",
                  "FE Tax" = "darkseagreen",
@@ -261,7 +283,7 @@ cost.colors2 <- c("Additional H2 t&d Cost" = "grey",
                  # "Markup subsidy/tax" = "lightblue",
                  "Adjustment Cost" = "darkgoldenrod1",
                  "flexibility subsidy" = "lightblue",
-                 'DIETER annual average electricity price' = "indianred3",
+                 'DIETER annual average electricity price with scarcity price' = "indianred3",
                  'DIETER shadow price due to capacity constraint from REMIND' = "mediumpurple3",
                  "Total Markup" = "lightblue")
 
@@ -278,7 +300,7 @@ cost.colors2_DT<- c(
                  "Investment Cost" = "deepskyblue2",
                  "Fuel Cost" = "orange3",
                  "Adjustment Cost" = "darkgoldenrod1",
-                 'DIETER annual average electricity price' = "indianred3",
+                 'DIETER annual average electricity price with scarcity price' = "indianred3",
                  'DIETER shadow price due to capacity constraint from REMIND' = "mediumpurple3"
                  )
 
@@ -344,7 +366,8 @@ flexadj <- read.gdx(gdx, "vm_flexAdj", field="l", factors = FALSE, squeeze = FAL
 REMIND marginal LCOE component for each tech (marginal in the sense of one additional added unit of generation of each tech)
 
 ```{r}
-#total (marginal) LCOE per tech
+#total (marginal) LCOE per tech (with a unit of $/(MWh total generation), curtailment cost comes on top of it, and together it gives $/(MWh usable generation) )
+
 df.lcoe.te.total <- df.lcoe %>% 
                   filter(region %in% plot.reg,
                          period %in% plot.period, type == "marginal",
@@ -360,7 +383,7 @@ df.lcoe.te.components <- df.lcoe %>%
                          period %in% plot.period, type == "marginal",
                          tech %in% map.price.tech$tech, sector %in% plot.sector) %>% 
                   filter(! cost == c("Total LCOE")) %>% 
-                  filter( output == "seel") %>% 
+                  filter( output %in% c("seel","seh2")) %>% 
                   replace(is.na(.), 0) %>% 
                   select(period, tech, cost, lcoe=value) 
 
@@ -404,7 +427,7 @@ df.lcoe.elh2.components <- df.lcoe %>%
                          tech %in% plot.tech, sector %in% plot.sector,
                          value != 0) %>% 
                   filter( ! cost %in% c("Total LCOE")) %>% 
-                  order.levels(tech = plot.tech, cost = names(cost.colors)) %>% 
+                  order.levels(tech = plot.tech, cost = names(cost.colors.te)) %>% 
                   revalue.levels(tech = tech.label) %>% 
                   select(period, tech, cost, sector,value)
 
@@ -441,11 +464,13 @@ mrkup.plot <- mrkup %>%
   dplyr::rename( value = mk )
 
 #tech LCOE components for generating techs (with markups), for both power and seh2
-df.lcoe.te.plot <- list(mrkup.plot, df.lcoe.te.components.plot) %>% 
-  reduce(full_join)  %>% 
-  replace(is.na(.), 0) %>% 
-  select(period,tech, cost, value) %>% 
-  mutate(sector = "supply-side") 
+# df.lcoe.te.plot <- list(mrkup.plot, df.lcoe.te.components.plot) %>% 
+#   reduce(full_join)  %>% 
+#   replace(is.na(.), 0) %>% 
+#   select(period,tech, cost, value) %>% 
+#   mutate(sector = "supply-side") 
+
+df.lcoe.te.plot <- df.lcoe.te.components.plot
 
 if (h2switch == 0){
   df.lcoe.te.plot <- df.lcoe.te.plot %>% 
@@ -463,11 +488,14 @@ mv <- read.gdx(gdx, "p32_marketValue", factors = FALSE, squeeze = FALSE) %>%
   select(period, tech, cost, mv=value) 
 
 #net LCOE for generating tech
-df.lcoe_minus_markup.te <- df.lcoe.te.total %>% 
-                  replace(is.na(.), 0) %>% 
-                  full_join(mrkup) %>% 
-                  mutate(totalLCOE = totalLCOE + mk) %>% 
-                  mutate(cost = "Total (marginal) LCOE - Markup")
+# df.lcoe_minus_markup.te <- df.lcoe.te.total %>% 
+#                   replace(is.na(.), 0) %>% 
+#                   full_join(mrkup) %>% 
+#                   mutate(totalLCOE = totalLCOE + mk) %>% 
+#                   mutate(cost = "Total (marginal) LCOE - Markup")
+
+df.lcoe_minus_markup.te <- df.lcoe.te.total%>% 
+                  mutate(cost = "Total (marginal) LCOE")
 
 df.lcoe_minus_markup.te.plot <- df.lcoe_minus_markup.te %>% 
   dplyr::rename( value = totalLCOE )
@@ -482,10 +510,10 @@ p.teLCOE <- ggplot() +
                       aes(period, value, fill=cost)) +
             geom_line(data = df.telcoe_mv.plot,
                       aes(period, value, linetype=cost), size=1.2) +
-            facet_wrap(~tech~sector, scales = "free_y") +
+            facet_wrap(~tech, scales = "free_y") +
             scale_y_continuous("LCOE and REMIND Price\n(USD2015/MWh)") +
             scale_x_continuous(breaks = seq(2010,2100,10)) +
-            scale_fill_manual(values = cost.colors) +
+            scale_fill_manual(values = cost.colors.te) +
             theme_bw() +
             theme( axis.text.x = element_text(angle = 90),
                    strip.background = element_blank())
@@ -503,7 +531,7 @@ REMIND marginal LCOE component for the entire power system (marginal in the sens
 df.lcoe.components <- list(df.lcoe.elh2.components,df.lcoe.sys.components,df.markup.sys) %>% 
   reduce(full_join) 
 
-df.lcoe.components.nocurt <- df.lcoe.components %>% 
+df.lcoe.components.nocurt <- df.lcoe.components %>%
   filter(!cost =="Curtailment Cost")
   
 df.lcoe_minus_tax.plot <- list(df.lcoe.components, df.markup.sys, flexadj) %>% 
@@ -513,20 +541,20 @@ df.lcoe_minus_tax.plot <- list(df.lcoe.components, df.markup.sys, flexadj) %>%
   dplyr::ungroup(period,tech,sector) %>% 
   mutate(variable = "Total (marginal) LCOE - Flex Tax")
 
-df.lcoe_minus_tax.plot.nocurt <- list(df.lcoe.components.nocurt, df.markup.sys, flexadj) %>% 
-  reduce(full_join)%>% 
+df.lcoe_minus_tax.plot.nocurt <- list(df.lcoe.components.nocurt, df.markup.sys, flexadj) %>%
+  reduce(full_join)%>%
   dplyr::group_by(period,tech,sector) %>%
-  dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
-  dplyr::ungroup(period,tech,sector) %>% 
+  dplyr::summarise( value = sum(value), .groups = "keep" ) %>%
+  dplyr::ungroup(period,tech,sector) %>%
   mutate(variable = "Total (marginal) LCOE - Flex Tax")
 
 df.pricelcoe_minus_tax.plot <- list(df.lcoe_minus_tax.plot,df.price) %>% 
   reduce(full_join)
 
-df.pricelcoe_minus_tax.plot.nocurt <- list(df.lcoe_minus_tax.plot.nocurt,df.price) %>% 
+df.pricelcoe_minus_tax.plot.nocurt <- list(df.lcoe_minus_tax.plot.nocurt,df.price) %>%
   reduce(full_join)
 
-df.lcoe.components.nocurt.plot <- list(df.lcoe.components.nocurt, flexadj) %>% 
+df.lcoe.components.nocurt.plot <- list(df.lcoe.components.nocurt, flexadj) %>%
   reduce(full_join)
 
 df.lcoe.components.plot <- list(df.lcoe.components, flexadj) %>% 
@@ -535,11 +563,11 @@ df.lcoe.components.plot <- list(df.lcoe.components, flexadj) %>%
 if (h2switch == 0){
   df.lcoe.components.plot <- df.lcoe.components.plot %>% 
   filter(!tech =="Electrolyzers")
-  df.lcoe.components.nocurt.plot <- df.lcoe.components.nocurt.plot %>% 
+  df.lcoe.components.nocurt.plot <- df.lcoe.components.nocurt.plot %>%
   filter(!tech =="Electrolyzers")
   df.pricelcoe_minus_tax.plot <- df.pricelcoe_minus_tax.plot %>% 
   filter(!tech =="Electrolyzers")
-  df.pricelcoe_minus_tax.plot.nocurt <- df.pricelcoe_minus_tax.plot.nocurt %>% 
+  df.pricelcoe_minus_tax.plot.nocurt <- df.pricelcoe_minus_tax.plot.nocurt %>%
   filter(!tech =="Electrolyzers")
 }
 
@@ -552,29 +580,33 @@ p.sysLCOE_wmarkup <- ggplot() +
             facet_wrap(~tech~sector, scales = "free_y") +
             scale_y_continuous("LCOE and REMIND Price\n(USD2015/MWh)") +
             scale_x_continuous(breaks = seq(2010,2100,10)) +
-            scale_fill_manual(values = cost.colors) +
+            scale_fill_manual(values = cost.colors.sys.wh2) +
+            coord_cartesian(ylim = c(-30,160))+
             theme_bw() +
+            theme(aspect.ratio = 1) +
             theme( axis.text.x = element_text(angle = 90),
                    strip.background = element_blank())
 
 
-ggsave(plot = p.sysLCOE_wmarkup, filename = paste0(plot.dir, run_number, "_LCOE_", plot.name, "_", plot.scen, ".png"))
+ggsave(plot = p.sysLCOE_wmarkup, filename = paste0(plot.dir, run_number, "_LCOE_", plot.name, "_", plot.scen, ".png"),width = 14, height =7)
 
-p.sysLCOE_wmarkup <- ggplot() + 
-            geom_col( data = df.lcoe.components.nocurt.plot, 
+p.sysLCOE_wmarkup <- ggplot() +
+            geom_col( data = df.lcoe.components.nocurt.plot,
                       aes(period, value, fill=cost)) +
             geom_line(data = df.pricelcoe_minus_tax.plot.nocurt,
                       aes(period, value, linetype=variable), size=1.2) +
             facet_wrap(~tech~sector, scales = "free_y") +
             scale_y_continuous("LCOE and REMIND Price\n(USD2015/MWh)") +
             scale_x_continuous(breaks = seq(2010,2100,10)) +
-            scale_fill_manual(values = cost.colors) +
+            scale_fill_manual(values = cost.colors.sys.wh2) +
+            coord_cartesian(ylim = c(-30,160))+
             theme_bw() +
+            theme(aspect.ratio = 1) +
             theme( axis.text.x = element_text(angle = 90),
                    strip.background = element_blank())
 
 
-ggsave(plot = p.sysLCOE_wmarkup, filename = paste0(plot.dir, run_number, "_LCOE_", plot.name, "_REMIND_nocurt.png"))
+ggsave(plot = p.sysLCOE_wmarkup, filename = paste0(plot.dir, run_number, "_LCOE_", plot.name, "_REMIND_nocurt.png"),width = 14, height =7)
 
 ```
 DIETER's marginal LCOE components for each technology, market value, shadow price, etc (marginal in the sense of one additional MWh added to the year by the marginal plant (corresponding to capfac of the highest level empty grade for VRE)) 
@@ -598,7 +630,8 @@ reportLCOEcomponents_DT_marg = c(
                   # shadow price
                   "shadow price of capacity bound from REMIND - marg ($/MWh)", 
                   # market value
-                  "DIETER Market value w/ scarcity price shaved ($/MWh)"
+                  # "DIETER Market value ($/MWh)"
+                  "DIETER Market value ($/MWh)"
                   )
 
 reportLCOEcomponents_DT_avg = c(
@@ -610,14 +643,20 @@ reportLCOEcomponents_DT_avg = c(
                   "O&M var cost ($/MWh)", 
                   "grid cost ($/MWh)", 
                   "shadow price of capacity bound from REMIND - avg ($/MWh)", 
-                  "DIETER Market value w/ scarcity price shaved ($/MWh)"
+                  "DIETER Market value ($/MWh)",
+                  # "DIETER Market value ($/MWh)",
+                  NULL
                   )
 
 report_DT_genshare = c("genshares (%)")
 
-report_DT_prices = c('load-weighted price for total demand ($/MWh)', 
-                     'price for total demand w/ scarcity price shaved ($/MWh)', 
-                     'total system shadow price of capacity bound - avg ($/MWh)'
+report_DT_prices = c(
+                     'price for total demand - with scarcity price ($/MWh)',
+                     'price for total demand ($/MWh)',
+                     'total system shadow price of capacity bound - avg ($/MWh)',
+                     # 'total system shadow price of capacity bound - marg ($/MWh)',
+                     # 'price for fixed demand ($/MWh)'
+                     NULL
                      )
 
 dieter.tech.mapping <- c(lig = "Coal",
@@ -627,7 +666,8 @@ dieter.tech.mapping <- c(lig = "Coal",
                          CCGT = "CCGT",
                          bio = "Biomass",
                          ror = "Hydro",
-                         Wind_on = "Wind",
+                         Wind_on = "Wind On",
+                         Wind_off = "Wind Off",
                          Solar = "Solar",
                          elh2 = "Electrolyzers",
                          `all Tech` = "All Tech",
@@ -636,7 +676,8 @@ dieter.tech.mapping <- c(lig = "Coal",
 
 # label mapping for plots
 dieter.variable.mapping <- c( 
-  `DIETER Market value w/ scarcity price shaved ($/MWh)` = 'Market Value', 
+  `DIETER Market value ($/MWh)` = 'Market Value',
+  `DIETER Market value with scarcity price ($/MWh)` = 'Market Value with scarcity price', 
   `O&M var cost ($/MWh)` = "OMV Cost",
   `O&M fixed cost - avg ($/MWh)` = "OMF Cost",
   `annualized investment cost - avg ($/MWh)` = "Investment Cost",
@@ -647,11 +688,14 @@ dieter.variable.mapping <- c(
   `fuel cost - divided by eta ($/MWh)` = "Fuel Cost",
   `CO2 cost ($/MWh)` = "CO2 Tax Cost",
   `grid cost ($/MWh)` = "Grid Cost",
-  `price w/ scarcity price shaved ($/MWh)` = 'DIETER annual average electricity price with scarcity price shaved off',
-  `load-weighted price for fixed demand ($/MWh)` = 'DIETER annual average electricity price', 
+  `price for total demand ($/MWh)` = 'DIETER annual average electricity price',
+  `price for total demand - with scarcity price ($/MWh)` = 'DIETER annual average electricity price with scarcity price',
   `total system shadow price of capacity bound - avg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND',
+  `total system shadow price of capacity bound - marg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND',
   `shadow price of capacity bound from REMIND - marg ($/MWh)` = 'Shadow Price',
-  `shadow price of capacity bound from REMIND - avg ($/MWh)` = 'Shadow Price'                            )
+  `shadow price of capacity bound from REMIND - avg ($/MWh)` = 'Shadow Price',
+  `Total Markup` = 'Total Markup',
+  NULL)
 
 # color mapping
 cost.colors_DT <- c(
@@ -686,9 +730,9 @@ label.price <- c("Market Value", "Shadow Price")
 price.colors <- c(
                  "REMIND Price" = "darkblue",
                  "Total (marginal) LCOE - Flex Tax" = "darkorchid",
-                 "DIETER annual average electricity price" = "darkcyan",
-                 # "DIETER annual average electricity price with scarcity price shaved off" = "indianred", 
-                 "DIETER annual average electricity price + shadow price from REMIND" = "violet"
+                 # "DIETER annual average electricity price" = "darkcyan",
+                 "DIETER annual average electricity price with scarcity price" = "indianred",
+                 "DIETER annual average electricity price with scarcity price + shadow price from REMIND" = "violet"
                  # ,
                  # 'DIETER shadow price due to capacity constraint from REMIND' = "DodgerBlue4"
                  )
@@ -818,7 +862,7 @@ running_lcoe_components <- c(
                  "Fuel Cost")
 
 conventionals <- c("Coal", "OCGT", "CCGT", "Biomass")
-renewables <- c("Solar", "Wind")
+renewables <- c("Solar", "Wind On", "Wind Off")
 
 # conventionals_ordered <- factor(credit_rating, ordered = TRUE, 
                                 # levels = c("AAA", "AA", "A", "BBB"))
@@ -866,16 +910,17 @@ prices_DT$model <- "DIETER"
 
 shadow_prices_DT <- prices_DT %>% 
   filter(variable == 'DIETER shadow price due to capacity constraint from REMIND') %>% 
-  select(period, shad=value) 
+  select(period, shad=value)
 
 elec_prices_DT <- prices_DT %>% 
-  filter(variable == "DIETER annual average electricity price") 
+  filter(variable == "DIETER annual average electricity price with scarcity price") 
 
 elec_prices_DT_wShadPrice <- elec_prices_DT %>% 
   left_join(shadow_prices_DT) %>% 
   mutate(value = value + shad) %>% 
-  mutate(variable = "DIETER annual average electricity price + shadow price from REMIND")
+  mutate(variable = "DIETER annual average electricity price with scarcity price + shadow price from REMIND")
 
+# prices_RM <- df.pricelcoe_minus_tax.plot %>%
 prices_RM <- df.pricelcoe_minus_tax.plot.nocurt %>%
   filter(tech == "System") %>%
   filter(variable %in% c("REMIND Price", "Total (marginal) LCOE - Flex Tax")) %>%
@@ -888,7 +933,7 @@ prices_lines <- list(elec_prices_DT_wShadPrice, elec_prices_DT, prices_RM) %>%
 ## filter out the electricity price in DIETER which has scarcity price shaved off, since it does
 # not match well with LCOE
 prices_bar <- prices_DT %>% 
-      filter(!variable == 'DIETER annual average electricity price with scarcity price shaved off') %>% 
+      filter(!variable == 'DIETER annual average electricity price') %>%
       mutate(value = -value)
       
 genshare <- lapply(iter_toplot, get_report_variable_DT, varlist=report_DT_genshare)
@@ -911,11 +956,12 @@ sysLCOE_avg_DT <- dieter.telcoe_avg %>%
   dplyr::group_by(period,variable) %>%
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
   dplyr::ungroup(period,variable) %>% 
-  mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) 
+  mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping))))
 
 sysLCOE_avg_DT$type <- "Average"
 sysLCOE_avg_DT$model <- "DIETER"
 
+# sysLCOE_marg_RM <- df.lcoe.components %>%
 sysLCOE_marg_RM <- df.lcoe.components.nocurt %>%
   filter(tech == "System") %>%
   select(!variable) %>%
@@ -923,8 +969,9 @@ sysLCOE_marg_RM <- df.lcoe.components.nocurt %>%
   mutate(model = "REMIND")
 
 sys_avgLCOE_compare <- list(sysLCOE_avg_DT, sysLCOE_marg_RM) %>% 
-            reduce(full_join)  %>% 
-            mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) 
+            reduce(full_join)  
+# %>% 
+            # mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) 
 
 p.sysLCOE_compare <- ggplot() + 
             geom_col( data = sys_avgLCOE_compare, 
@@ -936,8 +983,8 @@ p.sysLCOE_compare <- ggplot() +
             scale_y_continuous("LCOE and DIETER Price\n(USD2015/MWh)") +
             scale_x_continuous(breaks = seq(2010,2100,10)) +
             scale_color_manual(name = "variable", values = price.colors) +
-            coord_cartesian(ylim = c(-5,110))+
-            scale_fill_manual(values = cost.colors) +
+            coord_cartesian(ylim = c(-5,115))+
+            scale_fill_manual(values = cost.colors.sys) +
             theme_bw() +
             theme( axis.text.x = element_text(angle = 90),
                    strip.background = element_blank())
@@ -993,8 +1040,8 @@ p.sysLCOE_compare <- ggplot() +
             scale_y_continuous("LCOE and DIETER Price\n(USD2015/MWh)") +
             scale_x_continuous(breaks = seq(2010,2100,10)) +
             scale_color_manual(name = "variable", values = price.colors) +
-            coord_cartesian(ylim = c(-5,110))+
-            scale_fill_manual(values = cost.colors) +
+            coord_cartesian(ylim = c(-5,115))+
+            scale_fill_manual(values = cost.colors.sys) +
             theme_bw() +
             theme( axis.text.x = element_text(angle = 90),
                    strip.background = element_blank())
@@ -1044,7 +1091,8 @@ remind.sector.coupling.mapping <- c(elh2 = "Electrolyzers",
                                     NULL)
                                       
 remind.vre.mapping <- c(hydro = "Hydro",
-                        wind = "Wind",
+                        wind = "Wind On",
+                        windoff = "Wind Off",
                         spv = "Solar",
                         NULL)
 
@@ -1081,7 +1129,7 @@ df.lcoe.RM2DTte.RM <- list(prod_shareType_RM, df.lcoe.te.RM) %>%
                 dplyr::group_by(period,tech,cost) %>%
                 dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
                 dplyr::ungroup(period,tech,cost) %>% 
-                filter(!cost =="Curtailment Cost") %>% 
+                # filter(!cost =="Curtailment Cost") %>% 
                 filter(!cost =="Markup subsidy/tax")
 
 df.lcoe.avg.dieter <- cost_bkdw_avg_DT %>% 
@@ -1100,7 +1148,7 @@ p.techLCOE_compare<-ggplot() +
   ggtitle("Tech LCOE comparison (last iteration) - left REMIND (marginal), right DIETER (average)")+
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=20)) +
   theme(aspect.ratio = .5) +
-  scale_fill_manual(name = "model", values =cost.colors)+
+  scale_fill_manual(name = "model", values =cost.colors.te)+
   facet_wrap(~tech, nrow = 3, scales = "free") 
 
 ggsave(plot = p.techLCOE_compare, filename = paste0(plot.dir, run_number, "_teLCOE_avg_compare.png"), width = 25, height = 15)
@@ -1121,7 +1169,7 @@ p.techmargLCOE_compare <-ggplot() +
   ggtitle("Tech LCOE comparison (last iteration) - left REMIND (marginal), right DIETER (marginal)")+
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=20)) +
   theme(aspect.ratio = .5) +
-  scale_fill_manual(name = "model", values =cost.colors)+
+  scale_fill_manual(name = "model", values =cost.colors.te)+
   facet_wrap(~tech, nrow = 3, scales = "free") 
 
 ggsave(plot = p.techmargLCOE_compare, filename = paste0(plot.dir, run_number, "_teLCOE_marg_compare.png"), width = 25, height = 15)
