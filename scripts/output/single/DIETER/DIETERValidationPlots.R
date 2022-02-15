@@ -1,6 +1,6 @@
 # Main function for REMIND-DIETER plots
 
-DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
+# DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
   
   # Load libraries ----------------------------------------------------------
 
@@ -13,78 +13,129 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
   library(gridExtra)
   
   # Configurations ----------------------------------------------------------
-
+  ##
+  save_cfg = 1
+  
+  ## load cm_startyear
+  startyear <- cfg$gms$cm_startyear
+  model.startyear = max(2020,startyear)
+  model.periods <- c(seq(model.startyear, 2060, 5), seq(2070, 2100, 10), seq(2110, 2150, 20))
+  
   report.periods <- c(seq(2005, 2060, 5), seq(2070, 2100, 10), seq(2110, 2150, 20))
 
-  remind.nonvre.mapping <- c(coalchp = "Coal (Lig + HC)",
-                             igcc = "Coal (Lig + HC)",
-                             igccc = "Coal (Lig + HC)",
-                             pcc = "Coal (Lig + HC)",
-                             pco = "Coal (Lig + HC)",
-                             pc = "Coal (Lig + HC)",
+  # load coupled region
+  DTcoupreg <- file.path(outputdir, remind.files[2]) %>%  
+    read.gdx("regDTcoup", factor = FALSE) 
+  reg <- as.character(DTcoupreg)
+  
+  ## define technologies
+  ############### REMIND #########################
+  remind.nonvre.mapping <- c(igcc = "Coal",
+                             igccc = "Coal",
+                             pcc = "Coal",
+                             pco = "Coal",
+                             pc = "Coal",
                              tnrs = "Nuclear",
+                             fnrs = "Nuclear",
                              ngt = "OCGT",
                              ngcc = "CCGT",
                              ngccc = "CCGT",
-                             gaschp = "CCGT",
-                             biochp = "Biomass",
                              bioigcc = "Biomass",
-                             bioigccc = "Biomass")
+                             bioigccc = "Biomass",
+                             NULL)
+  
+  if(cfg$gms$cm_DT_CHP_coup == "on"){
+    remind.nonvreCHP.mapping <- c(coalchp = "Coal",
+                                  gaschp = "CCGT",
+                                  biochp = "Biomass",
+                                  NULL)
+    remind.nonvre.mapping <- c(remind.nonvre.mapping, remind.nonvreCHP.mapping)
+  }
   
   # shifting hydro to dispatchable because in REMIND usable energy is only defined for spv, wind, csp
-  remind.nonvre.mapping2 <- c(remind.nonvre.mapping, hydro = "Hydro")
+  remind.nonvre.mapping.whyd <- c(remind.nonvre.mapping, hydro = "Hydro")
   
-  remind.vre.mapping <- c(wind = "Wind",
+  remind.vre.mapping <- c(wind = "Wind Onshore",
+                          windoff = "Wind Offshore",
                           spv = "Solar")
+  
   remind.sector.coupling.mapping <- c(elh2 = "Electrolyzers")
-  remind.tech.mapping <- c(remind.nonvre.mapping2, remind.vre.mapping,remind.sector.coupling.mapping)
-  table_ordered_name = c("Coal (Lig + HC)", "Lignite", "Hard coal","CCGT", "Solar", "Wind", "Biomass", "OCGT", "Hydro", "Nuclear","Electrolyzers")
-  #table_ordered_name = c("Solar", "Wind", "Biomass", "Hydro", "Nuclear","CCGT", "OCGT", "Coal (Lig + HC)", "Lignite", "Hard coal")
+  
+  remind.tech.mapping <- c(remind.nonvre.mapping2, remind.vre.mapping, remind.sector.coupling.mapping)
+  
+  ############### DIETER #########################
+  table_ordered_name = c("Coal", "CCGT", "Solar", "Wind Onshore", "Wind Offshore", "Biomass", "OCGT", "Hydro", "Nuclear","Electrolyzers")
+  
   table_ordered_name_dem = c("Electricity used for Electrolysis","Electricity")
   
- 
+  dieter.tech.exclude <- c("OCGT_ineff")
   
-  dieter.tech.exclude <- c("OCGT_ineff", "Wind_off")
-  
-  dieter.supply.tech.mapping <- c(hc = "Hard coal",
-                                  lig = "Lignite",
-                                  coal = "Coal (Lig + HC)",
+  dieter.supply.tech.mapping <- c(coal = "Coal",
                                   nuc = "Nuclear",
                                   OCGT_eff = "OCGT",
                                   CCGT = "CCGT",
                                   bio = "Biomass",
                                   ror = "Hydro",
-                                  Wind_on = "Wind",
-                                  Solar = "Solar")
+                                  Wind_on = "Wind Onshore",
+                                  Wind_off = "Wind Offshore",
+                                  Solar = "Solar",
+                                  NULL)
   
   dieter.demand.tech.mapping <- c(seel = "Electricity",
                                   elh2 = "Electrolyzers")
   
+  dieter.nonvre.mapping<- c(coal = "Coal",
+                            nuc = "Nuclear",
+                            OCGT_eff = "OCGT",
+                            CCGT = "CCGT",
+                            bio = "Biomass",
+                            NULL)
+  
   dieter.tech.mapping <- c(dieter.supply.tech.mapping, dieter.demand.tech.mapping)
   
-  color.mapping1 <- c("CCGT" = "#999959", "Coal (Lig + HC)" = "#0c0c0c",
-                      "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
-                      "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff", "Electrolyzers" = "#48D1CC", "Electricity" = "#6495ED")
-  
-  color.mapping2 <- c("CCGT" = "#999959", "Lignite" = "#0c0c0c",
-                      "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
-                      "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
-                      "Hard coal" = "#808080", "Electrolyzers" = "#48D1CC", "Electricity" = "#6495ED", "peak demand" = "#0c0c0c")
-  
-  vre.names <- c("Hydro","Wind","Solar")
-  nonvre.names <- c("Lignite", "Hard coal","Coal (Lig + HC)", "Nuclear","OCGT","CCGT","Biomass","Electrolyzers")
+  vre.names <- c("Hydro","Wind Onshore","Wind Offshore", "Solar")
+  nonvre.names <- c("Coal", "Nuclear","OCGT","CCGT","Biomass","Electrolyzers")
   
   TECHkeylst_DT = c("CCGT",
-                    "lig",
                     "Solar",
                     "Wind_on",
+                    "Wind_off",
                     "bio",
                     "OCGT_eff",
                     "ror",
                     "nuc",
-                    "hc",
                     "elh2",
-                    "seel")
+                    "el")
+
+  ## define color mapping
+  color.mapping <- c("CCGT" = "#999959", "Coal" = "#0c0c0c",
+                      "Solar" = "#ffcc00", "Wind Onshore" = "#337fff", 
+                      "Wind Offshore" = "#334cff", "Biomass" = "#005900",
+                      "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
+                      "Electrolyzers" = "#48D1CC", "Electricity" = "#6495ED",
+                      NULL)
+  
+  color.mapping.capfac.line <- c(color.mapping,
+                      "peak hourly residual demand" = "#0c0c0c", NULL)
+  
+  color.mapping.cf <-c("REMIND real CapFac (%)" =  "#191999",
+                       "DIETER real avg CapFac (%)" = "#999959")
+  
+  color.mapping.cf.detail <- c(color.mapping.cf, 
+                               "DIETER avg CapFac (%)" = '#005900', 
+                               "REMIND CapFac (%)" = "#0c0c0c",
+                               'DIETER marg CapFac (%)' = '#7F7FFF',
+                               "DIETER real marg CapFac (%)" = "#ff33ff")
+  ##### variable names
+  
+  capfac.detail.report.dieter = c( "DIETER avg CapFac (%)",
+                                   "DIETER real avg CapFac (%)",
+                                   "DIETER marg CapFac (%)",
+                                   "DIETER real marg CapFac (%)",
+                                   "REMIND CapFac (%)",
+                                   "REMIND real CapFac (%)")
+  
+  
   sm_TWa_2_MWh <- 8.76E9
 
   # Directories -------------------------------------------------------------
@@ -105,7 +156,11 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
   str_sort(numeric = TRUE)
   cat(paste0("DIETER report files: ", length(dieter.files.report), "\n"))
 
+  dieter.mif.annual.report <- paste0(outputdir, "/DIETER/Dieter_Annual.mif")
   
+  cat(paste0("DIETER mif report files: ", dieter.mif.annual.report, "\n"))
+  
+ 
  
   id <- NULL
   for(fname in dieter.files){
@@ -159,7 +214,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
 
   # Generation --------------------------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotGeneration.R"), local=TRUE)
+  # source(file.path(dieter.scripts.folder, "plotGeneration.R"), local=TRUE)
 
   # Added capacities --------------------------------------------------------
 
@@ -171,7 +226,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
 
   # Price: Secondary electricity --------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotSeelPrice.R"), local=TRUE)
+  # source(file.path(dieter.scripts.folder, "plotSeelPrice.R"), local=TRUE)
 
   # Price: Peak demand ------------------------------------------------------
 
@@ -194,6 +249,6 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
 
   # Close LaTeX PDF ---------------------------------------------------------
 
-  swclose(sw)
+  # swclose(sw)
 
-}
+# }

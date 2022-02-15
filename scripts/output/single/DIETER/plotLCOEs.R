@@ -34,7 +34,7 @@ out.dieter.lcoe <- out.dieter.report %>%
   mutate(CO2 = `CO2 cost`) %>% 
   gather(c("IC", "OM", "FC", "CO2"), key="var", value="cost") %>% 
   select(c(model, tall, technology, iteration, var, cost)) %>% 
-  filter(!technology=="Coal (Lig + HC)") %>% 
+  filter(!technology=="Coal") %>% 
   mutate(var = factor(var, levels=rev(c("IC", "OM", "FC", "CO2"))))
   
 out.dieter.mv <- out.dieter.report %>% 
@@ -58,7 +58,7 @@ for(t.rep in report.periods){
   
   plot.dieter.capfac <- out.dieter.capfac %>% 
     filter(tall == t.rep) %>% 
-    filter(!technology=="Coal (Lig + HC)")
+    filter(!technology=="Coal")
   
   p <- ggplot() + 
     geom_bar(data=plot.dieter.lcoe, aes(x=iteration, y=cost, fill=var), stat="identity", position="stack") + 
@@ -88,7 +88,7 @@ plot.dieter.mv <- out.dieter.mv %>%
 plot.dieter.capfac <- out.dieter.capfac %>% 
   filter(iteration == max(iteration)) %>% 
   filter(tall %in% report.periods) %>% 
-  filter(!technology == "Coal (Lig + HC)")
+  filter(!technology == "Coal")
 
 p <- ggplot() + 
   geom_bar(data=plot.dieter.lcoe, aes(x=tall, y=cost, fill=var), stat="identity", position="stack") + 
