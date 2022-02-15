@@ -64,6 +64,8 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_DIETER_elecprice_wscar(ttot,all_regi)    "elec price in DIETER which accounts for scarcity price"
     p32_DIETER_shSeEl(ttot,all_regi,all_te)      "electricity generation share of technology from DIETER"
 
+    p32_prefac(ttot,all_regi,all_te)          "linear multiplier prefactor to ensure fast convergence and stability in looking for endogoneous solution current-iteration REMIND during coupling"
+
     p32_reqCap(ttot,all_regi)                              "required total dispatchable capacity to meet peak demand (from last iteration)"
     p32_capDecayStart(ttot,all_regi)                       "where capacity subsidy cost function starts to decay, it is a portion of the total required dispatchable capacities"
     p32_capDecayEnd(ttot,all_regi)                         "where capacity subsidy cost function decaying ends, it is a portion of the total required dispatchable capacities"
