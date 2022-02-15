@@ -245,7 +245,7 @@ execute_unload "RMdata_4DT.gdx",tDT32,regDTCoup,sm32_iter, !! basic info: couple
     s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,s32_windoff,s32_scarPrice, !! switches: H2 switch, mode switch, dispatch iterational switches, offshore switch
     COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,      !! tech sets: REMIND technology definition
     vm_cap, vm_deltaCap, vm_capDistr, v32_storloss,vm_capEarlyReti,vm_prodSe,vm_usableSeTe, !! quantities: capacity, generation, curtailment,
-    p32_realCapfacVRE,vm_capFac,pm_cf, pm_dataren, !! CF
+    p32_realCapfacVRE,vm_capFac,pm_cf,pm_dataren, !! CF
     p32_usableSeDisp,p32_seh2elh2Dem, !! total demand
     vm_costTeCapital, o_margAdjCostInv, pm_data,fm_dataglob,p32_r4DT, !! capex related tech parameters, interest rate
     pm_dataeta, pm_eta_conv, p32_fuelprice_avgiter, p32_CO2price4DT, fm_dataemiglob, !! running cost related tech parameters

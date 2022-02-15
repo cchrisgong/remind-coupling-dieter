@@ -303,7 +303,7 @@ q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_D
 	=e=
 * with prefactor, prefactor dependent on the value factor in DIETER
   ( p32_DIETER_MV(t,regi,te) * (
-   1 - p32_DIETER_VF(t,regi,te) *	(v32_shSeElDisp(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 )
+   1 - p32_prefac(t,regi,te) *	(v32_shSeElDisp(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 )
 	)
 	- p32_DIETER_elecprice(t,regi) )
 	 / 1e12 * sm_TWa_2_MWh * 1$(regDTCoup(regi))
@@ -324,7 +324,7 @@ q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
 * with prefactor
 	(( p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te)
 *	 * ( 1 + ( v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
-   * ( 1 + p32_DIETER_VF(t,regi,te) * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
+   * ( 1 + p32_prefac(t,regi,te) * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
 	)
 	/ 1e12 * sm_TWa_2_MWh )
 	* 1$(cm_DTcoup_eq ne 0)
