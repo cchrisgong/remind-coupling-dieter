@@ -4,49 +4,46 @@ cat("Plot generation \n")
 
 out.remind <- NULL
 remind.generation.withCurt <- NULL
-remind.consumption <- NULL
+
 
 for (i in 1:length(remind.files)) {
-  vmProdSe <-   file.path(outputdir, remind.files[i]) %>%
-    read.gdx("vm_prodSe", factors = FALSE, squeeze = FALSE) %>%
-    filter(tall %in% report.periods) %>%
-    filter(all_regi == "DEU") %>%
-    filter(all_te %in% names(remind.nonvre.mapping2)) %>%
-    filter(all_enty.1 == "seel") %>%
-    select(period = tall, all_te, value) %>%
-    revalue.levels(all_te = remind.nonvre.mapping2) %>%
-    mutate(value = value * sm_TWa_2_MWh / 1e6) %>%
-    dplyr::group_by(period, all_te) %>%
-    dplyr::summarise(value = sum(value) , .groups = 'keep') %>%
-    dplyr::ungroup(period, all_te) %>%
-    mutate(iteration = i)
-  
+# i = 1
   vmUsableSeTe <- file.path(outputdir, remind.files[i]) %>%
     read.gdx("vm_usableSeTe", factors = FALSE, squeeze = FALSE) %>%
-    filter(ttot %in% report.periods) %>%
-    filter(all_regi == "DEU") %>%
+    filter(ttot %in% model.periods) %>%
+    filter(all_regi == reg) %>%
+    filter(entySe == "seel") %>%
     filter(all_te %in% names(remind.vre.mapping)) %>%
-    filter(entySe == "seel")  %>%
     select(period = ttot, all_te, value) %>%
-    revalue.levels(all_te = remind.vre.mapping) %>%
+    revalue.levels(all_te = remind.vre.mapping) %>% 
     mutate(value = value * sm_TWa_2_MWh / 1e6) %>%
     dplyr::group_by(period, all_te) %>%
     dplyr::summarise(value = sum(value) , .groups = 'keep') %>%
     dplyr::ungroup(period, all_te) %>%
-    mutate(iteration = i)
+    mutate(iteration = i-1)%>%
+    mutate(all_te = factor(all_te, levels = rev(unique(remind.tech.mapping))))
+     
+  vmprodSe <- file.path(outputdir, remind.files[i]) %>%
+    read.gdx("vm_prodSe", factors = FALSE, squeeze = FALSE) %>%
+    filter(tall %in% model.periods) %>%
+    filter(all_regi == reg) %>%
+    filter(all_enty.1 == "seel") %>%
+    filter(all_te %in% names(remind.nonvre.mapping)) %>%
+    select(period = tall, all_te, value) %>%
+    revalue.levels(all_te = remind.nonvre.mapping) %>% 
+    mutate(value = value * sm_TWa_2_MWh / 1e6) %>%
+    dplyr::group_by(period, all_te) %>%
+    dplyr::summarise(value = sum(value) , .groups = 'keep') %>%
+    dplyr::ungroup(period, all_te) %>%
+    mutate(iteration = i-1)%>%
+    mutate(all_te = factor(all_te, levels = rev(unique(remind.tech.mapping))))
   
-  remind.vm_prodSe  <- list(vmProdSe, vmUsableSeTe) %>%
-    reduce(full_join) %>%
-    mutate(all_te = factor(all_te, levels = rev(unique(
-      remind.tech.mapping
-    ))))
-  
-  out.remind <- rbind(out.remind, remind.vm_prodSe)
+  out.remind <- rbind(out.remind, vmUsableSeTe,vmprodSe)
   
   generation.withCurt<- file.path(outputdir, remind.files[i]) %>%
     read.gdx("vm_prodSe", factors = FALSE, squeeze = FALSE) %>%
-    filter(tall %in% report.periods) %>%
-    filter(all_regi == "DEU") %>%
+    filter(tall %in% model.periods) %>%
+    filter(all_regi == reg) %>%
     filter(all_te %in% names(remind.tech.mapping)) %>%
     filter(all_enty.1 == "seel")  %>%
     select(period = tall, value,all_te) %>%
@@ -56,55 +53,69 @@ for (i in 1:length(remind.files)) {
     dplyr::ungroup(period, all_te) %>%
     mutate(value = value * sm_TWa_2_MWh/1e6) %>%
     mutate(all_te = factor(all_te, levels=rev(unique(remind.tech.mapping)))) %>%
-    mutate(iteration = i)
+    mutate(iteration = i-1)
 
   remind.generation.withCurt <- rbind(remind.generation.withCurt,generation.withCurt)
+  
+}
+
+remind.consumption <- NULL
+
+for (i in 2:length(remind.files)) {
   
   h2consum <- file.path(outputdir, remind.files[i]) %>%
     read.gdx("vm_demSe",
              factors = FALSE,
              field = "l",
              squeeze = FALSE) %>%
-    filter(ttot %in% report.periods) %>%
-    filter(all_regi == "DEU") %>%
+    filter(ttot %in% model.periods) %>%
+    filter(all_regi == reg) %>%
     filter(all_te == "elh2") %>%
     mutate(value = value * sm_TWa_2_MWh / 1e6) %>%
-    select(period = ttot, value) %>%
-    mutate(iteration = i)
-  
-  h2consum2 <- h2consum %>%
-    mutate(all_te = "elh2") %>%
-    mutate(iteration = i)
+    select(all_te,period = ttot, value) 
   
   totalConsum <- file.path(outputdir, remind.files[i]) %>%
-    read.gdx("p32_seelUsableDem",
+    read.gdx("p32_usableSeDisp",
              factors = FALSE,
              squeeze = FALSE) %>%
-    filter(ttot %in% report.periods) %>%
-    filter(all_regi == "DEU") %>%
+    filter(ttot %in% model.periods) %>%
+    filter(all_regi == reg) %>%
     mutate(value = value * sm_TWa_2_MWh / 1e6) %>%
-    select(period = ttot, totalconsum = value) %>%
-    mutate(iteration = i)
+    mutate(all_te="seel") %>% 
+    select(all_te,period = ttot, value)
   
   consumption.data <- list(h2consum, totalConsum) %>%
     reduce(full_join) %>%
-    mutate(value = totalconsum - value)  %>%
-    mutate(all_te = "seel") %>%
-    select(period, all_te, value) %>%
-    full_join(h2consum2) %>%
-    revalue.levels(all_te = dieter.tech.mapping) %>%
-    mutate(iteration = i)
+    revalue.levels(all_te = remind.tech.mapping) %>%
+    mutate(iteration = i-1)
   
- 
   remind.consumption <- rbind(remind.consumption, consumption.data)
   
 }
 
-
-remind.generation.withCurt$tech <- "total generation w/ curtailment"
-
 remind.consumption <- remind.consumption %>%
   mutate(all_te = fct_relevel(all_te, table_ordered_name_dem))
+
+generation.withCurt.disp <- remind.generation.withCurt %>% 
+  filter(!all_te %in% c("Solar", "Wind Onshore", "Wind Offshore")) %>% 
+  dplyr::group_by(period, iteration) %>%
+  dplyr::summarise( disp = sum(value) , .groups = 'keep' ) %>%
+  dplyr::ungroup(period, iteration)
+
+generation.withCurt.wind <- remind.generation.withCurt %>% 
+  filter(all_te %in% c("Wind Onshore")) %>% 
+  left_join(generation.withCurt.disp)  %>% 
+  mutate(value = value + disp) %>% 
+  select(iteration,period,all_te,value)
+
+generation.withCurt.vre <- remind.generation.withCurt %>% 
+  filter(all_te %in% c("Solar","Wind Offshore")) %>% 
+  select(iteration,period,all_te,value)%>% 
+  full_join(generation.withCurt.wind) 
+
+generation.withCurt.vre$tech <- "total generation w/ curtailment"   
+
+remind.generation.withCurt <- generation.withCurt.vre
 
 # Data preparation (DIETER) -----------------------------------------------
 
@@ -119,14 +130,11 @@ for (i in 1:length(sorted_files_DT)) {
       variable = X..4,
       value
     ) %>%
-    filter(all_te %in% TECHkeylst_DT) %>%
     filter(variable %in% c("total_generation", "usable_generation", "total_consumption")) %>%
     mutate(value = value / 1e6) %>%
     filter(all_te %in% names(dieter.tech.mapping)) %>%
     revalue.levels(all_te = dieter.tech.mapping) %>%
-    mutate(all_te = factor(all_te, levels = rev(unique(
-      dieter.tech.mapping
-    ))))  %>%
+    mutate(all_te = factor(all_te, levels = rev(unique(dieter.tech.mapping))))  %>%
     mutate(iteration = id[i]) %>%
     mutate(period = as.integer(period))
   
@@ -151,12 +159,32 @@ dieter.gen.wCurt.sum <- out.dieter %>%
 
 dieter.gen.wCurt$tech <- "total generation w/ curtailment"
 
+dieter.gen.wCurt.disp <- dieter.gen.wCurt %>% 
+  filter(!all_te %in% c("Solar", "Wind Onshore", "Wind Offshore")) %>% 
+  dplyr::group_by(period, iteration) %>%
+  dplyr::summarise( disp = sum(value) , .groups = 'keep' ) %>%
+  dplyr::ungroup(period, iteration)
+
+dieter.gen.wCurt.wind <- dieter.gen.wCurt %>% 
+  filter(all_te %in% c("Wind Onshore")) %>% 
+  left_join(dieter.gen.wCurt.disp) %>% 
+  mutate(value = value +disp) %>% 
+  select(iteration,period,all_te,value)
+
+dieter.gen.wCurt.vre <- dieter.gen.wCurt %>% 
+  filter(all_te %in% c("Wind Offshore","Solar")) %>% 
+  select(iteration,period,all_te,value)%>% 
+  full_join(dieter.gen.wCurt.wind) 
+
+dieter.gen.wCurt.vre$tech <- "total generation w/ curtailment"  
+
+dieter.gen.wCurt <- dieter.gen.wCurt.vre
 # Plotting ----------------------------------------------------------------
 
 swlatex(sw, paste0("\\section{Generation}"))
 
-for (year_toplot in report.periods) {
-  if(year_toplot >= 2020){
+for (year_toplot in model.periods) {
+    
   plot.remind <- out.remind %>%
     filter(period == year_toplot)
   
@@ -166,8 +194,6 @@ for (year_toplot in report.periods) {
   plot.remind.consumption <- remind.consumption %>%
     filter(period == year_toplot)
   
-  ymax = max(remind.consumption$value) * 2
-  ymin = -ymax
   
   if (length(sorted_files_DT) != 0) {
     plot.dieter.usableGen <-
@@ -179,14 +205,9 @@ for (year_toplot in report.periods) {
       dieter.gen.wCurt.sum %>% filter(period == year_toplot)
     plot.dieter.consumption <-
       dieter.consumption %>% filter(period == year_toplot)
-    ymax = max(plot.dieter.gen.wCurt.sum$value) * 1.3
-    if (max(dieter.consumption$value) == 0) {
-      ymin = 0
-    } else {
-      ymin = -max(plot.dieter.consumption$value) * 1.3
-    }
-  }
+    
   
+  }
   
   swlatex(sw, paste0("\\subsection{Generation in ", year_toplot, "}"))
   
@@ -201,7 +222,7 @@ for (year_toplot in report.periods) {
     geom_area(
       data = plot.remind.generation.withCurt,
       aes(x = iteration, y = value, color = all_te),
-      size = 1.2,
+      size = 1,
       alpha = 0,
       linetype = "dotted"
     ) +
@@ -212,16 +233,14 @@ for (year_toplot in report.periods) {
       alpha = 0.5,
       stat = "identity"
     ) +
-    scale_fill_manual(name = "Technology", values = color.mapping1) +
-    scale_color_manual(name = "Technology", values = color.mapping1) +
+    scale_fill_manual(name = "Technology", values = color.mapping) +
+    scale_color_manual(name = "Technology", values = color.mapping_vre) +
     theme(axis.text = element_text(size = 10),
           axis.title = element_text(size = 10, face = "bold")) +
     xlab("iteration") + ylab(paste0("Usable generation (TWh)")) +
-    ggtitle(paste0("REMIND", year_toplot)) +
-    coord_cartesian(ylim = c(ymin, ymax), xlim = c(0, max(out.remind$iteration))) +
-    theme(
-      legend.title = element_blank()
-    ) 
+    ggtitle(paste0("REMIND: ", reg, year_toplot)) +
+    theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
+  
   
   
   if (length(sorted_files_DT) != 0) {
@@ -235,7 +254,7 @@ for (year_toplot in report.periods) {
       geom_area(
         data = plot.dieter.gen.wCurt,
         aes(x = iteration, y = value, color = all_te),
-        size = 1.2,
+        size = 1,
         alpha = 0,
         linetype = "dotted"
       ) +
@@ -250,16 +269,14 @@ for (year_toplot in report.periods) {
         alpha = 0.5,
         stat = "identity"
       ) +
-      scale_fill_manual(name = "Technology", values = color.mapping2) +
-      scale_color_manual(name = "Technology", values = color.mapping2) +
+      scale_fill_manual(name = "Technology", values = color.mapping) +
+      scale_color_manual(name = "Technology", values = color.mapping_vre) +
       theme(axis.text = element_text(size = 10),
             axis.title = element_text(size = 10, face = "bold")) +
-      xlab("iteration") + ylab(paste0(c("total_generation", "usable_generation", "total_consumption"), "(TWh)")) +
-      coord_cartesian(ylim = c(ymin, ymax), xlim = c(0, max(out.remind$iteration))) +
-      ggtitle(paste0("DIETER", year_toplot)) +
-      theme(
-        legend.title = element_blank()
-      ) 
+      xlab("iteration") + ylab(paste0("Usable generation (TWh)")) +
+      ggtitle(paste0("DIETER: ", reg, year_toplot)) +
+      theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
+    
     
   }
   
@@ -272,8 +289,11 @@ for (year_toplot in report.periods) {
   }
   
   swfigure(sw, grid.draw, p)
+  if (save_cfg == 1){
+    ggsave(filename = paste0(outputdir, "/Generation_", year_toplot, ".png"),  p,  width = 8, height =10, units = "in", dpi = 120)
+  }
 }
-}
+
 
 swlatex(sw, "\\subsection{Generation over time (last iteration)}")
 
@@ -300,42 +320,40 @@ plot.dieter.consumption <-
 
 p1 <- ggplot() +
   geom_area(
-    data = plot.remind ,
+    data = plot.remind %>% filter(period <2110),
     aes(x = period, y = value, fill = all_te),
     size = 1.2,
     alpha = 0.5,
     stat = "identity"
   ) +
   geom_area(
-    data = plot.remind.generation.withCurt,
+    data = plot.remind.generation.withCurt%>% filter(period <2110),
     aes(x = period, y = value, color = all_te),
-    size = 1.2,
+    size = 1,
     alpha = 0,
     linetype = "dotted"
   ) +
   geom_area(
-    data = plot.remind.consumption,
+    data = plot.remind.consumption%>% filter(period <2110),
     aes(x = period, y = -value, fill = all_te),
     size = 1.2,
     alpha = 0.5,
     stat = "identity"
   ) +
-  scale_fill_manual(name = "Technology", values = color.mapping1) +
-  scale_color_manual(name = "Technology", values = color.mapping1) +
+  scale_fill_manual(name = "Technology", values = color.mapping) +
+  scale_color_manual(name = "Technology", values = color.mapping_vre) +
   theme(axis.text = element_text(size = 10),
         axis.title = element_text(size = 10, face = "bold")) +
   xlab("Year") + ylab(paste0("Usable generation (TWh)")) +
-  ggtitle(paste0("REMIND (last iteration)")) +
-  # coord_cartesian(ylim = c(ymin,ymax), xlim = c(0, max(out.remind$period)))+
-  theme(
-    legend.title = element_blank()
-  ) 
+  ggtitle(paste0("REMIND: ", reg, " (last iteration)")) +
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
+
 
 
 if (length(sorted_files_DT) != 0) {
   p2 <- ggplot() +
     geom_area(
-      data = plot.dieter,
+      data = plot.dieter%>% filter(period <2110),
       aes(
         x = as.integer(period),
         y = value,
@@ -345,18 +363,18 @@ if (length(sorted_files_DT) != 0) {
       alpha = 0.5
     ) +
     geom_area(
-      data = plot.dieter.gen.wCurt,
+      data = plot.dieter.gen.wCurt%>% filter(period <2110),
       aes(
         x = as.integer(period),
         y = value,
         color = all_te
       ),
-      size = 1.2,
+      size = 1,
       alpha = 0,
       linetype = "dotted"
     ) +
     geom_area(
-      data = plot.dieter.consumption,
+      data = plot.dieter.consumption%>% filter(period <2110),
       aes(
         x = as.integer(period),
         y = -value,
@@ -366,16 +384,15 @@ if (length(sorted_files_DT) != 0) {
       alpha = 0.5,
       stat = "identity"
     ) +
-    scale_fill_manual(name = "Technology", values = color.mapping2) +
-    scale_color_manual(name = "Technology", values = color.mapping2) +
+    scale_fill_manual(name = "Technology", values = color.mapping) +
+    scale_color_manual(name = "Technology", values = color.mapping_vre) +
     theme(axis.text = element_text(size = 10),
           axis.title = element_text(size = 10, face = "bold")) +
     xlab("Year") + ylab(paste0(c("total_generation", "usable_generation", "total_consumption"), "(TWh)")) +
     #coord_cartesian( xlim = c(min(out.dieter$period), max(out.dieter$period)))+
-    ggtitle(paste0("DIETER(last iteration)")) +
-    theme(
-      legend.title = element_blank()
-    ) 
+    ggtitle(paste0("DIETER: ", reg, " (last iteration)")) +
+    theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
+  
   
 }
 
@@ -387,3 +404,6 @@ if (length(sorted_files_DT) != 0) {
 }
 
 swfigure(sw, grid.draw, p)
+if (save_cfg == 1){
+  ggsave(filename = paste0(outputdir, "/Generation_time.png"),  p,  width = 8, height =10, units = "in", dpi = 120)
+}

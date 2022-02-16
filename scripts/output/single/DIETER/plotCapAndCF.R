@@ -14,19 +14,19 @@ if (length(dieter.files) != 0) {
     peak.demand.relfac <- file.path(outputdir, remind.files[i]) %>%  
       read.gdx("p32_peakDemand_relFac", factor = FALSE) %>% 
       filter(ttot %in% model.periods) %>% 
-      filter(all_regi == "DEU") %>%
+      filter(all_regi == reg) %>%
       select(period=ttot,resfrac = value) 
     
     h2.demand <- file.path(outputdir, remind.files[i]) %>%  
       read.gdx("p32_seh2elh2Dem", factor = FALSE) %>% 
       filter(ttot %in% model.periods) %>% 
-      filter(all_regi == "DEU") %>%
+      filter(all_regi == reg) %>%
       select(period=ttot,h2dem = value) 
     
     remind.data <- file.path(outputdir, remind.files[i]) %>%  
       read.gdx("v32_usableSeDisp", field="l", factor = FALSE) %>% 
       filter(ttot %in% model.periods) %>% 
-      filter(all_regi == "DEU") %>%
+      filter(all_regi == reg) %>%
       filter(entySe == "seel") %>%
       select(period=ttot,value) %>% 
       right_join(peak.demand.relfac) %>% 
@@ -44,7 +44,7 @@ if (length(dieter.files) != 0) {
     data.capacity <- file.path(outputdir, remind.files[i]) %>%  
       read.gdx("vm_cap", factors = FALSE, squeeze = FALSE) %>% 
       filter(tall %in% model.periods) %>%
-      filter(all_regi == "DEU") %>%
+      filter(all_regi == reg) %>%
       filter(all_te %in% names(remind.tech.mapping)) %>%
       filter(rlf == "1") %>% 
       mutate(value = value * 1e3) %>% #TW->GW
@@ -236,7 +236,7 @@ p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
 swfigure(sw,grid.draw,p)
 
 if (save_cfg == 1){
-ggsave(filename = paste0(outputdir, "/CAP_wCF_time.png"),  p,  width = 12, height =15, units = "in", dpi = 120)
+ggsave(filename = paste0(outputdir, "/CAP_time.png"),  p,  width = 12, height =15, units = "in", dpi = 120)
 }
 ##################################################################################################
 swlatex(sw, paste0("\\section{Capacity factors}"))
@@ -263,29 +263,6 @@ for(year_toplot in model.periods){
   ggsave(filename = paste0(outputdir, "/CF_", year_toplot, ".png"),  p,  width = 6, height =5, units = "in", dpi = 120)
   }
 }
-
-##################################################################################################
-# swlatex(sw, "\\subsection{Capacity factors over time (last iteration)}")
-# 
-# plot.remind <- out.remind.capfac %>% 
-#   filter(iter == max(iter))
-# 
-# plot.dieter <- out.dieter.capfac %>% 
-#   filter(iter == max(iter)) 
-# 
-# p <- ggplot() + 
-#   geom_line(data=plot.remind, aes(x=as.integer(period), y=value, color=variable)) +
-#   geom_line(data=plot.dieter, aes(x=as.integer(period), y=value, color=variable)) +
-#   scale_color_manual(name = "variable", values = color.mapping.cf.detail)+
-#   facet_wrap(~tech, nrow=3) +
-#   xlab("Time") + 
-#   ylab("Capacity factor")
-# 
-# swfigure(sw,print,p)
-# 
-# if (save_cfg == 1){
-#   ggsave(filename = paste0(outputdir, "/CF_time.png"),  p,  width = 15, height =10, units = "in", dpi = 120)
-# }
 
 ##################################################################################################
 swlatex(sw, "\\subsection{Capacity factors over time (last iteration): detailed}")

@@ -2,7 +2,7 @@
 
 cat("Plot added capacities \n")
 
-dieter.report.cap <- c("DIETER pre-investment capacities","REMIND pre-investment capacities")
+dieter.report.cap <- c("DIETER pre-investment capacities (GW)","REMIND pre-investment capacities (GW)")
 dieter.report.addcap <- c("DIETER added capacities (GW)", "REMIND added capacities (GW)")
 dieter.report.divest <- c("REMIND divestment (GW)")
 
@@ -12,15 +12,14 @@ out.dieter.report <- NULL
 for (i in 1:length(dieter.files.report)){
   dieter.data <- file.path(outputdir, dieter.files.report[i]) %>% 
     read.gdx("report_tech", squeeze=F) %>% 
-    rename(model=X..1, tall = X..2, var=X..4, tech=X..5) %>%
+    select(model=X..1, tall = X..2, var=X..4, tech=X..5, value) %>%
     filter(var %in% dieter.report.vars) %>% 
-    filter(!tech == "coal") %>% 
     revalue.levels(tech = dieter.tech.mapping) %>%
     mutate(variable = case_when(var %in% dieter.report.cap ~ "Pre-inv. cap.",
                                 var %in% dieter.report.addcap ~ "Added cap.",
                                 var %in% dieter.report.divest ~ "Divestment")) %>% 
     mutate(variable = factor(variable, levels=rev(c("Pre-inv. cap.", "Added cap.", "Divestment")))) %>% 
-    mutate(iteration = dieter.iter.step*i)
+    mutate(iteration = i)
   
   out.dieter.report <- rbind(out.dieter.report, dieter.data)
 }
@@ -31,17 +30,20 @@ for (i in 1:length(dieter.files.report)){
 swlatex(sw,"\\onecolumn")
 swlatex(sw, paste0("\\section{Added capacities}"))
 
-for(iter.rep in 1:length(dieter.files.report)){
+for(iter.rep in 1:round(length(dieter.files.report)/dieter.iter.step-1, 0)){
 
   swlatex(sw, paste0("\\subsection{Added capacities in iteration ", iter.rep*dieter.iter.step, "}"))
   
   plot.dieter <- out.dieter.report %>%
     filter(model == "DIETER") %>% 
+    filter(tall %in% model.periods.till2100) %>%
     filter(iteration == iter.rep*dieter.iter.step) %>% 
-    mutate(tall = as.numeric(as.character(tall)) - 1)  # Shift for dodged plot
+    mutate(tall = as.numeric(as.character(tall)) - 1)   # Shift for dodged plot
+    
   
   plot.remind <- out.dieter.report %>% 
     filter(model == "REMIND") %>% 
+    filter(tall %in%model.periods.till2100) %>%
     filter(iteration == iter.rep*dieter.iter.step) %>% 
     mutate(tall = as.numeric(as.character(tall)) + 1) %>%  # Shift for dodged plot
     mutate(value = ifelse(variable == "Divestment", -value, value))  # Divestment has negative value
@@ -57,5 +59,9 @@ for(iter.rep in 1:length(dieter.files.report)){
     ylab("Capacity [GW]")
   
   swfigure(sw,print,p, sw_option="width=20, height=10")
+  
+  if (save_cfg == 1){
+    ggsave(filename = paste0(outputdir, "/AddedCapacity_compare_i", iter.rep*dieter.iter.step, ".png"),  p,  width = 17, height =10, units = "in", dpi = 120)
+  }
 }
 swlatex(sw,"\\twocolumn")

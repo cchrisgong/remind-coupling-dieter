@@ -12,14 +12,54 @@
   library(grid)
   library(gridExtra)
   
+  outputdir = "./output/DIETERcoup_base_25_2022-02-15_20.40.46"
+  setwd("~/remind-coupling-dieter/")
   # Configurations ----------------------------------------------------------
   ##
   save_cfg = 1
+  
+  # Directories -------------------------------------------------------------
+  
+  report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_", str_sub(outputdir, start=8), ".pdf"))
+  #report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_",".pdf"))
+  
+  remind.files <- list.files(outputdir, pattern = "fulldata_[0-9]+\\.gdx") %>%
+    str_sort(numeric = TRUE)
+  cat(paste0("REMIND files: ", length(remind.files), "\n"))
+  maxiter = length(remind.files)
+  
+  dieter.files <- list.files(outputdir, pattern = "results_DIETER_i[0-9]+\\.gdx") %>%
+    str_sort(numeric = TRUE)
+  cat(paste0("DIETER files: ", length(dieter.files), "\n"))
+  
+  dieter.files.report <- list.files(outputdir, pattern = "report_DIETER_i[0-9]+\\.gdx") %>%
+    str_sort(numeric = TRUE)
+  cat(paste0("DIETER report files: ", length(dieter.files.report), "\n"))
+  
+  dieter.mif.annual.report <- paste0(outputdir, "/DIETER/Dieter_Annual.mif")
+  
+  cat(paste0("DIETER mif report files: ", dieter.mif.annual.report, "\n"))
+  
+  id <- NULL
+  for(fname in dieter.files){
+    idx <- as.numeric(str_extract(fname, "[0-9]+"))
+    id = c(id, idx)
+  }
+  id = sort(id)
+  
+  if (length(dieter.files) != 0) {
+    sorted_paths_DT <- paste0(outputdir, "results_DIETER_i", id, ".gdx")
+    sorted_files_DT <- paste0("results_DIETER_i", id, ".gdx")
+  }
+  
+  ## for plots every few steps
+  dieter.iter.step = 5
   
   ## load cm_startyear
   startyear <- cfg$gms$cm_startyear
   model.startyear = max(2020,startyear)
   model.periods <- c(seq(model.startyear, 2060, 5), seq(2070, 2100, 10), seq(2110, 2150, 20))
+  model.periods.till2100 <- c(seq(model.startyear, 2060, 5), seq(2070, 2100, 10))
   
   report.periods <- c(seq(2005, 2060, 5), seq(2070, 2100, 10), seq(2110, 2150, 20))
 
@@ -59,14 +99,15 @@
                           windoff = "Wind Offshore",
                           spv = "Solar")
   
-  remind.sector.coupling.mapping <- c(elh2 = "Electrolyzers")
+  remind.sector.coupling.mapping <- c(seel = "Electricity",
+                                      elh2 = "Electrolyzers")
   
-  remind.tech.mapping <- c(remind.nonvre.mapping2, remind.vre.mapping, remind.sector.coupling.mapping)
+  remind.tech.mapping <- c(remind.nonvre.mapping.whyd, remind.vre.mapping, remind.sector.coupling.mapping)
   
   ############### DIETER #########################
   table_ordered_name = c("Coal", "CCGT", "Solar", "Wind Onshore", "Wind Offshore", "Biomass", "OCGT", "Hydro", "Nuclear","Electrolyzers")
   
-  table_ordered_name_dem = c("Electricity used for Electrolysis","Electricity")
+  table_ordered_name_dem = c("Electrolyzers","Electricity")
   
   dieter.tech.exclude <- c("OCGT_ineff")
   
@@ -81,7 +122,7 @@
                                   Solar = "Solar",
                                   NULL)
   
-  dieter.demand.tech.mapping <- c(seel = "Electricity",
+  dieter.demand.tech.mapping <- c(el = "Electricity",
                                   elh2 = "Electrolyzers")
   
   dieter.nonvre.mapping<- c(coal = "Coal",
@@ -96,7 +137,7 @@
   vre.names <- c("Hydro","Wind Onshore","Wind Offshore", "Solar")
   nonvre.names <- c("Coal", "Nuclear","OCGT","CCGT","Biomass","Electrolyzers")
   
-  TECHkeylst_DT = c("CCGT",
+  dieter.tech = c("CCGT",
                     "Solar",
                     "Wind_on",
                     "Wind_off",
@@ -115,8 +156,14 @@
                       "Electrolyzers" = "#48D1CC", "Electricity" = "#6495ED",
                       NULL)
   
+  color.mapping_vre <- c("Solar" = "#ffcc00", "Wind Onshore" = "#337fff", "Wind Offshore" = "#334cff")
+  
   color.mapping.capfac.line <- c(color.mapping,
                       "peak hourly residual demand" = "#0c0c0c", NULL)
+  
+  color.mapping.seel.line <- c(color.mapping,
+                               "REMIND secondary electricity price ($/MWh) " = "#FFA500", 
+                               NULL)
   
   color.mapping.cf <-c("REMIND real CapFac (%)" =  "#191999",
                        "DIETER real avg CapFac (%)" = "#999959")
@@ -138,41 +185,6 @@
   
   sm_TWa_2_MWh <- 8.76E9
 
-  # Directories -------------------------------------------------------------
-
-  report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_", str_sub(outputdir, start=8), ".pdf"))
-  #report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_",".pdf"))
-  
-  remind.files <- list.files(outputdir, pattern = "fulldata_[0-9]+\\.gdx") %>%
-  str_sort(numeric = TRUE)
-  cat(paste0("REMIND files: ", length(remind.files), "\n"))
-  maxiter = length(remind.files)
-  
-  dieter.files <- list.files(outputdir, pattern = "results_DIETER_i[0-9]+\\.gdx") %>%
-  str_sort(numeric = TRUE)
-  cat(paste0("DIETER files: ", length(dieter.files), "\n"))
-
-  dieter.files.report <- list.files(outputdir, pattern = "report_DIETER_i[0-9]+\\.gdx") %>%
-  str_sort(numeric = TRUE)
-  cat(paste0("DIETER report files: ", length(dieter.files.report), "\n"))
-
-  dieter.mif.annual.report <- paste0(outputdir, "/DIETER/Dieter_Annual.mif")
-  
-  cat(paste0("DIETER mif report files: ", dieter.mif.annual.report, "\n"))
-  
- 
- 
-  id <- NULL
-  for(fname in dieter.files){
-    idx <- as.numeric(str_extract(fname, "[0-9]+"))
-    id = c(id, idx)
-  }
-  id = sort(id)
-  
-  if (length(dieter.files) != 0) {
-    sorted_paths_DT <- paste0(outputdir, "results_DIETER_i", id, ".gdx")
-    sorted_files_DT <- paste0("results_DIETER_i", id, ".gdx")
-  }
   
 
   # LaTeX configurations ----------------------------------------------------
@@ -210,7 +222,7 @@
 
   # Capacities --------------------------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotCapAndCF.R"), local=TRUE)
+  # source(file.path(dieter.scripts.folder, "plotCapAndCF.R"), local=TRUE)
 
   # Generation --------------------------------------------------------------
 
@@ -218,19 +230,19 @@
 
   # Added capacities --------------------------------------------------------
 
-  #source(file.path(dieter.scripts.folder, "plotAddedCapacities.R"), local=TRUE)
+  # source(file.path(dieter.scripts.folder, "plotAddedCapacities.R"), local=TRUE)
 
+  # Price: Secondary electricity --------------------------------------------
+  
+  # source(file.path(dieter.scripts.folder, "plotPrice.R"), local=TRUE)
+  
   # LCOEs -------------------------------------------------------------------
 
   #source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
 
-  # Price: Secondary electricity --------------------------------------------
-
-  # source(file.path(dieter.scripts.folder, "plotSeelPrice.R"), local=TRUE)
-
   # Price: Peak demand ------------------------------------------------------
 
-  #source(file.path(dieter.scripts.folder, "plotPeakDemandPrice.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotPeakDemandPrice.R"), local=TRUE)
 
   # (Residual) load duration curves -----------------------------------------
 

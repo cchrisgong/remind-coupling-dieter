@@ -12,7 +12,7 @@ for (i in 1:length(remind.files)){
 
   remind.qm_budget <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("qm_budget", field="m", squeeze=F) %>% 
-    filter(all_regi == "DEU") %>%
+    filter(all_regi == reg) %>%
     select(!all_regi) %>%  
     filter(ttot %in% report.periods) %>% 
     rename(tall = ttot) %>% 
