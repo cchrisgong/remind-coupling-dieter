@@ -112,12 +112,11 @@ Positive Variable
 v21_emiALLco2neg(ttot,all_regi)              "negative part of total CO2 emissions"
 v21_emiALLco2neg_slack(ttot,all_regi)        "dummy variable to extract negatice CO2 emissions from emiAll"
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-v21_prodse_dampen(ttot,all_regi)            "dampening prodse for coal and gas"
 v21_greenh2dem_dampen(ttot,all_regi)         "dampening dem for green h2"
 $ENDIF.DTcoup
 ;
 
-equations 
+equations
 q21_taxrev(ttot,all_regi)                       "calculation of difference in tax volume"
 q21_emiAllco2neg(ttot,all_regi)                 "calculates negative part of CO2 emissions"
 q21_tau_bio(ttot)                               "calculation of demand-dependent bioenergy tax"
