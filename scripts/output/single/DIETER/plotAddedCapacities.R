@@ -60,7 +60,7 @@ for(iter.rep in 1:round(length(dieter.files.report)/dieter.iter.step-1, 0)){
   
   swfigure(sw,print,p, sw_option="width=20, height=10")
   
-  if (save_cfg == 1){
+  if (save_png == 1){
     ggsave(filename = paste0(outputdir, "/AddedCapacity_compare_i", iter.rep*dieter.iter.step, ".png"),  p,  width = 17, height =10, units = "in", dpi = 120)
   }
 }

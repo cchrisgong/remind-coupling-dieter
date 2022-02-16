@@ -78,8 +78,8 @@ if (length(dieter.files) != 0) {
 # Data preparation (DIETER) -----------------------------------------------
 out.dieter.data <- NULL
 if (length(dieter.files) != 0) {
-  for (i in 1:length(sorted_files_DT)){
-    dieter.data <- file.path(outputdir, sorted_files_DT[i]) %>% 
+  for (i in 1:length(dieter.files)){
+    dieter.data <- file.path(outputdir, dieter.files[i]) %>% 
       read.gdx("p32_report4RM", factor = FALSE, squeeze = FALSE) %>%
       select(period = X..1, tech = X..3,variable=X..4,value)  %>%
       filter(period %in% model.periods) %>%
@@ -190,7 +190,7 @@ for(year_toplot in model.periods){
   } else { p<-p1 }
   
   swfigure(sw,grid.draw,p)
-  if (save_cfg == 1){
+  if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/CAP_", year_toplot, "wCF.png"),  p,  width = 12, height =15, units = "in", dpi = 120)
   }
 }
@@ -235,7 +235,7 @@ p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
 
 swfigure(sw,grid.draw,p)
 
-if (save_cfg == 1){
+if (save_png == 1){
 ggsave(filename = paste0(outputdir, "/CAP_time.png"),  p,  width = 12, height =15, units = "in", dpi = 120)
 }
 ##################################################################################################
@@ -259,7 +259,7 @@ for(year_toplot in model.periods){
     facet_wrap(~tech, nrow=3)
   
   swfigure(sw,print,p)
-  if (save_cfg == 1){
+  if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/CF_", year_toplot, ".png"),  p,  width = 6, height =5, units = "in", dpi = 120)
   }
 }
@@ -286,7 +286,7 @@ p <- ggplot() +
 
 swfigure(sw,print,p)
 
-if (save_cfg == 1){
+if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/CF_compare_time.png"),  p,  width = 20, height =10, units = "in", dpi = 120)
 }
 

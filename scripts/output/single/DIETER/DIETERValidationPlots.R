@@ -16,7 +16,8 @@
   setwd("~/remind-coupling-dieter/")
   # Configurations ----------------------------------------------------------
   ##
-  save_cfg = 1
+  # whether to save png
+  save_png = 1
   
   # Directories -------------------------------------------------------------
   
@@ -39,18 +40,6 @@
   dieter.mif.annual.report <- paste0(outputdir, "/DIETER/Dieter_Annual.mif")
   
   cat(paste0("DIETER mif report files: ", dieter.mif.annual.report, "\n"))
-  
-  id <- NULL
-  for(fname in dieter.files){
-    idx <- as.numeric(str_extract(fname, "[0-9]+"))
-    id = c(id, idx)
-  }
-  id = sort(id)
-  
-  if (length(dieter.files) != 0) {
-    sorted_paths_DT <- paste0(outputdir, "results_DIETER_i", id, ".gdx")
-    sorted_files_DT <- paste0("results_DIETER_i", id, ".gdx")
-  }
   
   ## for plots every few steps
   dieter.iter.step = 5
@@ -133,6 +122,11 @@
                             NULL)
   
   dieter.tech.mapping <- c(dieter.supply.tech.mapping, dieter.demand.tech.mapping)
+  
+  dieter.supply.fuel.mapping <- c("Coal" = "pecoal",
+                                  "OCGT" = "pegas",
+                                  "Biomass" = "pebiolc",
+                                  NULL)
   
   vre.names <- c("Hydro","Wind Onshore","Wind Offshore", "Solar")
   nonvre.names <- c("Coal", "Nuclear","OCGT","CCGT","Biomass","Electrolyzers")
@@ -235,6 +229,10 @@
   # Price: Secondary electricity --------------------------------------------
   
   # source(file.path(dieter.scripts.folder, "plotPrice.R"), local=TRUE)
+
+  # Price: primary energy and fuel --------------------------------------------
+  
+  source(file.path(dieter.scripts.folder, "plotFuelPriceAndTrade.R"), local=TRUE)
   
   # LCOEs -------------------------------------------------------------------
 
@@ -242,7 +240,7 @@
 
   # Price: Peak demand ------------------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotPeakDemandPrice.R"), local=TRUE)
+  # source(file.path(dieter.scripts.folder, "plotPeakDemandPrice.R"), local=TRUE)
 
   # (Residual) load duration curves -----------------------------------------
 

@@ -7,7 +7,6 @@ remind.generation.withCurt <- NULL
 
 
 for (i in 1:length(remind.files)) {
-# i = 1
   vmUsableSeTe <- file.path(outputdir, remind.files[i]) %>%
     read.gdx("vm_usableSeTe", factors = FALSE, squeeze = FALSE) %>%
     filter(ttot %in% model.periods) %>%
@@ -120,8 +119,8 @@ remind.generation.withCurt <- generation.withCurt.vre
 # Data preparation (DIETER) -----------------------------------------------
 
 out.dieter <- NULL
-for (i in 1:length(sorted_files_DT)) {
-  dieter.data <- file.path(outputdir, sorted_files_DT[i]) %>%
+for (i in 1:length(dieter.files)) {
+  dieter.data <- file.path(outputdir, dieter.files[i]) %>%
     read.gdx("p32_report4RM", factors = FALSE, squeeze = FALSE) %>%
     select(
       period = X..1,
@@ -195,7 +194,7 @@ for (year_toplot in model.periods) {
     filter(period == year_toplot)
   
   
-  if (length(sorted_files_DT) != 0) {
+  if (length(dieter.files) != 0) {
     plot.dieter.usableGen <-
       out.dieter %>% filter(as.integer(period) == year_toplot,
                             variable == "usable_generation")
@@ -243,7 +242,7 @@ for (year_toplot in model.periods) {
   
   
   
-  if (length(sorted_files_DT) != 0) {
+  if (length(dieter.files) != 0) {
     p2 <- ggplot() +
       geom_area(
         data = plot.dieter.usableGen,
@@ -282,14 +281,14 @@ for (year_toplot in model.periods) {
   
   
   grid.newpage()
-  if (length(sorted_files_DT) != 0) {
+  if (length(dieter.files) != 0) {
     p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
   } else {
     p <- p1
   }
   
   swfigure(sw, grid.draw, p)
-  if (save_cfg == 1){
+  if (save_png == 1){
     ggsave(filename = paste0(outputdir, "/Generation_", year_toplot, ".png"),  p,  width = 8, height =10, units = "in", dpi = 120)
   }
 }
@@ -350,7 +349,7 @@ p1 <- ggplot() +
 
 
 
-if (length(sorted_files_DT) != 0) {
+if (length(dieter.files) != 0) {
   p2 <- ggplot() +
     geom_area(
       data = plot.dieter%>% filter(period <2110),
@@ -397,13 +396,13 @@ if (length(sorted_files_DT) != 0) {
 }
 
 grid.newpage()
-if (length(sorted_files_DT) != 0) {
+if (length(dieter.files) != 0) {
   p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
 } else {
   p <- p1
 }
 
 swfigure(sw, grid.draw, p)
-if (save_cfg == 1){
+if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/Generation_time.png"),  p,  width = 8, height =10, units = "in", dpi = 120)
 }
