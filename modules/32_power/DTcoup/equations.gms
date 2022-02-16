@@ -242,9 +242,9 @@ q32_limitSolarWind(t,regi)$( (cm_solwindenergyscen = 2) OR (cm_solwindenergyscen
 *** DIETER coupling equations
 ***---------------------------------------------------------------------------
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-$IFTHEN.hardcap %cm_DTcapcon% == "hard"
+
 *** hard capacity constraint to peak residual load demand (excluding flexible load such as electrolysers)
-q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ) ..
+q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) AND (s32_hardcap ne 0) ) ..
 	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=g=
  p32_peakDemand_relFac(t,regi) * 8760 * ( v32_usableSeDisp(t,regi,"seel")
@@ -254,7 +254,6 @@ $ENDIF.elh2_coup
 )
 	;
 
-$ENDIF.hardcap
 
 $IFTHEN.softcap %cm_DTcapcon% == "soft"
 ** CG: implementing a softer capacity bound, with a flat capacity subsidy, once the sum of dispatchable capacity exceeds
@@ -297,8 +296,7 @@ $ENDIF.softcap
 *** price_DIETER = price_REMIND/budget_REMIND * 1e12 / sm_TWa_2_MWh
 *** price_REMIND = price_DIETER * budget_REMIND/1e12 * sm_TWa_2_MWh
 ***----------------------------------------------------------------------------
-*q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq eq 3)).. !! turn off equation
-q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq ne 0))..
+q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_DTcoup_eq ne 0) AND (s32_mrkupCoup ne 0))..
 	vm_Mrkup(t,regi,te)
 	=e=
 * with prefactor, prefactor dependent on the value factor in DIETER

@@ -137,7 +137,6 @@ q21_implicitDiscRate(ttot,all_regi)             "calculation of the implicit dis
 q21_taxemiMkt(ttot,all_regi,all_emiMkt)         "calculation of specific emission market tax on CO2 emissions"
 q21_taxrevBioImport(ttot,all_regi)              "calculation of bioenergy import tax"
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-q21_prodse_dampen(ttot,all_regi)             "dampening prodse"
 q21_greenh2dem_dampen(ttot,all_regi)         "dampening dem for green h2"
 q21_taxrevMrkup(ttot,all_regi)               "calculation for markup of electricity generation technologies from DIETER coupling"
 q21_priceCap(ttot,all_regi)                  "calculation of subsidy for dispatchable electricity generation technologies"

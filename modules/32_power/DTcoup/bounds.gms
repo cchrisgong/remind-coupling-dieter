@@ -128,6 +128,7 @@ $endif.chpoff
 vm_capFac.fx(t,regi,"csp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 vm_capFac.fx(t,regi,"dot")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 vm_capFac.fx(t,regi,"geohdr")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
+
 $IFTHEN.WindOff %cm_wind_offshore% == "0"
 vm_capFac.fx(t,regi,"windoff")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
 vm_prodSe.fx(t,regi,"pewin","seel","windoff")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
@@ -166,10 +167,5 @@ vm_cap.fx(t,regi,"h2turbVRE","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_e
 *** turn off H2 turbine
 vm_cap.fx(t,regi,"h2turb","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
 vm_capFac.fx(t,regi,"h2turb")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
-
-*fixing some less used technologies (at least for Germany) to 0 to avoid distortions
-* vm_cap.fx(t,regi,"csp",rlf)$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
-* vm_cap.fx(t,regi,"dot",rlf)$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
-* vm_cap.fx(t,regi,"geohdr",rlf)$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 
 $ENDIF.DTcoup

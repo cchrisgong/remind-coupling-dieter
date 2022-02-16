@@ -187,17 +187,9 @@ p32_test2(t,regi) =  sum(en2en(enty,enty2,te),
 * after 2100 to 5%, this only sets 2110, 2130, 2150 three years
 p32_r4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
 
-
-* $IFTHEN.Base_Cprice %carbonprice% == "none"
-* *** CG: updating CO2 price from REMIND to DIETER
-* p32_CO2price4DT(t,regi)$((t.val gt 2020) AND regDTCoup(regi)) = sum(regi_group(ext_regi,regi), p47_exoCo2tax(ext_regi,t));
-* $ENDIF.Base_Cprice
-
-
 $IFTHEN.policy_Cprice not %carbonprice% == "none"
 *** CG: updating CO2 price from REMIND to DIETER
 p32_CO2price4DT(t,regi)$(tDT32(t) AND regDTCoup(regi)) = pm_priceCO2(t,regi)/sm_C_2_CO2;
-!!p32_CO2price4DT(t,regi)$(cm_startyear AND regDTCoup(regi)) = pm_taxCO2eq(t,regi)/sm_DptCO2_2_TDpGtC;
 $ENDIF.policy_Cprice
 
 * REMIND data for DIETER

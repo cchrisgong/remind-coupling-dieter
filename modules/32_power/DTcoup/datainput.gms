@@ -190,6 +190,19 @@ p32_shSeElDem(t,regi,te)$(regDTCoup(regi)) = sum(en2en(enty,enty2,te),vm_demSe.l
 
 p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
 
+$IFTHEN.hardcap not %cm_DTcapcon% == "hard"
+s32_hardcap = 0;
+$ENDIF.hardcap
+
+$IFTHEN.hardcap %cm_DTcapcon% == "hard"
+s32_hardcap = 1;
+$ENDIF.hardcap
+
+s32_mrkupCoup = 0;
+$IFTHEN.hardcap %cm_DTmrkup% == "on"
+s32_mrkupCoup = 1;
+$ENDIF.hardcap
+
 *** dumping REMIND input for DIETER iteration
 *** CG: export H2 switch
 $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
@@ -254,6 +267,8 @@ execute_unload "RMdata_4DT.gdx",tDT32,regDTCoup,sm32_iter, !! basic info: couple
 
 put_utility "shell" /
   "cp RMdata_4DT.gdx RMdata_4DT_i0.gdx";
+put_utility "shell" /
+  "cp input.gdx fulldata_0.gdx";
 
 $ENDIF.DTcoup
 ************************************************************************************************

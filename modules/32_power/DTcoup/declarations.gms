@@ -95,6 +95,8 @@ scalars
     s32_DTcoupModeswitch                      "a binary switch for DIETER coupling mode - whether validation or dispatch, to be exported to DIETER"
     s32_windoff                               "a binary switch for wind offshore to be exported to DIETER"
     s32_scarPrice                             "scarcity price switch in DIETER, to be used with situation when there is no capacity constraint in REMIND due to peak residual hourly demand"
+    s32_hardcap                               "switch for capacity bound equation for coupling to DIETER"
+    s32_mrkupCoup                             "switch for markup coupling for coupling to DIETER"
 ;
 
 positive variables
@@ -153,9 +155,7 @@ $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
     q32_flexAdj(tall,all_regi,all_te)              "from DIETER coupling: calculate flexibility used in flexibility tax for technologies with electricity input"
 $ENDIF.elh2_coup
 
-$IFTHEN.hardcap %cm_DTcapcon% == "hard"
     q32_peakDemandDT(ttot,all_regi,all_enty)      "limit yearly sum of dispatchable capacities by the peak demand given by DIETER"
-$ENDIF.hardcap
 
 $IFTHEN.softcap %cm_DTcapcon% == "soft"
     q32_reqCap(ttot,all_regi,all_enty)             "sum of total dispatchable capacities"
