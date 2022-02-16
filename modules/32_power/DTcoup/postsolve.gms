@@ -29,7 +29,7 @@ p32_marketValue(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))
       = pm_SEPrice(t,regi,"seel")$regDTCoup(regi) + vm_Mrkup.l(t,regi,te)$regDTCoup(regi);
 *** CG: market price seen by sector coupling usage of power (e.g. green H2)
 
-p32_marketPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))
+p32_marketPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))
       = pm_SEPrice(t,regi,"seel")$regDTCoup(regi) - vm_flexAdj.l(t,regi,te)$regDTCoup(regi);
 
 *** CG: value factor in REMIND
