@@ -231,10 +231,8 @@ if ( (c_keep_DTiteration_gdxes eq 1) ,
 ***CG: make iteration copies of DIETER results
     put_utility "shell" /
       "cp results_DIETER.gdx results_DIETER_i" sm32_iter:0:0 ".gdx";
-
     put_utility "shell" /
       "cp report_DIETER.gdx report_DIETER_i" sm32_iter:0:0 ".gdx";
-
     put_utility "shell" /
       "cp full_DIETER.gdx full_DIETER_i" sm32_iter:0:0 ".gdx";
 
@@ -253,9 +251,11 @@ logfile.nr = 2;
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
     Execute_Loadpoint 'results_DIETER' p32_report4RM;
     Execute_Loadpoint 'results_DIETER' p32_reportmk_4RM;
+
 *** check DIETER solver status
 p32_DTstatus(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"el","model_status"));
 display p32_DTstatus;
+
 loop (t$tDT32(t),
   loop (regi$regDTCoup(regi),
     if (p32_DTstatus(t,regi) ne 1,
