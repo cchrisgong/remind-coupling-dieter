@@ -1,6 +1,6 @@
 # Main function for REMIND-DIETER plots
 
-DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
+DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   # Load libraries ----------------------------------------------------------
 
