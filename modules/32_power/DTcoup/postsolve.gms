@@ -279,6 +279,33 @@ p32_cf_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (teDTCoupSupp(te) 
 
 );
 
+* upscaling technologies for reporting
+p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND BIOte32(te) )
+      = p32_shSeElDisp(t,regi,te)$(BIOte32(te))/(sum(te2$(BIOte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
+p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND NonPeakGASte32(te) )
+      = p32_shSeElDisp(t,regi,te)$(NonPeakGASte32(te))/(sum(te2$(NonPeakGASte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
+p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi))
+      = p32_shSeElDisp(t,regi,te)$(NUCte32(te))/(sum(te2$(NUCte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
+p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
+      = p32_shSeElDisp(t,regi,te)$(COALte32(te))/(sum(te2$(COALte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
+
+p32_mrkupUpscaled(t,regi,te)$(BIOte32(te))
+      = sum(BIOte32(te), vm_Mrkup.l(t,regi,te) * p32_tech_category_genshare(t,regi,te));
+p32_mrkupUpscaled(t,regi,te)$(NonPeakGASte32(te))
+      = sum(NonPeakGASte32(te), vm_Mrkup.l(t,regi,te) * p32_tech_category_genshare(t,regi,te));
+p32_mrkupUpscaled(t,regi,te)$(NUCte32(te))
+      = sum(NUCte32(te), vm_Mrkup.l(t,regi,te) * p32_tech_category_genshare(t,regi,te));
+p32_mrkupUpscaled(t,regi,te)$(COALte32(te))
+      = sum(COALte32(te), vm_Mrkup.l(t,regi,te) * p32_tech_category_genshare(t,regi,te));
+
+p32_MVupscaled(t,regi,te)$(BIOte32(te))
+      = sum(BIOte32(te), p32_marketValue(t,regi,te) * p32_tech_category_genshare(t,regi,te));
+p32_MVupscaled(t,regi,te)$(NonPeakGASte32(te))
+      = sum(NonPeakGASte32(te), p32_marketValue(t,regi,te) * p32_tech_category_genshare(t,regi,te));
+p32_MVupscaled(t,regi,te)$(NUCte32(te))
+      = sum(NUCte32(te), p32_marketValue(t,regi,te) * p32_tech_category_genshare(t,regi,te));
+p32_MVupscaled(t,regi,te)$(COALte32(te))
+      = sum(COALte32(te), p32_marketValue(t,regi,te) * p32_tech_category_genshare(t,regi,te));
 
 $ENDIF.DTcoup
 
