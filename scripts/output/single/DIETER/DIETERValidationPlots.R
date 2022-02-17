@@ -12,7 +12,7 @@
   library(grid)
   library(gridExtra)
   
-  outputdir = "./output/DIETERcoup_base_25_2022-02-15_20.40.46"
+  outputdir = "./output/DIETERcoup_base_25_2022-02-15_10.54.13"
   setwd("~/remind-coupling-dieter/")
   # Configurations ----------------------------------------------------------
   ##
@@ -22,7 +22,6 @@
   # Directories -------------------------------------------------------------
   
   report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_", str_sub(outputdir, start=8), ".pdf"))
-  #report.output.file <- file.path(outputdir, paste0("REMIND-DIETER_validation_",".pdf"))
   
   remind.files <- list.files(outputdir, pattern = "fulldata_[0-9]+\\.gdx") %>%
     str_sort(numeric = TRUE)
@@ -89,7 +88,9 @@
                           spv = "Solar")
   
   remind.sector.coupling.mapping <- c(seel = "Electricity",
-                                      elh2 = "Electrolyzers")
+                                      elh2 = "Electrolyzers",
+                                      tdels = "Stationary Electricity",
+                                      tdelt = "Transport Electricity")
   
   remind.tech.mapping <- c(remind.nonvre.mapping.whyd, remind.vre.mapping, remind.sector.coupling.mapping)
   
@@ -176,6 +177,13 @@
                                    "REMIND CapFac (%)",
                                    "REMIND real CapFac (%)")
   
+  color.mapping.mv.var <- c(
+                         # "REMIND markup ($/MWh)" = "#0000cc", 
+                         "DIETER Market value ($/MWh)" = "#005900",
+                         "DIETER Market value with scarcity price ($/MWh)" = "007f00",
+                         "REMIND market value ($/MWh)" = "#7F7FFF")
+  
+  linetype.map <- c('DIETER' = 'dotted', 'REMIND' = 'solid')
   
   sm_TWa_2_MWh <- 8.76E9
 
@@ -232,15 +240,19 @@
 
   # Price: primary energy and fuel --------------------------------------------
   
-  source(file.path(dieter.scripts.folder, "plotFuelPriceAndTrade.R"), local=TRUE)
+  # source(file.path(dieter.scripts.folder, "plotFuelPriceAndTrade.R"), local=TRUE)
+  
+  # Market value and shadow price ------------------------------------------------------
+  
+  # source(file.path(dieter.scripts.folder, "plotMarketValuePrice.R"), local=TRUE)
+  
+  # Market value and shadow price ------------------------------------------------------
+  
+  # source(file.path(dieter.scripts.folder, "plotConvergence.R"), local=TRUE)
   
   # LCOEs -------------------------------------------------------------------
 
   #source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
-
-  # Price: Peak demand ------------------------------------------------------
-
-  # source(file.path(dieter.scripts.folder, "plotPeakDemandPrice.R"), local=TRUE)
 
   # (Residual) load duration curves -----------------------------------------
 
@@ -260,5 +272,5 @@
   # Close LaTeX PDF ---------------------------------------------------------
 
   # swclose(sw)
-
+# 
 # }

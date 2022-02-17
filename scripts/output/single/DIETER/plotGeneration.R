@@ -207,7 +207,7 @@ for (year_toplot in model.periods) {
     
   
   }
-  
+  #####################################################################################################
   swlatex(sw, paste0("\\subsection{Generation in ", year_toplot, "}"))
   
   p1 <- ggplot() +
@@ -293,7 +293,7 @@ for (year_toplot in model.periods) {
   }
 }
 
-
+#####################################################################################################
 swlatex(sw, "\\subsection{Generation over time (last iteration)}")
 
 plot.remind <-
@@ -405,4 +405,46 @@ if (length(dieter.files) != 0) {
 swfigure(sw, grid.draw, p)
 if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/Generation_time.png"),  p,  width = 8, height =10, units = "in", dpi = 120)
+}
+
+
+#####################################################################################################
+if (length(files_DT) != 0) {
+for (i in c(5,10,20,maxiter-1)){
+  
+    # i = 5
+    plot.remind.snap <- out.remind %>% 
+    filter(iteration == i) %>% 
+    filter(period <2110)%>%
+    mutate(period = as.numeric(period))%>% 
+    dplyr::rename(remind_gen = value)
+    
+    plot.dieter.snap <- out.dieter %>%
+    filter(iteration == i) %>%
+    filter(period <2110)%>%
+    mutate(period = as.numeric(period)) %>%
+    dplyr::rename(dieter_gen = value)
+    
+    plot.diff <- list(plot.remind.snap, plot.dieter.snap) %>%
+      reduce(full_join) %>%
+      mutate(delta_gen = remind_gen - dieter_gen) 
+  
+  p <-ggplot() +
+    geom_bar(data = plot.diff , aes(x = period, y = delta_gen, fill = all_te, label = delta_gen),  alpha = 0.5, stat = "identity") +
+    geom_label(size = 3, position = position_stack(vjust = 0.5)) +
+    scale_fill_manual(name = "Technology", values = color.mapping)+
+    theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+    xlab("period") + ylab(paste0("Usable generation (TWh)")) +
+    ggtitle(paste0("Generation difference REMIND - DIETER"))+
+    theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank()) +
+    theme(aspect.ratio = .5) 
+  
+  swfigure(sw, grid.draw, p)
+  if (save_png == 1){
+    ggsave(filename = paste0(outputdir, "/deltaGeneration_time_i", i, ".png"),  p,  width = 8, height =10, units = "in", dpi = 120)
+  }
+  
+  
+  
+}
 }
