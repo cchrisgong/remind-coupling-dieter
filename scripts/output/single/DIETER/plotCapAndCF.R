@@ -45,15 +45,15 @@ if (length(dieter.files) != 0) {
       read.gdx("vm_cap", factors = FALSE, squeeze = FALSE) %>% 
       filter(tall %in% model.periods) %>%
       filter(all_regi == reg) %>%
-      filter(all_te %in% names(remind.tech.mapping)) %>%
+      filter(all_te %in% names(remind.tech.mapping.narrow)) %>%
       filter(rlf == "1") %>% 
       mutate(value = value * 1e3) %>% #TW->GW
       select(period = tall, tech = all_te, rlf, value) %>% 
-      revalue.levels(tech = remind.tech.mapping) %>%
+      revalue.levels(tech = remind.tech.mapping.narrow) %>%
       dplyr::group_by(period, tech, rlf) %>%
       dplyr::summarise( value = sum(value) , .groups = 'keep' ) %>% 
       dplyr::ungroup(period, tech, rlf) %>% 
-      mutate(tech = factor(tech, levels=rev(unique(remind.tech.mapping))))
+      mutate(tech = factor(tech, levels=rev(unique(remind.tech.mapping.narrow))))
     
     data.capacity$iter <- i
     data.capacity$model <- "REMIND"
@@ -88,7 +88,7 @@ if (length(dieter.files) != 0) {
       revalue.levels(tech = dieter.tech.mapping) %>%
       mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))) 
     
-    dieter.data$iter <- id[i]
+    dieter.data$iter <- i
     dieter.data$model <- "DIETER"
     
     out.dieter.data <- rbind(out.dieter.data, dieter.data)
@@ -149,7 +149,7 @@ for(year_toplot in model.periods){
     geom_area(data = plot.remind.capacity, aes(x = iter, y = value, fill = tech), size = 1.2, alpha = 0.5) +
     geom_line(data = plot.remind.capfac, aes(x = iter, y = value*secAxisScale1, color = tech), size = 1.2, alpha = 1) + 
     scale_y_continuous(sec.axis = sec_axis(~./secAxisScale1, name = paste0("CF", "(%)")))+
-    scale_fill_manual(name = "Technology", values = color.mapping) +
+    scale_fill_manual(name = "Technology", values = color.mapping.cap) +
     scale_color_manual(name = "Technology", values = color.mapping.capfac.line) +
     xlab("iteration") + ylab(paste0("capacity", "(GW)")) +
     ggtitle(paste0("REMIND: ", reg, " ", year_toplot))+
@@ -176,7 +176,7 @@ for(year_toplot in model.periods){
       geom_line(data = plot.remind.demand, aes(x = iter, y = value, color = tech), size = 1.2, alpha = 2, linetype="dotted") +
       geom_line(data = plot.dieter.capfac, aes(x = iter, y = value*secAxisScale2, color = tech), size = 1.2, alpha = 1) +
       scale_y_continuous(sec.axis = sec_axis(~./secAxisScale2, name = paste0("CF", "(%)")))+
-      scale_fill_manual(name = "Technology", values = color.mapping) +
+      scale_fill_manual(name = "Technology", values = color.mapping.cap) +
       scale_color_manual(name = "Technology", values = color.mapping.capfac.line)+
       xlab("iteration") + ylab(paste0("capacity (GW)")) +
       coord_cartesian(xlim = c(0, max(plot.dieter.capacity$iter)),ylim = c(0, ymax))+
@@ -204,7 +204,7 @@ plot.remind.capacity <- out.remind.capacity %>%
 p0<-ggplot() +
   geom_area(data = plot.remind.capacity, aes(x = period, y = value, fill = tech), size = 1.2, alpha = 0.5) +
   scale_y_continuous(sec.axis = sec_axis(~./secAxisScale1, name = paste0("CF", "(%)")))+
-  scale_fill_manual(name = "Technology", values = color.mapping) +
+  scale_fill_manual(name = "Technology", values = color.mapping.cap) +
   scale_color_manual(name = "Technology", values = color.mapping.capfac.line) +
   xlab("period") + ylab(paste0("vm_cap", "(GW)")) +
   ggtitle(paste0("REMIND Last iteration: ", reg))+
@@ -222,7 +222,7 @@ if (length(dieter.files) != 0) {
   p2<-ggplot() +
     geom_area(data = plot.dieter.capacity, aes(x = as.integer(period), y = value, fill = tech), size = 1.2, alpha = 0.5) +
     scale_y_continuous(sec.axis = sec_axis(~./secAxisScale2, name = paste0("CF", "(%)")))+
-    scale_fill_manual(name = "Technology", values = color.mapping) +
+    scale_fill_manual(name = "Technology", values = color.mapping.cap) +
     scale_color_manual(name = "Technology", values = color.mapping.capfac.line)+
     xlab("period") + ylab(paste0("capacity (GW)")) +
     ggtitle(paste0("DIETER Last iteration: ", reg))+

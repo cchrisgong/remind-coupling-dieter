@@ -1,6 +1,6 @@
 # Main function for REMIND-DIETER plots
 
-# DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
+DIETERValidationPlots <- function(outputdir, dieter.scripts.folder) {
   
   # Load libraries ----------------------------------------------------------
 
@@ -12,12 +12,11 @@
   library(grid)
   library(gridExtra)
   
-  outputdir = "./output/DIETERcoup_base_25_2022-02-15_10.54.13"
-  setwd("~/remind-coupling-dieter/")
   # Configurations ----------------------------------------------------------
   ##
   # whether to save png
   save_png = 1
+  options(warn=-1)
   
   # Directories -------------------------------------------------------------
   
@@ -56,6 +55,9 @@
     read.gdx("regDTcoup", factor = FALSE) 
   reg <- as.character(DTcoupreg)
   
+  # load switches
+  h2switch <- cfg$gms$cm_DT_elh2_coup
+  
   ## define technologies
   ############### REMIND #########################
   remind.nonvre.mapping <- c(igcc = "Coal",
@@ -64,7 +66,7 @@
                              pco = "Coal",
                              pc = "Coal",
                              tnrs = "Nuclear",
-                             fnrs = "Nuclear",
+                             # fnrs = "Nuclear",
                              ngt = "OCGT",
                              ngcc = "CCGT",
                              ngccc = "CCGT",
@@ -91,8 +93,13 @@
                                       elh2 = "Electrolyzers",
                                       tdels = "Stationary Electricity",
                                       tdelt = "Transport Electricity")
+ 
+  remind.sector.coupling.mapping.narrow <- c(elh2 = "Electrolyzers")
   
   remind.tech.mapping <- c(remind.nonvre.mapping.whyd, remind.vre.mapping, remind.sector.coupling.mapping)
+  
+  remind.tech.mapping.narrow <- c(remind.nonvre.mapping.whyd, remind.vre.mapping, remind.sector.coupling.mapping.narrow)
+  
   
   ############### DIETER #########################
   table_ordered_name = c("Coal", "CCGT", "Solar", "Wind Onshore", "Wind Offshore", "Biomass", "OCGT", "Hydro", "Nuclear","Electrolyzers")
@@ -143,13 +150,86 @@
                     "elh2",
                     "el")
 
-  ## define color mapping
+  ##### plotLCOEs config
+  
+  
+  ### config
+  plot.tech <- c("elh2","system")
+  plot.sector <- c("supply-side")
+  plot.name <- "SE"
+  
+  variable = c(       "Price|Secondary Energy|Hydrogen", 
+                      #Coal
+                      "Price|Secondary Energy|Electricity", 
+                      "Price|Secondary Energy|Electricity",
+                      "Price|Secondary Energy|Electricity", 
+                      "Price|Secondary Energy|Electricity",
+                      "Price|Secondary Energy|Electricity", 
+                      # "Price|Secondary Energy|Electricity",
+                      #Gas
+                      "Price|Secondary Energy|Electricity",
+                      "Price|Secondary Energy|Electricity", 
+                      "Price|Secondary Energy|Electricity",
+                      # "Price|Secondary Energy|Electricity",
+                      #Biomass
+                      "Price|Secondary Energy|Electricity",
+                      "Price|Secondary Energy|Electricity", 
+                      # "Price|Secondary Energy|Electricity",
+                      
+                      "Price|Secondary Energy|Electricity", 
+                      "Price|Secondary Energy|Electricity",
+                      "Price|Secondary Energy|Electricity",
+                      "Price|Secondary Energy|Electricity",
+                      "Price|Secondary Energy|Electricity", 
+                      "Price|Secondary Energy|Electricity"                    
+  )
+  tech = c(
+    "elh2",
+    # Coal
+    "igcc","igccc","pc","pcc","pco",
+    # "coalchp", # disable CHP
+    # Gas
+    "ngcc","ngccc",
+    # "gaschp",  # disable CHP
+    "ngt",
+    # Biomass
+    # "biochp",  # disable CHP
+    "bioigcc","bioigccc",
+    "wind",
+    "windoff",
+    "spv",
+    "tnrs",
+    "hydro",
+    "system")
+  
+  map.price.tech <- data.frame(
+    variable,
+    tech ,
+    sector = rep("supply-side",length(tech)) 
+  )
+  
+  tech.label <- c("spv" ="Solar PV", "wind" = "Wind On","wind" = "Wind Off", "csp" = "Solar CSP", "ngt" = "OCGT",
+                  "pcc" = "Coal w/ CCS", "ngccc" = "Gas CC w/ CCS", "tnrs" = "Nuclear","bioigcc" = "Biomass","bioigcc" = "Biomass w/ CCS",
+                  # "biochp" = "Biomass", 
+                  # "coalchp" = "Coal", 
+                  "igcc" = "Coal", 
+                  # "gaschp" = "Gas",
+                  "hydro" = "Hydro", "ngcc" = "Gas","pc" = "Coal", "system" = "System", "elh2" = "Electrolyzers")
+  
+    ## define color mapping
   color.mapping <- c("CCGT" = "#999959", "Coal" = "#0c0c0c",
                       "Solar" = "#ffcc00", "Wind Onshore" = "#337fff", 
                       "Wind Offshore" = "#334cff", "Biomass" = "#005900",
                       "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
                       "Electrolyzers" = "#48D1CC", "Electricity" = "#6495ED",
                       NULL)
+  
+  color.mapping.cap <- c("CCGT" = "#999959", "Coal" = "#0c0c0c",
+                     "Solar" = "#ffcc00", "Wind Onshore" = "#337fff", 
+                     "Wind Offshore" = "#334cff", "Biomass" = "#005900",
+                     "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
+                     "Electrolyzers" = "#48D1CC", 
+                     NULL)
   
   color.mapping_vre <- c("Solar" = "#ffcc00", "Wind Onshore" = "#337fff", "Wind Offshore" = "#334cff")
   
@@ -184,6 +264,180 @@
                          "REMIND market value ($/MWh)" = "#7F7FFF")
   
   linetype.map <- c('DIETER' = 'dotted', 'REMIND' = 'solid')
+  
+  
+  # cost components
+  cost.colors <- c("Additional H2 t&d Cost" = "grey",
+                      "FE Tax" = "darkseagreen",
+                      "Flex Tax" = "lightblue",
+                      "CO2 Provision Cost" = "grey80",
+                      "Curtailment Cost" = "darkblue",
+                      "Storage Cost" = "darkorchid",
+                      "Grid Cost" = "darkolivegreen3",
+                      "CCS Cost" = "darkgoldenrod2",
+                      "Second Fuel Cost" = "violet",
+                      "CO2 Tax Cost" = "indianred",
+                      "OMV Cost" = "cyan",
+                      "OMF Cost" = "darkcyan",
+                      "Investment Cost" = "deepskyblue2",
+                      "Fuel Cost" = "orange3",
+                      "Adjustment Cost" = "darkgoldenrod1",
+                      NULL)
+  
+  cost.colors.te <- c(cost.colors,
+                      "flexibility subsidy" = "lightblue",
+                      "Markup subsidy/tax" = "lightblue")
+  
+  cost.colors.sys <- c(cost.colors,
+                       "Total Markup" = "lightblue",
+                       NULL)
+  
+  cost.colors.sys.wh2 <- c(cost.colors.sys, 
+                      "flexibility subsidy" = "lightblue")
+  
+  cost.colors.barline <- c(cost.colors.sys.wh2,
+                      'DIETER annual average electricity price with scarcity price' = "indianred3",
+                      'DIETER shadow price due to capacity constraint from REMIND' = "mediumpurple3",
+                      "Total Markup" = "lightblue")
+  
+  cost.colors.dieter<- c(
+                    "Curtailment Cost" = "darkblue",
+                    "Storage Cost" = "darkorchid",
+                    "Grid Cost" = "darkolivegreen3",
+                    # "CCS Cost" = "darkgoldenrod2",
+                    "CO2 Tax Cost" = "indianred",
+                    "OMV Cost" = "cyan",
+                    "OMF Cost" = "darkcyan",
+                    "Investment Cost" = "deepskyblue2",
+                    "Fuel Cost" = "orange3",
+                    "Adjustment Cost" = "darkgoldenrod1",
+                    'DIETER annual average electricity price with scarcity price' = "indianred3",
+                    'DIETER shadow price due to capacity constraint from REMIND' = "mediumpurple3",
+                     NULL)
+  
+  
+  # DIETER system and technology (marginal LCOE)
+  reportLCOE_DT = c("DIETER LCOE_avg ($/MWh)","DIETER LCOE_marg ($/MWh)")
+  
+  reportLCOEcomponents_DT_marg = c(
+    # LCOE component
+    "fuel cost - divided by eta ($/MWh)", 
+    "CO2 cost ($/MWh)", 
+    "annualized investment cost - marg ($/MWh)", 
+    "annualized adjustment cost - marg ($/MWh)", 
+    "O&M fixed cost - marg ($/MWh)", 
+    "O&M var cost ($/MWh)", 
+    # grid cost for VRE
+    "grid cost ($/MWh)", 
+    # shadow price
+    "shadow price of capacity bound from REMIND - marg ($/MWh)", 
+    # market value
+    # "DIETER Market value ($/MWh)"
+    "DIETER Market value ($/MWh)"
+  )
+  
+  reportLCOEcomponents_DT_avg = c(
+    "fuel cost - divided by eta ($/MWh)", 
+    "CO2 cost ($/MWh)", 
+    "annualized investment cost - avg ($/MWh)", 
+    "annualized adjustment cost - avg ($/MWh)", 
+    "O&M fixed cost - avg ($/MWh)", 
+    "O&M var cost ($/MWh)", 
+    "grid cost ($/MWh)", 
+    "shadow price of capacity bound from REMIND - avg ($/MWh)", 
+    "DIETER Market value ($/MWh)",
+    # "DIETER Market value ($/MWh)",
+    NULL
+  )
+  
+  report_DT_genshare = c("genshares (%)")
+  
+  report_DT_prices = c(
+    'price for total demand - with scarcity price ($/MWh)',
+    'price for total demand ($/MWh)',
+    'total system shadow price of capacity bound - avg ($/MWh)',
+    # 'total system shadow price of capacity bound - marg ($/MWh)',
+    # 'price for fixed demand ($/MWh)'
+    NULL
+  )
+  
+  dieter.tech.mapping <- c(lig = "Coal",
+                           coal = "Coal",
+                           nuc = "Nuclear",
+                           OCGT_eff = "OCGT",
+                           CCGT = "CCGT",
+                           bio = "Biomass",
+                           ror = "Hydro",
+                           Wind_on = "Wind On",
+                           Wind_off = "Wind Off",
+                           Solar = "Solar",
+                           elh2 = "Electrolyzers",
+                           `all Tech` = "All Tech",
+                           vregrid = "VRE grid",
+                           NULL)
+  
+  # label mapping for plots
+  dieter.variable.mapping <- c( 
+    `DIETER Market value ($/MWh)` = 'Market Value',
+    `DIETER Market value with scarcity price ($/MWh)` = 'Market Value with scarcity price', 
+    `O&M var cost ($/MWh)` = "OMV Cost",
+    `O&M fixed cost - avg ($/MWh)` = "OMF Cost",
+    `annualized investment cost - avg ($/MWh)` = "Investment Cost",
+    `annualized adjustment cost - avg ($/MWh)` = "Adjustment Cost",
+    `O&M fixed cost - marg ($/MWh)` = "OMF Cost",
+    `annualized investment cost - marg ($/MWh)` = "Investment Cost",              
+    `annualized adjustment cost - marg ($/MWh)` = "Adjustment Cost",
+    `fuel cost - divided by eta ($/MWh)` = "Fuel Cost",
+    `CO2 cost ($/MWh)` = "CO2 Tax Cost",
+    `grid cost ($/MWh)` = "Grid Cost",
+    `price for total demand ($/MWh)` = 'DIETER annual average electricity price',
+    `price for total demand - with scarcity price ($/MWh)` = 'DIETER annual average electricity price with scarcity price',
+    `total system shadow price of capacity bound - avg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND',
+    `total system shadow price of capacity bound - marg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND',
+    `shadow price of capacity bound from REMIND - marg ($/MWh)` = 'Shadow Price',
+    `shadow price of capacity bound from REMIND - avg ($/MWh)` = 'Shadow Price',
+    `Total Markup` = 'Total Markup',
+    NULL)
+  
+  # color mapping
+  cost.colors_DT <- c(
+    # "Curtailment Cost" = "darkblue",
+    "Storage Cost" = "darkorchid",
+    "Grid Cost" = "darkolivegreen3",
+    "CO2 Provision Cost" = "red",
+    "CO2 Tax Cost" = "indianred",
+    "OMV Cost" = "cyan",
+    "OMF Cost" = "darkcyan",
+    "Investment Cost" = "deepskyblue2",
+    "Fuel Cost" = "orange3",
+    "Market Value" = "violet",
+    "Adjustment Cost" = "orange2",
+    "Shadow Price" = "lightblue")
+  
+  cost.colors_DT_running <- c(
+    # "Curtailment Cost" = "darkblue",
+    # "Storage Cost" = "",
+    "Grid Cost" = "darkolivegreen3",
+    "CO2 Tax Cost" = "indianred",
+    "OMV Cost" = "cyan",
+    "OMF Cost" = "darkcyan",
+    "Investment Cost" = "deepskyblue2",
+    "Fuel Cost" = "orange3",
+    "Adjustment Cost" = "darkorchid"
+    # ,
+  )
+  
+  label.price <- c("Market Value", "Shadow Price")
+  
+  price.colors <- c(
+    "REMIND Price" = "darkblue",
+    "Total (marginal) LCOE - Flex Tax" = "darkorchid",
+    # "DIETER annual average electricity price" = "darkcyan",
+    "DIETER annual average electricity price with scarcity price" = "indianred",
+    "DIETER annual average electricity price with scarcity price + shadow price from REMIND" = "violet"
+    # ,
+    # 'DIETER shadow price due to capacity constraint from REMIND' = "DodgerBlue4"
+  )
   
   sm_TWa_2_MWh <- 8.76E9
 
@@ -224,35 +478,35 @@
 
   # Capacities --------------------------------------------------------------
 
-  # source(file.path(dieter.scripts.folder, "plotCapAndCF.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotCapAndCF.R"), local=TRUE)
 
   # Generation --------------------------------------------------------------
 
-  # source(file.path(dieter.scripts.folder, "plotGeneration.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotGeneration.R"), local=TRUE)
 
   # Added capacities --------------------------------------------------------
 
-  # source(file.path(dieter.scripts.folder, "plotAddedCapacities.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotAddedCapacities.R"), local=TRUE)
 
   # Price: Secondary electricity --------------------------------------------
   
-  # source(file.path(dieter.scripts.folder, "plotPrice.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotPrice.R"), local=TRUE)
 
   # Price: primary energy and fuel --------------------------------------------
   
-  # source(file.path(dieter.scripts.folder, "plotFuelPriceAndTrade.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotFuelPriceAndTrade.R"), local=TRUE)
   
   # Market value and shadow price ------------------------------------------------------
   
-  # source(file.path(dieter.scripts.folder, "plotMarketValuePrice.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotMarketValuePrice.R"), local=TRUE)
   
   # Market value and shadow price ------------------------------------------------------
   
-  # source(file.path(dieter.scripts.folder, "plotConvergence.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotConvergence.R"), local=TRUE)
   
   # LCOEs -------------------------------------------------------------------
 
-  #source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
 
   # (Residual) load duration curves -----------------------------------------
 
@@ -266,11 +520,9 @@
 
   #source(file.path(dieter.scripts.folder, "plotInverseScreeningCurve.R"), local=TRUE)
 
-  # Markups -----------------------------------------------------------------
-
-
   # Close LaTeX PDF ---------------------------------------------------------
 
   # swclose(sw)
-# 
-# }
+}
+
+  

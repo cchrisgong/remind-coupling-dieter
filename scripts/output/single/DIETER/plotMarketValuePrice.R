@@ -30,8 +30,10 @@ for (i in 2:length(remind.files)){
 # markup and market values
 
 out.remind.mrkup <- NULL
+out.remind.flexadj <- NULL
 out.remind.mv <- NULL
 out.remind.genshare <-NULL
+out.remind.sys.mrkup <-NULL
 
 for (i in 2:length(remind.files)){
   
@@ -48,7 +50,7 @@ for (i in 2:length(remind.files)){
     mutate(iteration = i-1)
 
   ### markups  
-  # supply side
+  # supply side: mean value is okay, since in remind it is already upscaled 
   remind.mrkup <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("vm_Mrkup", field="l", squeeze=F)  %>% 
     filter(all_regi == reg) %>%
@@ -67,6 +69,14 @@ for (i in 2:length(remind.files)){
     replace(is.na(.), 0) %>% 
     filter(!genshare ==0) %>% 
     select(-genshare)
+  
+  remind.sys.mrkup <- remind.mrkup %>% 
+    left_join(remind.genshare) %>% 
+    mutate(value = value * genshare/1e2)  %>% 
+    dplyr::group_by(period) %>%
+    dplyr::summarise( value = sum(value), .groups = "keep" ) %>%
+    dplyr::ungroup(period) %>% 
+    mutate(iteration = i-1)
   
   # demand side
   remind.flexadj <- file.path(outputdir, remind.files[i]) %>% 
@@ -111,6 +121,8 @@ for (i in 2:length(remind.files)){
     mutate(iteration = i-1)
   
     out.remind.mrkup <- rbind(out.remind.mrkup, remind.mrkup.non0gen, remind.flexadj)
+    out.remind.sys.mrkup <- rbind(out.remind.sys.mrkup, remind.sys.mrkup)
+    out.remind.flexadj <- rbind(out.remind.flexadj, remind.flexadj)
     out.remind.mv <- rbind(out.remind.mv, remind.marketvalue.non0gen, remind.marketprice)
     out.remind.genshare <- rbind(out.remind.genshare, remind.genshare)
 }
