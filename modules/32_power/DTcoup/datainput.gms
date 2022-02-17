@@ -267,8 +267,6 @@ execute_unload "RMdata_4DT.gdx",tDT32,regDTCoup,sm32_iter, !! basic info: couple
 
 put_utility "shell" /
   "cp RMdata_4DT.gdx RMdata_4DT_i0.gdx";
-put_utility "shell" /
-  "cp input.gdx fulldata_0.gdx";
 
 $ENDIF.DTcoup
 ************************************************************************************************

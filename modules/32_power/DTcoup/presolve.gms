@@ -178,6 +178,17 @@ $ENDIF.elh2_coup
 *** only for reporting
     p32_DIETER_elecprice_wscar(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_reportmk_4RM(gdxfile32,t,regi,"all_te","elec_price_wscar"));
 
+
+display p32_DIETER_elecprice;
+loop (t$tDT32(t),
+  loop (regi$regDTCoup(regi),
+    if (p32_DIETER_elecprice(t,regi) eq Eps,
+        put "one or more DIETER LP have 0 electricity price at iter ", sm32_iter:0:0;
+        put "if it is in the first few iterations it is okay, but please check";
+        put "at the last iteration that this is not the case";
+        );
+  );
+);
 *** CG: storage related coupling parameters
 * ** no curt_ratio averaging
 p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio"));
