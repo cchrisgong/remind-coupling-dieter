@@ -126,7 +126,7 @@ diff.price <- out.RMprice %>%
 p <-ggplot() +
   geom_line(data = diff.price, aes(x = iteration, y = value,), size = 1.2, alpha = 0.5) +
   theme(axis.text=element_text(size=20), axis.title=element_text(size= 20,face="bold")) +
-  xlab("iteration") + ylab(paste0("Difference of electricity price (REMIND-DIETER) ($/MWh)"))  +
+  xlab("iteration") + ylab(paste0("Difference of electricity price (REMIND-DIETER)\n($/MWh)"))  +
   theme(legend.title = element_text(size=25),legend.text = element_text(size=25)) +
   theme(legend.text = element_text(size=20), strip.text = element_text(size = 20)) +
   # coord_cartesian(ylim = c(-10,10)) +
@@ -159,7 +159,7 @@ p <-ggplot() +
   geom_line(data = diff.price.avg.yr, aes(x = iteration, y = value, color = variable), size = 1.2, alpha = 0.5) +
   geom_line(data = diff.price.avg.yr.movingavg, aes(x = iteration, y = value, color = variable), size = 2.5, alpha = 0.5) +
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
-  xlab("iteration") + ylab(paste0("Difference of electricity price (REMIND-DIETER) ($/MWh)"))  +
+  xlab("iteration") + ylab(paste0("Difference of electricity price (REMIND-DIETER)\n($/MWh)"))  +
   # coord_cartesian(ylim = c(-10,10)) +
   theme(legend.position = "bottom") +
   guides(color = guide_legend(nrow = 2, byrow = TRUE))
@@ -192,7 +192,7 @@ diff.mv <- out.remind.mv %>%
 p <-ggplot() +
   geom_line(data = diff.mv, aes(x = iteration, y = value, color = tech), size = 1.2, alpha = 0.5) +
   theme(axis.text=element_text(size=20), axis.title=element_text(size= 20,face="bold")) +
-  xlab("iteration") + ylab(paste0("Difference of market value (REMIND-DIETER) by tech ($/MWh)"))  +
+  xlab("iteration") + ylab(paste0("Difference of market value (REMIND-DIETER) by tech\n($/MWh)"))  +
   theme(legend.title = element_text(size=25),legend.text = element_text(size=25)) +
   theme(legend.text = element_text(size=20), strip.text = element_text(size = 20)) +
   scale_color_manual(name = "tech", values = color.mapping)+
@@ -230,7 +230,7 @@ p <-ggplot() +
   geom_line(data = diff.mv.avg.yr, aes(x = iteration, y = value, color = variable), size = 1.2, alpha = 0.5) +
   geom_line(data = diff.mv.avg.yr.movingavg, aes(x = iteration, y = value, color = variable), size = 2.5, alpha = 0.5) +
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
-  xlab("iteration") + ylab(paste0("Difference of time-averaged market value (REMIND-DIETER) ($/MWh)"))  +
+  xlab("iteration") + ylab(paste0("Difference of time-averaged market value (REMIND-DIETER)\n($/MWh)"))  +
   # coord_cartesian(ylim = c(-10,10)) +
   theme(legend.position = "bottom") +
   guides(color = guide_legend(nrow = 2, byrow = TRUE))
@@ -247,7 +247,7 @@ swlatex(sw, paste0("\\subsection{Total system markup (REMIND) - difference to la
 p <-ggplot() +
   geom_line(data = out.remind.total.sys.markup.diff, aes(x = iteration, y = value), size = 1.2, alpha = 0.5) +
   theme(axis.text=element_text(size=20), axis.title=element_text(size= 20,face="bold")) +
-  xlab("iteration") + ylab(paste0("Total tax markup (REMIND) = markup - reference markup from last iteration ($/MWh)"))  +
+  xlab("iteration") + ylab(paste0("Total tax markup (REMIND) = markup - reference markup from last iteration\n($/MWh)"))  +
   # coord_cartesian(ylim = c(-10,10)) +
   ggtitle(paste0("Total system markup (REMIND) - difference to last iteration (this should go to zero as coupled model reaches convergence"))+
   theme(plot.title = element_text(size = 26, face = "bold"))+

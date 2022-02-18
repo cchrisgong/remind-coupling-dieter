@@ -225,13 +225,13 @@ for (year_toplot in model.periods) {
       alpha = 0,
       linetype = "dotted"
     ) +
-    geom_area(
-      data = plot.remind.consumption ,
-      aes(x = iteration, y = -value, fill = all_te),
-      size = 1.2,
-      alpha = 0.5,
-      stat = "identity"
-    ) +
+    # geom_area(
+    #   data = plot.remind.consumption ,
+    #   aes(x = iteration, y = -value, fill = all_te),
+    #   size = 1.2,
+    #   alpha = 0.5,
+    #   stat = "identity"
+    # ) +
     scale_fill_manual(name = "Technology", values = color.mapping) +
     scale_color_manual(name = "Technology", values = color.mapping_vre) +
     theme(axis.text = element_text(size = 10),
@@ -257,17 +257,17 @@ for (year_toplot in model.periods) {
         alpha = 0,
         linetype = "dotted"
       ) +
-      geom_area(
-        data = plot.dieter.consumption,
-        aes(
-          x = iteration,
-          y = -value,
-          fill = all_te
-        ),
-        size = 1.2,
-        alpha = 0.5,
-        stat = "identity"
-      ) +
+      # geom_area(
+      #   data = plot.dieter.consumption,
+      #   aes(
+      #     x = iteration,
+      #     y = -value,
+      #     fill = all_te
+      #   ),
+      #   size = 1.2,
+      #   alpha = 0.5,
+      #   stat = "identity"
+      # ) +
       scale_fill_manual(name = "Technology", values = color.mapping) +
       scale_color_manual(name = "Technology", values = color.mapping_vre) +
       theme(axis.text = element_text(size = 10),
@@ -332,13 +332,13 @@ p1 <- ggplot() +
     alpha = 0,
     linetype = "dotted"
   ) +
-  geom_area(
-    data = plot.remind.consumption%>% filter(period <2110),
-    aes(x = period, y = -value, fill = all_te),
-    size = 1.2,
-    alpha = 0.5,
-    stat = "identity"
-  ) +
+  # geom_area(
+  #   data = plot.remind.consumption%>% filter(period <2110),
+  #   aes(x = period, y = -value, fill = all_te),
+  #   size = 1.2,
+  #   alpha = 0.5,
+  #   stat = "identity"
+  # ) +
   scale_fill_manual(name = "Technology", values = color.mapping) +
   scale_color_manual(name = "Technology", values = color.mapping_vre) +
   theme(axis.text = element_text(size = 10),
@@ -372,17 +372,17 @@ if (length(dieter.files) != 0) {
       alpha = 0,
       linetype = "dotted"
     ) +
-    geom_area(
-      data = plot.dieter.consumption%>% filter(period <2110),
-      aes(
-        x = as.integer(period),
-        y = -value,
-        fill = all_te
-      ),
-      size = 1.2,
-      alpha = 0.5,
-      stat = "identity"
-    ) +
+    # geom_area(
+    #   data = plot.dieter.consumption%>% filter(period <2110),
+    #   aes(
+    #     x = as.integer(period),
+    #     y = -value,
+    #     fill = all_te
+    #   ),
+    #   size = 1.2,
+    #   alpha = 0.5,
+    #   stat = "identity"
+    # ) +
     scale_fill_manual(name = "Technology", values = color.mapping) +
     scale_color_manual(name = "Technology", values = color.mapping_vre) +
     theme(axis.text = element_text(size = 10),

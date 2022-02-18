@@ -30,21 +30,20 @@ for (i in 1:length(dieter.files.report)){
 swlatex(sw,"\\onecolumn")
 swlatex(sw, paste0("\\section{Added capacities}"))
 
-for(iter.rep in 1:round(length(dieter.files.report)/dieter.iter.step-1, 0)){
-
-  swlatex(sw, paste0("\\subsection{Added capacities in iteration ", iter.rep*dieter.iter.step, "}"))
+for(iter.rep in c(1,2,3,4,5,10,25)){
+  swlatex(sw, paste0("\\subsection{Added capacities in iteration ", iter.rep, "}"))
   
   plot.dieter <- out.dieter.report %>%
     filter(model == "DIETER") %>% 
     filter(tall %in% model.periods.till2100) %>%
-    filter(iteration == iter.rep*dieter.iter.step) %>% 
+    filter(iteration == iter.rep) %>% 
     mutate(tall = as.numeric(as.character(tall)) - 1)   # Shift for dodged plot
     
   
   plot.remind <- out.dieter.report %>% 
     filter(model == "REMIND") %>% 
     filter(tall %in%model.periods.till2100) %>%
-    filter(iteration == iter.rep*dieter.iter.step) %>% 
+    filter(iteration == iter.rep) %>% 
     mutate(tall = as.numeric(as.character(tall)) + 1) %>%  # Shift for dodged plot
     mutate(value = ifelse(variable == "Divestment", -value, value))  # Divestment has negative value
   
@@ -61,7 +60,7 @@ for(iter.rep in 1:round(length(dieter.files.report)/dieter.iter.step-1, 0)){
   swfigure(sw,print,p, sw_option="width=20, height=10")
   
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/DIETER/AddedCapacity_compare_i", iter.rep*dieter.iter.step, ".png"),  p,  width = 17, height =10, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/AddedCapacity_compare_i", iter.rep, ".png"),  p,  width = 17, height =10, units = "in", dpi = 120)
   }
 }
 swlatex(sw,"\\twocolumn")

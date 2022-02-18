@@ -201,7 +201,7 @@ plot.remind.capacity <- out.remind.capacity %>%
   filter(iter == max(out.remind.capacity$iter))
 
 p0<-ggplot() +
-  geom_area(data = plot.remind.capacity, aes(x = period, y = value, fill = tech), size = 1.2, alpha = 0.5) +
+  geom_area(data = plot.remind.capacity%>% filter(period %in% model.periods.till2100) , aes(x = period, y = value, fill = tech), size = 1.2, alpha = 0.5) +
   scale_y_continuous(sec.axis = sec_axis(~./secAxisScale1, name = paste0("CF", "(%)")))+
   scale_fill_manual(name = "Technology", values = color.mapping.cap) +
   scale_color_manual(name = "Technology", values = color.mapping.capfac.line) +
@@ -219,7 +219,7 @@ plot.dieter.capacity <- out.dieter.capacity %>%
 
 if (length(dieter.files) != 0) {
   p2<-ggplot() +
-    geom_area(data = plot.dieter.capacity, aes(x = as.integer(period), y = value, fill = tech), size = 1.2, alpha = 0.5) +
+    geom_area(data = plot.dieter.capacity%>% filter(period %in% model.periods.till2100), aes(x = as.integer(period), y = value, fill = tech), size = 1.2, alpha = 0.5) +
     scale_y_continuous(sec.axis = sec_axis(~./secAxisScale2, name = paste0("CF", "(%)")))+
     scale_fill_manual(name = "Technology", values = color.mapping.cap) +
     scale_color_manual(name = "Technology", values = color.mapping.capfac.line)+

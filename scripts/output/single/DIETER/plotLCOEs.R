@@ -154,9 +154,8 @@ df.lcoe.elh2.total <- df.lcoe %>%
   select(period, tech, variable, cost, sector,value)
 
 # prepare REMIND prices for plot, calculate 15-year moving average and convert to USD2015/MWh, join with total LCOE for lineplot
-df.price <- df.mod %>% 
-  filter(region == reg,
-         period %in% model.periods, variable %in% map.price.tech$variable) %>% 
+df.price0 <- df.mod %>% 
+  filter(region == reg,variable %in% map.price.tech$variable) %>% 
   # convert from USD2005/GJ to USD2015/MWh
   mutate( value = value * 1.2 * 3.66) %>% 
   left_join(map.price.tech) %>% 
@@ -166,6 +165,9 @@ df.price <- df.mod %>%
   revalue.levels(tech = tech.label) %>% 
   select(period, tech, variable, sector,value)
 
+df.price <- df.price0 %>% 
+  filter(period %in% model.periods)
+  
 df.lcoe.te.components.plot <- df.lcoe.te.components %>% 
   dplyr::rename( value = lcoe )
 
@@ -351,7 +353,7 @@ if (save_png == 1){
 swlatex(sw, paste0("\\subsection{Technology LCOE - REMIND}"))
 
 p.teLCOE <- ggplot() +
-  geom_col( data = df.lcoe.te.plot,
+  geom_col( data = df.lcoe.te.plot%>% filter(period %in% model.periods.till2100),
             aes(period, value, fill=cost)) +
   geom_line(data = df.telcoe_mv.plot,
             aes(period, value, linetype=cost), size=1.2) +
@@ -596,6 +598,13 @@ prices_RM <- df.pricelcoe_minus_tax.plot.nocurt %>%
   select(period, variable, value)%>%
   mutate(model = "REMIND")
 
+prices_RM.movingavg <- df.price0 %>%
+  filter(tech == "System") %>% 
+  select(period, variable, value)%>%
+  mutate(model = "REMIND") %>% 
+  mutate(value = frollmean(value, 6, align = "center", fill = NA)) %>% 
+  mutate(variable = "REMIND price moving average")
+
 prices_lines <- list(elec_prices_DT_wShadPrice, elec_prices_DT, prices_RM) %>%
   reduce(full_join)
 
@@ -658,9 +667,11 @@ p.sysLCOE_compare <- ggplot() +
             aes(period, value, fill=variable)) +
   geom_line(data = prices_lines %>% filter(period %in% model.periods.till2100) ,
             aes(period, value, color=variable), size=1.2) +  
+  geom_line(data = prices_RM.movingavg %>% filter(period %in% model.periods.till2100) ,
+            aes(period, value, color=variable), alpha = 0.5, size=2) +  
   # geom_polygon(data = prices_lines, aes(x = period, y = value), alpha = 0.3) +
   facet_wrap(~model, scales = "free_y") +
-  scale_y_continuous("LCOE and DIETER Price\n(USD2015/MWh)") +
+  scale_y_continuous("LCOE and power price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
   scale_color_manual(name = "variable", values = price.colors) +
   coord_cartesian(ylim = c(-5,115))+

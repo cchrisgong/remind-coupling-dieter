@@ -432,6 +432,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   price.colors <- c(
     "REMIND Price" = "darkblue",
+    "REMIND price moving average" = "#8DB600",
     "Total (marginal) LCOE - Flex Tax" = "darkorchid",
     # "DIETER annual average electricity price" = "darkcyan",
     "DIETER annual average electricity price with scarcity price" = "indianred",
@@ -479,23 +480,23 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
 
   # Capacities --------------------------------------------------------------
 
-  # source(file.path(dieter.scripts.folder, "plotCapAndCF.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotCapAndCF.R"), local=TRUE)
 # 
 #   # Generation --------------------------------------------------------------
 # 
-#   source(file.path(dieter.scripts.folder, "plotGeneration.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotGeneration.R"), local=TRUE)
 # 
 #   # Added capacities --------------------------------------------------------
 # 
-#   source(file.path(dieter.scripts.folder, "plotAddedCapacities.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotAddedCapacities.R"), local=TRUE)
 # 
 #   # Price: Secondary electricity --------------------------------------------
 #   
-#   source(file.path(dieter.scripts.folder, "plotPrice.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotPrice.R"), local=TRUE)
 # 
 #   # Price: primary energy and fuel --------------------------------------------
 #   
-#   source(file.path(dieter.scripts.folder, "plotFuelPriceAndTrade.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotFuelPriceAndTrade.R"), local=TRUE)
 #   
 #   # Market value and shadow price ------------------------------------------------------
 #   
@@ -507,19 +508,19 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
 #   
 #   # LCOEs -------------------------------------------------------------------
 # 
-  # source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
 
   # (Residual) load duration curves -----------------------------------------
 
-  #source(file.path(dieter.scripts.folder, "plotRLDCs.R"), local=TRUE) # Attention: computationally heavy on standard PC
+  # source(file.path(dieter.scripts.folder, "plotRLDCs.R"), local=TRUE) # Attention: computationally heavy on standard PC
 
   # Price duration curves ---------------------------------------------------
 
-  #source(file.path(dieter.scripts.folder, "plotPriceDurationCurve.R"), local=TRUE)
+  # source(file.path(dieter.scripts.folder, "plotPriceDurationCurve.R"), local=TRUE)
 
   # (Inverse) screening curves ----------------------------------------------
 
-  #source(file.path(dieter.scripts.folder, "plotInverseScreeningCurve.R"), local=TRUE)
+  # source(file.path(dieter.scripts.folder, "plotInverseScreeningCurve.R"), local=TRUE)
 
   # Close LaTeX PDF ---------------------------------------------------------
 
