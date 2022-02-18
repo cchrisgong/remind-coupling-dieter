@@ -21,15 +21,15 @@ for (i in 1:length(remind.files)) {
     dplyr::ungroup(period, all_te) %>%
     mutate(iteration = i-1)%>%
     mutate(all_te = factor(all_te, levels = rev(unique(remind.tech.mapping))))
-     
+  
   vmprodSe <- file.path(outputdir, remind.files[i]) %>%
     read.gdx("vm_prodSe", factors = FALSE, squeeze = FALSE) %>%
     filter(tall %in% model.periods) %>%
     filter(all_regi == reg) %>%
     filter(all_enty.1 == "seel") %>%
-    filter(all_te %in% names(remind.nonvre.mapping)) %>%
+    filter(all_te %in% names(remind.nonvre.mapping.whyd)) %>%
     select(period = tall, all_te, value) %>%
-    revalue.levels(all_te = remind.nonvre.mapping) %>% 
+    revalue.levels(all_te = remind.nonvre.mapping.whyd) %>%
     mutate(value = value * sm_TWa_2_MWh / 1e6) %>%
     dplyr::group_by(period, all_te) %>%
     dplyr::summarise(value = sum(value) , .groups = 'keep') %>%
@@ -38,6 +38,7 @@ for (i in 1:length(remind.files)) {
     mutate(all_te = factor(all_te, levels = rev(unique(remind.tech.mapping))))
   
   out.remind <- rbind(out.remind, vmUsableSeTe,vmprodSe)
+  
   
   generation.withCurt<- file.path(outputdir, remind.files[i]) %>%
     read.gdx("vm_prodSe", factors = FALSE, squeeze = FALSE) %>%
@@ -409,7 +410,7 @@ if (save_png == 1){
 
 
 #####################################################################################################
-if (length(files_DT) != 0) {
+if (length(dieter.files) != 0) {
 for (i in c(5,10,20,maxiter-1)){
   
     # i = 5

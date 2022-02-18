@@ -13,7 +13,7 @@ for (i in 1:length(remind.files)){
   
   PE.marginals <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("q_balPe", field="m", squeeze = F) %>%
-    filter(all_regi == REGIkey1) %>% 
+    filter(all_regi == reg) %>% 
     filter(all_enty %in% c("pegas","pecoal","pebiolc")) %>% 
     select(period = ttot, fuel = all_enty, m) %>% 
     left_join(remind.qm_budget) %>% 
@@ -35,7 +35,7 @@ for (i in 2:length(remind.files)){
   
   PE.price <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("pm_PEPrice", squeeze = F) %>%
-    filter(all_regi == REGIkey1) %>% 
+    filter(all_regi == reg) %>% 
     filter(all_enty %in% c("pegas","pecoal","pebiolc")) %>% 
     mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2) %>% 
     select(period = ttot, fuel = all_enty, value) %>% 
@@ -45,7 +45,7 @@ for (i in 2:length(remind.files)){
   # in REMIND PE prices can be averaged over 3 iterations before being passed to DIETER
   PE.avg.price  <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("p32_fuelprice_avgiter", squeeze = F) %>%
-    filter(all_regi == REGIkey1) %>% 
+    filter(all_regi == reg) %>% 
     filter(all_enty %in% c("pegas","pecoal","pebiolc")) %>% 
     mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2) %>% 
     select(period = ttot, fuel = all_enty, value) %>% 
@@ -54,7 +54,7 @@ for (i in 2:length(remind.files)){
   
   PE.prod <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("vm_prodPe", field="l", squeeze = F) %>%
-    filter(all_regi == REGIkey1) %>% 
+    filter(all_regi == reg) %>% 
     filter(all_enty %in% c("pegas","pecoal","pebiolc")) %>% 
     mutate(value = value *sm_TWa_2_MWh/1e6) %>% 
     select(period = ttot, fuel = all_enty, value) %>% 
@@ -72,7 +72,7 @@ for (i in 2:length(remind.files)){
   PE.export <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("vm_Xport", field="l", squeeze = FALSE) %>% 
     filter(tall %in% report.periods) %>% 
-    filter(all_regi == REGIkey1) %>% 
+    filter(all_regi == reg) %>% 
     filter(all_enty %in% c("pecoal", "pegas","pebiolc")) %>% 
     mutate(value = value * sm_TWa_2_MWh/1e6) %>% 
     select(period = tall,fuel = all_enty, export = value)
@@ -80,14 +80,14 @@ for (i in 2:length(remind.files)){
   PE.mport <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("vm_Mport", field="l", squeeze = FALSE) %>% 
     filter(tall %in% report.periods) %>% 
-    filter(all_regi == REGIkey1) %>% 
+    filter(all_regi == reg) %>% 
     filter(all_enty %in% c("pecoal", "pegas","pebiolc")) %>% 
     mutate(value = value * sm_TWa_2_MWh/1e6) %>% 
     select(period = tall,fuel = all_enty, import = value)
   
   PE.importcost  <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("pm_costsPEtradeMp", squeeze = FALSE)  %>% 
-    filter(all_regi == REGIkey1) %>% 
+    filter(all_regi == reg) %>% 
     filter(all_enty %in% c("pecoal", "pegas","pebiolc")) %>% 
     select(fuel = all_enty, mportcost = value)
   
@@ -100,7 +100,7 @@ for (i in 2:length(remind.files)){
   PE.extr <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("vm_fuExtr", field="l", squeeze = FALSE)  %>% 
     filter(ttot %in% report.periods) %>% 
-    filter(all_regi == REGIkey1) %>% 
+    filter(all_regi == reg) %>% 
     filter(all_enty %in% c("pecoal", "pegas","pebiolc"))  %>% 
     filter(rlf == "1") %>% 
     mutate(value = -value * sm_TWa_2_MWh/1e6) %>% 

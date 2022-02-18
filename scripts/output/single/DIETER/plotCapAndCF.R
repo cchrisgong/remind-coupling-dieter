@@ -200,19 +200,12 @@ swlatex(sw, "\\subsection{Capacities over time (last iteration)}")
 plot.remind.capacity <- out.remind.capacity %>% 
   filter(iter == max(out.remind.capacity$iter))
 
-p0<-ggplot() +
+p1<-ggplot() +
   geom_area(data = plot.remind.capacity%>% filter(period %in% model.periods.till2100) , aes(x = period, y = value, fill = tech), size = 1.2, alpha = 0.5) +
-  scale_y_continuous(sec.axis = sec_axis(~./secAxisScale1, name = paste0("CF", "(%)")))+
   scale_fill_manual(name = "Technology", values = color.mapping.cap) +
-  scale_color_manual(name = "Technology", values = color.mapping.capfac.line) +
   xlab("period") + ylab(paste0("vm_cap", "(GW)")) +
   ggtitle(paste0("REMIND Last iteration: ", reg))+
   theme(legend.title = element_blank()) 
-
-if (length(dieter.files) != 0) {
-  p1 <- p0 + 
-    geom_line(data = plot.remind.demand, aes(x = period, y = value, color = tech), size = 1.2, alpha = 1,linetype="dotted")
-}
 
 plot.dieter.capacity <- out.dieter.capacity %>%
   filter(iter == max(out.dieter.capacity$iter))
@@ -220,9 +213,7 @@ plot.dieter.capacity <- out.dieter.capacity %>%
 if (length(dieter.files) != 0) {
   p2<-ggplot() +
     geom_area(data = plot.dieter.capacity%>% filter(period %in% model.periods.till2100), aes(x = as.integer(period), y = value, fill = tech), size = 1.2, alpha = 0.5) +
-    scale_y_continuous(sec.axis = sec_axis(~./secAxisScale2, name = paste0("CF", "(%)")))+
     scale_fill_manual(name = "Technology", values = color.mapping.cap) +
-    scale_color_manual(name = "Technology", values = color.mapping.capfac.line)+
     xlab("period") + ylab(paste0("capacity (GW)")) +
     ggtitle(paste0("DIETER Last iteration: ", reg))+
     
@@ -253,6 +244,7 @@ for(year_toplot in model.periods){
     geom_line(data=plot.remind, aes(x=iter, y=value, color=variable, linetype = model)) + 
     geom_line(data=plot.dieter, aes(x=iter, y=value, color=variable, linetype = model)) +
     scale_color_manual(name = "variable", values = color.mapping.cf)+
+    theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=7)) +
     xlab("Iteration") + 
     ylab("Capacity factor") + 
     facet_wrap(~tech, nrow=3)
@@ -279,6 +271,7 @@ p <- ggplot() +
   geom_line(data = data.capfac, aes(x = as.integer(period), y = value, color = variable, linetype = model), size = 1.2, alpha = 1) +
   scale_color_manual(name = "variable", values = color.mapping.cf.detail) +
   theme(axis.text=element_text(size=10), axis.title=element_text(size=10,face="bold")) +
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=10)) +
   facet_wrap(~tech, nrow = 3)+
   xlab("Time") +
   ylab("Capacity factor")
@@ -286,7 +279,7 @@ p <- ggplot() +
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/CF_compare_time.png"),  p,  width = 20, height =10, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/CF_compare_time.png"),  p,  width = 15, height =8, units = "in", dpi = 120)
 }
 
 

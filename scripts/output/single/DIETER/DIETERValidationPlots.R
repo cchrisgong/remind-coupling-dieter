@@ -11,6 +11,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   library(mip)
   library(grid)
   library(gridExtra)
+  library(data.table)
   
   # Configurations ----------------------------------------------------------
   ##

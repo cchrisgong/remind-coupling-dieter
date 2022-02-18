@@ -1,4 +1,5 @@
 # Data preparation --------------------------------------------------------
+# the script that generates LCOE is from Felix: https://github.com/pik-piam/remind2/blob/master/R/reportLCOE.R
 
 cat("Plot LCOEs \n")
 ### read mif
