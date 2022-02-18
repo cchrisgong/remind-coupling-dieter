@@ -29,5 +29,5 @@ if(cfg$gms$power == "DTcoup"){
   #sys.source(file.path(dieter.scripts.folder, "DIETERValidationPlots.R"), envir = dieterenv)
   source(file.path(dieter.scripts.folder, "DIETERValidationPlots.R"))
   # Call function
-  DIETERValidationPlots(outputdir = paste0(outputdir,"/DIETER"), dieter.scripts.folder = dieter.scripts.folder, cfg = cfg)
+  DIETERValidationPlots(outputdir = outputdir, dieter.scripts.folder = dieter.scripts.folder, cfg = cfg)
 }

@@ -22,7 +22,7 @@ for (i in 2:length(remind.files)){
     mutate(q32_peakDemandDT.m = q32_peakDemandDT.m/qm_budget.m * 1e12 / 1e9 * 1.2) %>% # (10^12 2005$)/TW-> 2015$/kW
     replace(is.na(.), 0) %>%
     select(period,value=q32_peakDemandDT.m) %>% 
-    mutate(iteration = i)
+    mutate(iteration = i-1)
   
   out.remind.peakdem.shadowprice <- rbind(out.remind.peakdem.shadowprice, remind.peakdem.shadowprice)
 }
@@ -52,8 +52,8 @@ for (i in 2:length(remind.files)){
   ### markups  
   # supply side: mean value is okay, since in remind it is already upscaled 
   remind.mrkup <- file.path(outputdir, remind.files[i]) %>% 
-    # read.gdx("vm_Mrkup", field="l", squeeze=F)  %>% 
-    read.gdx("p32_mrkupUpscaled", squeeze=F)
+    read.gdx("vm_Mrkup", field="l", squeeze=F)  %>%
+    # read.gdx("p32_mrkupUpscaled", squeeze=F)
     filter(all_regi == reg) %>%
     select(period = tall, tech = all_te, value) %>% 
     filter(tech %in% names(remind.tech.mapping)) %>% 
@@ -174,7 +174,7 @@ p <- ggplot() +
 
 swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/CapacityConstraint_shadowPrice_iteration.png"),  p,  width = 15, height =8, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/CapacityConstraint_shadowPrice_iteration.png"),  p,  width = 15, height =8, units = "in", dpi = 120)
 }
 #########################################################################################################
 swlatex(sw,"\\twocolumn")
@@ -191,7 +191,7 @@ p <- ggplot() +
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/CapacityConstraint_shadowPrice_time.png"),  p,  width = 6, height =12, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/CapacityConstraint_shadowPrice_time.png"),  p,  width = 6, height =12, units = "in", dpi = 120)
 }
 
 ########################################################################################################
@@ -213,7 +213,7 @@ p <- ggplot() +
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/Markup_time_iters.png"),  p,  width = 8, height =12, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/Markup_time_iters.png"),  p,  width = 8, height =12, units = "in", dpi = 120)
 }
 ########################################################################################################
 swlatex(sw, paste0("\\subsection{Markup time series (last iteration)}"))
@@ -229,7 +229,7 @@ p <- ggplot() +
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/Markup_time_lastiter.png"),  p,  width = 8, height =6, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/Markup_time_lastiter.png"),  p,  width = 8, height =6, units = "in", dpi = 120)
 }
 ########################################################################################################
 swlatex(sw, paste0("\\subsection{Market value time series (a few iterations)}"))
@@ -246,7 +246,7 @@ p <- ggplot() +
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/MarketValue_time_iters.png"),  p,  width = 8, height =12, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/MarketValue_time_iters.png"),  p,  width = 8, height =12, units = "in", dpi = 120)
 }
 
 ########################################################################################################
@@ -263,7 +263,7 @@ p <- ggplot() +
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/MarketValue_time_lastiter.png"),  p,  width = 8, height =6, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/MarketValue_time_lastiter.png"),  p,  width = 8, height =6, units = "in", dpi = 120)
 }
 
 ########################################################################################################
@@ -280,7 +280,7 @@ p <- ggplot() +
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/MarketValue_time_lastiter.png"),  p,  width = 8, height =12, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/MarketValue_time_lastiter.png"),  p,  width = 8, height =12, units = "in", dpi = 120)
 }
 
 ########################################################################################################
@@ -311,7 +311,7 @@ for (yr in c(2020,2030,2040,2050)){
   swfigure(sw,print,p)
   
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/MarketValue_compare_", yr, "_iteration.png"),  p,  width = 18, height =12, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/MarketValue_compare_", yr, "_iteration.png"),  p,  width = 18, height =12, units = "in", dpi = 120)
   }
   
 }
@@ -344,6 +344,6 @@ p <- ggplot()+
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/MarketValue_compare_time.png"),  p,  width = 17, height =10, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/MarketValue_compare_time.png"),  p,  width = 17, height =10, units = "in", dpi = 120)
 }
 

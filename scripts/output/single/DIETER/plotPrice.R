@@ -59,7 +59,7 @@ p<-ggplot() +
 swfigure(sw,print,p,sw_option="width=20, height=12")
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/SE_elec_price_RM_iteration.png"),  p,  width = 12, height =7, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/SE_elec_price_RM_iteration.png"),  p,  width = 12, height =7, units = "in", dpi = 120)
 }
 
 swlatex(sw,"\\onecolumn")
@@ -79,7 +79,7 @@ p<-ggplot() +
 swfigure(sw,print,p,sw_option="width=20, height=12")
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/SE_elec_price_w_demand_RM_iteration.png"),  p,  width = 12, height =7, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/SE_elec_price_w_demand_RM_iteration.png"),  p,  width = 12, height =7, units = "in", dpi = 120)
 }
 
 swlatex(sw,"\\onecolumn")
@@ -100,7 +100,7 @@ p<-ggplot() +
 
 swfigure(sw,print,p2,sw_option="width=20, height=12")
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/SE_elec_price_w_CF_RM_iteration.png"),  p,  width = 12, height =7, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/SE_elec_price_w_CF_RM_iteration.png"),  p,  width = 12, height =7, units = "in", dpi = 120)
 }
 
 swlatex(sw, paste0("\\subsection{secondary electricity price over time for both models}"))
@@ -115,6 +115,6 @@ p <- ggplot() +
 
 swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/SE_elec_price_RMDT_time.png"),  p,  width = 12, height =7, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/SE_elec_price_RMDT_time.png"),  p,  width = 12, height =7, units = "in", dpi = 120)
 }
 

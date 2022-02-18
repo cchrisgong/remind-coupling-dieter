@@ -271,7 +271,7 @@ p <- ggplot() +
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/teLCOE_avg_DIETER_bar.png"),  p,  width = 20, height =10, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_avg_DIETER_bar.png"),  p,  width = 20, height =10, units = "in", dpi = 120)
 }
 ################## DIETER average LCOE plot ########################
 plot.dieter.telcoe_avg <- dieter.telcoe_avg %>%
@@ -297,7 +297,7 @@ p <- ggplot() +
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/teLCOE_avg_DIETER_line.png"),  p,  width = 20, height =10, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_avg_DIETER_line.png"),  p,  width = 20, height =10, units = "in", dpi = 120)
 }
 
 ################## DIETER marginal LCOE plot ########################
@@ -323,7 +323,7 @@ p <- ggplot() +
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/teLCOE_marg_DIETER_bar.png"),  p,  width = 20, height =10, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_marg_DIETER_bar.png"),  p,  width = 20, height =10, units = "in", dpi = 120)
 }
 
 plot.dieter.telcoe_marg <- dieter.telcoe_marg %>%
@@ -344,7 +344,7 @@ p <- ggplot() +
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/teLCOE_marg_DIETER_line.png"),  p,  width = 20, height =10, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_marg_DIETER_line.png"),  p,  width = 20, height =10, units = "in", dpi = 120)
 }
 
 ########################################################################################################
@@ -366,7 +366,7 @@ p.teLCOE <- ggplot() +
 swfigure(sw,print,p.teLCOE)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/teLCOE_REMIND.png"),  p.teLCOE,  width = 17, height =7, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_REMIND.png"),  p.teLCOE,  width = 17, height =7, units = "in", dpi = 120)
 }
 
 
@@ -433,7 +433,7 @@ p.techLCOE_compare<-ggplot() +
 swfigure(sw,print,p.techLCOE_compare)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/teLCOE_avg_compare.png"),  p.techLCOE_compare,  width = 25, height =15, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_avg_compare.png"),  p.techLCOE_compare,  width = 25, height =15, units = "in", dpi = 120)
 }
 ########################################################################################################
 swlatex(sw, paste0("\\subsection{Technology LCOE (DIETER marginal LCOE) - Comparison}"))
@@ -460,7 +460,7 @@ p.techmargLCOE_compare <-ggplot() +
 swfigure(sw,print,p.techmargLCOE_compare)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/teLCOE_marg_compare.png"),  p.techmargLCOE_compare,  width = 25, height =15, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_marg_compare.png"),  p.techmargLCOE_compare,  width = 25, height =15, units = "in", dpi = 120)
 }
 
 swlatex(sw, paste0("\\section{System LCOEs}"))
@@ -532,7 +532,7 @@ p.sysLCOE_wmarkup <- ggplot() +
 swfigure(sw,print,p.sysLCOE_wmarkup)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/sysLCOE_w_markup_REMIND.png"),  p.sysLCOE_wmarkup,  width = 17, height =7, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/sysLCOE_w_markup_REMIND.png"),  p.sysLCOE_wmarkup,  width = 17, height =7, units = "in", dpi = 120)
 }
 ########################################################################################################
 swlatex(sw, paste0("\\subsection{System LCOE - REMIND - without curtailment cost}"))
@@ -558,7 +558,7 @@ p.sysLCOE_wmarkup <- ggplot() +
 swfigure(sw,print,p.sysLCOE_wmarkup)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/sysLCOE_w_markup_REMIND_nocurt.png"),  p.sysLCOE_wmarkup,  width = 17, height =7, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/sysLCOE_w_markup_REMIND_nocurt.png"),  p.sysLCOE_wmarkup,  width = 17, height =7, units = "in", dpi = 120)
 }
 
 ########################################################################################################
@@ -672,7 +672,7 @@ p.sysLCOE_compare <- ggplot() +
 swfigure(sw,print,p.sysLCOE_compare)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/avgLCOE_price_compare_line.png"),  p.sysLCOE_compare,  width = 17, height =7, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/avgLCOE_price_compare_line.png"),  p.sysLCOE_compare,  width = 17, height =7, units = "in", dpi = 120)
 }
 
 
@@ -695,7 +695,7 @@ p.sysLCOEprice_DIETER <- ggplot() +
 swfigure(sw,print,p.sysLCOEprice_DIETER)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/avgLCOE_price_compare_bar.png"),  p.sysLCOEprice_DIETER,  width = 10, height =7, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/avgLCOE_price_compare_bar.png"),  p.sysLCOEprice_DIETER,  width = 10, height =7, units = "in", dpi = 120)
 }
 
 # DIETER system marginal LCOE
@@ -738,7 +738,7 @@ if (save_png == 1){
 # swfigure(sw,print,p)
 # 
 # if (save_png == 1){
-#   ggsave(filename = paste0(outputdir, "/margLCOE_price_compare_line.png"),  p,  width = 17, height =7, units = "in", dpi = 120)
+#   ggsave(filename = paste0(outputdir, "/DIETER/margLCOE_price_compare_line.png"),  p,  width = 17, height =7, units = "in", dpi = 120)
 # }
 
 # 
@@ -761,7 +761,7 @@ if (save_png == 1){
 # swfigure(sw,print,p)
 # 
 # if (save_png == 1){
-#   ggsave(filename = paste0(outputdir, "/margLCOE_price_compare_bar.png"),  p,  width = 17, height =7, units = "in", dpi = 120)
+#   ggsave(filename = paste0(outputdir, "/DIETER/margLCOE_price_compare_bar.png"),  p,  width = 17, height =7, units = "in", dpi = 120)
 # }
 ########################################################################################################
 swlatex(sw, paste0("\\subsectionDIETER's VRE total LCOEs compared to fossil fuel plants running cost}"))
@@ -795,5 +795,5 @@ p.techLCOE_compare<-ggplot() +
 swfigure(sw,print,p.techLCOE_compare)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/teLCOE_avg_ffrunningVRE_compare.png"),  p.techLCOE_compare,  width = 30, height =18, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_avg_ffrunningVRE_compare.png"),  p.techLCOE_compare,  width = 30, height =18, units = "in", dpi = 120)
 }

@@ -80,7 +80,7 @@ p<-ggplot() +
 
 swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/Generation_share_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/Generation_share_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
 }
 
 ##################################################################################################
@@ -109,7 +109,7 @@ p <-ggplot() +
 
 swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/Diff_generation_share_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/Diff_generation_share_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
 }
 
 ##################################################################################################
@@ -136,7 +136,7 @@ p <-ggplot() +
 
 swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/Diff_elec_price_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/Diff_elec_price_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
 }
 
 ##################################################################################################
@@ -166,7 +166,7 @@ p <-ggplot() +
 
 swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/Diff_avg_elec_price_convergence_iteration.png"),  p,  width = 7, height =4.5, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/Diff_avg_elec_price_convergence_iteration.png"),  p,  width = 7, height =4.5, units = "in", dpi = 120)
 }
 
 ##################################################################################################
@@ -203,7 +203,7 @@ p <-ggplot() +
 
 swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/Diff_MV_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/Diff_MV_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
 }
 ##################################################################################################
 swlatex(sw, paste0("\\subsection{Market value difference (time average) over iterations}"))
@@ -217,10 +217,18 @@ diff.mv.avg.yr <- diff.mv %>%
   dplyr::group_by(iteration) %>%
   dplyr::summarise( value = mean(value), .groups = "keep" ) %>% 
   dplyr::ungroup(iteration) %>% 
-  filter(value>0)
+  filter(value>0)%>% 
+  mutate(variable = "Difference of electricity price")
+
+# moving average
+diff.mv.avg.yr.movingavg <-diff.mv.avg.yr %>% 
+  mutate( value = frollmean(value, 3, align = "center", fill = NA)) %>% 
+  mutate(variable = "Moving average")
+
 
 p <-ggplot() +
-  geom_line(data = diff.mv.avg.yr, aes(x = iteration, y = value), size = 1.2, alpha = 0.5) +
+  geom_line(data = diff.mv.avg.yr, aes(x = iteration, y = value, color = variable), size = 1.2, alpha = 0.5) +
+  geom_line(data = diff.mv.avg.yr.movingavg, aes(x = iteration, y = value, color = variable), size = 2.5, alpha = 0.5) +
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
   xlab("iteration") + ylab(paste0("Difference of time-averaged market value (REMIND-DIETER) ($/MWh)"))  +
   # coord_cartesian(ylim = c(-10,10)) +
@@ -229,7 +237,7 @@ p <-ggplot() +
 
 swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/Diff_t_avg_MV_convergence_iteration.png"),  p,  width = 6, height =5, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/Diff_t_avg_MV_convergence_iteration.png"),  p,  width = 6, height =5, units = "in", dpi = 120)
 }
 
 
@@ -247,7 +255,7 @@ p <-ggplot() +
 
 swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/REMIND_total_sys_markup_diff_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/REMIND_total_sys_markup_diff_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
 }
 
 ##################################################################################################
@@ -264,7 +272,7 @@ p <-ggplot() +
 
 swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/REMIND_budget_time.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/REMIND_budget_time.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
 }
 
 

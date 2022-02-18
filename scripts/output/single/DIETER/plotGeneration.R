@@ -289,7 +289,7 @@ for (year_toplot in model.periods) {
   
   swfigure(sw, grid.draw, p)
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/Generation_", year_toplot, ".png"),  p,  width = 8, height =10, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/Generation_", year_toplot, ".png"),  p,  width = 8, height =10, units = "in", dpi = 120)
   }
 }
 
@@ -404,7 +404,7 @@ if (length(dieter.files) != 0) {
 
 swfigure(sw, grid.draw, p)
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/Generation_time.png"),  p,  width = 8, height =10, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/Generation_time.png"),  p,  width = 8, height =10, units = "in", dpi = 120)
 }
 
 
@@ -441,7 +441,7 @@ for (i in c(5,10,20,maxiter-1)){
   
   swfigure(sw, grid.draw, p)
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/deltaGeneration_time_i", i, ".png"),  p,  width = 8, height =10, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/deltaGeneration_time_i", i, ".png"),  p,  width = 8, height =10, units = "in", dpi = 120)
   }
   
   

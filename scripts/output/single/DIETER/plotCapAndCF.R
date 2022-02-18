@@ -190,7 +190,7 @@ for(year_toplot in model.periods){
   
   swfigure(sw,grid.draw,p)
   if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/CAP_", year_toplot, "wCF.png"),  p,  width = 12, height =15, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/CAP_", year_toplot, "wCF.png"),  p,  width = 12, height =15, units = "in", dpi = 120)
   }
 }
 }
@@ -235,7 +235,7 @@ p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
 swfigure(sw,grid.draw,p)
 
 if (save_png == 1){
-ggsave(filename = paste0(outputdir, "/CAP_time.png"),  p,  width = 12, height =15, units = "in", dpi = 120)
+ggsave(filename = paste0(outputdir, "/DIETER/CAP_time.png"),  p,  width = 12, height =15, units = "in", dpi = 120)
 }
 ##################################################################################################
 swlatex(sw, paste0("\\section{Capacity factors}"))
@@ -259,7 +259,7 @@ for(year_toplot in model.periods){
   
   swfigure(sw,print,p)
   if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/CF_", year_toplot, ".png"),  p,  width = 6, height =5, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/CF_", year_toplot, ".png"),  p,  width = 6, height =5, units = "in", dpi = 120)
   }
 }
 
@@ -286,7 +286,7 @@ p <- ggplot() +
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/CF_compare_time.png"),  p,  width = 20, height =10, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/CF_compare_time.png"),  p,  width = 20, height =10, units = "in", dpi = 120)
 }
 
 

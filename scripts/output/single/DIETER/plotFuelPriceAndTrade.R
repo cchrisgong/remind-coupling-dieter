@@ -155,7 +155,7 @@ secAxisScale= 1/20
   
   swfigure(sw, grid.draw, p)
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/PE_price_prod_RM.png"),  p,  width = 20, height =13, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/PE_price_prod_RM.png"),  p,  width = 20, height =13, units = "in", dpi = 120)
   }
   
 #####################################################################################################  
@@ -170,7 +170,7 @@ secAxisScale= 1/20
 
   swfigure(sw, grid.draw, p)
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/PE_price_DT.png"),  p,  width = 20, height =13, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/PE_price_DT.png"),  p,  width = 20, height =13, units = "in", dpi = 120)
   }
   #####################################################################################################
   swlatex(sw, paste0("\\subsection{Price, production and trade of coal - REMIND"))
@@ -186,7 +186,7 @@ secAxisScale= 1/20
 
   swfigure(sw, grid.draw, p)
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/COAL_price_quantity_RM.png"),  p,  width = 20, height =13, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/COAL_price_quantity_RM.png"),  p,  width = 20, height =13, units = "in", dpi = 120)
   }
   #####################################################################################################
   swlatex(sw, paste0("\\subsection{Price, production and trade of gas - REMIND"))
@@ -201,7 +201,7 @@ secAxisScale= 1/20
 
   swfigure(sw, grid.draw, p)
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/GAS_price_quantity_RM.png"),  p,  width = 20, height =13, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/GAS_price_quantity_RM.png"),  p,  width = 20, height =13, units = "in", dpi = 120)
   }
   
   # 
@@ -216,7 +216,7 @@ secAxisScale= 1/20
 
   swfigure(sw, grid.draw, p)
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/BIOMASS_price_quantity_RM.png"),  p,  width = 20, height =13, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/BIOMASS_price_quantity_RM.png"),  p,  width = 20, height =13, units = "in", dpi = 120)
   }
   
   

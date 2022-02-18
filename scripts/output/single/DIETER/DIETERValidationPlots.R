@@ -35,7 +35,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     str_sort(numeric = TRUE)
   cat(paste0("DIETER report files: ", length(dieter.files.report), "\n"))
   
-  dieter.mif.annual.report <- paste0(outputdir, "/DIETER/Dieter_Annual.mif")
+  dieter.mif.annual.report <- paste0(outputdir, "/DIETER/DIETER/Dieter_Annual.mif")
   
   cat(paste0("DIETER mif report files: ", dieter.mif.annual.report, "\n"))
   
@@ -503,11 +503,11 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
 #   
 #   # Market value and shadow price ------------------------------------------------------
 #   
-#   source(file.path(dieter.scripts.folder, "plotConvergence.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotConvergence.R"), local=TRUE)
 #   
 #   # LCOEs -------------------------------------------------------------------
 # 
-  source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
+  # source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
 
   # (Residual) load duration curves -----------------------------------------
 
