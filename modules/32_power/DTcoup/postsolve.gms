@@ -32,6 +32,8 @@ p32_marketValue(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))
 p32_marketPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))
       = pm_SEPrice(t,regi,"seel")$regDTCoup(regi) - vm_flexAdj.l(t,regi,te)$regDTCoup(regi);
 
+p32_mrkup(t,regi,te) = vm_Mrkup.l(t,regi,te);
+
 *** CG: value factor in REMIND
 p32_valueFactor(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))
       = p32_marketValue(t,regi,te)$regDTCoup(regi)/(pm_SEPrice(t,regi,"seel")$regDTCoup(regi) + sm_eps);
@@ -276,10 +278,9 @@ $ENDIF.curt_avg
 
 * coupled demand side or supply side technologies:
 p32_cf_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (teDTCoupSupp(te) OR CFcoupDemte32(te))) = vm_capFac.l(t,regi,te);
-
 );
 
-* upscaling technologies for reporting
+* upscaling technologies
 p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND BIOte32(te) )
       = p32_shSeElDisp(t,regi,te)$(BIOte32(te))/(sum(te2$(BIOte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
 p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND NonPeakGASte32(te) )
@@ -289,23 +290,38 @@ p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(re
 p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
       = p32_shSeElDisp(t,regi,te)$(COALte32(te))/(sum(te2$(COALte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
 
-p32_mrkupUpscaled(t,regi,te)$(BIOte32(te))
-      = sum(BIOte32(te), vm_Mrkup.l(t,regi,te) * p32_tech_category_genshare(t,regi,te));
-p32_mrkupUpscaled(t,regi,te)$(NonPeakGASte32(te))
-      = sum(NonPeakGASte32(te), vm_Mrkup.l(t,regi,te) * p32_tech_category_genshare(t,regi,te));
-p32_mrkupUpscaled(t,regi,te)$(NUCte32(te))
-      = sum(NUCte32(te), vm_Mrkup.l(t,regi,te) * p32_tech_category_genshare(t,regi,te));
-p32_mrkupUpscaled(t,regi,te)$(COALte32(te))
-      = sum(COALte32(te), vm_Mrkup.l(t,regi,te) * p32_tech_category_genshare(t,regi,te));
+p32_mrkupUpscaled(t,regi,te) = p32_mrkup(t,regi,te);
 
-p32_MVupscaled(t,regi,te)$(BIOte32(te))
+*** average mk weighted by generation share
+p32_mrkupAvgW(t,regi,"Bio")
+      = sum(BIOte32(te), p32_mrkup(t,regi,te) * p32_tech_category_genshare(t,regi,te));
+p32_mrkupAvgW(t,regi,"CCGT")
+      = sum(NonPeakGASte32(te), p32_mrkup(t,regi,te) * p32_tech_category_genshare(t,regi,te));
+p32_mrkupAvgW(t,regi,"nuc")
+      = sum(NUCte32(te), p32_mrkup(t,regi,te) * p32_tech_category_genshare(t,regi,te));
+p32_mrkupAvgW(t,regi,"coal")
+      = sum(COALte32(te), p32_mrkup(t,regi,te) * p32_tech_category_genshare(t,regi,te));
+
+p32_mrkupUpscaled(t,regi,te)$(BIOte32(te)) = p32_mrkupAvgW(t,regi,"Bio");
+p32_mrkupUpscaled(t,regi,te)$(NonPeakGASte32(te)) = p32_mrkupAvgW(t,regi,"CCGT");
+p32_mrkupUpscaled(t,regi,te)$(NUCte32(te)) = p32_mrkupAvgW(t,regi,"nuc");
+p32_mrkupUpscaled(t,regi,te)$(COALte32(te)) = p32_mrkupAvgW(t,regi,"coal");
+
+p32_MVupscaled(t,regi,te) = p32_marketValue(t,regi,te);
+*** mv weighted by generation share
+p32_MVAvgW(t,regi,"Bio")
       = sum(BIOte32(te), p32_marketValue(t,regi,te) * p32_tech_category_genshare(t,regi,te));
-p32_MVupscaled(t,regi,te)$(NonPeakGASte32(te))
+p32_MVAvgW(t,regi,"CCGT")
       = sum(NonPeakGASte32(te), p32_marketValue(t,regi,te) * p32_tech_category_genshare(t,regi,te));
-p32_MVupscaled(t,regi,te)$(NUCte32(te))
+p32_MVAvgW(t,regi,"nuc")
       = sum(NUCte32(te), p32_marketValue(t,regi,te) * p32_tech_category_genshare(t,regi,te));
-p32_MVupscaled(t,regi,te)$(COALte32(te))
+p32_MVAvgW(t,regi,"coal")
       = sum(COALte32(te), p32_marketValue(t,regi,te) * p32_tech_category_genshare(t,regi,te));
+
+p32_MVupscaled(t,regi,te)$(BIOte32(te)) = p32_MVAvgW(t,regi,"Bio");
+p32_MVupscaled(t,regi,te)$(NonPeakGASte32(te)) = p32_MVAvgW(t,regi,"CCGT");
+p32_MVupscaled(t,regi,te)$(NUCte32(te)) = p32_MVAvgW(t,regi,"nuc");
+p32_MVupscaled(t,regi,te)$(COALte32(te)) = p32_MVAvgW(t,regi,"coal");
 
 $ENDIF.DTcoup
 
