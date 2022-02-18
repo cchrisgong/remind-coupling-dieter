@@ -11,8 +11,6 @@ tDT32s2(ttot) "second shorter list of time points that are coupled to DIETER" /2
 
 DIETERte32 "technologies in DIETER"
 /coal
-hc
-lig
 nuc
 CCGT
 OCGT_eff
@@ -103,3 +101,4 @@ $endif.chpoff
 
 NUCte32(all_te) "nuclear to seel tech in REMIND" /tnrs,fnrs/
 CFcoupDemte32(all_te) "demand-side technologies in REMIND which have prefactors to capacity factor" /elh2/
+Aggte32 "aggregated technologies" /Bio,coal,CCGT,nuc/

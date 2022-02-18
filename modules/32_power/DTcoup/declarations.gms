@@ -72,9 +72,12 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_tech_category_genshare(ttot,all_regi,all_te)       "generation share of sub-technology within a DIETER tech category from last REMIND iteration"
 
     p32_cf_last_iter(ttot,all_regi,all_te)                 "pm_cf of current iteration"
+    p32_mrkupAvgW(ttot,all_regi,Aggte32)                                 "aggregated weighted average markup"
+    p32_mrkup(ttot,all_regi,all_te)                        "markup of last iteration"
     p32_mrkupUpscaled(ttot,all_regi,all_te)                "markup upscaled to aggregated technological type"
+    p32_MVAvgW(ttot,all_regi,Aggte32)                                    "aggregated weighted average market value"
     p32_MVupscaled(ttot,all_regi,all_te)                   "market value upscaled to aggregated technological type"
-    
+
 $ENDIF.DTcoup
 
     p32_DIETERCurtRatio(ttot,all_regi,all_te)              "ratio of curtailed energy to usable energy for VRE from DIETER"
