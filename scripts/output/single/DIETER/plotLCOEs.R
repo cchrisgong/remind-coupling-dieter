@@ -76,6 +76,15 @@ df.lcoe.te.total <- df.lcoe %>%
   select(period, tech, value) %>% 
   dplyr::rename( totalLCOE = value )
 
+df.lcoe.grid<- df.lcoe %>% 
+  filter(region == reg,
+         period %in% model.periods, type == "average",
+         tech %in% map.price.tech$tech, sector %in% plot.sector) %>% 
+  filter(cost == "Grid Cost") %>% 
+  filter( output %in% c("seel","seh2")) %>% 
+  replace(is.na(.), 0) %>% 
+  select(period, tech, cost, lcoe=value)
+
 #component (marginal) LCOE per tech
 df.lcoe.te.components <- df.lcoe %>% 
   filter(region == reg,
@@ -84,7 +93,8 @@ df.lcoe.te.components <- df.lcoe %>%
   filter(! cost == c("Total LCOE")) %>% 
   filter( output %in% c("seel","seh2")) %>% 
   replace(is.na(.), 0) %>% 
-  select(period, tech, cost, lcoe=value) 
+  select(period, tech, cost, lcoe=value) %>% 
+  full_join(df.lcoe.grid)
 
 df.lcoe.te.components[mapply(is.infinite, df.lcoe.te.components)] <- 0
 
@@ -753,3 +763,37 @@ if (save_png == 1){
 # if (save_png == 1){
 #   ggsave(filename = paste0(outputdir, "/margLCOE_price_compare_bar.png"),  p,  width = 17, height =7, units = "in", dpi = 120)
 # }
+########################################################################################################
+swlatex(sw, paste0("\\subsectionDIETER's VRE total LCOEs compared to fossil fuel plants running cost}"))
+
+dieter.telcoe_avg_ffr <- dieter.telcoe_avg %>% 
+    filter(variable %in% running_lcoe_components) %>% 
+    filter(tech %in% conventionals) %>% 
+    mutate(tech = factor(tech, ordered=TRUE))
+
+dieter.telcoe_avg_vre <- dieter.telcoe_avg %>% 
+    filter(tech %in% renewables) %>% 
+    mutate(tech = factor(tech, ordered=TRUE))
+
+dieter.telcoe_marg_ffr <- dieter.telcoe_marg %>% 
+    filter(variable %in% running_lcoe_components) %>% 
+    filter(tech %in% conventionals)
+
+### avg LCOE
+p.techLCOE_compare<-ggplot() +
+  geom_col(data = dieter.telcoe_avg_vre %>% filter(period > 2015 & period <2110), aes(x = tech, y = value, fill = variable), colour="black", position='stack', size = 1) +
+  geom_col(data = dieter.telcoe_avg_ffr %>% filter(period > 2015 & period <2110), aes(x = tech, y = value, fill = variable), colour="black", position='stack', size = 1) +
+  scale_alpha_discrete(range = c(0.4,1)) +
+  theme(axis.text=element_text(size=15), axis.title=element_text(size= 18, face="bold"),strip.text = element_text(size=25),plot.title = element_text(size = 30, face = "bold")) +
+  xlab("") + ylab(paste0("LCOE ($/MWh)")) +
+  ggtitle("Tech average LCOE DIETER (last iteration) - left: running cost of conventionals, right: total cost of VRE")+
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=20)) +
+  theme(aspect.ratio = .4) +
+  scale_fill_manual(name = "model", values =cost.colors_DT_running)+
+  facet_wrap(~period, nrow = 4, scales = "free") 
+
+swfigure(sw,print,p.techLCOE_compare)
+
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/teLCOE_avg_ffrunningVRE_compare.png"),  p.techLCOE_compare,  width = 30, height =18, units = "in", dpi = 120)
+}

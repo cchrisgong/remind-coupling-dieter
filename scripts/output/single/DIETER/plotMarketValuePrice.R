@@ -52,9 +52,11 @@ for (i in 2:length(remind.files)){
   ### markups  
   # supply side: mean value is okay, since in remind it is already upscaled 
   remind.mrkup <- file.path(outputdir, remind.files[i]) %>% 
-    read.gdx("vm_Mrkup", field="l", squeeze=F)  %>% 
+    # read.gdx("vm_Mrkup", field="l", squeeze=F)  %>% 
+    read.gdx("p32_mrkupUpscaled", squeeze=F)
     filter(all_regi == reg) %>%
     select(period = tall, tech = all_te, value) %>% 
+    filter(tech %in% names(remind.tech.mapping)) %>% 
     revalue.levels(tech = remind.tech.mapping) %>%
     filter(period %in% model.periods) %>% 
     dplyr::group_by(period,tech) %>%

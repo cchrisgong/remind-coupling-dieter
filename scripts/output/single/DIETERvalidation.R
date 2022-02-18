@@ -6,8 +6,8 @@
 # |  Contact: remind@pik-potsdam.de
 
 require(lucode2)
-
-# outputdir = "./output/DIETERcoup_base_25_2022-02-15_10.54.13"
+# 
+# outputdir = "./output/DIETERcoup_base_25_wER_2022-02-17_16.18.53"
 # setwd("/home/chengong/remind-coupling-dieter/")
 options(warn=-1)
 
@@ -29,5 +29,5 @@ if(cfg$gms$power == "DTcoup"){
   #sys.source(file.path(dieter.scripts.folder, "DIETERValidationPlots.R"), envir = dieterenv)
   source(file.path(dieter.scripts.folder, "DIETERValidationPlots.R"))
   # Call function
-  DIETERValidationPlots(outputdir = outputdir, dieter.scripts.folder = dieter.scripts.folder, cfg = cfg)
+  DIETERValidationPlots(outputdir = paste0(outputdir,"/DIETER"), dieter.scripts.folder = dieter.scripts.folder, cfg = cfg)
 }

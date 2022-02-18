@@ -4,6 +4,8 @@ cat("Plot Seel price \n")
 
 out.remind.seel <- NULL
 out.SEPrice <- NULL
+out.RMprice <- NULL
+out.DTprice <- NULL
 out.totalDem <- NULL
 
 for (i in 2:length(remind.files)){
@@ -14,13 +16,13 @@ for (i in 2:length(remind.files)){
     filter(all_regi == reg) %>% 
     mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2)  %>%  # (10^12 2005$)/TWa -> 2015$/MWh
     select(period=ttot, value) %>%
-    mutate(iteration = i) %>%
+    mutate(iteration = i-1) %>%
     mutate(variable = "REMIND secondary electricity price ($/MWh)")
   
   DTprice  <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx( "p32_DIETER_elecprice", squeeze = FALSE) %>% 
     select(period=ttot, value) %>%
-    mutate(iteration = i) %>%
+    mutate(iteration = i-1) %>%
     mutate(variable = "DIETER secondary electricity price ($/MWh)")
   
   p32_seelTotDem <- file.path(outputdir, remind.files[i]) %>% 
@@ -29,9 +31,11 @@ for (i in 2:length(remind.files)){
     filter(all_enty == "seel") %>%
     select(period=ttot,value) %>% 
     mutate(value = value *sm_TWa_2_MWh/1e6)  %>%
-    mutate(iteration = i)  %>%
+    mutate(iteration = i-1)  %>%
     mutate(variable = "Total demand (Twh)")
   
+  out.RMprice <- rbind(out.RMprice, RMprice)
+  out.DTprice <- rbind(out.DTprice, DTprice)
   out.SEPrice <- rbind(out.SEPrice, RMprice, DTprice)
   out.totalDem <- rbind(out.totalDem, p32_seelTotDem)
 }
@@ -102,7 +106,7 @@ if (save_png == 1){
 swlatex(sw, paste0("\\subsection{secondary electricity price over time for both models}"))
 
 plot.seelprice <- out.SEPrice %>% 
-  filter(iteration %in% c(5,10,20,25,maxiter))
+  filter(iteration %in% c(1,2,3,4,5,10,maxiter))
 
 p <- ggplot() + 
   geom_line(data=plot.seelprice, aes(x=as.integer(period), y=value, color = variable), size = 2, alpha = 0.5) +
@@ -113,3 +117,4 @@ swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/SE_elec_price_RMDT_time.png"),  p,  width = 12, height =7, units = "in", dpi = 120)
 }
+

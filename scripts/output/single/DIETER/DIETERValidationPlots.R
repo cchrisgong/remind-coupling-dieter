@@ -210,10 +210,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   tech.label <- c("spv" ="Solar PV", "wind" = "Wind On","wind" = "Wind Off", "csp" = "Solar CSP", "ngt" = "OCGT",
                   "pcc" = "Coal w/ CCS", "ngccc" = "Gas CC w/ CCS", "tnrs" = "Nuclear","bioigcc" = "Biomass","bioigcc" = "Biomass w/ CCS",
-                  # "biochp" = "Biomass", 
-                  # "coalchp" = "Coal", 
                   "igcc" = "Coal", 
-                  # "gaschp" = "Gas",
                   "hydro" = "Hydro", "ngcc" = "Gas","pc" = "Coal", "system" = "System", "elh2" = "Electrolyzers")
   
     ## define color mapping
@@ -258,7 +255,6 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                                    "REMIND real CapFac (%)")
   
   color.mapping.mv.var <- c(
-                         # "REMIND markup ($/MWh)" = "#0000cc", 
                          "DIETER Market value ($/MWh)" = "#005900",
                          "DIETER Market value with scarcity price ($/MWh)" = "007f00",
                          "REMIND market value ($/MWh)" = "#7F7FFF")
@@ -332,7 +328,6 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     # shadow price
     "shadow price of capacity bound from REMIND - marg ($/MWh)", 
     # market value
-    # "DIETER Market value ($/MWh)"
     "DIETER Market value ($/MWh)"
   )
   
@@ -346,7 +341,6 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     "grid cost ($/MWh)", 
     "shadow price of capacity bound from REMIND - avg ($/MWh)", 
     "DIETER Market value ($/MWh)",
-    # "DIETER Market value ($/MWh)",
     NULL
   )
   
@@ -368,13 +362,22 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                            CCGT = "CCGT",
                            bio = "Biomass",
                            ror = "Hydro",
-                           Wind_on = "Wind On",
-                           Wind_off = "Wind Off",
+                           Wind_on = "Wind Onshore",
+                           Wind_off = "Wind Offshore",
                            Solar = "Solar",
                            elh2 = "Electrolyzers",
                            `all Tech` = "All Tech",
                            vregrid = "VRE grid",
                            NULL)
+  
+  running_lcoe_components <- c(
+    "CO2 Tax Cost",
+    "OMV Cost",
+    "Fuel Cost")
+  
+  conventionals <- c("Coal", "OCGT", "CCGT", "Biomass")
+  renewables <- c("Solar", "Wind On", "Wind Off")
+  
   
   # label mapping for plots
   dieter.variable.mapping <- c( 
@@ -415,8 +418,6 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     "Shadow Price" = "lightblue")
   
   cost.colors_DT_running <- c(
-    # "Curtailment Cost" = "darkblue",
-    # "Storage Cost" = "",
     "Grid Cost" = "darkolivegreen3",
     "CO2 Tax Cost" = "indianred",
     "OMV Cost" = "cyan",
@@ -478,34 +479,34 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
 
   # Capacities --------------------------------------------------------------
 
-  source(file.path(dieter.scripts.folder, "plotCapAndCF.R"), local=TRUE)
-
-  # Generation --------------------------------------------------------------
-
-  source(file.path(dieter.scripts.folder, "plotGeneration.R"), local=TRUE)
-
-  # Added capacities --------------------------------------------------------
-
-  source(file.path(dieter.scripts.folder, "plotAddedCapacities.R"), local=TRUE)
-
-  # Price: Secondary electricity --------------------------------------------
-  
-  source(file.path(dieter.scripts.folder, "plotPrice.R"), local=TRUE)
-
-  # Price: primary energy and fuel --------------------------------------------
-  
-  source(file.path(dieter.scripts.folder, "plotFuelPriceAndTrade.R"), local=TRUE)
-  
-  # Market value and shadow price ------------------------------------------------------
-  
+  # source(file.path(dieter.scripts.folder, "plotCapAndCF.R"), local=TRUE)
+# 
+#   # Generation --------------------------------------------------------------
+# 
+#   source(file.path(dieter.scripts.folder, "plotGeneration.R"), local=TRUE)
+# 
+#   # Added capacities --------------------------------------------------------
+# 
+#   source(file.path(dieter.scripts.folder, "plotAddedCapacities.R"), local=TRUE)
+# 
+#   # Price: Secondary electricity --------------------------------------------
+#   
+#   source(file.path(dieter.scripts.folder, "plotPrice.R"), local=TRUE)
+# 
+#   # Price: primary energy and fuel --------------------------------------------
+#   
+#   source(file.path(dieter.scripts.folder, "plotFuelPriceAndTrade.R"), local=TRUE)
+#   
+#   # Market value and shadow price ------------------------------------------------------
+#   
   source(file.path(dieter.scripts.folder, "plotMarketValuePrice.R"), local=TRUE)
-  
-  # Market value and shadow price ------------------------------------------------------
-  
-  source(file.path(dieter.scripts.folder, "plotConvergence.R"), local=TRUE)
-  
-  # LCOEs -------------------------------------------------------------------
-
+#   
+#   # Market value and shadow price ------------------------------------------------------
+#   
+#   source(file.path(dieter.scripts.folder, "plotConvergence.R"), local=TRUE)
+#   
+#   # LCOEs -------------------------------------------------------------------
+# 
   source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
 
   # (Residual) load duration curves -----------------------------------------

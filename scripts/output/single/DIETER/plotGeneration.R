@@ -134,7 +134,7 @@ for (i in 1:length(dieter.files)) {
     filter(all_te %in% names(dieter.tech.mapping)) %>%
     revalue.levels(all_te = dieter.tech.mapping) %>%
     mutate(all_te = factor(all_te, levels = rev(unique(dieter.tech.mapping))))  %>%
-    mutate(iteration = id[i]) %>%
+    mutate(iteration = i) %>%
     mutate(period = as.integer(period))
   
   out.dieter <- rbind(out.dieter, dieter.data)

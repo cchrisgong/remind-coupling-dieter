@@ -2,7 +2,6 @@
 
 cat("Plot capacities \n")
 
-
 # Data preparation (REMIND) -----------------------------------------------
 out.remind.capacity <- NULL
 out.remind.demand <- NULL
@@ -81,7 +80,7 @@ if (length(dieter.files) != 0) {
   for (i in 1:length(dieter.files)){
     dieter.data <- file.path(outputdir, dieter.files[i]) %>% 
       read.gdx("p32_report4RM", factor = FALSE, squeeze = FALSE) %>%
-      select(period = X..1, tech = X..3,variable=X..4,value)  %>%
+      select(period = X..1, tech = X..3, variable=X..4, value)  %>%
       filter(period %in% model.periods) %>%
       filter(tech %in% names(dieter.tech.mapping)) %>%
       filter(variable %in% c("capacity")) %>%

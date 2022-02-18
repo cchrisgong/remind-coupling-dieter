@@ -113,6 +113,127 @@ if (save_png == 1){
 }
 
 ##################################################################################################
+swlatex(sw, paste0("\\subsection{Electricity price difference over iterations}"))
+
+diff.price <- out.RMprice %>% 
+  filter(period %in% model.periods) %>% 
+  filter(!value == 0) %>% 
+  select(period,iteration,rmprice=value) %>% 
+  left_join(out.DTprice) %>% 
+  select(period,iteration,rmprice, value) %>% 
+  mutate(value = rmprice - value)
+
+p <-ggplot() +
+  geom_line(data = diff.price, aes(x = iteration, y = value,), size = 1.2, alpha = 0.5) +
+  theme(axis.text=element_text(size=20), axis.title=element_text(size= 20,face="bold")) +
+  xlab("iteration") + ylab(paste0("Difference of electricity price (REMIND-DIETER) ($/MWh)"))  +
+  theme(legend.title = element_text(size=25),legend.text = element_text(size=25)) +
+  theme(legend.text = element_text(size=20), strip.text = element_text(size = 20)) +
+  # coord_cartesian(ylim = c(-10,10)) +
+  theme(legend.position = "bottom") +
+  guides(color = guide_legend(nrow = 2, byrow = TRUE))+
+  facet_wrap(~period, nrow = 3)
+
+swfigure(sw,print,p,sw_option="width=20, height=12")
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/Diff_elec_price_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
+}
+
+##################################################################################################
+swlatex(sw, paste0("\\subsection{Electricity price difference (time average) over iterations}"))
+
+diff.price.avg.yr <- diff.price %>% 
+  filter(period %in% model.periods.till2100) %>% 
+  dplyr::group_by(iteration) %>%
+  dplyr::summarise( value = mean(value), .groups = "keep" ) %>% 
+  dplyr::ungroup(iteration) %>% 
+  mutate(variable = "Difference of electricity price")
+
+# moving average
+diff.price.avg.yr.movingavg <-diff.price.avg.yr %>% 
+  mutate( value = frollmean(value, 3, align = "center", fill = NA)) %>% 
+  mutate(variable = "Moving average")
+
+
+p <-ggplot() +
+  geom_line(data = diff.price.avg.yr, aes(x = iteration, y = value, color = variable), size = 1.2, alpha = 0.5) +
+  geom_line(data = diff.price.avg.yr.movingavg, aes(x = iteration, y = value, color = variable), size = 2.5, alpha = 0.5) +
+  theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+  xlab("iteration") + ylab(paste0("Difference of electricity price (REMIND-DIETER) ($/MWh)"))  +
+  # coord_cartesian(ylim = c(-10,10)) +
+  theme(legend.position = "bottom") +
+  guides(color = guide_legend(nrow = 2, byrow = TRUE))
+
+swfigure(sw,print,p,sw_option="width=20, height=12")
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/Diff_avg_elec_price_convergence_iteration.png"),  p,  width = 7, height =4.5, units = "in", dpi = 120)
+}
+
+##################################################################################################
+swlatex(sw, paste0("\\subsection{Market value difference over iterations}"))
+diff.mv <- out.remind.mv %>% 
+  # filter(tech == dieter.supply.tech.mapping) 
+  filter(period %in% model.periods) %>% 
+  select(period,tech,iteration,rm.mv=value) %>% 
+  filter(iteration >1) %>% 
+  left_join(out.RMprice) %>% 
+  filter(!value == 0) %>% 
+  select(-value,-variable) %>% 
+  filter(!rm.mv == 0) %>% 
+  left_join(out.dieter.mv.woscar%>% 
+              mutate(period = as.integer(period)) %>% 
+              select(period,iteration,tech,value)) %>% 
+  filter(!tech %in% remind.sector.coupling.mapping) %>% 
+  replace(is.na(.), 0) %>%
+  select(period,iteration,tech,rm.mv, value) %>% 
+  mutate(value = rm.mv - value) %>% 
+  select(-rm.mv) 
+
+p <-ggplot() +
+  geom_line(data = diff.mv, aes(x = iteration, y = value, color = tech), size = 1.2, alpha = 0.5) +
+  theme(axis.text=element_text(size=20), axis.title=element_text(size= 20,face="bold")) +
+  xlab("iteration") + ylab(paste0("Difference of market value (REMIND-DIETER) by tech ($/MWh)"))  +
+  theme(legend.title = element_text(size=25),legend.text = element_text(size=25)) +
+  theme(legend.text = element_text(size=20), strip.text = element_text(size = 20)) +
+  scale_color_manual(name = "tech", values = color.mapping)+
+  # coord_cartesian(ylim = c(-10,10)) +
+  theme(legend.position = "bottom") +
+  guides(color = guide_legend(nrow = 2, byrow = TRUE))+
+  facet_wrap(~period, nrow = 3)
+
+swfigure(sw,print,p,sw_option="width=20, height=12")
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/Diff_MV_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
+}
+##################################################################################################
+swlatex(sw, paste0("\\subsection{Market value difference (time average) over iterations}"))
+
+diff.mv.avg.yr <- diff.mv %>% 
+  # filter(iteration == 12)
+  filter(period %in% model.periods.till2100) %>% 
+  dplyr::group_by(period,iteration) %>%
+  dplyr::summarise( value = mean(value), .groups = "keep" ) %>% 
+  dplyr::ungroup(period,iteration) %>% 
+  dplyr::group_by(iteration) %>%
+  dplyr::summarise( value = mean(value), .groups = "keep" ) %>% 
+  dplyr::ungroup(iteration) %>% 
+  filter(value>0)
+
+p <-ggplot() +
+  geom_line(data = diff.mv.avg.yr, aes(x = iteration, y = value), size = 1.2, alpha = 0.5) +
+  theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+  xlab("iteration") + ylab(paste0("Difference of time-averaged market value (REMIND-DIETER) ($/MWh)"))  +
+  # coord_cartesian(ylim = c(-10,10)) +
+  theme(legend.position = "bottom") +
+  guides(color = guide_legend(nrow = 2, byrow = TRUE))
+
+swfigure(sw,print,p,sw_option="width=20, height=12")
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/Diff_t_avg_MV_convergence_iteration.png"),  p,  width = 6, height =5, units = "in", dpi = 120)
+}
+
+
+##################################################################################################
 swlatex(sw, paste0("\\subsection{Total system markup (REMIND) - difference to last iteration}"))
 
 p <-ggplot() +
