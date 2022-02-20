@@ -144,8 +144,6 @@ vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi) AND not tDT32(t)) = 
 * v32_shStor.up(t,regi,teVRE) = 100;
 * v32_shStor.lo(t,regi,teVRE) = 0;
 
-
-
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
 $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"

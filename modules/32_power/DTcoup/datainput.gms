@@ -190,18 +190,17 @@ p32_shSeElDem(t,regi,te)$(regDTCoup(regi)) = sum(en2en(enty,enty2,te),vm_demSe.l
 
 p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
 
-$IFTHEN.hardcap not %cm_DTcapcon% == "hard"
+$IFTHEN.nohardcap not %cm_DTcapcon% == "hard"
 s32_hardcap = 0;
-$ENDIF.hardcap
-
+$ENDIF.nohardcap
 $IFTHEN.hardcap %cm_DTcapcon% == "hard"
 s32_hardcap = 1;
 $ENDIF.hardcap
 
 s32_mrkupCoup = 0;
-$IFTHEN.hardcap %cm_DTmrkup% == "on"
+$IFTHEN.mrkupCoup %cm_DTmrkup% == "on"
 s32_mrkupCoup = 1;
-$ENDIF.hardcap
+$ENDIF.mrkupCoup
 
 *** dumping REMIND input for DIETER iteration
 *** CG: export H2 switch
@@ -241,8 +240,24 @@ s32_scarPrice = 1;  !! shave off scarcity price
 $ENDIF.capcon
 *** initiating other parameters for averaging in loop
 
-p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
 
+$IFTHEN.ACcoup %cm_DTcoup_adjCost% == "on"
+s32_adjCost = 1;
+$ENDIF.ACcoup
+$IFTHEN.noACcoup %cm_DTcoup_adjCost% == "off"
+s32_adjCost = 0;
+$ENDIF.noACcoup
+
+$IFTHEN.margVREcoup %cm_DTcoup_margVRE% == "on"
+s32_margVRE = 1;
+$ENDIF.margVREcoup
+$IFTHEN.nomargVREcoup %cm_DTcoup_margVRE% == "off"
+s32_margVRE = 0;
+$ENDIF.nomargVREcoup
+
+
+
+p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
 p32_cf_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) = pm_cf(t,regi,te);
 
 $IFTHEN.curt_avg %cm_DTcurt_avg% == "on"
@@ -255,7 +270,8 @@ $ENDIF.curt_avg
 
 * REMIND data for DIETER
 execute_unload "RMdata_4DT.gdx",tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,
-    s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,s32_windoff,s32_scarPrice, !! switches: H2 switch, mode switch, dispatch iterational switches, offshore switch
+    s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,!! switches: H2 switch, mode switch, dispatch iterational switches,
+    s32_windoff,s32_scarPrice, s32_adjCost, s32_margVRE, !! switches: offshore switch, scarcity price switch, adjustment cost coupling switch, marginal VRE investment cost coupling switch,
     COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,      !! tech sets: REMIND technology definition
     vm_cap, vm_deltaCap, vm_capDistr, v32_storloss,vm_capEarlyReti,vm_prodSe,vm_usableSeTe, !! quantities: capacity, generation, curtailment,
     p32_realCapfacVRE,vm_capFac,pm_cf,pm_dataren, !! CF

@@ -102,7 +102,9 @@ scalars
     s32_windoff                               "a binary switch for wind offshore to be exported to DIETER"
     s32_scarPrice                             "scarcity price switch in DIETER, to be used with situation when there is no capacity constraint in REMIND due to peak residual hourly demand"
     s32_hardcap                               "switch for capacity bound equation for coupling to DIETER"
-    s32_mrkupCoup                             "switch for markup coupling for coupling to DIETER"
+    s32_mrkupCoup                             "switch for receiving markups from DIETER"
+    s32_adjCost                               "switch for handing adjustment cost to DIETER"
+    s32_margVRE                               "switch for taking into account investment cost in DIETER for VRE should see the lowest grade potential capacity factor, not the average"
 ;
 
 positive variables
