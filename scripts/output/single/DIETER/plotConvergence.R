@@ -266,7 +266,7 @@ p <-ggplot() +
   theme(axis.text=element_text(size=12), axis.title=element_text(size= 12,face="bold")) +
   xlab("Time") + ylab(paste0("Budget equation marginal"))  +
   # coord_cartesian(ylim = c(-10,10)) +
-  ggtitle(paste0("Budget equation marginal (this shows if for some iterations, the forcing from the coupling relieves the bound on budget, the more there are these iterations the less stable the coupling usually is)"))+
+  ggtitle(paste0("Budget equation marginal (this shows if for some iterations budget becomes 0, i.e the forcing from the coupling relieves the bound on budget, the more there are these iterations the less stable the coupling usually is)"))+
   theme(plot.title = element_text(size = 15, face = "bold"))+
   facet_wrap(~iteration, nrow = 5, scale="free")
 

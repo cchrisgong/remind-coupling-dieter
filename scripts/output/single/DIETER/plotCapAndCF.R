@@ -38,7 +38,7 @@ if (length(dieter.files) != 0) {
     out.remind.demand <- rbind(out.remind.demand, remind.data)
   }
   
-  for (i in 1:(length(remind.files)-1)){
+  for (i in 1:(length(remind.files))){
  
     data.capacity <- file.path(outputdir, remind.files[i]) %>%  
       read.gdx("vm_cap", factors = FALSE, squeeze = FALSE) %>% 
@@ -98,7 +98,7 @@ if (length(dieter.files) != 0) {
     select(period, tech, value, iter)
   
   out.dieter.capfac <- NULL
-  for (i in 1:(length(remind.files)-1)){
+  for (i in 1:(length(remind.files))){
     data.real.capfac <-
       file.path(outputdir, dieter.files.report[i]) %>% 
       read.gdx("report_tech", squeeze = F) %>% 

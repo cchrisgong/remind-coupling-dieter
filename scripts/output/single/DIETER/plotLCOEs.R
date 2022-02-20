@@ -279,12 +279,14 @@ if (save_png == 1){
 ################## DIETER average LCOE plot ########################
 plot.dieter.telcoe_avg <- dieter.telcoe_avg %>%
   mutate(period = as.integer(period)) %>%
-  filter(period %in% model.periods.till2100)
+  filter(period %in% model.periods.till2100) %>% 
+  filter(!tech == "VRE grid")
 
 plot.dieter.price <-dieter.price %>%
-  mutate(value = -value) %>%
+  mutate(value = - value) %>%
   mutate(period = as.integer(period)) %>%
-  filter(period %in% model.periods.till2100)
+  filter(period %in% model.periods.till2100) %>% 
+  filter(!tech == "VRE grid")
 
 p <- ggplot() +
   geom_bar(data = plot.dieter.telcoe_avg, aes(x = period, y = value, fill = variable), stat='identity', size = 1.2, alpha = 0.5)+
@@ -306,12 +308,14 @@ if (save_png == 1){
 ################## DIETER marginal LCOE plot ########################
 dieter.telcoe_marg <- cost_bkdw_marg_DT %>%
   filter(!variable %in% label.price)%>%
-  filter(period %in% model.periods.till2100)
+  filter(period %in% model.periods.till2100)%>% 
+  filter(!tech == "VRE grid")
 
 dieter.teloceprice_marg <- list(dieter.price, dieter.telcoe_marg) %>%
   reduce(full_join) %>%
   filter(period %in% model.periods.till2100) %>%
-  mutate(period = as.integer(period))
+  mutate(period = as.integer(period))%>% 
+  filter(!tech == "VRE grid")
 
 p <- ggplot() +
   geom_bar(data = dieter.teloceprice_marg, aes(x = period, y = value,  fill = variable), stat='identity', size = 1.2, alpha = 0.5)+
@@ -421,8 +425,9 @@ df.lcoe.avg.dieter <- cost_bkdw_avg_DT %>%
 barwidth = 1.5
 
 p.techLCOE_compare<-ggplot() +
-  geom_col(data = df.lcoe.RM2DTte.RM , aes(x = period-barwidth/2-0.1, y = value, fill = cost), colour="black", position='stack', size = 1, width = barwidth) +
-  geom_col(data = df.lcoe.avg.dieter , aes(x = period+barwidth/2+0.1, y = value, fill = variable), colour="black", position='stack', size = 1,
+  geom_col(data = df.lcoe.RM2DTte.RM, aes(x = period-barwidth/2-0.1, y = value, fill = cost), colour="black", position='stack', size = 1, width = barwidth) +
+  geom_col(data = df.lcoe.avg.dieter%>% 
+             filter(!tech == "VRE grid"), aes(x = period+barwidth/2+0.1, y = value, fill = variable), colour="black", position='stack', size = 1,
            width = barwidth) +
   scale_alpha_discrete(range = c(0.4,1)) +
   theme(axis.text=element_text(size=20), axis.title=element_text(size= 20, face="bold"),strip.text = element_text(size=25),plot.title = element_text(size = 30, face = "bold")) +
@@ -449,7 +454,8 @@ barwidth = 1.5
 
 p.techmargLCOE_compare <-ggplot() +
   geom_col(data = df.lcoe.RM2DTte.RM %>% filter(period > 2015 & period <2110), aes(x = period-barwidth/2-0.1, y = value, fill = cost), colour="black", position='stack', size = 1, width = barwidth) +
-  geom_col(data = df.lcoe.marg.dieter %>% filter(period > 2015 & period <2110), aes(x = period+barwidth/2+0.1, y = value, fill = variable), colour="black", position='stack', size = 1,
+  geom_col(data = df.lcoe.marg.dieter %>% 
+             filter(!tech == "VRE grid") %>% filter(period > 2015 & period <2110), aes(x = period+barwidth/2+0.1, y = value, fill = variable), colour="black", position='stack', size = 1,
            width = barwidth) +
   scale_alpha_discrete(range = c(0.4,1)) +
   theme(axis.text=element_text(size=20), axis.title=element_text(size= 20, face="bold"),strip.text = element_text(size=25),plot.title = element_text(size = 30, face = "bold")) +

@@ -30,21 +30,21 @@ for (i in 1:length(dieter.files.report)){
 swlatex(sw,"\\onecolumn")
 swlatex(sw, paste0("\\section{Added capacities}"))
 
-for(iter.rep in c(1,2,3,4,5,10,25)){
+for(iter.rep in c(1,2,3,4,5,10,25,maxiter-1)){
   swlatex(sw, paste0("\\subsection{Added capacities in iteration ", iter.rep, "}"))
   
   plot.dieter <- out.dieter.report %>%
     filter(model == "DIETER") %>% 
     filter(tall %in% model.periods.till2100) %>%
     filter(iteration == iter.rep) %>% 
-    mutate(tall = as.numeric(as.character(tall)) - 1)   # Shift for dodged plot
+    mutate(tall = as.numeric(as.character(tall)) + 1)   # Shift for dodged plot
     
   
   plot.remind <- out.dieter.report %>% 
     filter(model == "REMIND") %>% 
     filter(tall %in%model.periods.till2100) %>%
     filter(iteration == iter.rep) %>% 
-    mutate(tall = as.numeric(as.character(tall)) + 1) %>%  # Shift for dodged plot
+    mutate(tall = as.numeric(as.character(tall)) - 1) %>%  # Shift for dodged plot
     mutate(value = ifelse(variable == "Divestment", -value, value))  # Divestment has negative value
   
   p <- ggplot() +
@@ -52,7 +52,7 @@ for(iter.rep in c(1,2,3,4,5,10,25)){
     geom_bar(data = plot.remind, aes(x=tall, y=value, fill=model, alpha=variable), colour="black", stat="identity", position="stack", width=2) +
     scale_alpha_manual(values=c("Pre-inv. cap."= 1, "Added cap."=0.5, "Divestment"=0.2), limits=c("Pre-inv. cap.", "Added cap.", "Divestment")) +
     facet_wrap(~tech, scales="free") +
-    coord_cartesian(xlim = c(2010, 2100)) +
+    coord_cartesian(xlim = c(2020, 2100)) +
     theme(legend.position="bottom") + 
     xlab("Time") + 
     ylab("Capacity [GW]")
