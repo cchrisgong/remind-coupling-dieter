@@ -276,6 +276,36 @@ cost_bkdw_avg <- file.path(outputdir, dieter.files.report[iter_toplot]) %>%
     select(period, tech, variable, value)%>% 
     mutate(period = as.numeric(period))
 
+# cost for REMIND but reported in DIETER (this should be properly reported in remind2/reportLCOE in the future)
+cost_bkdw_avg_4RM <- file.path(outputdir, dieter.files.report[iter_toplot]) %>%
+  read.gdx("report_tech", factors = FALSE, squeeze=FALSE) %>%
+  select(model=X..1, period = X..2, variable=X..4, tech=X..5, value) %>%
+  filter(variable %in% reportLCOEcomponents_REMIND_avg) %>%
+  filter(period %in% model.periods) %>%
+  filter(tech %in% names(dieter.tech.mapping)) %>%
+  filter(model == "REMIND")%>%
+  revalue.levels(tech = dieter.tech.mapping) %>%
+  mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))) %>%
+  revalue.levels(variable = dieter.variable.mapping) %>%
+  mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>%
+  select(period, tech, variable, value)%>% 
+  mutate(period = as.numeric(period))
+
+# cost for REMIND but reported in DIETER (this should be properly reported in remind2/reportLCOE in the future)
+cost_bkdw_marg_4RM <- file.path(outputdir, dieter.files.report[iter_toplot]) %>%
+  read.gdx("report_tech", factors = FALSE, squeeze=FALSE) %>%
+  select(model=X..1, period = X..2, variable=X..4, tech=X..5, value) %>%
+  filter(variable %in% reportLCOEcomponents_REMIND_marg) %>%
+  filter(period %in% model.periods) %>%
+  filter(tech %in% names(dieter.tech.mapping)) %>%
+  filter(model == "REMIND")%>%
+  revalue.levels(tech = dieter.tech.mapping) %>%
+  mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))) %>%
+  revalue.levels(variable = dieter.variable.mapping) %>%
+  mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>%
+  select(period, tech, variable, value)%>% 
+  mutate(period = as.numeric(period))
+
 if (h2switch == "off"){
     cost_bkdw_avg <- cost_bkdw_avg %>%
       filter(!tech %in% c(remind.sector.coupling.mapping))
@@ -311,8 +341,8 @@ gridcost <- cost_bkdw_avg_DT %>%
   filter(tech == "VRE grid") %>%
   select(period,variable,value)
 
-# adjustment cost
-adjcost <- cost_bkdw_avg_DT %>%
+# REMIND marginal adjustment cost (note: only approx, since this is reported in DIETER and uses marginal capfac in dieter, so it is the same as DIETER adjustment cost)
+adjcost_marg <- cost_bkdw_marg_4RM %>%
   filter(variable == "Adjustment Cost") %>%
   filter(!tech == "VRE grid") %>%
   select(period,tech,cost=variable,value)
@@ -475,7 +505,7 @@ df.lcoe.avg.dieter <- cost_bkdw_avg_DT %>%
   filter(period %in% model.periods.till2100)
 
 barwidth = 1.5
-df.lcoe.teAgg.wAdj <- list(df.lcoe.teAgg,adjcost) %>%
+df.lcoe.teAgg.wAdj <- list(df.lcoe.teAgg, adjcost_marg) %>%
   reduce(full_join) %>% 
   filter(period %in% model.periods.till2100) %>% 
   mutate(cost = factor(cost, levels=rev(unique(c(dieter.variable.mapping,"Curtailment Cost")))))
@@ -509,10 +539,13 @@ df.lcoe.marg.dieter <- cost_bkdw_marg_DT %>%
 barwidth = 1.5
 
 p.techmargLCOE_compare <-ggplot() +
-  geom_col(data = df.lcoe.teAgg %>% filter(period > 2015 & period <2110), aes(x = period-barwidth/2-0.1, y = value, fill = cost), colour="black", position='stack', size = 1, width = barwidth) +
+  geom_col(data = df.lcoe.teAgg.wAdj %>% 
+             filter(period %in% model.periods.till2100, period > 2020), 
+           aes(x = period-barwidth/2-0.1, y = value, fill = cost), colour="black", position='stack', size = 1, width = barwidth) +
   geom_col(data = df.lcoe.marg.dieter %>% 
-             filter(!tech == "VRE grid") %>% filter(period > 2015 & period <2110), aes(x = period+barwidth/2+0.1, y = value, fill = variable), colour="black", position='stack', size = 1,
-           width = barwidth) +
+             filter(!tech == "VRE grid") %>% 
+             filter(period %in% model.periods.till2100, period > 2020), 
+           aes(x = period+barwidth/2+0.1, y = value, fill = variable), colour="black", position='stack', size = 1, width = barwidth) +
   scale_alpha_discrete(range = c(0.4,1)) +
   theme(axis.text=element_text(size=20), axis.title=element_text(size= 20, face="bold"),strip.text = element_text(size=25),plot.title = element_text(size = 30, face = "bold")) +
   xlab("year") + ylab(paste0("LCOE ($/MWh)")) +
@@ -633,9 +666,8 @@ if (save_png == 1){
 }
 
 ########################################################################################################
-swlatex(sw, paste0("\\subsection{Marginal and average system LCOE - DIETER vs. REMIND}"))
+swlatex(sw, paste0("\\subsection{Marginal and average DIETER system LCOE vs. marginal REMIND system LCOE}"))
 #DIETER's marginal and average system LCOE and price, compared with REMIND side-by-side
-
 
 prices_DT <- file.path(outputdir, dieter.files.report[iter_toplot]) %>% 
   read.gdx("report", squeeze=F) %>% 
@@ -695,7 +727,8 @@ genshare.dieter <- file.path(outputdir, dieter.files.report[iter_toplot]) %>%
   mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))) %>% 
   revalue.levels(variable = dieter.variable.mapping) %>%
   mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>% 
-  select(period, tech, variable, value)
+  select(period, tech, variable, value) %>% 
+  mutate(period = as.numeric(period))
 
 genshare1 <- genshare.dieter %>%
   select(period, tech, genshare=value) %>%
@@ -720,6 +753,8 @@ sysLCOE_avg_DT <- dieter.telcoe_avg %>%
 
 sysLCOE_avg_DT$type <- "Average"
 sysLCOE_avg_DT$model <- "DIETER"
+
+AdjCost <- sysLCOE_avg_DT
 
 sysLCOE_marg_RM <- df.lcoe.components %>%
 # sysLCOE_marg_RM <- df.lcoe.components.nocurt %>%

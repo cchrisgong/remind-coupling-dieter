@@ -345,6 +345,16 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     NULL
   )
   
+  reportLCOEcomponents_REMIND_avg = c(
+    "annualized adjustment cost - avg ($/MWh)", 
+    NULL
+  )
+  
+  reportLCOEcomponents_REMIND_marg = c(
+    "annualized adjustment cost - marg ($/MWh)", 
+    NULL
+  )
+  
   report_DT_genshare = c("genshares (%)")
   
   report_DT_prices = c(
