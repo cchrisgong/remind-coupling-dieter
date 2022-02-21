@@ -505,10 +505,12 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
 #   
 #   # Market value and shadow price ------------------------------------------------------
 #   
+  # this needs plotPrice.R
   source(file.path(dieter.scripts.folder, "plotConvergence.R"), local=TRUE)
 #   
 #   # LCOEs -------------------------------------------------------------------
 # 
+  # this needs plotMarketValuePrice.R
   source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
 
   # (Residual) load duration curves -----------------------------------------
