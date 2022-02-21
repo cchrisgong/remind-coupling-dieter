@@ -532,8 +532,13 @@ if(s80_bool eq 1,
 
 );
 
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+if ( (c_keep_iteration_gdxes eq 1) ,
 
-
+    put_utility "shell" /
+      "cp input.gdx fulldata_0.gdx";
+);
+$ENDIF.DTcoup
 
 ***Fade out LT correction terms, they should only be important in the first iterations and might interfere with ST corrections.
 ***p80_etaLT(trade) = p80_etaLT(trade)*0.5;
