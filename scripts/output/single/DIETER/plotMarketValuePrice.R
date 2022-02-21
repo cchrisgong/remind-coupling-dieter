@@ -61,9 +61,10 @@ for (i in 2:length(remind.files)){
     revalue.levels(tech = remind.tech.mapping) %>%
     filter(period %in% model.periods) %>% 
     dplyr::group_by(period,tech) %>%
-    dplyr::summarise( value = mean(value), .groups = "keep" ) %>%
+    dplyr::summarise(value = mean(value), .groups = "keep" ) %>%  
     dplyr::ungroup(period,tech) %>%
-    mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2) %>% # mrkup already divides by budget in the model
+    # negative sign here needed since a positive markup is equivalent to lower cost
+    mutate(value = - value * 1e12 / sm_TWa_2_MWh * 1.2) %>% # mrkup already divides by budget in the model
     mutate(iteration = i-1)
   
   # only report those tech for which there are generations
@@ -140,7 +141,7 @@ dieter.report.mv <- c("DIETER Market value with scarcity price ($/MWh)",
 out.dieter.report.mv <- NULL
 for (i in 1:length(dieter.files.report)){
   dieter.mv <- file.path(outputdir, dieter.files.report[i]) %>% 
-    read.gdx("report_tech", squeeze=F) %>% 
+    read.gdx("report_tech", squeeze = F) %>% 
     select(model=X..1, period = X..2, var=X..4, tech=X..5, value) %>%
     filter(var %in% dieter.report.mv) %>% 
     filter(period %in% model.periods) %>% 

@@ -89,14 +89,14 @@ swlatex(sw, paste0("\\subsection{Generation share difference over iterations}"))
 remind.gensh <- plot.remind.genshare %>% 
   select(period, tech, genshareRM = genshare, iteration)
 
-dieter.report.gensh <- out.dieter.report.gensh %>% 
+diff.gensh <- out.dieter.report.gensh %>% 
   select(period, tech, genshareDT = value, iteration) %>% 
   mutate(period = as.integer(period)) %>% 
   left_join(remind.gensh) %>% 
   mutate(delGenshare = genshareRM - genshareDT)
 
 p <-ggplot() +
-  geom_line(data = dieter.report.gensh, aes(x = iteration, y = delGenshare, color = tech), size = 1.2, alpha = 0.5) +
+  geom_line(data = diff.gensh, aes(x = iteration, y = delGenshare, color = tech), size = 1.2, alpha = 0.5) +
   theme(axis.text=element_text(size=20), axis.title=element_text(size= 20,face="bold")) +
   xlab("iteration") + ylab(paste0("Difference of generation share (REMIND-DIETER) (%)"))  +
   scale_color_manual(name = "tech", values = color.mapping) +
