@@ -6,7 +6,7 @@ cat("Plot market value, markup, capacity shadow price \n")
 # shadow price
 
 out.remind.peakdem.shadowprice <- NULL
-for (i in 2:length(remind.files)){
+for (i in 2:(length(remind.files))){
 
   remind.qm_budget <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("qm_budget", field="m", squeeze=F) %>% 
@@ -35,7 +35,7 @@ out.remind.mv <- NULL
 out.remind.genshare <-NULL
 out.remind.sys.mrkup <-NULL
 
-for (i in 2:length(remind.files)){
+for (i in 2:(length(remind.files))){
   
   # load generation share
   remind.genshare <- file.path(outputdir, remind.files[i]) %>% 
@@ -159,7 +159,13 @@ out.dieter.mv.wscar <- out.dieter.report.mv %>%
 out.dieter.mv.woscar <- out.dieter.report.mv %>% 
   filter(var == "DIETER Market value ($/MWh)")
 
-
+if (h2switch == "off"){
+  out.dieter.mv.wscar <- out.dieter.mv.wscar %>%
+    filter(!tech %in% c("Electrolyzers","Electricity"))
+  
+  out.dieter.mv.woscar <- out.dieter.mv.woscar %>%
+    filter(!tech %in% c("Electrolyzers","Electricity"))
+}
 # Plotting ----------------------------------------------------------------
 
 swlatex(sw,"\\onecolumn")
@@ -283,7 +289,8 @@ swlatex(sw, paste0("\\subsection{Market value model comparison - over iteration 
 for (yr in c(2020,2030,2040,2050)){
   
   plot.remind.mv <- out.remind.mv %>% 
-    mutate(var = "REMIND Market value ($/MWh)")
+    mutate(var = "REMIND market value ($/MWh)")%>% 
+    filter(!tech %in% remind.sector.coupling.mapping) 
   
   p <- ggplot()+
     geom_line(data = plot.remind.mv %>% filter(period == yr), aes(x = iteration, y = value, color = var), size = 1.2, alpha = 1.5) +
