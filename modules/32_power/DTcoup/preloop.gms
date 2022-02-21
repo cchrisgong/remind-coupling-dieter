@@ -42,11 +42,11 @@ if ( (c_keep_iteration_gdxes eq 1) ,
 
 ***CG: saves some lst files for diagnosis
     put_utility "shell" /
+      "cp DIETER_v1.0.2_1.lst DIETER_v1.0.2_1_i" sm32_iter:0:0 ".lst";
+    put_utility "shell" /
       "cp DIETER_v1.0.2_10.lst DIETER_v1.0.2_10_i" sm32_iter:0:0 ".lst";
     put_utility "shell" /
-      "cp DIETER_v1.0.2_11.lst DIETER_v1.0.2_11_i" sm32_iter:0:0 ".lst";
-    put_utility "shell" /
-      "cp DIETER_v1.0.2_12.lst DIETER_v1.0.2_12_i" sm32_iter:0:0 ".lst";
+      "cp DIETER_v1.0.2_15.lst DIETER_v1.0.2_15_i" sm32_iter:0:0 ".lst";
 
 );
 logfile.nr = 2;

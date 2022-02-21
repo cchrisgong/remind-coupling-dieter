@@ -243,9 +243,9 @@ if ( (c_keep_DTiteration_gdxes eq 1) ,
     put_utility "shell" /
       "cp DIETER_v1.0.2_1.lst DIETER_v1.0.2_1_i" sm32_iter:0:0 ".lst";
     put_utility "shell" /
-      "cp DIETER_v1.0.2_5.lst DIETER_v1.0.2_5_i" sm32_iter:0:0 ".lst";
-    put_utility "shell" /
       "cp DIETER_v1.0.2_10.lst DIETER_v1.0.2_10_i" sm32_iter:0:0 ".lst";
+    put_utility "shell" /
+      "cp DIETER_v1.0.2_15.lst DIETER_v1.0.2_15_i" sm32_iter:0:0 ".lst";
 
 );
 logfile.nr = 2;
