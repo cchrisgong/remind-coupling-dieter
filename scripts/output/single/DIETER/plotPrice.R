@@ -109,7 +109,7 @@ plot.seelprice <- out.SEPrice %>%
   filter(iteration %in% c(1,2,3,4,5,10,maxiter))
 
 p <- ggplot() + 
-  geom_line(data=plot.seelprice, aes(x=as.integer(period), y=value, color = variable), size = 2, alpha = 0.5) +
+  geom_line(data=plot.seelprice, aes(x=as.numeric(period), y=value, color = variable), size = 2, alpha = 0.5) +
   xlab("Time")+
   facet_wrap(~iteration, nrow = 3)
 

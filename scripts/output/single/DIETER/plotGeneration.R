@@ -136,7 +136,7 @@ for (i in 1:length(dieter.files)) {
     revalue.levels(all_te = dieter.tech.mapping) %>%
     mutate(all_te = factor(all_te, levels = rev(unique(dieter.tech.mapping))))  %>%
     mutate(iteration = i) %>%
-    mutate(period = as.integer(period))
+    mutate(period = as.numeric(period))
   
   out.dieter <- rbind(out.dieter, dieter.data)
 }
@@ -197,7 +197,7 @@ for (year_toplot in model.periods) {
   
   if (length(dieter.files) != 0) {
     plot.dieter.usableGen <-
-      out.dieter %>% filter(as.integer(period) == year_toplot,
+      out.dieter %>% filter(as.numeric(period) == year_toplot,
                             variable == "usable_generation")
     plot.dieter.gen.wCurt <-
       dieter.gen.wCurt %>% filter(period == year_toplot)
@@ -355,7 +355,7 @@ if (length(dieter.files) != 0) {
     geom_area(
       data = plot.dieter%>% filter(period <2110),
       aes(
-        x = as.integer(period),
+        x = as.numeric(period),
         y = value,
         fill = all_te
       ),
@@ -365,7 +365,7 @@ if (length(dieter.files) != 0) {
     geom_area(
       data = plot.dieter.gen.wCurt%>% filter(period <2110),
       aes(
-        x = as.integer(period),
+        x = as.numeric(period),
         y = value,
         color = all_te
       ),
@@ -376,7 +376,7 @@ if (length(dieter.files) != 0) {
     # geom_area(
     #   data = plot.dieter.consumption%>% filter(period <2110),
     #   aes(
-    #     x = as.integer(period),
+    #     x = as.numeric(period),
     #     y = -value,
     #     fill = all_te
     #   ),

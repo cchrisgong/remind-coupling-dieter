@@ -91,7 +91,7 @@ remind.gensh <- plot.remind.genshare %>%
 
 diff.gensh <- out.dieter.report.gensh %>% 
   select(period, tech, genshareDT = value, iteration) %>% 
-  mutate(period = as.integer(period)) %>% 
+  mutate(period = as.numeric(period)) %>% 
   left_join(remind.gensh) %>% 
   mutate(delGenshare = genshareRM - genshareDT)
 
@@ -181,7 +181,7 @@ diff.mv <- out.remind.mv %>%
   select(-value,-variable) %>% 
   filter(!rm.mv == 0) %>% 
   left_join(out.dieter.mv.woscar%>% 
-              mutate(period = as.integer(period)) %>% 
+              mutate(period = as.numeric(period)) %>% 
               select(period,iteration,tech,value)) %>% 
   filter(!tech %in% remind.sector.coupling.mapping) %>% 
   replace(is.na(.), 0) %>%

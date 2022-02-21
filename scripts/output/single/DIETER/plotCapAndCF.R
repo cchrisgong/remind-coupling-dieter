@@ -212,7 +212,7 @@ plot.dieter.capacity <- out.dieter.capacity %>%
 
 if (length(dieter.files) != 0) {
   p2<-ggplot() +
-    geom_area(data = plot.dieter.capacity%>% filter(period %in% model.periods.till2100), aes(x = as.integer(period), y = value, fill = tech), size = 1.2, alpha = 0.5) +
+    geom_area(data = plot.dieter.capacity%>% filter(period %in% model.periods.till2100), aes(x = as.numeric(period), y = value, fill = tech), size = 1.2, alpha = 0.5) +
     scale_fill_manual(name = "Technology", values = color.mapping.cap) +
     xlab("period") + ylab(paste0("capacity (GW)")) +
     ggtitle(paste0("DIETER Last iteration: ", reg))+
@@ -268,7 +268,7 @@ data.capfac <-
   mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping))))
   
 p <- ggplot() +
-  geom_line(data = data.capfac, aes(x = as.integer(period), y = value, color = variable, linetype = model), size = 1.2, alpha = 1) +
+  geom_line(data = data.capfac, aes(x = as.numeric(period), y = value, color = variable, linetype = model), size = 1.2, alpha = 1) +
   scale_color_manual(name = "variable", values = color.mapping.cf.detail) +
   theme(axis.text=element_text(size=10), axis.title=element_text(size=10,face="bold")) +
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=10)) +

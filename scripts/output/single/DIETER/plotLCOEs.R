@@ -361,7 +361,7 @@ dieter.telcoe_avg <- cost_bkdw_avg_DT %>%
 dieter.teloceprice_avg <- list(dieter.price, dieter.telcoe_avg) %>%
   reduce(full_join) %>%
   filter(period %in% model.periods.till2100) %>%
-  mutate(period = as.integer(period))%>%
+  mutate(period = as.numeric(period))%>%
   filter(!tech == "VRE grid")
 
 # 2020 has very high LCOE due to shadow price for biomass and OCGT, exclude from plotting
@@ -428,7 +428,7 @@ dieter.telcoe_marg <- cost_bkdw_marg_DT %>%
 dieter.teloceprice_marg <- list(dieter.price, dieter.telcoe_marg) %>%
   reduce(full_join) %>%
   filter(period %in% model.periods.till2100) %>%
-  mutate(period = as.integer(period))%>% 
+  mutate(period = as.numeric(period))%>% 
   filter(!tech == "VRE grid")
 
 # 2020 has very high LCOE due to shadow price for biomass and OCGT, exclude from plotting
@@ -449,7 +449,7 @@ if (save_png == 1){
 }
 
 plot.dieter.telcoe_marg <- dieter.telcoe_marg %>%
-  mutate(period = as.integer(period)) %>%
+  mutate(period = as.numeric(period)) %>%
   filter(period %in% model.periods.till2100)
 # 2020 has very high LCOE due to shadow price for biomass and OCGT, exclude from plotting
 p <- ggplot() +
@@ -501,7 +501,7 @@ swlatex(sw, paste0("\\subsection{Technology LCOE (DIETER average LCOE) - Compari
 df.lcoe.avg.dieter <- cost_bkdw_avg_DT %>% 
   filter(!variable == "Market Value") %>% 
   filter(!variable == "Shadow Price") %>% 
-  mutate(period = as.integer(period)) %>% 
+  mutate(period = as.numeric(period)) %>% 
   filter(period %in% model.periods.till2100)
 
 barwidth = 1.5
@@ -534,7 +534,7 @@ swlatex(sw, paste0("\\subsection{Technology LCOE (DIETER marginal LCOE) - Compar
 df.lcoe.marg.dieter <- cost_bkdw_marg_DT %>% 
   filter(!variable == "Market Value") %>% 
   filter(!variable == "Shadow Price") %>%
-  mutate(period = as.integer(period))
+  mutate(period = as.numeric(period))
 
 barwidth = 1.5
 
@@ -677,7 +677,7 @@ prices_DT <- file.path(outputdir, dieter.files.report[iter_toplot]) %>%
   filter(model == "DIETER")%>% 
   revalue.levels(variable = dieter.variable.mapping) %>%
   mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>% 
-  mutate(period = as.integer(period)) %>% 
+  mutate(period = as.numeric(period)) %>% 
   select(model,period, variable, value)
 
 shadow_prices_DT <- prices_DT %>% 
@@ -749,7 +749,7 @@ sysLCOE_avg_DT <- dieter.telcoe_avg %>%
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
   dplyr::ungroup(period,variable) %>% 
   mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>% 
-  mutate(period = as.integer(period)) 
+  mutate(period = as.numeric(period)) 
 
 sysLCOE_avg_DT$type <- "Average"
 sysLCOE_avg_DT$model <- "DIETER"
@@ -832,7 +832,7 @@ if (save_png == 1){
 #   dplyr::summarise( value = sum(value), .groups = "keep" ) %>%
 #   dplyr::ungroup(period,variable) %>%
 #   mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>% 
-#   mutate(period = as.integer(period))
+#   mutate(period = as.numeric(period))
 # 
 # sysLCOE_marg_DT$type <- "Marginal"
 # sysLCOE_marg_DT$model <- "DIETER"

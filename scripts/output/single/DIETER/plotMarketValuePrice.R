@@ -47,6 +47,7 @@ for (i in 2:(length(remind.files))){
     dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
     dplyr::ungroup(ttot, all_te) %>% 
     select(period=ttot, tech=all_te, genshare = value) %>% 
+    mutate(period = as.numeric(period)) %>% 
     mutate(iteration = i-1)
 
   ### markups  
@@ -58,6 +59,7 @@ for (i in 2:(length(remind.files))){
     filter(tech %in% names(remind.tech.mapping)) %>% 
     revalue.levels(tech = remind.tech.mapping) %>%
     filter(period %in% model.periods) %>% 
+    mutate(period = as.numeric(period)) %>% 
     dplyr::group_by(period,tech) %>%
     dplyr::summarise(value = mean(value), .groups = "keep" ) %>%  
     dplyr::ungroup(period,tech) %>%
@@ -87,6 +89,7 @@ for (i in 2:(length(remind.files))){
     select(period = tall, tech = all_te, value) %>% 
     revalue.levels(tech = remind.sector.coupling.mapping) %>%
     filter(period %in% model.periods) %>% 
+    mutate(period = as.numeric(period)) %>% 
     dplyr::group_by(period,tech) %>%
     dplyr::summarise( value = mean(value), .groups = "keep" ) %>%
     dplyr::ungroup(period,tech) %>%
@@ -101,6 +104,7 @@ for (i in 2:(length(remind.files))){
     select(period = ttot, tech = all_te, value) %>%
     revalue.levels(tech = remind.tech.mapping) %>%
     filter(period %in% model.periods) %>% 
+    mutate(period = as.numeric(period)) %>% 
     dplyr::group_by(period,tech) %>%
     dplyr::summarise( value = mean(value), .groups = "keep" ) %>%
     dplyr::ungroup(period,tech) %>%
@@ -121,6 +125,7 @@ for (i in 2:(length(remind.files))){
     revalue.levels(all_te = remind.tech.mapping) %>% 
     mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2) %>%
     select(period= ttot, tech=all_te, value) %>% 
+    mutate(period = as.numeric(period)) %>% 
     mutate(iteration = i-1)
   
     out.remind.mrkup <- rbind(out.remind.mrkup, remind.mrkup.non0gen, remind.flexadj)
@@ -143,6 +148,7 @@ for (i in 1:length(dieter.files.report)){
     select(model=X..1, period = X..2, var=X..4, tech=X..5, value) %>%
     filter(var %in% dieter.report.mv) %>% 
     filter(period %in% model.periods) %>% 
+    mutate(period = as.numeric(period)) %>% 
     revalue.levels(tech = dieter.tech.mapping) %>%
     mutate(iteration = i)
   
@@ -321,11 +327,11 @@ plot.dieter.mv.woscar<- out.dieter.mv.woscar %>%
 
 p <- ggplot()+
   geom_line(data = plot.remind.mv %>% filter(iteration == maxiter-1, period <2110), 
-            aes(x = as.integer(period) , y = value, color = var), size = 1.2, alpha = 1.5) +
+            aes(x = period , y = value, color = var), size = 1.2, alpha = 1.5) +
   geom_line(data = out.dieter.mv.wscar %>% filter(iteration == maxiter-1, period <2110),
-            aes(x = as.integer(period) , y = value, color = var), size = 1.2, alpha = 0.5) +
+            aes(x = period , y = value, color = var), size = 1.2, alpha = 0.5) +
   geom_line(data = plot.dieter.mv.woscar,
-            aes(x = as.integer(period) , y = value, color = var), size = 1.2, alpha = 0.5) +
+            aes(x = period , y = value, color = var), size = 1.2, alpha = 0.5) +
   theme(axis.text = element_text(size=15), axis.title=element_text(size=15, face="bold")) +
   xlab("Time") + ylab(paste0("Market Value ", "(USD/MWh)"))  +
   scale_color_manual(name = "var", values = color.mapping.mv.var)+
