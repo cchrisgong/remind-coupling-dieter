@@ -190,6 +190,13 @@ loop (t$tDT32(t),
         );
   );
 );
+
+p32_DIETER_techNonScarProd(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"bio","peak_gen_bin"));
+p32_DIETER_techNonScarProd(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"CCGT","peak_gen_bin"));
+p32_DIETER_techNonScarProd(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","peak_gen_bin"));
+p32_DIETER_techNonScarProd(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","peak_gen_bin"));
+p32_DIETER_techNonScarProd(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"OCGT_eff","peak_gen_bin"));
+
 *** CG: storage related coupling parameters
 * ** no curt_ratio averaging
 p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","curt_ratio"));

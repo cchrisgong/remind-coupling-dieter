@@ -43,11 +43,14 @@ parameters
     p32_shSeElDem(ttot,all_regi,all_te)	                "share of electricity demand in % [%] in last iter REMIND"
     p32_shSeElDemDIETER(ttot,all_regi,all_te)	          "share of electricity demand in % [%] in last iter DIETER - only as a share of dispatched tech generation"
     p32_realCapfacVRE(ttot,all_regi,all_te)             "post curtailment - real VRE capfac"
+    p32_realCapfac(ttot,all_regi,all_te)                "all tech's capfac, for VRE it is post curtailment - real VRE capfac"
     p32_theoCapfacVRE(ttot,all_regi,all_te)             "pre curtailment - theoretical VRE capfac"
 
     p32_marketValue(ttot,all_regi,all_te)               "market value seen by REMIND"
     p32_marketPrice(ttot,all_regi,all_te)               "market price seen by REMIND"
     p32_valueFactor(ttot,all_regi,all_te)               "value factor seen by REMIND"
+    p32_shadowPrice(ttot,all_regi,all_te)               "capacity shadow price seen by REMIND - not from peak demand constraint from DIETER (per energy unit)"
+    p32_capConShadowPrice(ttot,all_regi,all_te)         "capacity shadow price seen by REMIND from peak demand constraint from DIETER (per energy unit)"
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *   p32_capStor_DIET(tall,all_regi)       "storage cap from DIETER"
@@ -63,6 +66,7 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_DIETER_elecprice(ttot,all_regi)          "elec price in DIETER as read by REMIND"
     p32_DIETER_elecprice_wscar(ttot,all_regi)    "elec price in DIETER which accounts for scarcity price"
     p32_DIETER_shSeEl(ttot,all_regi,all_te)      "electricity generation share of technology from DIETER"
+    p32_DIETER_techNonScarProd(ttot,all_regi,all_te)      "whether a tech is NOT producing at scarcity price hour in DIETER"
 
     p32_prefac(ttot,all_regi,all_te)          "linear multiplier prefactor to ensure fast convergence and stability in looking for endogoneous solution current-iteration REMIND during coupling"
 

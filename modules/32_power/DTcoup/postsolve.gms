@@ -9,10 +9,15 @@
 * calculate post curtailment "real" VRE capfac
 p32_realCapfacVRE(t,regi,teVRE)$(vm_cap.l(t,regi,teVRE,"1"))
     = ( sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)) - v32_storloss.l(t,regi,teVRE) )
-    / vm_cap.l(t,regi,teVRE,"1") *100;
+    / vm_cap.l(t,regi,teVRE,"1") * 100;
+
+p32_realCapfac(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (teDTCoupSupp(te) OR CFcoupDemte32(te)))
+    = p32_realCapfacVRE(t,regi,te)$(teVRE(te)) +
+    vm_capFac.l(t,regi,te)$((teDTCoupSupp(te) OR CFcoupDemte32(te)) AND not teVRE(te)) * 100;
+
 * calculate pre curtailment "theoretical" VRE capfac
 p32_theoCapfacVRE(t,regi,teVRE)$(vm_cap.l(t,regi,teVRE,"1"))
-    = sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)) / vm_cap.l(t,regi,teVRE,"1") *100;
+    = sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)) / vm_cap.l(t,regi,teVRE,"1") * 100;
 
 *** calculation of SE electricity price (for internal use and reporting purposes), excluding 0 cases
 pm_SEPrice(t,regi,entySE)$(abs(qm_budget.m(t,regi)) gt sm_eps AND sameas(entySE,"seel")) =
@@ -37,6 +42,12 @@ p32_mrkup(t,regi,te) = vm_Mrkup.l(t,regi,te);
 *** CG: value factor in REMIND
 p32_valueFactor(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))
       = p32_marketValue(t,regi,te)$regDTCoup(regi)/(pm_SEPrice(t,regi,"seel")$regDTCoup(regi) + sm_eps);
+
+p32_shadowPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (p32_realCapfac(t,regi,te)))
+      = vm_cap.m(t,regi,te,"1") / (p32_realCapfac(t,regi,te) / 1e2);
+
+p32_capConShadowPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (abs(q32_peakDemandDT.m(t,regi,"seel")) gt sm_eps) AND (abs(qm_budget.m(t,regi)) gt sm_eps) AND (p32_realCapfac(t,regi,te)))
+      = q32_peakDemandDT.m(t,regi,"seel") / (qm_budget.m(t,regi)) / (p32_realCapfac(t,regi,te) / 1e2);
 
 p32_shSeElDisp(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) = v32_shSeElDisp.l(t,regi,te);
 p32_shSeEl(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) = v32_shSeEl.l(t,regi,te);
