@@ -7,7 +7,7 @@
 
 require(lucode2)
 # 
- outputdir = "./output/DIETERcoup_base_25_wAdjCost_noMarg_2022-02-20_13.12.12"
+# outputdir = "./output/DIETERcoup_base_25_wAdjCost_noMarg_2022-02-20_13.12.12"
 # setwd("/home/chengong/remind-coupling-dieter/")
 options(warn=-1)
 
