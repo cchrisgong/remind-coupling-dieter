@@ -40,6 +40,24 @@ mv <- file.path(outputdir, remind.files[iter_toplot]) %>%
   mutate(cost = "Market value") %>% 
   mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2)
 
+sp <- file.path(outputdir, remind.files[iter_toplot]) %>% 
+  read.gdx("p32_shadowPrice", squeeze=F)  %>% 
+  filter(all_regi == reg) %>%
+  filter(all_te %in% names(remind.tech.mapping)) %>% 
+  select(period = ttot, tech = all_te, value) %>%
+  filter(period %in% model.periods.till2100) %>% 
+  mutate(cost = "Market value") %>% 
+  mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2)
+
+sp.capcon <- file.path(outputdir, remind.files[iter_toplot]) %>% 
+  read.gdx("p32_capConShadowPrice", squeeze=F)  %>% 
+  filter(all_regi == reg) %>%
+  filter(all_te %in% names(remind.tech.mapping)) %>% 
+  select(period = ttot, tech = all_te, value) %>%
+  filter(period %in% model.periods.till2100) %>% 
+  mutate(cost = "Market value") %>% 
+  mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2)
+
 mrkup <- out.remind.mrkup %>% 
   mutate(cost = "Markup subsidy/tax") %>% 
   filter(period %in% model.periods.till2100) %>% 
@@ -66,7 +84,6 @@ flexadj <- out.remind.flexadj %>%
   filter(period %in% model.periods.till2100) %>% 
   mutate(cost = "flexibility subsidy") %>% 
   mutate(sector = "supply-side") 
-
 
 # aggregated production share per upscaled technology
 prod_aggShare_RM <- prod_share %>% 
@@ -157,9 +174,8 @@ df.lcoe.sys <- list(prod_share, df.lcoe.te.total) %>%
   mutate(sector = "supply-side") %>%  
   mutate(variable = "Total LCOE")
 
-### electrolysers LCOE
+### electrolyzers LCOE
 df.lcoe.elh2.components <- df.lcoe %>% 
-  # filter(output == "seh2",region == reg, tech == "elh2")
   filter(region == reg, 
          period %in% model.periods, type == "marginal",
          tech %in% plot.tech, sector %in% plot.sector,
@@ -167,7 +183,8 @@ df.lcoe.elh2.components <- df.lcoe %>%
   filter( ! cost %in% c("Total LCOE")) %>% 
   order.levels(tech = plot.tech, cost = names(cost.colors.te)) %>% 
   revalue.levels(tech = tech.label) %>% 
-  select(period, tech, cost, sector,value)
+  select(period, tech, cost, sector,value) %>% 
+  mutate(period = as.numeric(period))
 
 # filter for total LCOE
 df.lcoe.elh2.total <- df.lcoe %>% 
@@ -235,19 +252,19 @@ df.lcoe_minus_markup.te.plot <- df.lcoe_minus_markup.te %>%
   select(-value) %>% 
   dplyr::rename( value = totalLCOE )
 
-df.mvAgg.plot <- list(prod_shareType_RM, mv) %>% 
-  reduce(full_join) %>% 
-  mutate(period = as.numeric(period)) %>%
-  replace(is.na(.), 0) %>% 
-  mutate(value = share * value) %>% 
-  revalue.levels(tech = remind.tech.mapping) %>% 
-  dplyr::group_by(period,tech,cost) %>%
-  dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
-  dplyr::ungroup(period,tech,cost) %>% 
-  mutate(period = as.numeric(period)) %>% 
-  filter(period %in% model.periods.till2100)
+# df.spAgg <- list(prod_shareType_RM, sp) %>% 
+#   reduce(full_join) %>% 
+#   mutate(period = as.numeric(period)) %>%
+#   replace(is.na(.), 0) %>% 
+#   mutate(value = share * value) %>% 
+#   revalue.levels(tech = remind.tech.mapping) %>% 
+#   dplyr::group_by(period,tech,cost) %>%
+#   dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
+#   dplyr::ungroup(period,tech,cost) %>% 
+#   mutate(period = as.numeric(period)) %>% 
+#   filter(period %in% model.periods.till2100)
 
-df.telcoe_mv.plot <- list(df.lcoe_minus_markup.te.plot, df.mvAgg.plot) %>% 
+df.telcoe_mv.plot <- list(df.lcoe_minus_markup.te.plot, mv.agg) %>% 
   reduce(full_join) %>%
   filter(period %in% model.periods.till2100)
 
@@ -496,7 +513,7 @@ if (save_png == 1){
 
 
 ########################################################################################################
-swlatex(sw, paste0("\\subsection{Technology LCOE (DIETER average LCOE) - Comparison}"))
+swlatex(sw, paste0("\\subsection{Technology LCOE (DIETER average LCOE, REMIND marginal LCOE) - Comparison}"))
 
 df.lcoe.avg.dieter <- cost_bkdw_avg_DT %>% 
   filter(!variable == "Market Value") %>% 
@@ -530,7 +547,7 @@ if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_avg_compare.png"),  p.techLCOE_compare,  width = 25, height =15, units = "in", dpi = 120)
 }
 ########################################################################################################
-swlatex(sw, paste0("\\subsection{Technology LCOE (DIETER marginal LCOE) - Comparison}"))
+swlatex(sw, paste0("\\subsection{Technology LCOE (DIETER marginal LCOE, REMIND marginal LCOE) - Comparison}"))
 df.lcoe.marg.dieter <- cost_bkdw_marg_DT %>% 
   filter(!variable == "Market Value") %>% 
   filter(!variable == "Shadow Price") %>%
@@ -714,7 +731,6 @@ prices_lines <- list(elec_prices_DT_wShadPrice, elec_prices_DT, prices_RM) %>%
 prices_bar <- prices_DT %>% 
   filter(!variable == 'DIETER annual average electricity price') %>%
   mutate(value = -value)
-
 
 genshare.dieter <- file.path(outputdir, dieter.files.report[iter_toplot]) %>% 
   read.gdx("report_tech", squeeze=F) %>% 

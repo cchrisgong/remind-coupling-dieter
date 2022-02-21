@@ -452,6 +452,11 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     # 'DIETER shadow price due to capacity constraint from REMIND' = "DodgerBlue4"
   )
   
+  dieter.report.mv <- c("DIETER Market value with scarcity price ($/MWh)", 
+                        "DIETER Market value ($/MWh)",
+                        NULL)
+  
+  
   sm_TWa_2_MWh <- 8.76E9
 
   

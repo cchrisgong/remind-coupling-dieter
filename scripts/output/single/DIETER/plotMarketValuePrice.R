@@ -137,9 +137,6 @@ for (i in 2:(length(remind.files))){
 
 # DIETER --------------------------------------------------
 
-dieter.report.mv <- c("DIETER Market value with scarcity price ($/MWh)", 
-                      "DIETER Market value ($/MWh)",
-                      NULL)
 
 out.dieter.report.mv <- NULL
 for (i in 1:length(dieter.files.report)){
@@ -148,9 +145,9 @@ for (i in 1:length(dieter.files.report)){
     select(model=X..1, period = X..2, var=X..4, tech=X..5, value) %>%
     filter(var %in% dieter.report.mv) %>% 
     filter(period %in% model.periods) %>% 
-    mutate(period = as.numeric(period)) %>% 
+    # mutate(period = as.numeric(period)) %>% 
     revalue.levels(tech = dieter.tech.mapping) %>%
-    mutate(iteration = i)
+    mutate(iteration = i-1)
   
   out.dieter.report.mv <- rbind(out.dieter.report.mv, dieter.mv)
 }
@@ -215,7 +212,7 @@ swlatex(sw, paste0("\\section{Market value and markups}"))
 swlatex(sw, paste0("\\subsection{Markup time series (a few iterations)}"))
 
 p <- ggplot() + 
-  geom_line(data=out.remind.mrkup %>% filter(iteration %in% c(5,20,maxiter-1), period <2100), aes(x=period, y=value, color = tech)) +
+  geom_line(data=out.remind.mrkup %>% filter(iteration %in% c(5,20,maxiter-1), period <2100), aes(x=period, y=-value, color = tech)) +
   theme(legend.position = "bottom") +
   scale_color_manual(name = "Technology", values = color.mapping) +
   xlab("Time") + 
@@ -232,7 +229,7 @@ if (save_png == 1){
 swlatex(sw, paste0("\\subsection{Markup time series (last iteration)}"))
 
 p <- ggplot() + 
-  geom_line(data=out.remind.mrkup %>% filter(iteration %in% c(maxiter-1), period <2100), aes(x=period, y=value, color = tech)) +
+  geom_line(data=out.remind.mrkup %>% filter(iteration %in% c(maxiter-1), period <2100), aes(x=period, y=-value, color = tech)) +
   theme(legend.position = "bottom") +
   scale_color_manual(name = "Technology", values = color.mapping) +
   xlab("Time") + 
@@ -322,13 +319,21 @@ for (yr in c(2020,2030,2040,2050)){
 ########################################################################################################
 swlatex(sw, paste0("\\subsection{Market value model comparison - time series (last iteration)}"))
 
-plot.dieter.mv.woscar<- out.dieter.mv.woscar %>%
+plot.dieter.mv.woscar <- out.dieter.mv.woscar %>%
+  filter(iteration == maxiter-1, period <2110) %>% 
+  mutate(period = as.numeric(period)) 
+
+plot.dieter.mv.wscar <- out.dieter.mv.wscar %>%
+  filter(iteration == maxiter-1, period <2110) %>% 
+  mutate(period = as.numeric(period)) 
+
+plot.remind.mv <- plot.remind.mv %>% 
   filter(iteration == maxiter-1, period <2110)
 
 p <- ggplot()+
-  geom_line(data = plot.remind.mv %>% filter(iteration == maxiter-1, period <2110), 
+  geom_line(data = plot.remind.mv, 
             aes(x = period , y = value, color = var), size = 1.2, alpha = 1.5) +
-  geom_line(data = out.dieter.mv.wscar %>% filter(iteration == maxiter-1, period <2110),
+  geom_line(data = plot.dieter.mv.wscar,
             aes(x = period , y = value, color = var), size = 1.2, alpha = 0.5) +
   geom_line(data = plot.dieter.mv.woscar,
             aes(x = period , y = value, color = var), size = 1.2, alpha = 0.5) +

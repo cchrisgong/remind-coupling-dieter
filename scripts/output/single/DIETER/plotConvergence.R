@@ -87,11 +87,12 @@ if (save_png == 1){
 swlatex(sw, paste0("\\subsection{Generation share difference over iterations}"))
 
 remind.gensh <- plot.remind.genshare %>% 
+  mutate(period = as.factor(period)) %>% 
   select(period, tech, genshareRM = genshare, iteration)
 
 diff.gensh <- out.dieter.report.gensh %>% 
   select(period, tech, genshareDT = value, iteration) %>% 
-  mutate(period = as.numeric(period)) %>% 
+  # mutate(period = as.numeric(period)) %>% 
   left_join(remind.gensh) %>% 
   mutate(delGenshare = genshareRM - genshareDT)
 
