@@ -190,6 +190,7 @@ p32_shSeElDem(t,regi,te)$(regDTCoup(regi)) = sum(en2en(enty,enty2,te),vm_demSe.l
 
 p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seh2")) = vm_demSe.l(t,regi,"seel","seh2","elh2");
 
+*** CG: whether capcacity constraint for residual peak load is on
 $IFTHEN.nohardcap not %cm_DTcapcon% == "hard"
 s32_hardcap = 0;
 $ENDIF.nohardcap
@@ -197,6 +198,7 @@ $IFTHEN.hardcap %cm_DTcapcon% == "hard"
 s32_hardcap = 1;
 $ENDIF.hardcap
 
+*** CG: whether there is markup coupling
 s32_mrkupCoup = 0;
 $IFTHEN.mrkupCoup %cm_DTmrkup% == "on"
 s32_mrkupCoup = 1;
@@ -240,7 +242,7 @@ s32_scarPrice = 1;  !! shave off scarcity price
 $ENDIF.capcon
 *** initiating other parameters for averaging in loop
 
-
+*** CG: whether adjustment cost gets passed to DIETER
 $IFTHEN.ACcoup %cm_DTcoup_adjCost% == "on"
 s32_adjCost = 1;
 $ENDIF.ACcoup
@@ -248,6 +250,7 @@ $IFTHEN.noACcoup %cm_DTcoup_adjCost% == "off"
 s32_adjCost = 0;
 $ENDIF.noACcoup
 
+*** CG: whether VRE marginal grade is accounted for for investment cost in DIETER
 $IFTHEN.margVREcoup %cm_DTcoup_margVRE% == "on"
 s32_margVRE = 1;
 $ENDIF.margVREcoup
@@ -255,7 +258,13 @@ $IFTHEN.nomargVREcoup %cm_DTcoup_margVRE% == "off"
 s32_margVRE = 0;
 $ENDIF.nomargVREcoup
 
-
+*** CG: whether there is early retirement discount for investment cost in DIETER
+$IFTHEN.DTnoER %cm_DTnoER% == "on"
+s32_noER = 1;
+$ENDIF.DTnoER
+$IFTHEN.DTwER %cm_DTnoER% == "off"
+s32_noER = 0;
+$ENDIF.DTwER
 
 p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
 p32_cf_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) = pm_cf(t,regi,te);
@@ -271,7 +280,7 @@ $ENDIF.curt_avg
 * REMIND data for DIETER
 execute_unload "RMdata_4DT.gdx",tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,
     s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,!! switches: H2 switch, mode switch, dispatch iterational switches,
-    s32_windoff,s32_scarPrice, s32_adjCost, s32_margVRE, !! switches: offshore switch, scarcity price switch, adjustment cost coupling switch, marginal VRE investment cost coupling switch,
+    s32_windoff,s32_scarPrice, s32_adjCost, s32_margVRE, s32_noER,!! switches: offshore switch, scarcity price switch, adjustment cost coupling switch, marginal VRE investment cost coupling switch,
     COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,      !! tech sets: REMIND technology definition
     vm_cap, vm_deltaCap, vm_capDistr, v32_storloss,vm_capEarlyReti,vm_prodSe,vm_usableSeTe, !! quantities: capacity, generation, curtailment,
     p32_realCapfacVRE,vm_capFac,pm_cf,pm_dataren, !! CF

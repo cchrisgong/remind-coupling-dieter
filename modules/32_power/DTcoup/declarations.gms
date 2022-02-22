@@ -98,17 +98,18 @@ $ENDIF.DTcoup
 ;
 
 scalars
-    s32_storlink                              "how strong is the influence of two similar renewable energies on each other's storage requirements (1= complete, 4= rather small)" /3/
-    sm32_iter                                 "iteration.val"
-    sm32_DTiter                               "iteration when DIETER starts to be coupled"
-    s32_H2switch                              "a binary switch for flexible H2 coupling, to be exported to DIETER"
-    s32_DTcoupModeswitch                      "a binary switch for DIETER coupling mode - whether validation or dispatch, to be exported to DIETER"
-    s32_windoff                               "a binary switch for wind offshore to be exported to DIETER"
-    s32_scarPrice                             "scarcity price switch in DIETER, to be used with situation when there is no capacity constraint in REMIND due to peak residual hourly demand"
-    s32_hardcap                               "switch for capacity bound equation for coupling to DIETER"
-    s32_mrkupCoup                             "switch for receiving markups from DIETER"
-    s32_adjCost                               "switch for handing adjustment cost to DIETER"
-    s32_margVRE                               "switch for taking into account investment cost in DIETER for VRE should see the lowest grade potential capacity factor, not the average"
+    s32_storlink            "how strong is the influence of two similar renewable energies on each other's storage requirements (1= complete, 4= rather small)" /3/
+    sm32_iter               "iteration.val"
+    sm32_DTiter             "iteration when DIETER starts to be coupled"
+    s32_H2switch            "a binary switch for flexible H2 coupling, to be exported to DIETER"
+    s32_DTcoupModeswitch    "a binary switch for DIETER coupling mode - whether validation or dispatch, to be exported to DIETER"
+    s32_windoff             "a binary switch for wind offshore to be exported to DIETER"
+    s32_scarPrice           "scarcity price switch in DIETER, to be used with situation when there is no capacity constraint in REMIND due to peak residual hourly demand"
+    s32_hardcap             "switch for capacity bound equation for coupling to DIETER"
+    s32_mrkupCoup           "switch for receiving markups from DIETER"
+    s32_adjCost             "switch for handing adjustment cost to DIETER"
+    s32_margVRE             "switch for taking into account investment cost in DIETER for VRE should see the lowest grade potential capacity factor, not the average"
+    s32_noER                "switch for taking into account investment cost in DIETER for early retirement (it's only a rough estimate in DIETER)"
 ;
 
 positive variables
