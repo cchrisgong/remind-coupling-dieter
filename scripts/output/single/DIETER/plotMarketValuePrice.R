@@ -76,7 +76,7 @@ for (i in 2:(length(remind.files))){
   
   remind.sys.mrkup <- remind.mrkup %>% 
     left_join(remind.genshare) %>% 
-    mutate(value = value * genshare/1e2)  %>% 
+    mutate(value = value * genshare/1e2) %>% 
     dplyr::group_by(period) %>%
     dplyr::summarise( value = sum(value), .groups = "keep" ) %>%
     dplyr::ungroup(period) %>% 
@@ -323,7 +323,7 @@ plot.dieter.mv.woscar <- out.dieter.mv.woscar %>%
   filter(iteration == maxiter-1, period <2110) %>% 
   mutate(period = as.numeric(period)) 
 
-plot.dieter.mv.wscar <- out.dieter.mv.wscar %>%
+plot.dieter.mv.wscar <- out.dieter.mv.wscar %>% 
   filter(iteration == maxiter-1, period <2110) %>% 
   mutate(period = as.numeric(period)) 
 

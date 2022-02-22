@@ -7,6 +7,8 @@ remind.generation.withCurt <- NULL
 
 
 for (i in 1:length(remind.files)) {
+  
+  # usable energy for VRE (excluding curtailment)
   vmUsableSeTe <- file.path(outputdir, remind.files[i]) %>%
     read.gdx("vm_usableSeTe", factors = FALSE, squeeze = FALSE) %>%
     filter(ttot %in% model.periods) %>%
@@ -22,6 +24,7 @@ for (i in 1:length(remind.files)) {
     mutate(iteration = i-1)%>%
     mutate(all_te = factor(all_te, levels = rev(unique(remind.tech.mapping))))
   
+  # for non-VRE
   vmprodSe <- file.path(outputdir, remind.files[i]) %>%
     read.gdx("vm_prodSe", factors = FALSE, squeeze = FALSE) %>%
     filter(tall %in% model.periods) %>%
@@ -38,7 +41,6 @@ for (i in 1:length(remind.files)) {
     mutate(all_te = factor(all_te, levels = rev(unique(remind.tech.mapping))))
   
   out.remind <- rbind(out.remind, vmUsableSeTe,vmprodSe)
-  
   
   generation.withCurt<- file.path(outputdir, remind.files[i]) %>%
     read.gdx("vm_prodSe", factors = FALSE, squeeze = FALSE) %>%
@@ -135,7 +137,7 @@ for (i in 1:length(dieter.files)) {
     filter(all_te %in% names(dieter.tech.mapping)) %>%
     revalue.levels(all_te = dieter.tech.mapping) %>%
     mutate(all_te = factor(all_te, levels = rev(unique(dieter.tech.mapping))))  %>%
-    mutate(iteration = i) %>%
+    mutate(iteration = i-1) %>%
     mutate(period = as.numeric(period))
   
   out.dieter <- rbind(out.dieter, dieter.data)
@@ -333,13 +335,7 @@ p1 <- ggplot() +
     alpha = 0,
     linetype = "dotted"
   ) +
-  # geom_area(
-  #   data = plot.remind.consumption%>% filter(period <2110),
-  #   aes(x = period, y = -value, fill = all_te),
-  #   size = 1.2,
-  #   alpha = 0.5,
-  #   stat = "identity"
-  # ) +
+
   scale_fill_manual(name = "Technology", values = color.mapping) +
   scale_color_manual(name = "Technology", values = color.mapping_vre) +
   theme(axis.text = element_text(size = 10),
@@ -373,23 +369,12 @@ if (length(dieter.files) != 0) {
       alpha = 0,
       linetype = "dotted"
     ) +
-    # geom_area(
-    #   data = plot.dieter.consumption%>% filter(period <2110),
-    #   aes(
-    #     x = as.numeric(period),
-    #     y = -value,
-    #     fill = all_te
-    #   ),
-    #   size = 1.2,
-    #   alpha = 0.5,
-    #   stat = "identity"
-    # ) +
+
     scale_fill_manual(name = "Technology", values = color.mapping) +
     scale_color_manual(name = "Technology", values = color.mapping_vre) +
     theme(axis.text = element_text(size = 10),
           axis.title = element_text(size = 10, face = "bold")) +
     xlab("Year") + ylab(paste0(c("total_generation", "usable_generation", "total_consumption"), "(TWh)")) +
-    #coord_cartesian( xlim = c(min(out.dieter$period), max(out.dieter$period)))+
     ggtitle(paste0("DIETER: ", reg, " (last iteration)")) +
     theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
   
@@ -411,9 +396,8 @@ if (save_png == 1){
 
 #####################################################################################################
 if (length(dieter.files) != 0) {
-for (i in c(5,10,20,maxiter-1)){
-  
-    # i = 5
+for (i in c(5,10,20,27,maxiter-1)){
+   # i = 27
     plot.remind.snap <- out.remind %>% 
     filter(iteration == i) %>% 
     filter(period <2110)%>%
@@ -422,6 +406,7 @@ for (i in c(5,10,20,maxiter-1)){
     
     plot.dieter.snap <- out.dieter %>%
     filter(iteration == i) %>%
+    filter(variable == "usable_generation") %>%
     filter(period <2110)%>%
     mutate(period = as.numeric(period)) %>%
     dplyr::rename(dieter_gen = value)

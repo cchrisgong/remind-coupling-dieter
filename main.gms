@@ -85,7 +85,7 @@
 * 
 * Input data revision: 6.28
 * 
-* Last modification (input data): Mon Jan 31 16:27:44 2022
+* Last modification (input data): Tue Feb 22 17:21:46 2022
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -140,7 +140,7 @@ option profile = 0;
 
 
 ***---------------------    Run name    -----------------------------------------
-$setGlobal c_expname  xx_Calib_FE_med
+$setGlobal c_expname  DIETERcoup_base_25_disp
 
 ***------------------------------------------------------------------------------
 ***                           MODULES
@@ -173,13 +173,13 @@ $setGlobal trade  standard     !! def = standard
 ***---------------------    26_agCosts ------------------------------------------
 $setGlobal agCosts  costs               !! def = costs
 ***---------------------    29_CES_parameters    --------------------------------
-$setglobal CES_parameters  calibrate       !! def = load
+$setglobal CES_parameters  load       !! def = load
 ***---------------------    30_biomass    ---------------------------------------
 $setGlobal biomass  magpie_40 !! def = magpie_40
 ***---------------------    31_fossil    ----------------------------------------
 $setGlobal fossil  grades2poly        !! def = grades2poly
 ***---------------------    32_power    ----------------------------------------
-$setGlobal power  IntC               !! def = IntC
+$setGlobal power  DTcoup               !! def = IntC
 ***---------------------    33_cdr       ----------------------------------------
 $setGlobal CDR  DAC                   !! def = DAC
 ***---------------------    35_transport    -------------------------------------
@@ -199,7 +199,7 @@ $setglobal banking  off               !! def = off
 ***---------------------    45_carbonprice  -------------------------------------
 $setglobal carbonprice  none          !! def = none
 ***---------------------    47_regipol  -------------------------------------
-$setglobal regipol  regiCarbonPrice              !! def = none
+$setglobal regipol  none              !! def = none
 ***---------------------    50_damages    ---------------------------------------
 $setGlobal damages  off               !! def = off
 ***---------------------    51_internalizeDamages    ---------------------------------------
@@ -356,7 +356,7 @@ cm_deuCDRmax                 "switch to limit maximum annual CDR amount in Germa
 ***                           YOU ARE IN THE WARNING ZONE (DON'T DO CHANGES HERE)
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-cm_iteration_max       = 0;     !! def = 1
+cm_iteration_max       = 1;     !! def = 1
 c_solver_try_max       = 2;     !! def = 2
 c_keep_iteration_gdxes = 1;     !! def = 0
 c_keep_DTiteration_gdxes = 1;     !! def = 0
@@ -423,7 +423,7 @@ cm_rentdisccoal     = 0.4;       !! def 0.4
 cm_rentdisccoal2    = 0.6;       !! def 0.6
 cm_rentconvcoal     = 50;        !! def 50
 $setglobal c_regi_earlyreti_rate  GLO 0.09, EUR_regi 0.15      !! def = GLO 0.09, EUR_regi 0.15
-$setglobal c_tech_earlyreti_rate  off !! def = GLO.(biodiesel 0.14, bioeths 0.14), EUR_regi.(biodiesel 0.15, bioeths 0.15), USA_regi.pc 0.13, REF_regi.pc 0.13, CHA_regi.pc 0.13
+$setglobal c_tech_earlyreti_rate  GLO.pc 0.05, EUR_regi.pc 0.15 !! def = GLO.(biodiesel 0.14, bioeths 0.14), EUR_regi.(biodiesel 0.15, bioeths 0.15), USA_regi.pc 0.13, REF_regi.pc 0.13, CHA_regi.pc 0.13
 
 cm_so2tax_scen        = 1;         !! def =
 c_cint_scen           = 1;         !! def = 1
@@ -447,7 +447,7 @@ cm_expoLinear_yearStart  = 2050;   !! def = 2050
 c_budgetCO2from2020FFI   = 700;    !! def = 700 
 c_abtrdy                 = 2010;   !! def = 2010
 c_abtcst                 = 1;      !! def = 1
-c_budgetCO2from2020      = 1150;   !! def = 1150
+c_budgetCO2from2020      = 0;   !! def = 1150
 $setGlobal cm_regiExoPrice  off    !! def = off
 $setGlobal cm_regiCO2target  off   !! def = off
 cm_postTargetIncrease    = 2;      !! def = 2
@@ -470,8 +470,8 @@ $setGlobal cm_ESD_post2055Increase  2 !! def = 2
 $setGlobal cm_emiMktEScoop  off    !! def = off	
 $setGlobal cm_emiMktES2020price  30 !! def = 30
 $setGlobal cm_emiMktES2050	 off   !! def = off	
-$setGlobal cm_NucRegiPol	 off   !! def = off		
-$setGlobal cm_CoalRegiPol	 off   !! def = off		
+$setGlobal cm_NucRegiPol	 on   !! def = off		
+$setGlobal cm_CoalRegiPol	 on   !! def = off		
 $setGlobal cm_proNucRegiPol	 off   !! def = off
 $setGlobal cm_CCSRegiPol	 off   !! def = off	
 $setGlobal cm_implicitFE  off !! def = off
@@ -555,7 +555,7 @@ cm_TaxConvCheck = 0; !! def 0, which means tax convergence check is off
 
 $setGlobal cm_ARIADNE_FeShareBounds  off !! def = off
 
-$setGlobal cm_ariadne_VRECapFac_adj  on !! def = off
+$setGlobal cm_ariadne_VRECapFac_adj  off !! def = off
 
 $setGlobal c_VREPot_Factor  off !! def = off
 
@@ -576,23 +576,23 @@ cm_deuCDRmax = -1; !! def = -1
 ***                           YOU ARE IN THE WARNING ZONE (DON'T DO CHANGES HERE)
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *--------------------flags------------------------------------------------------------
-$setglobal cm_DTcoup  off         !! def = off
+$setglobal cm_DTcoup  on         !! def = off
 $setglobal cm_DTmode  dispatch         !! def = validation
 cm_DTcoup_eq = 0;         !! def = 0
 cm_DT_dispatch_i1 = 20;           !! def <- 20
 cm_DT_dispatch_i2 = 25;           !! def <- 24
-$setglobal cm_DTcapcon  none        !! def = none
+$setglobal cm_DTcapcon  hard        !! def = none
 $setglobal cm_DTmrkup  on           !! def = on
-$setglobal cm_DTnoER   on           !! def = off
-$setglobal cm_DTcoup_adjCost     off          # def <- off
-$setglobal cm_DTcoup_margVRE     off          # def <- off
+$setglobal cm_DTnoER  on           !! def = off
+$setglobal cm_DTcoup_adjCost  on
+$setglobal cm_DTcoup_margVRE  on
 
 $setglobal cm_DT_elh2_coup  off       !! def = off
 $setglobal cm_DT_CHP_coup  off       !! def = on
 $setglobal cm_DTcf_avg  on         !! def = on
 $setglobal cm_DTfc_avg  on         !! def = on
 $setglobal cm_DTcurt_avg  on       !! def = on
-$setglobal cm_DTdem_avg  on       !! def = on
+$setglobal cm_DTdem_avg  off       !! def = on
 cm_DTcoup_flatco2 = 25;           !!def <- 25 flat CO2 price for testing dieter coupling
 
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
@@ -615,15 +615,15 @@ $setGlobal cm_magicc_temperatureImpulseResponse  off           !! def = off
 
 $setGlobal cm_damage_DiceLike_specification  HowardNonCatastrophic   !! def = HowardNonCatastrophic
 
-$setglobal cm_CES_configuration  indu_fixed_shares-buil_simple-tran_complex-POP_pop_SSP2-GDP_gdp_SSP2-En_gdp_SSP2-Kap_debt_limit-FE_med-Reg_2b1450bc   !! this will be changed by start_run()
+$setglobal cm_CES_configuration  indu_fixed_shares-buil_simple-tran_complex-POP_pop_SSP2-GDP_gdp_SSP2-En_gdp_SSP2-Kap_debt_limit-bit-Reg_2b1450bc   !! this will be changed by start_run()
 
 $setglobal c_CES_calibration_new_structure  0     !!  def  =  0
 $setglobal c_CES_calibration_iterations  10     !!  def  =  10
 $setglobal c_CES_calibration_iteration            1     !!  def  =  1
 $setglobal c_CES_calibration_write_prices  0     !!  def  =  0
-$setglobal cm_CES_calibration_default_prices  0.01  !!  def  =  0.01
+$setglobal cm_CES_calibration_default_prices  0  !!  def  =  0.01
 $setglobal c_CES_calibration_industry_FE_target  0
-$setglobal cm_calibration_string  off    !!  def  =  off
+$setglobal cm_calibration_string  bit    !!  def  =  off
 
 $setglobal c_testOneRegi_region  DEU       !! def = EUR
 
@@ -632,7 +632,7 @@ $setglobal cm_techcosts  REG       !! def = REG
 $setglobal cm_regNetNegCO2  on       !! def = on
 
 *** INNOPATHS switches
-$setglobal cm_calibration_FE  medium      !! def = off
+$setglobal cm_calibration_FE  off      !! def = off
 
 $setglobal cm_INNOPATHS_eni  off!! def = off
 $setglobal cm_INNOPATHS_enb  off!! def = off
@@ -667,7 +667,7 @@ $setglobal cm_feShareLimits  off  !! def = off
 
 $setglobal cm_altTransBunkersShare  off      !! def = off
 
-$setglobal cm_wind_offshore  0      !! def = 0
+$setglobal cm_wind_offshore  1      !! def = 0
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ***                                  END OF WARNING ZONE
