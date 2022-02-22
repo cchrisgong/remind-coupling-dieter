@@ -36,7 +36,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     str_sort(numeric = TRUE)
   cat(paste0("DIETER report files: ", length(dieter.files.report), "\n"))
   
-  dieter.mif.annual.report <- paste0(outputdir, "/DIETER/DIETER/Dieter_Annual.mif")
+  dieter.mif.annual.report <- paste0(outputdir, "/DIETER/Dieter_Annual.mif")
   
   cat(paste0("DIETER mif report files: ", dieter.mif.annual.report, "\n"))
   
@@ -257,7 +257,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   color.mapping.mv.var <- c(
                          "DIETER Market value ($/MWh)" = "#005900",
-                         "DIETER Market value with scarcity price ($/MWh)" = "007f00",
+                         "DIETER Market value with scarcity price ($/MWh)" = "#007f00",
                          "REMIND market value ($/MWh)" = "#7F7FFF")
   
   linetype.map <- c('DIETER' = 'dotted', 'REMIND' = 'solid')
@@ -293,7 +293,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                       "flexibility subsidy" = "lightblue")
   
   cost.colors.barline <- c(cost.colors.sys.wh2,
-                      'DIETER annual average electricity price with scarcity price' = "indianred3",
+                      'DIETER annual average electricity price with scarcity price' = "#00b300",
                       'DIETER shadow price due to capacity constraint from REMIND' = "mediumpurple3",
                       "Total Markup" = "lightblue")
   
@@ -329,7 +329,9 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     # shadow price
     "shadow price of capacity bound from REMIND - marg ($/MWh)", 
     # market value
-    "DIETER Market value ($/MWh)"
+    "DIETER Market value ($/MWh)",
+    "DIETER Market value with scarcity price ($/MWh)",
+    NULL
   )
   
   reportLCOEcomponents_DT_avg = c(
@@ -342,6 +344,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     "grid cost ($/MWh)", 
     "shadow price of capacity bound from REMIND - avg ($/MWh)", 
     "DIETER Market value ($/MWh)",
+    "DIETER Market value with scarcity price ($/MWh)",
     NULL
   )
   
@@ -424,7 +427,8 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     "OMF Cost" = "darkcyan",
     "Investment Cost" = "deepskyblue2",
     "Fuel Cost" = "orange3",
-    "Market Value" = "violet",
+    # "Market Value" = "violet",
+    "Market Value with scarcity price" = "violet",
     "Adjustment Cost" = "orange2",
     "Shadow Price" = "lightblue")
   
@@ -439,7 +443,10 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     # ,
   )
   
-  label.price <- c("Market Value", "Shadow Price")
+  label.price <- c("Market Value", 
+                   "Shadow Price", 
+                   "Market Value with scarcity price",
+                   NULL)
   
   price.colors <- c(
     "REMIND Price" = "darkblue",
@@ -447,9 +454,11 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     "Total (marginal) LCOE - Flex Tax" = "darkorchid",
     # "DIETER annual average electricity price" = "darkcyan",
     "DIETER annual average electricity price with scarcity price" = "indianred",
-    "DIETER annual average electricity price with scarcity price + shadow price from REMIND" = "violet"
+    "DIETER annual average electricity price with scarcity price + shadow price from REMIND" = "violet",
+    "REMIND price + shadow price (historical and peak load bound on cap.)" = "#ff0090",
     # ,
     # 'DIETER shadow price due to capacity constraint from REMIND' = "DodgerBlue4"
+    NULL
   )
   
   dieter.report.mv <- c("DIETER Market value with scarcity price ($/MWh)", 
