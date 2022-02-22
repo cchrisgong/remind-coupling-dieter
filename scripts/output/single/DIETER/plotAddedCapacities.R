@@ -30,7 +30,7 @@ for (i in 1:length(dieter.files.report)){
 swlatex(sw,"\\onecolumn")
 swlatex(sw, paste0("\\section{Added capacities}"))
 
-for(iter.rep in c(1,2,3,4,5,10,25,27,maxiter-1)){
+for(iter.rep in c(1,2,3,4,5,10,25,maxiter-1)){
   swlatex(sw, paste0("\\subsection{Added capacities in iteration ", iter.rep, "}"))
   
   plot.dieter <- out.dieter.report %>%

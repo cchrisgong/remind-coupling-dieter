@@ -207,7 +207,7 @@ $IFTHEN.DTcoup_off %cm_DTcoup% == "off"
 ***---------------------------------------------------------------------------
 *** Operating reserve constraint
 ***---------------------------------------------------------------------------
-*** CG: only applying to non-coupled region for now in control (coupling off) to avoid distortion
+*** CG: only applying to non-coupled region for now to avoid distortion
 q32_operatingReserve(t,regi)$((t.val ge 2010) AND regNoDTCoup(regi))..
 ***1 is the chosen load coefficient
 	vm_usableSe(t,regi,"seel") * 1$( regNoDTCoup(regi) )
@@ -245,9 +245,9 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
 *** hard capacity constraint to peak residual load demand (excluding flexible load such as electrolysers)
 q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) AND (s32_hardcap ne 0) ) ..
-	sum(te$(DISPATCHte32(te) AND (p32_DIETER_techNonScarProd(t,regi,te) eq 1)), sum(rlf, vm_cap(t,regi,te,rlf)))
+	sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=g=
-  p32_peakDemand_relFac(t,regi) * 8760 * ( v32_usableSeDisp(t,regi,"seel")
+ p32_peakDemand_relFac(t,regi) * 8760 * ( v32_usableSeDisp(t,regi,"seel")
 $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
   - vm_demSe(t,regi,"seel","seh2","elh2")
 $ENDIF.elh2_coup
@@ -322,8 +322,7 @@ q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
 * with prefactor
 	(( p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te)
 *	 * ( 1 + ( v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
-   * ( 1 + 0.7 * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
-*  * ( 1 + p32_prefac(t,regi,te) * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
+   * ( 1 + p32_prefac(t,regi,te) * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
 	)
 	/ 1e12 * sm_TWa_2_MWh )
 	* 1$(cm_DTcoup_eq ne 0)

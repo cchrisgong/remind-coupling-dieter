@@ -11,7 +11,6 @@ p32_realCapfacVRE(t,regi,teVRE)$(vm_cap.l(t,regi,teVRE,"1"))
     = ( sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)) - v32_storloss.l(t,regi,teVRE) )
     / vm_cap.l(t,regi,teVRE,"1") * 100;
 
-* "real" VRE capfac for all technologies
 p32_realCapfac(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (teDTCoupSupp(te) OR CFcoupDemte32(te)))
     = p32_realCapfacVRE(t,regi,te)$(teVRE(te)) +
     vm_capFac.l(t,regi,te)$((teDTCoupSupp(te) OR CFcoupDemte32(te)) AND not teVRE(te)) * 100;
