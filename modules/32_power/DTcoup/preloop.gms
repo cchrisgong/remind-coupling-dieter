@@ -14,7 +14,6 @@ Execute_Loadpoint 'input' q32_balSe.m = q32_balSe.m;
 *** be revised later if coupling starts in the middle of the REMIND nash run)
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 ***  switch on second coupling switch when coupling actually begins
-cm_DTcoup_eq = 1;
 
 *** CG: fit a polynom through oscillating fuel price data for biomass, coal and gas
 execute "Rscript fuelPriceCubRegr.R";

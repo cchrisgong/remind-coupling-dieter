@@ -22,6 +22,13 @@ if ( cm_bioprod_histlim ge 0,
         vm_capFac.lo(t,regi_sensscen,teBioPebiolc)$(t.val ge 2030) = 0;
 );
 
+sm32_iter = iteration.val;
+display "current coupled iteration", sm32_iter;
+
+* turn on coupled equations at the designated iteration
+if ((sm32_iter ge sm32_DTiter),
+cm_DTcoup_eq = 1;
+);
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** CG: when coupling is on relax constraint for coupled region, coupled years and coupled tech
@@ -141,10 +148,11 @@ vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regNoDTCoup(regi)) = 0;
 vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi) AND not tDT32(t)) = 0;
 
 ***CG: bound shares between 0 and 100
-* v32_shStor.up(t,regi,teVRE) = 100;
-* v32_shStor.lo(t,regi,teVRE) = 0;
+v32_shStor.up(t,regi,teVRE) = 100;
+v32_shStor.lo(t,regi,teVRE) = 0;
 
-if ((s32_mrkupCoup eq 0),
+** for testing the case when markup coupling is removed
+if ((s32_mrkupCoup eq 0 AND (cm_DTcoup_eq eq 1)),
 vm_Mrkup.fx(t,regi,te) = 0;
 );
 

@@ -140,17 +140,14 @@ $ENDIF.elh2_coup
 *********** INTERFACE FOR READING IN DIETER RESULTS ****************
 *###################################################################
 *note: !!!! if the coupling is turned on after some iterations of uncoupled REMIND run,
-*           then don't use a last fulldata.gdx from a previous run as input
-*           (this will messed up the variables and equations that are turning on later)
+*           then don't use a last fulldata.gdx from a previous coupled run as input
+*           (this will messed up the variables and equations that are designed to be only turned on later)
 
 *** CG: start of DIETER coupling
-*sm32_DTiter = 15
-*if( ((ord(iteration) ge sm32_DTiter) and ( mod(ord(iteration), 3) eq 0)),
 
- if( ((ord(iteration) ge sm32_DTiter) and ( mod(ord(iteration), 1) eq 0)),
+* if( ((sm32_iter ge sm32_DTiter) and ( mod(sm32_iter, 3) eq 0)),
 
-sm32_iter = iteration.val;
-display "DIETER iteration", sm32_iter;
+ if( ((sm32_iter ge sm32_DTiter-1) and ( mod(sm32_iter, 1) eq 0)),
 
 *** CG: fuel cost to be passed on to DIETER
 *** sometimes for some reason the marginals of the PE equation is 0
@@ -291,7 +288,7 @@ $ENDIF.curt_avg
 
 * coupled demand side or supply side technologies:
 p32_cf_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (teDTCoupSupp(te) OR CFcoupDemte32(te))) = vm_capFac.l(t,regi,te);
-);
+
 
 * upscaling technologies
 p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND BIOte32(te) )
@@ -336,6 +333,7 @@ p32_MVupscaled(t,regi,te)$(NonPeakGASte32(te)) = p32_MVAvgW(t,regi,"CCGT");
 p32_MVupscaled(t,regi,te)$(NUCte32(te)) = p32_MVAvgW(t,regi,"nuc");
 p32_MVupscaled(t,regi,te)$(COALte32(te)) = p32_MVAvgW(t,regi,"coal");
 
+);
 $ENDIF.DTcoup
 
 $endif.calibrate
