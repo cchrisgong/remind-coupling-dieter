@@ -183,11 +183,8 @@ display p32_DIETER_elecprice;
 loop (t$tDT32(t),
   loop (regi$regDTCoup(regi),
     if (p32_DIETER_elecprice(t,regi) eq Eps,
-        put "one or more DIETER LP have 0 electricity price";
-* put "if it is in the first few iterations it is okay";
-* put "but please check that " ;
-* put "at the last iteration that this is not the case";
-        );
+Display "one or more DIETER LP have 0 electricity price, if this happens in the first few iters it is ok, but pls check that at last iter that this is not the case";        
+);
   );
 );
 
