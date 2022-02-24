@@ -816,7 +816,8 @@ sysLCOE_avg_DT <- dieter.telcoe_avg %>%
 sysLCOE_avg_DT$type <- "Average"
 sysLCOE_avg_DT$model <- "DIETER"
 
-AdjCost <- sysLCOE_avg_DT
+# AdjCost <- sysLCOE_avg_DT %>% 
+  
 
 sysLCOE_marg_RM <- df.lcoe.components %>%
 # sysLCOE_marg_RM <- df.lcoe.components.nocurt %>%
@@ -854,7 +855,7 @@ p.sysLCOE_compare <- ggplot() +
 swfigure(sw,print,p.sysLCOE_compare)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/avgLCOE_price_compare_line.png"),  p.sysLCOE_compare,  width = 17, height =7, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/sys_avgLCOE_price_compare_line.png"),  p.sysLCOE_compare,  width = 17, height =7, units = "in", dpi = 120)
 }
 
 
@@ -877,53 +878,56 @@ p.sysLCOEprice_DIETER <- ggplot() +
 swfigure(sw,print,p.sysLCOEprice_DIETER)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/avgLCOE_price_compare_bar.png"),  p.sysLCOEprice_DIETER,  width = 10, height =7, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/avgLCOE_price_bar.png"),  p.sysLCOEprice_DIETER,  width = 10, height =7, units = "in", dpi = 120)
 }
 
 
 
 # DIETER system marginal LCOE
-# 
-# sysLCOE_marg_DT <- dieter.telcoe_marg %>%
-#   select(period,tech,variable,value) %>%
-#   filter(!tech %in% c("VRE grid", "Electrolyzers")) %>%
-#   left_join(genshare1) %>%
-#   mutate(value = value * genshare) %>%
-#   select(period,tech,variable,value) %>%
-#   full_join(gridcost_p) %>%
-#   replace(is.na(.), 0) %>%
-#   dplyr::group_by(period,variable) %>%
-#   dplyr::summarise( value = sum(value), .groups = "keep" ) %>%
-#   dplyr::ungroup(period,variable) %>%
-#   mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>% 
-#   mutate(period = as.numeric(period))
-# 
-# sysLCOE_marg_DT$type <- "Marginal"
-# sysLCOE_marg_DT$model <- "DIETER"
-# 
-# sys_margLCOE_compare <- list(sysLCOE_marg_DT, sysLCOE_marg_RM) %>%
-#   reduce(full_join)
-# 
-# p <- ggplot() +
-#   geom_col( data = sys_margLCOE_compare,
-#             aes(period, value, fill=variable)) +
-#   geom_line(data = prices_lines %>% filter(period %in% model.periods.till2100) ,
-#             aes(period, value, color=variable), size=1.2) +
-#   facet_wrap(~model, scales = "free_y") +
-#   scale_y_continuous("LCOE and DIETER Price\n(USD2015/MWh)") +
-#   scale_x_continuous(breaks = seq(2010,2100,10)) +
-#   scale_color_manual(name = "variable", values = price.colors) +
-#   coord_cartesian(ylim = c(-5,115))+
-#   scale_fill_manual(values = cost.colors.sys) +
-#   theme_bw() +
-#   theme( axis.text.x = element_text(angle = 90),
-#          strip.background = element_blank())
-# 
-# swfigure(sw,print,p)
-# 
-# if (save_png == 1){
-#   ggsave(filename = paste0(outputdir, "/DIETER/margLCOE_price_compare_line.png"),  p,  width = 17, height =7, units = "in", dpi = 120)
-# }
+
+sysLCOE_marg_DT <- dieter.telcoe_marg %>%
+  select(period,tech,variable,value) %>%
+  filter(!tech %in% c("VRE grid", "Electrolyzers")) %>%
+  left_join(genshare1) %>%
+  mutate(value = value * genshare) %>%
+  select(period,tech,variable,value) %>%
+  full_join(gridcost_p) %>%
+  replace(is.na(.), 0) %>%
+  dplyr::group_by(period,variable) %>%
+  dplyr::summarise( value = sum(value), .groups = "keep" ) %>%
+  dplyr::ungroup(period,variable) %>%
+  mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>%
+  mutate(period = as.numeric(period))
+
+sysLCOE_marg_DT$type <- "Marginal"
+sysLCOE_marg_DT$model <- "DIETER"
+
+sys_margLCOE_compare <- list(sysLCOE_marg_DT, sysLCOE_marg_RM) %>%
+  reduce(full_join)
+
+ymax = max(prices_lines$value) * 1.1
+ymin = min(sys_avgLCOE_compare$value) * 1.1
+
+p <- ggplot() +
+  geom_col( data = sys_margLCOE_compare,
+            aes(period, value, fill=variable)) +
+  geom_line(data = prices_lines %>% filter(period %in% model.periods.till2100) ,
+            aes(period, value, color=variable), size=1.2) +
+  facet_wrap(~model, scales = "free_y") +
+  scale_y_continuous("LCOE and DIETER Price\n(USD2015/MWh)") +
+  scale_x_continuous(breaks = seq(2010,2100,10)) +
+  scale_color_manual(name = "variable", values = price.colors) +
+  coord_cartesian(ylim = c(-5,115))+
+  scale_fill_manual(values = cost.colors.sys) +
+  theme_bw() +
+  theme( axis.text.x = element_text(angle = 90),
+         strip.background = element_blank())
+
+swfigure(sw,print,p)
+
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/DIETER/sys_margLCOE_price_compare_line.png"),  p,  width = 17, height =7, units = "in", dpi = 120)
+}
 
 # 
 # DIETER_bar_marg <- list(prices_bar, sysLCOE_marg_DT) %>%
