@@ -57,7 +57,7 @@ for (i in 1:length(dieter.files.report)){
 # Plotting ----------------------------------------------------------------
 
 swlatex(sw,"\\onecolumn")
-swlatex(sw, paste0("\\section{Convergence variables - teration series}"))
+swlatex(sw, paste0("\\section{Convergence variables - iteration series}"))
 ##################################################################################################
 swlatex(sw, paste0("\\subsection{Generation share over iterations}"))
 
@@ -155,13 +155,14 @@ diff.price.avg.yr.movingavg <-diff.price.avg.yr %>%
   mutate( value = frollmean(value, 3, align = "center", fill = NA)) %>% 
   mutate(variable = "Moving average")
 
+ymax = max(diff.price.avg.yr$value) * 1.1
 
 p <-ggplot() +
   geom_line(data = diff.price.avg.yr, aes(x = iteration, y = value, color = variable), size = 1.2, alpha = 0.5) +
   geom_line(data = diff.price.avg.yr.movingavg, aes(x = iteration, y = value, color = variable), size = 2.5, alpha = 0.5) +
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
   xlab("iteration") + ylab(paste0("Difference of electricity price (REMIND-DIETER)\n($/MWh)"))  +
-  # coord_cartesian(ylim = c(-10,10)) +
+  coord_cartesian(ylim = c(0,ymax)) +
   theme(legend.position = "bottom") +
   guides(color = guide_legend(nrow = 2, byrow = TRUE))
 
@@ -176,7 +177,7 @@ diff.mv <- out.remind.mv %>%
   # filter(tech == dieter.supply.tech.mapping) 
   filter(period %in% model.periods) %>% 
   select(period,tech,iteration,rm.mv=value) %>% 
-  filter(iteration >1) %>% 
+  filter(iteration > 0) %>% 
   left_join(out.RMprice) %>% 
   filter(!value == 0) %>% 
   select(-value,-variable) %>% 
@@ -197,7 +198,6 @@ p <-ggplot() +
   theme(legend.title = element_text(size=25),legend.text = element_text(size=25)) +
   theme(legend.text = element_text(size=20), strip.text = element_text(size = 20)) +
   scale_color_manual(name = "tech", values = color.mapping)+
-  # coord_cartesian(ylim = c(-10,10)) +
   theme(legend.position = "bottom") +
   guides(color = guide_legend(nrow = 2, byrow = TRUE))+
   facet_wrap(~period, nrow = 3)
@@ -226,13 +226,14 @@ diff.mv.avg.yr.movingavg <-diff.mv.avg.yr %>%
   mutate( value = frollmean(value, 3, align = "center", fill = NA)) %>% 
   mutate(variable = "Moving average")
 
+ymax = max(diff.mv.avg.yr$value) * 1.1
 
 p <-ggplot() +
   geom_line(data = diff.mv.avg.yr, aes(x = iteration, y = value, color = variable), size = 1.2, alpha = 0.5) +
   geom_line(data = diff.mv.avg.yr.movingavg, aes(x = iteration, y = value, color = variable), size = 2.5, alpha = 0.5) +
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
   xlab("iteration") + ylab(paste0("Difference of time-averaged market value (REMIND-DIETER)\n($/MWh)"))  +
-  # coord_cartesian(ylim = c(-10,10)) +
+  coord_cartesian(ylim = c(0,ymax)) +
   theme(legend.position = "bottom") +
   guides(color = guide_legend(nrow = 2, byrow = TRUE))
 

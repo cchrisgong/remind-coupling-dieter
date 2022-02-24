@@ -9,6 +9,8 @@
 * *** calculate CF for dispatchable from solar pv share
 * pm_cf_linear(tDT32,regi,DISPATCHte32_2)$regDTCoup(regi) = pm_cf(tDT32,regi,DISPATCHte32_2)$regDTCoup(regi) * ( 1 - 0.5 * v32_shSeEl.l(tDT32,regi,"spv")$regDTCoup(regi) / 100);
 
+
+
 *** calculation of SE electricity price (useful for internal use and reporting purposes)
 pm_SEPrice(t,regi,entySE)$(abs (qm_budget.m(t,regi)) gt sm_eps AND sameas(entySE,"seel")) =
        q32_balSe.m(t,regi,entySE) / qm_budget.m(t,regi);
@@ -28,6 +30,8 @@ $ENDIF.dem_avg
 $ENDIF.DTcoup
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
+
+if ((cm_DTcoup_eq eq 1),
     Execute_Loadpoint 'results_DIETER' p32_report4RM;
     Execute_Loadpoint 'results_DIETER' p32_reportmk_4RM;
 *   Couple capacity factor from DIETER to REMIND
@@ -35,7 +39,6 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *   optional: averaging capfac over 2 iterations
 
 ***CG:noCF averaging
-*if( (ord(iteration) le sm32_DTiter) ,
     pm_cf(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
     			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac"));
     pm_cf(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi))
@@ -50,11 +53,10 @@ $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
     pm_cf(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi))
     			= sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","capfac"));
 $ENDIF.elh2_coup
-*);
 
 $IFTHEN.cf_avg %cm_DTcf_avg% == "on"
 *** CG: CF averaging, only after DT is coupled for one iteration (to avoid pm_cf being distorted by default high values)
-if( (ord(iteration) gt sm32_DTiter),
+if( (sm32_iter gt sm32_DTiter),
 pm_cf(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND COALte32(te) )
 			= 0.5 * ( p32_cf_last_iter(t,regi,te)$(COALte32(te))
       + sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","capfac")) );
@@ -183,8 +185,8 @@ display p32_DIETER_elecprice;
 loop (t$tDT32(t),
   loop (regi$regDTCoup(regi),
     if (p32_DIETER_elecprice(t,regi) eq Eps,
-Display "one or more DIETER LP have 0 electricity price, if this happens in the first few iters it is ok, but pls check that at last iter that this is not the case";        
-);
+      Display "one or more DIETER LP have 0 electricity price, if it is in the first few iterations it is okay, but please check that at the last iteration that this is not the case";
+        );
   );
 );
 
@@ -221,6 +223,8 @@ $ENDIF.WindOff
 * ror capfac is harmonized by setting capfac in DIETER to be the same as that in REMIND
 $ENDIF.curt_avg
 
+
+);
 
 $ENDIF.DTcoup
 

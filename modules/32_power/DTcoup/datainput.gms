@@ -94,7 +94,7 @@ p32_PriceDurSlope(regi,"elh2") = cm_PriceDurSlope_elh2;
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_minVF_spv = 0.1;
 sm32_iter = 0;  !!initialize REMIND iteration scalar
-sm32_DTiter = 1; !!the iteration of REMIND when DIETER is first coupled
+*sm32_DTiter = 1; !!the iteration of REMIND when DIETER is first coupled
 
 *** initiating parameters for first iteration of DIETER based on input.gdx
 ** loading variable directly without .l
@@ -178,6 +178,7 @@ $IFTHEN.Base_Cprice not %carbonprice% == "none"
 p32_CO2price4DT(t,regi)$((t.val gt 2020) AND regDTCoup(regi)) = pm_priceCO2(t,regi)/sm_C_2_CO2;
 $ENDIF.Base_Cprice
 
+sm32_DTiter = cm_DTcoup_sIter;
 
 * calculate fuel prices (only prices in REMIND in the form of marginals need to be divided by qm_budget.m)
 p32_fuelprice_curriter(t,regi,entyPe)$(regDTCoup(regi) AND (abs(q_balPe.m(t,regi,entyPe)) gt sm_eps) AND (abs(qm_budget.m(t,regi)) gt sm_eps)) =
