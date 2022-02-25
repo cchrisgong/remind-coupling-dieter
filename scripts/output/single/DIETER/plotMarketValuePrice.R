@@ -140,14 +140,15 @@ for (i in 2:(length(remind.files))){
 
 out.dieter.report.mv <- NULL
 for (i in 1:length(dieter.files.report)){
+  it <- as.numeric(str_extract(dieter.files[i], "[0-9]+"))
+  
   dieter.mv <- file.path(outputdir, dieter.files.report[i]) %>% 
     read.gdx("report_tech", squeeze = F) %>% 
     select(model=X..1, period = X..2, var=X..4, tech=X..5, value) %>%
     filter(var %in% dieter.report.mv) %>% 
     filter(period %in% model.periods) %>% 
-    # mutate(period = as.numeric(period)) %>% 
     revalue.levels(tech = dieter.tech.mapping) %>%
-    mutate(iteration = i-1)
+    mutate(iteration = it)
   
   out.dieter.report.mv <- rbind(out.dieter.report.mv, dieter.mv)
 }
@@ -162,10 +163,12 @@ out.dieter.mv.woscar <- out.dieter.report.mv %>%
 
 if (h2switch == "off"){
   out.dieter.mv.wscar <- out.dieter.mv.wscar %>%
-    filter(!tech %in% c("Electrolyzers","Electricity"))
+    filter(!tech %in% dieter.demand.tech.mapping)%>%
+    filter(!tech %in% names(dieter.demand.tech.mapping))
   
   out.dieter.mv.woscar <- out.dieter.mv.woscar %>%
-    filter(!tech %in% c("Electrolyzers","Electricity"))
+    filter(!tech %in% dieter.demand.tech.mapping)%>%
+    filter(!tech %in% names(dieter.demand.tech.mapping))
 }
 # Plotting ----------------------------------------------------------------
 

@@ -41,6 +41,7 @@ dieter.report.gensh <- c("genshares (%)",
 out.dieter.report.gensh <- NULL
 
 for (i in 1:length(dieter.files.report)){
+  it <- as.numeric(str_extract(dieter.files[i], "[0-9]+"))
   dieter.gensh <- file.path(outputdir, dieter.files.report[i]) %>% 
     read.gdx("report_tech", squeeze=F) %>% 
     select(model=X..1, period = X..2, var=X..4, tech=X..5, value) %>% 
@@ -48,7 +49,7 @@ for (i in 1:length(dieter.files.report)){
     filter(var %in% dieter.report.gensh) %>% 
     filter(period %in% model.periods) %>% 
     revalue.levels(tech = dieter.tech.mapping) %>%
-    mutate(iteration = i) 
+    mutate(iteration = it) 
   
   out.dieter.report.gensh <- rbind(out.dieter.report.gensh, dieter.gensh)
 }

@@ -5,7 +5,6 @@ cat("Plot generation \n")
 out.remind <- NULL
 remind.generation.withCurt <- NULL
 
-
 for (i in 1:length(remind.files)) {
   
   # usable energy for VRE (excluding curtailment)
@@ -123,6 +122,8 @@ remind.generation.withCurt <- generation.withCurt.vre
 
 out.dieter <- NULL
 for (i in 1:length(dieter.files)) {
+  it <- as.numeric(str_extract(dieter.files[i], "[0-9]+"))
+  
   dieter.data <- file.path(outputdir, dieter.files[i]) %>%
     read.gdx("p32_report4RM", factors = FALSE, squeeze = FALSE) %>%
     select(
@@ -137,7 +138,7 @@ for (i in 1:length(dieter.files)) {
     filter(all_te %in% names(dieter.tech.mapping)) %>%
     revalue.levels(all_te = dieter.tech.mapping) %>%
     mutate(all_te = factor(all_te, levels = rev(unique(dieter.tech.mapping))))  %>%
-    mutate(iteration = i-1) %>%
+    mutate(iteration = it) %>%
     mutate(period = as.numeric(period))
   
   out.dieter <- rbind(out.dieter, dieter.data)

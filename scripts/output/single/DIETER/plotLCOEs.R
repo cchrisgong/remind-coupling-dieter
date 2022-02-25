@@ -293,7 +293,7 @@ swlatex(sw, paste0("\\subsection{Technology LCOE - DIETER}"))
 
 #DIETER's marginal LCOE components for each technology, market value, shadow price, etc (marginal in the sense of one additional MWh added to the year by the marginal plant (corresponding to capfac of the highest level empty grade for VRE))
 
-cost_bkdw_avg <- file.path(outputdir, dieter.files.report[iter_toplot]) %>%
+cost_bkdw_avg <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
     read.gdx("report_tech", factors = FALSE, squeeze=FALSE) %>%
     select(model=X..1, period = X..2, variable=X..4, tech=X..5, value) %>%
     filter(variable %in% reportLCOEcomponents_DT_avg) %>%
@@ -308,7 +308,7 @@ cost_bkdw_avg <- file.path(outputdir, dieter.files.report[iter_toplot]) %>%
     mutate(period = as.numeric(period))
 
 # cost for REMIND but reported in DIETER (this should be properly reported in remind2/reportLCOE in the future)
-cost_bkdw_avg_4RM <- file.path(outputdir, dieter.files.report[iter_toplot]) %>%
+cost_bkdw_avg_4RM <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
   read.gdx("report_tech", factors = FALSE, squeeze=FALSE) %>%
   select(model=X..1, period = X..2, variable=X..4, tech=X..5, value) %>%
   filter(variable %in% reportLCOEcomponents_REMIND_avg) %>%
@@ -327,7 +327,7 @@ if (h2switch == "off"){
       filter(!tech %in% c(remind.sector.coupling.mapping))
   }
 
-cost_bkdw_marg <- file.path(outputdir, dieter.files.report[iter_toplot]) %>%
+cost_bkdw_marg <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
   read.gdx("report_tech", factors = FALSE, squeeze=FALSE) %>%
   select(model=X..1, period = X..2, variable=X..4, tech=X..5, value) %>%
   filter(variable %in% reportLCOEcomponents_DT_marg) %>%
@@ -348,7 +348,7 @@ if (h2switch == "off"){
 
 
 # cost for REMIND but reported in DIETER (this should be properly reported in remind2/reportLCOE in the future)
-cost_bkdw_marg_4RM <- file.path(outputdir, dieter.files.report[iter_toplot]) %>%
+cost_bkdw_marg_4RM <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
   read.gdx("report_tech", factors = FALSE, squeeze=FALSE) %>%
   select(model=X..1, period = X..2, variable=X..4, tech=X..5, value) %>%
   filter(variable %in% reportLCOEcomponents_REMIND_marg) %>%
@@ -715,7 +715,7 @@ if (save_png == 1){
 swlatex(sw, paste0("\\subsection{Marginal and average DIETER system LCOE vs. marginal REMIND system LCOE}"))
 #DIETER's marginal and average system LCOE and price, compared with REMIND side-by-side
 
-prices_DT <- file.path(outputdir, dieter.files.report[iter_toplot]) %>% 
+prices_DT <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>% 
   read.gdx("report", squeeze=F) %>% 
   select(model=X..1, period = X..2, variable=X..4, value) %>%
   filter(variable %in% report_DT_prices) %>% 
@@ -778,7 +778,7 @@ prices_bar <- prices_DT %>%
   filter(!variable == 'DIETER annual average electricity price') %>%
   mutate(value = -value)
 
-genshare.dieter <- file.path(outputdir, dieter.files.report[iter_toplot]) %>% 
+genshare.dieter <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>% 
   read.gdx("report_tech", squeeze=F) %>% 
   select(model=X..1, period = X..2, variable=X..4, tech=X..5, value) %>%
   filter(variable %in% report_DT_genshare) %>% 

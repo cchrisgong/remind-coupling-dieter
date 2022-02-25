@@ -506,25 +506,26 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   # Capacities --------------------------------------------------------------
 
   source(file.path(dieter.scripts.folder, "plotCapAndCF.R"), local=TRUE)
-# 
+#
 #   # Generation --------------------------------------------------------------
-# 
+#
   source(file.path(dieter.scripts.folder, "plotGeneration.R"), local=TRUE)
-# 
+#
 #   # Added capacities --------------------------------------------------------
-# 
+#
   source(file.path(dieter.scripts.folder, "plotAddedCapacities.R"), local=TRUE)
-# 
+#
 #   # Price: Secondary electricity --------------------------------------------
-#   
+#
   source(file.path(dieter.scripts.folder, "plotPrice.R"), local=TRUE)
-# 
+#
 #   # Price: primary energy and fuel --------------------------------------------
-#   
+#
   source(file.path(dieter.scripts.folder, "plotFuelPriceAndTrade.R"), local=TRUE)
 #   
 #   # Market value and shadow price ------------------------------------------------------
 #   
+  # this needs plotPrice.R 
   source(file.path(dieter.scripts.folder, "plotMarketValuePrice.R"), local=TRUE)
 #   
 #   # Market value and shadow price ------------------------------------------------------

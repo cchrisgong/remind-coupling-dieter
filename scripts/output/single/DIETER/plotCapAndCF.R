@@ -5,7 +5,6 @@ cat("Plot capacities \n")
 # Data preparation (REMIND) -----------------------------------------------
 out.remind.capacity <- NULL
 out.remind.demand <- NULL
-out.remind.capfac <- NULL
 
 if (length(dieter.files) != 0) {
   for (i in 2:(length(remind.files)-1)){
@@ -58,7 +57,21 @@ if (length(dieter.files) != 0) {
     data.capacity$model <- "REMIND"
     
     out.remind.capacity <- rbind(out.remind.capacity, data.capacity)
-    
+  }
+  
+  
+  }
+
+
+# Data preparation (DIETER) -----------------------------------------------
+out.dieter.data <- NULL
+out.remind.capfac <- NULL
+
+if (length(dieter.files) != 0) {
+  
+  for (i in 1:length(dieter.files)){
+    # i=22
+    it <- as.numeric(str_extract(dieter.files[i], "[0-9]+"))
     data.real.capfac <-
       file.path(outputdir, dieter.files.report[i]) %>% 
       read.gdx("report_tech", squeeze = F) %>% 
@@ -67,17 +80,11 @@ if (length(dieter.files) != 0) {
       revalue.levels(tech = dieter.tech.mapping) %>%
       mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping))))
     
-    data.real.capfac$iter <- i
+    data.real.capfac$iter <- it
     data.real.capfac$model <- "REMIND"
     
     out.remind.capfac <- rbind(out.remind.capfac, data.real.capfac)
-  }
-}
-
-# Data preparation (DIETER) -----------------------------------------------
-out.dieter.data <- NULL
-if (length(dieter.files) != 0) {
-  for (i in 1:length(dieter.files)){
+  
     dieter.data <- file.path(outputdir, dieter.files[i]) %>% 
       read.gdx("p32_report4RM", factor = FALSE, squeeze = FALSE) %>%
       select(period = X..1, tech = X..3, variable=X..4, value)  %>%
@@ -87,18 +94,21 @@ if (length(dieter.files) != 0) {
       revalue.levels(tech = dieter.tech.mapping) %>%
       mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))) 
     
-    dieter.data$iter <- i
+    dieter.data$iter <- it
     dieter.data$model <- "DIETER"
     
     out.dieter.data <- rbind(out.dieter.data, dieter.data)
-  }
+}
+  
+  
   out.dieter.capacity <- out.dieter.data %>%
     filter(variable == "capacity") %>%
     mutate(value = value/1e3) %>% #MW->GW
     select(period, tech, value, iter)
   
   out.dieter.capfac <- NULL
-  for (i in 1:(length(remind.files))){
+  for (i in 1:(length(dieter.files))){
+    it <- as.numeric(str_extract(dieter.files[i], "[0-9]+"))
     data.real.capfac <-
       file.path(outputdir, dieter.files.report[i]) %>% 
       read.gdx("report_tech", squeeze = F) %>% 
@@ -107,7 +117,7 @@ if (length(dieter.files) != 0) {
       revalue.levels(tech = dieter.tech.mapping) %>%
       mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping))))
     
-    data.real.capfac$iter <- i
+    data.real.capfac$iter <- it
     data.real.capfac$model <- "DIETER"
     out.dieter.capfac <- rbind(out.dieter.capfac,data.real.capfac)
   }
@@ -258,9 +268,8 @@ for(year_toplot in model.periods){
 ##################################################################################################
 swlatex(sw, "\\subsection{Capacity factors over time (last iteration): detailed}")
 
-
 data.capfac <-
-  file.path(outputdir, dieter.files.report[maxiter]) %>% 
+  file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>% 
   read.gdx("report_tech", squeeze = F) %>% 
   select(model = X..1, period = X..2, variable = X..4, tech = X..5, value) %>% 
   filter(variable %in% capfac.detail.report.dieter) %>% 
