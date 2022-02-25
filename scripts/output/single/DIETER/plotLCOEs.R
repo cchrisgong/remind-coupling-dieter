@@ -840,8 +840,7 @@ p.sysLCOE_compare <- ggplot() +
   geom_line(data = prices_RM.movingavg %>% filter(period %in% model.periods.till2100) ,
             aes(period, value, color=variable), alpha = 0.5, size=2) +  
   geom_line(data = prices_w2Shad_RM %>% filter(period %in% model.periods.till2100) ,
-            aes(period, value, color=variable), size=1.2) +   
-  # geom_polygon(data = prices_lines, aes(x = period, y = value), alpha = 0.3) +
+            aes(period, value, color=variable), size=1.2) + 
   facet_wrap(~model, scales = "free_y") +
   scale_y_continuous("LCOE and power price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +

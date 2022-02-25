@@ -551,7 +551,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
 
   # Close LaTeX PDF ---------------------------------------------------------
 
-  # swclose(sw)
+  swclose(sw)
 }
 
   
