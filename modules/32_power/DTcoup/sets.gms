@@ -27,6 +27,19 @@ el
 vregrid
 /
 
+techUpscaledNames32 "Upscaled names for checking convergence"
+/coal
+nuclear
+ccgt
+ocgt
+biomass
+windon
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+windoff
+$ENDIF.WindOff
+solar
+hydro/
+
 DIETERvarname32 "DIETER name" /capfac,ResPeakDem_relFac,value_factor,gen_share,
 market_value,market_price,elec_price, elec_price_wscar,curt_share,curt_ratio,
 dem_share,usable_generation,model_status,peak_gen_bin/

@@ -296,6 +296,14 @@ if (sm_globalBudget_dev gt 1.01 OR sm_globalBudget_dev lt 0.99,
   p80_messageShow("target") = YES;
 );
 
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+*** check DIETER coupling target, must be within 4% of target value
+if (sm_DTgenShDiff lt 0.05,
+  s80_bool = 0;
+  p80_messageShow("target") = YES;
+);
+$ENDIF.DTcoup
+
 
 display "####";
 display "Convergence diagnostics";
