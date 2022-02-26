@@ -8,7 +8,6 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   library(quitte)
   library(lusweave)
   library(magclass)
-  library(mip)
   library(grid)
   library(gridExtra)
   library(data.table)

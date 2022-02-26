@@ -17,19 +17,19 @@ df.mod <- read.quitte(mifpath)
 lcoe.file <- grep("REMIND_LCOE.*", list.files(outputdir, full.names = T), value=T)
 df.lcoe <- read.csv(lcoe.file, sep = ";", header = T, colClasses = c(rep("factor", 3), "numeric", rep("factor", 6), "numeric") )
   
-#system markup: out.remind.sys.mrkup
-#te markup: out.remind.mrkup
-#te flexadj: out.remind.flexadj
+# system markup: out.remind.sys.mrkup
+# te markup: out.remind.mrkup
+# te flexadj: out.remind.flexadj
 # generation share:　out.remind.genshare
 
-  # load generation share
+# load generation share
 prod_share <- file.path(outputdir, remind.files[iter_toplot]) %>% 
     read.gdx("v32_shSeElDisp", squeeze = F)  %>% 
     filter(all_regi == reg) %>% 
     filter(all_te %in% names(remind.tech.mapping)) %>% 
     select(period=ttot, tech=all_te, genshare = value) %>% 
     filter(period %in% model.periods.till2100) %>% 
-    mutate(genshare = genshare/1e2) %>% 
+    mutate(genshare = genshare / 1e2) %>% 
     mutate(period = as.numeric(period))
   
 mv <- file.path(outputdir, remind.files[iter_toplot]) %>% 
@@ -60,13 +60,13 @@ sp.capcon <- file.path(outputdir, remind.files[iter_toplot]) %>%
 mrkup <- out.remind.mrkup %>% 
   mutate(cost = "Markup subsidy/tax") %>% 
   filter(period %in% model.periods.till2100) %>% 
-  filter(iteration == iter_toplot -1) %>% 
+  filter(iteration == iter_toplot - 1) %>% 
   select(-iteration)
 
 mv.agg <- out.remind.mv %>% 
   mutate(cost = "Market value") %>% 
   filter(period %in% model.periods.till2100) %>% 
-  filter(iteration == iter_toplot -1) %>% 
+  filter(iteration == iter_toplot - 1) %>% 
   select(-iteration)
 
 if (h2switch == "off"){
@@ -119,7 +119,7 @@ df.lcoe.te.total <- df.lcoe %>%
   select(period, tech, value) %>% 
   dplyr::rename( totalLCOE = value )
 
-df.lcoe.grid<- df.lcoe %>% 
+df.lcoe.grid <- df.lcoe %>% 
   filter(region == reg,
          period %in% model.periods, type == "average",
          tech %in% map.price.tech$tech, sector %in% plot.sector) %>% 
@@ -373,7 +373,7 @@ gridcost <- cost_bkdw_avg_DT %>%
   filter(tech == "VRE grid") %>%
   select(period,variable,value)
 
-# REMIND marginal adjustment cost (note: only approx, since this is reported in DIETER and uses marginal capfac in dieter, so it is the same as DIETER adjustment cost)
+# REMIND marginal adjustment cost 
 adjcost_marg <- cost_bkdw_marg_4RM %>%
   filter(variable == "Adjustment Cost") %>%
   filter(!tech == "VRE grid") %>%
@@ -558,9 +558,9 @@ df.lcoe.teAgg.wAdj <- list(df.lcoe.teAgg, adjcost_marg) %>%
   mutate(cost = factor(cost, levels=rev(unique(c(dieter.variable.mapping,"Curtailment Cost")))))
   
 p.techLCOE_compare<-ggplot() +
-  geom_col(data = df.lcoe.teAgg.wAdj %>% filter(period >2020), aes(x = period-barwidth/2-0.1, y = value, fill = cost), colour="black", position='stack', size = 1, width = barwidth) +
+  geom_col(data = df.lcoe.teAgg.wAdj, aes(x = period-barwidth/2-0.1, y = value, fill = cost), colour="black", position='stack', size = 1, width = barwidth) +
   geom_col(data = df.lcoe.avg.dieter %>% 
-             filter(!tech == "VRE grid", period >2020), aes(x = period+barwidth/2+0.1, y = value, fill = variable), colour="black", position='stack', size = 1,
+             filter(!tech == "VRE grid"), aes(x = period+barwidth/2+0.1, y = value, fill = variable), colour="black", position='stack', size = 1,
            width = barwidth) +
   scale_alpha_discrete(range = c(0.4,1)) +
   theme(axis.text=element_text(size=20), axis.title=element_text(size= 20, face="bold"),strip.text = element_text(size=25),plot.title = element_text(size = 30, face = "bold")) +
@@ -787,9 +787,7 @@ genshare.dieter <- file.path(outputdir, dieter.files.report[length(dieter.files.
   filter(model == "DIETER")%>% 
   revalue.levels(tech = dieter.tech.mapping) %>%
   mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))) %>% 
-  revalue.levels(variable = dieter.variable.mapping) %>%
-  mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>% 
-  select(period, tech, variable, value) %>% 
+  select(period, tech, value) %>% 
   mutate(period = as.numeric(period))
 
 genshare1 <- genshare.dieter %>%
@@ -816,8 +814,18 @@ sysLCOE_avg_DT <- dieter.telcoe_avg %>%
 sysLCOE_avg_DT$type <- "Average"
 sysLCOE_avg_DT$model <- "DIETER"
 
-# AdjCost <- sysLCOE_avg_DT %>% 
-  
+# marginal adj cost for ths system in DIETER  
+adjcost.sys.marg <- adjcost_marg %>% 
+  select(period,tech,value) %>% 
+  left_join(prod_aggShare_RM) %>% 
+  filter(period %in% model.periods.till2100) %>% 
+  mutate(value = value * aggshare) %>% 
+  select(!aggshare) %>% 
+  dplyr::group_by(period) %>%
+  dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
+  dplyr::ungroup(period) %>% 
+  mutate(variable = "Adjustment Cost") %>% 
+  mutate(model = "REMIND")
 
 sysLCOE_marg_RM <- df.lcoe.components %>%
 # sysLCOE_marg_RM <- df.lcoe.components.nocurt %>%
@@ -826,7 +834,7 @@ sysLCOE_marg_RM <- df.lcoe.components %>%
   select(period, variable= cost, value) %>%
   mutate(model = "REMIND")
 
-sys_avgLCOE_compare <- list(sysLCOE_avg_DT, sysLCOE_marg_RM) %>% 
+sys_avgLCOE_compare <- list(sysLCOE_avg_DT, sysLCOE_marg_RM, adjcost.sys.marg) %>% 
   reduce(full_join)  
 
 ymax = max(prices_lines$value) * 1.1
@@ -839,8 +847,8 @@ p.sysLCOE_compare <- ggplot() +
             aes(period, value, color=variable), size=1.2) +  
   geom_line(data = prices_RM.movingavg %>% filter(period %in% model.periods.till2100) ,
             aes(period, value, color=variable), alpha = 0.5, size=2) +  
-  geom_line(data = prices_w2Shad_RM %>% filter(period %in% model.periods.till2100) ,
-            aes(period, value, color=variable), size=1.2) + 
+  # geom_line(data = prices_w2Shad_RM %>% filter(period %in% model.periods.till2100) ,
+            # aes(period, value, color=variable), size=1.2) + 
   facet_wrap(~model, scales = "free_y") +
   scale_y_continuous("LCOE and power price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
@@ -879,7 +887,6 @@ swfigure(sw,print,p.sysLCOEprice_DIETER)
 if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/avgLCOE_price_bar.png"),  p.sysLCOEprice_DIETER,  width = 10, height =7, units = "in", dpi = 120)
 }
-
 
 
 # DIETER system marginal LCOE
