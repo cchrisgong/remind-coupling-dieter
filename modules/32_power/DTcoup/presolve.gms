@@ -182,10 +182,11 @@ $ENDIF.elh2_coup
 
 
 display p32_DIETER_elecprice;
+** display a warning message for 0 power price in DIETER, later one can implement this condition as a convergence criteria
 loop (t$tDT32(t),
   loop (regi$regDTCoup(regi),
     if (p32_DIETER_elecprice(t,regi) eq Eps,
-      Display "one or more DIETER LP have 0 electricity price, if it is in the first few iterations it is okay, but please check that at the last iteration that this is not the case";
+Display "one or more DIETER LP have 0 electricity price, if this happens in the first few iters it is ok, but pls check that at last iter that this is not the case";
         );
   );
 );

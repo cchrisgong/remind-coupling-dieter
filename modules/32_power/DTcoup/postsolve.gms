@@ -38,7 +38,9 @@ p32_marketValue(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))
 p32_marketPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))
       = pm_SEPrice(t,regi,"seel")$regDTCoup(regi) - vm_flexAdj.l(t,regi,te)$regDTCoup(regi);
 
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_mrkup(t,regi,te) = vm_Mrkup.l(t,regi,te);
+$ENDIF.DTcoup
 
 *** CG: value factor in REMIND
 p32_valueFactor(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))
@@ -47,8 +49,10 @@ p32_valueFactor(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))
 p32_shadowPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (p32_realCapfac(t,regi,te)))
       = vm_cap.m(t,regi,te,"1") / (p32_realCapfac(t,regi,te) / 1e2);
 
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_capConShadowPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (abs(q32_peakDemandDT.m(t,regi,"seel")) gt sm_eps) AND (abs(qm_budget.m(t,regi)) gt sm_eps) AND (p32_realCapfac(t,regi,te)))
       = q32_peakDemandDT.m(t,regi,"seel") / (qm_budget.m(t,regi)) / (p32_realCapfac(t,regi,te) / 1e2);
+$ENDIF.DTcoup
 
 p32_shSeElDisp(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) = v32_shSeElDisp.l(t,regi,te);
 p32_shSeEl(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) = v32_shSeEl.l(t,regi,te);
@@ -259,8 +263,8 @@ if ( (c_keep_DTiteration_gdxes eq 1) ,
 );
 logfile.nr = 2;
 
+
 *** CG: after DIETER is executed, check if they all have optimal status
-$IFTHEN.DTcoup %cm_DTcoup% == "on"
     Execute_Loadpoint 'results_DIETER' p32_report4RM;
     Execute_Loadpoint 'results_DIETER' p32_reportmk_4RM;
 
@@ -275,8 +279,6 @@ loop (t$tDT32(t),
         );
   );
 );
-$ENDIF.DTcoup
-
 
 $IFTHEN.curt_avg %cm_DTcurt_avg% == "on"
 p32_DIETERCurtRatioLaIter(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"spv");
@@ -288,7 +290,6 @@ $ENDIF.curt_avg
 
 * coupled demand side or supply side technologies:
 p32_cf_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (teDTCoupSupp(te) OR CFcoupDemte32(te))) = vm_capFac.l(t,regi,te);
-
 
 * upscaling technologies
 p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND BIOte32(te) )
