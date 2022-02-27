@@ -213,19 +213,20 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                   "igcc" = "Coal", 
                   "hydro" = "Hydro", "ngcc" = "Gas","pc" = "Coal", "system" = "System", "elh2" = "Electrolyzers")
   
-    ## define color mapping
+## define color mapping (only for non-elh2 coupled version for now)
+  
   color.mapping <- c("CCGT" = "#999959", "Coal" = "#0c0c0c",
                       "Solar" = "#ffcc00", "Wind Onshore" = "#337fff", 
                       "Wind Offshore" = "#334cff", "Biomass" = "#005900",
                       "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
-                      "Electrolyzers" = "#48D1CC", "Electricity" = "#6495ED",
+                      # "Electrolyzers" = "#48D1CC", "Electricity" = "#6495ED",
                       NULL)
   
   color.mapping.cap <- c("CCGT" = "#999959", "Coal" = "#0c0c0c",
                      "Solar" = "#ffcc00", "Wind Onshore" = "#337fff", 
                      "Wind Offshore" = "#334cff", "Biomass" = "#005900",
                      "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
-                     "Electrolyzers" = "#48D1CC", 
+                     # "Electrolyzers" = "#48D1CC", 
                      NULL)
   
   color.mapping_vre <- c("Solar" = "#ffcc00", "Wind Onshore" = "#337fff", "Wind Offshore" = "#334cff")
@@ -265,7 +266,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   # cost components
   cost.colors <- c("Additional H2 t&d Cost" = "grey",
                       "FE Tax" = "darkseagreen",
-                      "Flex Tax" = "lightblue",
+                      "Markup" = "lightblue",
                       "CO2 Provision Cost" = "grey80",
                       "Curtailment Cost" = "darkblue",
                       "Storage Cost" = "darkorchid",
@@ -450,7 +451,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   price.colors <- c(
     "REMIND Price" = "darkblue",
     "REMIND price moving average" = "#8DB600",
-    "Total (marginal) LCOE - Flex Tax" = "darkorchid",
+    "Total (marginal) LCOE + Markup" = "darkorchid",
     # "DIETER annual average electricity price" = "darkcyan",
     "DIETER annual average electricity price with scarcity price" = "indianred",
     "DIETER annual average electricity price with scarcity price + shadow price from REMIND" = "violet",

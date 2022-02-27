@@ -223,7 +223,7 @@ p2<-ggplot() +
     scale_fill_manual(name = "Technology", values = color.mapping.cap) +
     xlab("period") + ylab(paste0("capacity (GW)")) +
     ggtitle(paste0("DIETER Last iteration: ", reg))+
-    theme(aspect.ratio = .5)+
+    # theme(aspect.ratio = .7)+
     theme( legend.title = element_blank()) 
 }
 

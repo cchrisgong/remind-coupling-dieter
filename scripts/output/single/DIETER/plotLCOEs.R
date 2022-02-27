@@ -14,6 +14,11 @@ mifpath <- grep("REMIND_generic.*.mif", list.files(outputdir, full.names = T), v
 dat.mod <- read.report(mifpath, as.list=FALSE)
 df.mod <- read.quitte(mifpath)
 
+#*** load LCOE data reported from remind2: note!!! the CAPEX calculated here does not
+#*account for the early retirement sunk cost whereas the CAPEX reported from my DIETER
+#*reporting does. This for example will cause a seemingly huge mismatch for te LCOE 
+#*when CO2 price is high and e.g. 90% of CCGT is suddenly retired at 2020
+#*
 lcoe.file <- grep("REMIND_LCOE.*", list.files(outputdir, full.names = T), value=T)
 df.lcoe <- read.csv(lcoe.file, sep = ";", header = T, colClasses = c(rep("factor", 3), "numeric", rep("factor", 6), "numeric") )
   
@@ -558,9 +563,11 @@ df.lcoe.teAgg.wAdj <- list(df.lcoe.teAgg, adjcost_marg) %>%
   mutate(cost = factor(cost, levels=rev(unique(c(dieter.variable.mapping,"Curtailment Cost")))))
   
 p.techLCOE_compare<-ggplot() +
-  geom_col(data = df.lcoe.teAgg.wAdj, aes(x = period-barwidth/2-0.1, y = value, fill = cost), colour="black", position='stack', size = 1, width = barwidth) +
+  geom_col(data = df.lcoe.teAgg.wAdj%>% 
+             filter(period > 2020)
+               , aes(x = period-barwidth/2-0.1, y = value, fill = cost), colour="black", position='stack', size = 1, width = barwidth) +
   geom_col(data = df.lcoe.avg.dieter %>% 
-             filter(!tech == "VRE grid"), aes(x = period+barwidth/2+0.1, y = value, fill = variable), colour="black", position='stack', size = 1,
+             filter(!tech == "VRE grid", period > 2020), aes(x = period+barwidth/2+0.1, y = value, fill = variable), colour="black", position='stack', size = 1,
            width = barwidth) +
   scale_alpha_discrete(range = c(0.4,1)) +
   theme(axis.text=element_text(size=20), axis.title=element_text(size= 20, face="bold"),strip.text = element_text(size=25),plot.title = element_text(size = 30, face = "bold")) +
@@ -609,28 +616,29 @@ if (save_png == 1){
 
 swlatex(sw, paste0("\\section{System LCOEs}"))
 ########################################################################################################
+
 swlatex(sw, paste0("\\subsection{System LCOE - REMIND - with curtailment cost}"))
 # REMIND marginal LCOE component for the entire power system (marginal in the sense of one additional added unit of generation in the system)
 
-df.lcoe.components <- list(df.lcoe.elh2.components,df.lcoe.sys.components,df.markup.sys) %>%
+df.lcoe.components <- list(df.lcoe.elh2.components,df.lcoe.sys.components,df.markup.sys, adjcost_marg) %>%
   reduce(full_join)
 
 df.lcoe.components.nocurt <- df.lcoe.components %>%
-  filter(!cost =="Curtailment Cost")
+  filter(!cost == "Curtailment Cost")
 
 df.lcoe_minus_tax.plot <- list(df.lcoe.components, df.markup.sys, flexadj) %>%
-  reduce(full_join)%>%
-  dplyr::group_by(period,tech,sector) %>%
+  reduce(full_join) %>% 
+  dplyr::group_by(period,tech,sector) %>% 
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>%
-  dplyr::ungroup(period,tech,sector) %>%
-  mutate(variable = "Total (marginal) LCOE - Flex Tax")
+  dplyr::ungroup(period,tech,sector) %>% 
+  mutate(variable = "Total (marginal) LCOE + Markup") 
 
 df.lcoe_minus_tax.plot.nocurt <- list(df.lcoe.components.nocurt, df.markup.sys, flexadj) %>%
-  reduce(full_join)%>%
+  reduce(full_join) %>%
   dplyr::group_by(period,tech,sector) %>%
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>%
   dplyr::ungroup(period,tech,sector) %>%
-  mutate(variable = "Total (marginal) LCOE - Flex Tax")
+  mutate(variable = "Total (marginal) LCOE + Markup") 
 
 df.pricelcoe_minus_tax.plot <- list(df.lcoe_minus_tax.plot,df.price) %>%
   reduce(full_join)
@@ -741,7 +749,7 @@ elec_prices_DT_wShadPrice <- elec_prices_DT %>%
 prices_RM <- df.pricelcoe_minus_tax.plot %>%
 # prices_RM <- df.pricelcoe_minus_tax.plot.nocurt %>%
   filter(tech == "System") %>%
-  filter(variable %in% c("REMIND Price", "Total (marginal) LCOE - Flex Tax")) %>%
+  filter(variable %in% c("REMIND Price", "Total (marginal) LCOE + Markup")) %>%
   select(period, variable, value)%>%
   mutate(model = "REMIND")
 
@@ -766,7 +774,7 @@ prices_RM.movingavg <- df.price0 %>%
   filter(tech == "System") %>% 
   select(period, variable, value)%>%
   mutate(model = "REMIND") %>% 
-  mutate(value = frollmean(value, 6, align = "center", fill = NA)) %>% 
+  mutate(value = frollmean(value, 3, align = "center", fill = NA)) %>% 
   mutate(variable = "REMIND price moving average")
 
 prices_lines <- list(elec_prices_DT_wShadPrice, elec_prices_DT, prices_RM) %>%
@@ -814,24 +822,25 @@ sysLCOE_avg_DT <- dieter.telcoe_avg %>%
 sysLCOE_avg_DT$type <- "Average"
 sysLCOE_avg_DT$model <- "DIETER"
 
-# marginal adj cost for ths system in DIETER  
-adjcost.sys.marg <- adjcost_marg %>% 
-  select(period,tech,value) %>% 
-  left_join(prod_aggShare_RM) %>% 
-  filter(period %in% model.periods.till2100) %>% 
-  mutate(value = value * aggshare) %>% 
-  select(!aggshare) %>% 
-  dplyr::group_by(period) %>%
-  dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
-  dplyr::ungroup(period) %>% 
-  mutate(variable = "Adjustment Cost") %>% 
-  mutate(model = "REMIND")
 
 sysLCOE_marg_RM <- df.lcoe.components %>%
 # sysLCOE_marg_RM <- df.lcoe.components.nocurt %>%
   filter(tech == "System") %>%
   select(!variable) %>%
   select(period, variable= cost, value) %>%
+  mutate(model = "REMIND")
+
+# marginal adj cost for the system in DIETER  
+adjcost.sys.marg <- adjcost_marg %>%
+  select(period,tech,value) %>%
+  left_join(prod_aggShare_RM) %>%
+  filter(period %in% model.periods.till2100) %>%
+  mutate(value = value * aggshare) %>%
+  select(!aggshare) %>%
+  dplyr::group_by(period) %>%
+  dplyr::summarise( value = sum(value), .groups = "keep" ) %>%
+  dplyr::ungroup(period) %>%
+  mutate(variable = "Adjustment Cost") %>%
   mutate(model = "REMIND")
 
 sys_avgLCOE_compare <- list(sysLCOE_avg_DT, sysLCOE_marg_RM, adjcost.sys.marg) %>% 
