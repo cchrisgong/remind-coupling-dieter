@@ -41,8 +41,9 @@ if ((cm_DTcoup_eq eq 1),
 				vm_capFac.up(t,regi,te)=INF;  !! must not be capped by one, as some vm_capFac are larger than 1 due to scaling
 * these cause infes in DTmode = none...
 $IFTHEN.hasbound not %cm_DTmode% == "none"
-        vm_capFac.up(t,regi,te)$(DISPATCHte32(te)) = 0.8; !! but set CF of non nuclear dispatchables to be less than 80% (this is consistent with eqn con2c_maxprodannual_conv in DIETER)
-        vm_capFac.up(t,regi,te)$(NUCte32(te) AND t.val gt 2030) = 0.85; !! but set CF of nuc to be less than 85% (this is consistent with eqn con2c_maxprodannual_conv_nuc in DIETER)
+* vm_capFac.up(t,regi,te)$(DISPATCHte32(te)) = 0.8; !! set CF of non nuclear dispatchables to be less than 80% (this is consistent with eqn con2c_maxprodannual_conv in DIETER)
+* vm_capFac.up(t,regi,"tnrs")$(tDT32(t) AND (t.val gt 2030)) = 0.85; !! set CF of nuc to be less than 85% (this is consistent with eqn con2c_maxprodannual_conv_nuc in DIETER)
+* vm_capFac.up(t,regi,"tnrs")$(tDT32(t) AND (t.val le 2030)) = 0.9; !! otherwise might cause infes
 $ENDIF.hasbound
 				);
 			);
@@ -135,6 +136,7 @@ $endif.chpoff
 vm_capFac.fx(t,regi,"csp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 vm_capFac.fx(t,regi,"dot")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 vm_capFac.fx(t,regi,"geohdr")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
+*vm_capFac.fx(t,regi,"fnrs")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 
 $IFTHEN.WindOff %cm_wind_offshore% == "0"
 vm_capFac.fx(t,regi,"windoff")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
