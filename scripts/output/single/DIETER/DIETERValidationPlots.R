@@ -235,7 +235,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                       "peak hourly residual demand" = "#0c0c0c", NULL)
   
   color.mapping.seel.line <- c(color.mapping,
-                               "REMIND secondary electricity price ($/MWh) " = "#FFA500", 
+                               "REMIND secondary electricity price ($/MWh)" = "#FFA500", 
                                NULL)
   
   color.mapping.cf <-c("REMIND real CapFac (%)" =  "#191999",
@@ -369,8 +369,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     NULL
   )
   
-  dieter.tech.mapping <- c(lig = "Coal",
-                           coal = "Coal",
+  dieter.tech.mapping <- c(coal = "Coal",
                            nuc = "Nuclear",
                            OCGT_eff = "OCGT",
                            CCGT = "CCGT",
@@ -385,12 +384,14 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                            NULL)
   
   running_lcoe_components <- c(
+    "Grid Cost",
+    "Adjustment Cost",
     "CO2 Tax Cost",
     "OMV Cost",
     "Fuel Cost")
   
   conventionals <- c("Coal", "OCGT", "CCGT", "Biomass")
-  renewables <- c("Solar", "Wind On", "Wind Off")
+  renewables <- c("Solar", "Wind Onshore", "Wind Offshore")
   
   
   # label mapping for plots
@@ -451,7 +452,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   price.colors <- c(
     "REMIND Price" = "darkblue",
     "REMIND price moving average" = "#8DB600",
-    "Total (marginal) LCOE + Markup" = "darkorchid",
+    # "Total (marginal) LCOE + Markup" = "darkorchid",
     # "DIETER annual average electricity price" = "darkcyan",
     "DIETER annual average electricity price with scarcity price" = "indianred",
     "DIETER annual average electricity price with scarcity price + shadow price from REMIND" = "violet",

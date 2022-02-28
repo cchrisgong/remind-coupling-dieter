@@ -4,7 +4,7 @@ cat("Plot capacities \n")
 out.remind.capacity <- NULL
 out.remind.demand <- NULL
 if (length(dieter.files) != 0) {
-  for (i in 2:(length(remind.files)-1)){
+  for (i in 2:(length(remind.files))){
     
     peak.demand.relfac <- file.path(outputdir, remind.files[i]) %>%  
       read.gdx("p32_peakDemand_relFac", factor = FALSE) %>% 
@@ -29,7 +29,8 @@ if (length(dieter.files) != 0) {
       replace(is.na(.), 0) %>% 
       mutate(value = (value - h2dem) * resfrac * 8760 * 1e3) 
     
-    remind.data$iter <- i-1
+    it <- as.numeric(str_extract(remind.files[i], "[0-9]+"))
+    remind.data$iter <- it
     remind.data$model <- "REMIND"
     out.remind.demand <- rbind(out.remind.demand, remind.data)
   }
@@ -50,7 +51,8 @@ if (length(dieter.files) != 0) {
       dplyr::ungroup(period, tech, rlf) %>% 
       mutate(tech = factor(tech, levels=rev(unique(remind.tech.mapping.narrow))))
     
-    data.capacity$iter <- i
+    it <- as.numeric(str_extract(remind.files[i], "[0-9]+"))
+    data.capacity$iter <- it
     data.capacity$model <- "REMIND"
     
     out.remind.capacity <- rbind(out.remind.capacity, data.capacity)

@@ -233,14 +233,15 @@ p <-ggplot() +
   geom_line(data = diff.mv.avg.yr, aes(x = iteration, y = value, color = variable), size = 1.2, alpha = 0.5) +
   geom_line(data = diff.mv.avg.yr.movingavg, aes(x = iteration, y = value, color = variable), size = 2.5, alpha = 0.5) +
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
-  xlab("iteration") + ylab(paste0("Difference of time-averaged market value (REMIND-DIETER)\n($/MWh)"))  +
+  xlab("iteration") + ylab("< MV_R - MV_D > {t =<2100, tech}") +
+                           # "Diff of tech- and time-averaged MV (REMIND-DIETER)\n($/MWh)")  +
   coord_cartesian(ylim = c(0,ymax)) +
   theme(legend.position = "bottom") +
   guides(color = guide_legend(nrow = 2, byrow = TRUE))
 
 swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/Diff_t_avg_MV_convergence_iteration.png"),  p,  width = 6, height =5, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/Diff_t_avg_MV_convergence_iteration.png"),  p,  width = 6, height =5.5, units = "in", dpi = 120)
 }
 
 

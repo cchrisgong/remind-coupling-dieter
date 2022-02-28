@@ -2,7 +2,6 @@
 
 cat("Plot Seel price \n")
 
-out.remind.seel <- NULL
 out.SEPrice <- NULL
 out.RMprice <- NULL
 out.DTprice <- NULL
@@ -17,7 +16,7 @@ for (i in 2:length(remind.files)){
     mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2)  %>%  # (10^12 2005$)/TWa -> 2015$/MWh
     select(period=ttot, value) %>%
     mutate(iteration = i-1) %>%
-    mutate(variable = "REMIND secondary electricity price ($/MWh)")
+    mutate(variable= "REMIND secondary electricity price ($/MWh)")
   
   DTprice  <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx( "p32_DIETER_elecprice", squeeze = FALSE) %>% 
@@ -40,8 +39,9 @@ for (i in 2:length(remind.files)){
   out.totalDem <- rbind(out.totalDem, p32_seelTotDem)
 }
 
-RM.SEprice <- out.SEPrice %>% 
-  filter(variable == "REMIND secondary electricity price ($/MWh)")
+RM.SEprice <- out.RMprice %>% 
+  select(period, value,iteration,tech=variable) %>% 
+  filter(period %in% model.periods)
 
 # Plotting ----------------------------------------------------------------
 
@@ -68,7 +68,7 @@ swlatex(sw, paste0("\\subsection{Secondary electricity (seel) price + total dema
 secAxisScale = 0.4
 
 p<-ggplot() +
-  geom_line(data = RM.SEprice, aes(x = iteration, y = value, color = variable), size = 1.2, alpha = 0.5) +
+  geom_line(data = out.RMprice, aes(x = iteration, y = value, color = variable), size = 1.2, alpha = 0.5) +
   geom_line(data = out.totalDem, aes(x = iteration, y = value *secAxisScale , color =variable), size = 1.2, alpha = 0.5) +
   theme(axis.text=element_text(), axis.title=element_text()) +
   scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0("total demand ", "(TWh)")))+
@@ -89,18 +89,19 @@ swlatex(sw, paste0("\\subsection{Secondary electricity (seel) price + capacity f
 secAxisScale = 1
 
 p<-ggplot() +
-  geom_line(data = RM.SEprice%>% mutate(tech=variable), aes(x = iteration, y = value, color = tech), size = 2, alpha = 0.5) +
+  geom_line(data = RM.SEprice, aes(x = iteration, y = value, color = tech), linetype = "dashed", size = 1, alpha = 0.8) +
   geom_line(data = out.remind.capfac, aes(x = iter, y = value, color = tech), size = 1, alpha = 0.5) +
   scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0("CF", "(%)")))+
  scale_color_manual(name = "tech", values = color.mapping.seel.line) +
   theme(axis.text=element_text(), axis.title=element_text()) +
-  xlab("iteration") + ylab(paste0("REMIND secondary electricity price ", "[$/MWh]"))  +
+  xlab("iteration") + ylab(paste0("REMIND secondary electricity price ($/MWh) with capacity factors"))  +
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=15)) +
   coord_cartesian(ylim = c(-20,200))+
   facet_wrap(~period, nrow = 3)
 
 swfigure(sw,print,p2,sw_option="width=20, height=12")
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/SE_elec_price_w_CF_RM_iteration.png"),  p,  width = 12, height =7, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/SE_elec_price_w_CF_RM_iteration.png"),  p,  width = 16, height =9, units = "in", dpi = 120)
 }
 
 swlatex(sw, paste0("\\subsection{secondary electricity price over time for both models}"))
