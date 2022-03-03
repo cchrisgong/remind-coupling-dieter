@@ -160,7 +160,12 @@ f21_taxCO2eqHist(t,regi)$(t.val ge 2020) = 5;
 ** Fixing European 2020 carbon price to 20$/t CO2 (other regions to zero)
 *f21_taxCO2eqHist("2020",regi) = 0;
 f21_taxCO2eqHist("2020",regi)$(regi_group("EUR_regi",regi)) =  20;
-*CG* 
+*CG* if DIETER coupled, then set CO2 price to be higher in 2020 so we see VRE in DIETER
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+$IFTHEN.DTmode %cm_DTmode% == "none"
+f21_taxCO2eqHist("2020",regi)$(regi_group("EUR_regi",regi)) =  70;
+$ENDIF.DTmode
+$ENDIF.DTcoup
 Display "input data historical co2 price";
 Display f21_taxCO2eqHist;
 
