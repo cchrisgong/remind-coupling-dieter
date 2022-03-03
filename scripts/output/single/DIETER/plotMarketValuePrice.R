@@ -93,7 +93,7 @@ for (i in 2:(length(remind.files))){
     dplyr::group_by(period,tech) %>%
     dplyr::summarise( value = mean(value), .groups = "keep" ) %>%
     dplyr::ungroup(period,tech) %>%
-    mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2) %>% # flexadj already divides by budget in the model
+    mutate(value = -value * 1e12 / sm_TWa_2_MWh * 1.2) %>% # flexadj already divides by budget in the model
     mutate(iteration = i-1)
   
   #### market values
@@ -214,8 +214,14 @@ swlatex(sw, paste0("\\section{Market value and markups}"))
 ########################################################################################################
 swlatex(sw, paste0("\\subsection{Markup time series (a few iterations)}"))
 
+if (h2switch == "off"){
+  out.remind.mrkup <- out.remind.mrkup %>% 
+    filter(!tech %in% remind.sector.coupling.mapping)
+}
+
+
 p <- ggplot() + 
-  geom_line(data=out.remind.mrkup %>% filter(iteration %in% c(5,20,maxiter-1), period <2100), aes(x=period, y=-value, color = tech)) +
+  geom_line(data=out.remind.mrkup %>% filter(iteration %in% c(1,2,maxiter-1), period <2100), aes(x=period, y=-value, color = tech)) +
   theme(legend.position = "bottom") +
   scale_color_manual(name = "Technology", values = color.mapping) +
   xlab("Time") + 
@@ -250,9 +256,12 @@ swlatex(sw, paste0("\\subsection{Market value time series (a few iterations)}"))
 plot.remind.mv <- out.remind.mv %>% 
   dplyr::group_by(tech,iteration) %>%
   mutate( value = frollmean(value, 3, align = "center", fill = NA)) %>% 
-  dplyr::ungroup(tech,iteration) %>% 
-  filter(!tech %in% remind.sector.coupling.mapping) 
-  # filter(period == 2050)
+  dplyr::ungroup(tech,iteration)
+
+if (h2switch == "off"){
+  plot.remind.mv <- plot.remind.mv %>% 
+    filter(!tech %in% remind.sector.coupling.mapping)
+}
 
 p <- ggplot() + 
   geom_line(data=plot.remind.mv %>% filter(iteration %in% c(5,20,maxiter-1), period <2100), aes(x=period, y=value, color = tech)) +

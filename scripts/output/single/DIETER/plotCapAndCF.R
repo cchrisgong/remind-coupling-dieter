@@ -212,7 +212,7 @@ plot.remind.capacity <- out.remind.capacity %>%
 p1<-ggplot() +
   geom_area(data = plot.remind.capacity%>% filter(period %in% model.periods.till2100) , aes(x = period, y = value, fill = tech), size = 1.2, alpha = 0.5) +
   scale_fill_manual(name = "Technology", values = color.mapping.cap) +
-  xlab("period") + ylab(paste0("vm_cap", "(GW)")) +
+  xlab("period") + ylab(paste0("Capacity (GW)")) +
   ggtitle(paste0("REMIND Last iteration: ", reg))+
   theme(legend.title = element_blank()) 
 
@@ -223,7 +223,7 @@ plot.dieter.capacity <- out.dieter.capacity %>%
 p2<-ggplot() +
     geom_area(data = plot.dieter.capacity%>% filter(period %in% model.periods.till2100), aes(x = as.numeric(period), y = value, fill = tech), size = 1.2, alpha = 0.5) +
     scale_fill_manual(name = "Technology", values = color.mapping.cap) +
-    xlab("period") + ylab(paste0("capacity (GW)")) +
+    xlab("period") + ylab(paste0("Capacity (GW)")) +
     ggtitle(paste0("DIETER Last iteration: ", reg))+
     # theme(aspect.ratio = .7)+
     theme( legend.title = element_blank()) 

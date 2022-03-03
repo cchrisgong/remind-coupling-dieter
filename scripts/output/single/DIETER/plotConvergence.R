@@ -211,16 +211,18 @@ if (save_png == 1){
 swlatex(sw, paste0("\\subsection{Market value difference (time average) over iterations}"))
 
 diff.mv.avg.yr <- diff.mv %>% 
+  left_join( out.remind.genshare) %>% 
   # filter(iteration == 12)
   filter(period %in% model.periods.till2100) %>% 
+  mutate(value = value * genshare/1e2) %>% 
   dplyr::group_by(period,iteration) %>%
-  dplyr::summarise( value = mean(value), .groups = "keep" ) %>% 
+  dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
   dplyr::ungroup(period,iteration) %>% 
   dplyr::group_by(iteration) %>%
   dplyr::summarise( value = mean(value), .groups = "keep" ) %>% 
   dplyr::ungroup(iteration) %>% 
   filter(value>0)%>% 
-  mutate(variable = "Difference of electricity price")
+  mutate(variable = "Difference of market value")
 
 # moving average
 diff.mv.avg.yr.movingavg <-diff.mv.avg.yr %>% 

@@ -148,10 +148,10 @@ dieter.gen.wCurt <- out.dieter %>%
   filter(variable == "total_generation") %>%
   select(period, iteration, all_te, value)
 
-
 dieter.consumption <- out.dieter %>%
   filter(variable == "total_consumption") %>%
-  select(period, iteration, all_te, value)
+  select(period, iteration, all_te, value) %>% 
+  mutate(all_te = fct_relevel(all_te, table_ordered_name_dem))
 
 dieter.gen.wCurt.sum <- out.dieter %>%
   filter(variable == "total_generation") %>%
@@ -229,13 +229,6 @@ for (year_toplot in model.periods) {
       alpha = 0,
       linetype = "dotted"
     ) +
-    # geom_area(
-    #   data = plot.remind.consumption ,
-    #   aes(x = iteration, y = -value, fill = all_te),
-    #   size = 1.2,
-    #   alpha = 0.5,
-    #   stat = "identity"
-    # ) +
     scale_fill_manual(name = "Technology", values = color.mapping) +
     scale_color_manual(name = "Technology", values = color.mapping_vre) +
     theme(axis.text = element_text(size = 10),
@@ -244,7 +237,16 @@ for (year_toplot in model.periods) {
     ggtitle(paste0("REMIND: ", reg, year_toplot)) +
     theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
   
-  
+  if (h2switch == "on"){
+    p1 <- p1 +
+      geom_area(
+        data = plot.remind.consumption ,
+        aes(x = iteration, y = -value, fill = all_te),
+        size = 1.2,
+        alpha = 0.5,
+        stat = "identity"
+      )
+  }
   
   if (length(dieter.files) != 0) {
     p2 <- ggplot() +
@@ -261,17 +263,6 @@ for (year_toplot in model.periods) {
         alpha = 0,
         linetype = "dotted"
       ) +
-      # geom_area(
-      #   data = plot.dieter.consumption,
-      #   aes(
-      #     x = iteration,
-      #     y = -value,
-      #     fill = all_te
-      #   ),
-      #   size = 1.2,
-      #   alpha = 0.5,
-      #   stat = "identity"
-      # ) +
       scale_fill_manual(name = "Technology", values = color.mapping) +
       scale_color_manual(name = "Technology", values = color.mapping_vre) +
       theme(axis.text = element_text(size = 10),
@@ -280,6 +271,20 @@ for (year_toplot in model.periods) {
       ggtitle(paste0("DIETER: ", reg, year_toplot)) +
       theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
     
+    if (h2switch == "on"){
+    p2 <- p2 +
+    geom_area(
+      data = plot.dieter.consumption,
+      aes(
+        x = iteration,
+        y = -value,
+        fill = all_te
+      ),
+      size = 1.2,
+      alpha = 0.5,
+      stat = "identity"
+    ) 
+    }
     
   }
   
@@ -293,7 +298,7 @@ for (year_toplot in model.periods) {
   
   swfigure(sw, grid.draw, p)
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/DIETER/Generation_", year_toplot, ".png"),  p,  width = 8, height =10, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/Generation_", year_toplot, ".png"),  p,  width = 9, height =12, units = "in", dpi = 120)
   }
 }
 
@@ -319,7 +324,6 @@ plot.dieter.gen.wCurt.sum <-
   dieter.gen.wCurt.sum %>% filter(iteration == max(dieter.gen.wCurt.sum$iteration))
 plot.dieter.consumption <-
   dieter.consumption %>% filter(iteration == max(dieter.consumption$iteration))
-
 
 p1 <- ggplot() +
   geom_area(
@@ -379,7 +383,6 @@ if (length(dieter.files) != 0) {
     ggtitle(paste0("DIETER: ", reg, " (last iteration)")) +
     theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
   
-  
 }
 
 grid.newpage()
@@ -391,7 +394,7 @@ if (length(dieter.files) != 0) {
 
 swfigure(sw, grid.draw, p)
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/Generation_time.png"),  p,  width = 8, height =10, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/Generation_time.png"),  p,  width = 8, height =12, units = "in", dpi = 120)
 }
 
 
@@ -428,10 +431,54 @@ for (i in c(5,10,20,27,maxiter-1)){
   
   swfigure(sw, grid.draw, p)
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/DIETER/deltaGeneration_time_i", i, ".png"),  p,  width = 8, height =10, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/deltaGeneration_time_i", i, ".png"),  p,  width = 8, height =6, units = "in", dpi = 120)
   }
   
-  
-  
 }
 }
+
+
+#####################################################################################################
+
+if (length(dieter.files) != 0) {
+  
+  for (i in c(0,1,2,3,5,maxiter-2)){
+    
+    plot.remind.i0 <- out.remind %>% 
+      filter(iteration == 0+i) %>% 
+      filter(period <2110) %>%
+      select(-iteration) %>% 
+      mutate(period = as.numeric(period)) %>% 
+      dplyr::rename(remind_gen_0 = value)
+    
+    plot.remind.i1 <- out.remind %>% 
+      filter(iteration == 1+i) %>% 
+      filter(period <2110) %>%
+      select(-iteration) %>% 
+      mutate(period = as.numeric(period)) %>% 
+      dplyr::rename(remind_gen_1 = value)
+  
+    plot.remind.iter.diff <- list(plot.remind.i0, plot.remind.i1) %>%
+      reduce(full_join) %>%
+      mutate(delta_gen = remind_gen_1 - remind_gen_0) 
+    
+    p1 <-ggplot() +
+      geom_bar(data = plot.remind.iter.diff , aes(x = period, y = delta_gen, fill = all_te),  alpha = 0.5, stat = "identity") +
+      geom_label(size = 3, position = position_stack(vjust = 0.5)) +
+      scale_fill_manual(name = "Technology", values = color.mapping)+
+      theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+      xlab("period") + ylab(paste0("Usable generation (TWh)")) +
+      ggtitle(paste0("REMIND Generation (i=", i+1,") - REMIND Generation (i=", i,")"))+
+      theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank()) +
+      theme(aspect.ratio = .5) 
+    
+    grid.newpage()
+    p <- p1
+    
+    swfigure(sw, grid.draw, p)
+    if (save_png == 1){
+      ggsave(filename = paste0(outputdir, "/DIETER/deltaGeneration_iteration_", i, ".png"),  p,  width = 8, height =6, units = "in", dpi = 120)
+    }
+  }
+}
+

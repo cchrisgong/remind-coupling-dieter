@@ -96,6 +96,10 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
  
   remind.sector.coupling.mapping.narrow <- c(elh2 = "Electrolyzers")
   
+  remind.sector.coupling.mapping.exclude <- c(tdels = "Stationary Electricity",
+                                              tdelt = "Transport Electricity")
+
+    
   remind.tech.mapping <- c(remind.nonvre.mapping.whyd, remind.vre.mapping, remind.sector.coupling.mapping)
   
   remind.tech.mapping.narrow <- c(remind.nonvre.mapping.whyd, remind.vre.mapping, remind.sector.coupling.mapping.narrow)
@@ -129,7 +133,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                             bio = "Biomass",
                             NULL)
   
-  dieter.tech.mapping <- c(dieter.supply.tech.mapping, dieter.demand.tech.mapping)
+  # dieter.tech.mapping <- c(dieter.supply.tech.mapping, dieter.demand.tech.mapping)
   
   dieter.supply.fuel.mapping <- c("Coal" = "pecoal",
                                   "OCGT" = "pegas",
@@ -213,21 +217,33 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                   "igcc" = "Coal", 
                   "hydro" = "Hydro", "ngcc" = "Gas","pc" = "Coal", "system" = "System", "elh2" = "Electrolyzers")
   
-## define color mapping (only for non-elh2 coupled version for now)
+## define color mapping 
   
-  color.mapping <- c("CCGT" = "#999959", "Coal" = "#0c0c0c",
-                      "Solar" = "#ffcc00", "Wind Onshore" = "#337fff", 
-                      "Wind Offshore" = "#334cff", "Biomass" = "#005900",
-                      "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
-                      # "Electrolyzers" = "#48D1CC", "Electricity" = "#6495ED",
-                      NULL)
+
+    color.mapping <- c("CCGT" = "#999959", "Coal" = "#0c0c0c",
+                       "Solar" = "#ffcc00", "Wind Onshore" = "#337fff", 
+                       "Wind Offshore" = "#334cff", "Biomass" = "#005900",
+                       "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
+                       "Electrolyzers" = "#48D1CC", "Electricity" = "#6495ED",
+                       NULL)
+  
+  if (h2switch == "on"){
+    color.mapping <- c(color.mapping,
+                       "Electrolyzers" = "#48D1CC", "Electricity" = "#6495ED",
+                       NULL)
+  }
   
   color.mapping.cap <- c("CCGT" = "#999959", "Coal" = "#0c0c0c",
                      "Solar" = "#ffcc00", "Wind Onshore" = "#337fff", 
                      "Wind Offshore" = "#334cff", "Biomass" = "#005900",
                      "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
-                     # "Electrolyzers" = "#48D1CC", 
                      NULL)
+  
+  if (h2switch == "on"){
+    color.mapping.cap <- c(color.mapping.cap,
+                       "Electrolyzers" = "#48D1CC", 
+                       NULL)
+  }
   
   color.mapping_vre <- c("Solar" = "#ffcc00", "Wind Onshore" = "#337fff", "Wind Offshore" = "#334cff")
   
@@ -379,6 +395,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                            Wind_off = "Wind Offshore",
                            Solar = "Solar",
                            elh2 = "Electrolyzers",
+                           el = "Electricity",
                            `all Tech` = "All Tech",
                            vregrid = "VRE grid",
                            NULL)
