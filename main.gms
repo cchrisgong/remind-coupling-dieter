@@ -579,6 +579,7 @@ cm_deuCDRmax = -1; !! def = -1
 *--------------------flags------------------------------------------------------------
 $setglobal cm_DTcoup  off         !! def = off
 $setglobal cm_DTmode  dispatch         !! def = validation
+$setglobal cm_DTstor  none	   !!def = none
 cm_DTcoup_eq = 0;         !! def = 0
 cm_DT_dispatch_i1 = 20;           !! def <- 20
 cm_DT_dispatch_i2 = 25;           !! def <- 24
