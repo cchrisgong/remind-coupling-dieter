@@ -127,7 +127,6 @@ positive variables
     v32_capDecayEnd(ttot,all_regi)                 "the end decay point of the logit function for required dispatchable capacity as a function of electricity demand"
     v32_flexPriceShare(tall,all_regi,all_te)       "share of average electricity price that flexible technologies see [share: 0...1]"
     v32_flexPriceShareMin(tall,all_regi,all_te)    "possible minimum of share of average electricity price that flexible technologies see [share: 0...1]"
-;
 
 equations
     q32_balSe(ttot,all_regi,all_enty)		   "balance equation for electricity secondary energy"

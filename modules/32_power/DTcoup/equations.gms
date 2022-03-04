@@ -78,7 +78,6 @@ q32_usableSeTeDisp(t,regi,entySe,te)$(tDT32(t) AND regDTCoup(regi) AND sameas(en
 *** Definition of capacity constraints for storage:
 ***---------------------------------------------------------------------------
 q32_limitCapTeStor(t,regi,teStor)$( (t.val ge 2015) AND ((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))) ..
-*q32_limitCapTeStor(t,regi,teStor)$( (t.val ge 2015) AND ( (not tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) OR (regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))) ..
 ** above logic: apply equation when >= 2015 for non coupled region; or for coupled region when switch is off, or for coupled region when switch is on outside coupled years
     ( 0.5$( cm_VRE_supply_assumptions eq 1 )
     + 1$( cm_VRE_supply_assumptions ne 1 )
@@ -174,7 +173,6 @@ $ENDIF.DTcoup
 ***---------------------------------------------------------------------------
 *** Calculation of necessary storage electricity production:
 ***---------------------------------------------------------------------------
-*q32_limitCapTeStor(t,regi,teStor)$( (t.val ge 2015) AND ((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))) ..
 q32_shStor(t,regi,teVRE)$( (t.val ge 2020) AND ((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi)) )..
 	v32_shStor(t,regi,teVRE)
 	=g=
@@ -197,7 +195,6 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 	+ (p32_DIETERCurtRatio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) )
   * ( 1 + (v32_shSeElDisp(t,regi,teVRE) / 100 - p32_DIETER_shSeEl(t,regi,teVRE) / 100 ) )   !!! this is important to keep for stability
 	* 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 1) AND tDT32(t))
-*	+ 0 * 1$(regDTCoup(regi)) !! turn off curtailment for coupled region
 $ENDIF.DTcoup
 ;
 
@@ -322,7 +319,7 @@ q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
 * with prefactor
 	(( p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te)
 *	 * ( 1 + ( v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
-   * ( 1 + 0.7 * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
+  * ( 1 + 0.7 * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
 *  * ( 1 + p32_prefac(t,regi,te) * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
 	)
 	/ 1e12 * sm_TWa_2_MWh )
