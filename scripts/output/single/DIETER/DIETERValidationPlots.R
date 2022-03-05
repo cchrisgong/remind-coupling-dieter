@@ -224,7 +224,6 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                        "Solar" = "#ffcc00", "Wind Onshore" = "#337fff", 
                        "Wind Offshore" = "#334cff", "Biomass" = "#005900",
                        "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
-                       "Electrolyzers" = "#48D1CC", "Electricity" = "#6495ED",
                        NULL)
   
   if (h2switch == "on"){
@@ -535,24 +534,25 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
 #
 #   # Price: Secondary electricity --------------------------------------------
 #
+  # this needs plotCapAndCF.R
   source(file.path(dieter.scripts.folder, "plotPrice.R"), local=TRUE)
 #
 #   # Price: primary energy and fuel --------------------------------------------
 #
   source(file.path(dieter.scripts.folder, "plotFuelPriceAndTrade.R"), local=TRUE)
-#   
+#
 #   # Market value and shadow price ------------------------------------------------------
-#   
-  # this needs plotPrice.R 
+#
+  # this needs plotPrice.R
   source(file.path(dieter.scripts.folder, "plotMarketValuePrice.R"), local=TRUE)
-#   
+#
 #   # Market value and shadow price ------------------------------------------------------
-#   
+#
   # this needs plotPrice.R & plotMarketValuePrice.R
   source(file.path(dieter.scripts.folder, "plotConvergence.R"), local=TRUE)
-#   
+#
 #   # LCOEs -------------------------------------------------------------------
-# 
+#
   # this needs plotMarketValuePrice.R
   source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
 

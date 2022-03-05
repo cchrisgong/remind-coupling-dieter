@@ -441,20 +441,19 @@ for (iter in c(0,1,maxiter-1)){
 # 2020 has very high LCOE due to shadow price for biomass and OCGT, exclude from plotting
 p <- ggplot() +
   geom_bar(data = dieter.teloceprice_avg %>% filter(period > 2020, iteration == iter), aes(x = period, y = value,  fill = variable), stat = 'identity', size = 1.2, alpha = 0.5) +
-  labs(color = "LCOE") +
-  labs(linetype = "") +
-  labs(fill = "") +
   theme(axis.text=element_text(size = 20), axis.title=element_text(size = 20, face="bold"), strip.text = element_text(size = 20)) +
   theme(legend.text = element_text(size=20), strip.text = element_text(size = 20))+
-  xlab("year") + ylab(paste0("LCOE ($/MWh)")) +
+  xlab("year") + ylab(paste0("LCOE and value of DIETER generating technology ($/MWh)")) +
   scale_fill_manual(values = cost.colors_DT) +
+  theme(legend.title=element_blank())+
+  theme(legend.position="bottom") + 
   coord_cartesian(xlim = c(2020,2100))+
   facet_wrap(~tech, nrow = 3, scales = "free")
 
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_avg_DIETER_bar_i=", iter, ".png"),  p,  width = 20, height =10, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_avg_DIETER_bar_i=", iter, ".png"),  p,  width = 17, height =12, units = "in", dpi = 120)
 }
 }
 ################## DIETER average LCOE plot ########################
@@ -821,7 +820,7 @@ out.prices_DT <-  rbind(out.prices_DT, prices_DT)
 
 shadow_prices_DT <- out.prices_DT %>% 
   filter(variable == 'DIETER shadow price due to capacity constraint from REMIND') %>% 
-  select(period, shad=value)
+  select(period, shad=value,iteration)
 
 elec_prices_DT <- out.prices_DT %>% 
   filter(variable == "DIETER annual average electricity price with scarcity price") 
@@ -864,11 +863,11 @@ prices_RM.movingavg <- df.price0 %>%
   mutate(variable = "REMIND price moving average")
 
 elec_prices_DT_laIter <- elec_prices_DT %>% 
-  filter(iteration == length(dieter.files.report)) %>% 
+  filter(iteration == maxiter -1) %>% 
   select(-iteration)
 
 elec_prices_DT_wShadPrice_laIter <- elec_prices_DT_wShadPrice %>% 
-  filter(iteration == length(dieter.files.report)) %>% 
+  filter(iteration == maxiter -1) %>% 
   select(-iteration)
 
 prices_lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter, prices_RM) %>%

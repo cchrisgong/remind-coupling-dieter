@@ -299,7 +299,7 @@ if (save_png == 1){
 swlatex(sw, paste0("\\section{Market value model comparison}"))
 swlatex(sw, paste0("\\subsection{Market value model comparison - over iteration for a few years}"))
 
-for (yr in c(2020,2030,2040,2050)){
+for (yr in c(2025,2030,2040,2050)){
   
   plot.remind.mv <- out.remind.mv %>% 
     mutate(var = "REMIND market value ($/MWh)")%>% 

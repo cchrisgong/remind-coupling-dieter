@@ -76,6 +76,7 @@ p<-ggplot() +
   coord_cartesian(ylim = c(0,60))+
   theme(legend.text = element_text(size=20), strip.text = element_text(size = 20))+
   theme(legend.position = "bottom") +
+  theme(legend.title=element_blank())+
   guides(color = guide_legend(nrow = 2, byrow = TRUE))+
   facet_wrap(~period, nrow = 3)
 
@@ -106,6 +107,7 @@ p <-ggplot() +
   theme(legend.text = element_text(size=20), strip.text = element_text(size = 20)) +
   coord_cartesian(ylim = c(-10,10)) +
   theme(legend.position = "bottom") +
+  theme(legend.title=element_blank())+
   guides(color = guide_legend(nrow = 2, byrow = TRUE))+
   facet_wrap(~period, nrow = 3)
 
@@ -165,6 +167,7 @@ p <-ggplot() +
   xlab("iteration") + ylab(paste0("Difference of electricity price (REMIND-DIETER)\n($/MWh)"))  +
   coord_cartesian(ylim = c(0,ymax)) +
   theme(legend.position = "bottom") +
+  theme(legend.title=element_blank())+
   guides(color = guide_legend(nrow = 2, byrow = TRUE))
 
 swfigure(sw,print,p,sw_option="width=20, height=12")
@@ -175,7 +178,7 @@ if (save_png == 1){
 ##################################################################################################
 swlatex(sw, paste0("\\subsection{Market value difference over iterations}"))
 diff.mv <- out.remind.mv %>% 
-  # filter(tech == dieter.supply.tech.mapping) 
+  filter(tech == dieter.supply.tech.mapping) %>% 
   filter(period %in% model.periods) %>% 
   select(period,tech,iteration,rm.mv=value) %>% 
   filter(iteration > 0) %>% 
@@ -210,19 +213,48 @@ if (save_png == 1){
 ##################################################################################################
 swlatex(sw, paste0("\\subsection{Market value difference (time average) over iterations}"))
 
-diff.mv.avg.yr <- diff.mv %>% 
+# weighted market value by share
+rm.mv <- out.remind.mv %>% 
+  # filter(iteration == 12) %>% 
+  filter(tech %in% dieter.supply.tech.mapping) %>% 
+  filter(period %in% model.periods) %>% 
+  select(period,tech,iteration,rm.mv=value) %>% 
+  filter(iteration > 0) %>% 
+  left_join(out.RMprice) %>% 
+  filter(!value == 0) %>% 
+  select(-value,-variable) %>% 
+  filter(!rm.mv == 0)  %>% 
   left_join( out.remind.genshare) %>% 
-  # filter(iteration == 12)
   filter(period %in% model.periods.till2100) %>% 
-  mutate(value = value * genshare/1e2) %>% 
+  mutate(rm.mv = rm.mv * genshare / 1e2) %>% 
   dplyr::group_by(period,iteration) %>%
-  dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
+  dplyr::summarise( rm.mv = sum(rm.mv), .groups = "keep" ) %>% 
   dplyr::ungroup(period,iteration) %>% 
   dplyr::group_by(iteration) %>%
-  dplyr::summarise( value = mean(value), .groups = "keep" ) %>% 
-  dplyr::ungroup(iteration) %>% 
-  filter(value>0)%>% 
-  mutate(variable = "Difference of market value")
+  dplyr::summarise( rm.mv = mean(rm.mv), .groups = "keep" ) %>% 
+  dplyr::ungroup(iteration) 
+  
+dt.mv <- out.dieter.mv.woscar%>% 
+  filter(iteration > 0) %>% 
+  mutate(period = as.numeric(period)) %>% 
+  select(period,iteration,tech,dt.mv = value) %>% 
+  filter(!tech %in% remind.sector.coupling.mapping) %>% 
+  left_join( out.dieter.report.gensh %>% 
+             mutate(period = as.numeric(period)) %>% 
+             select(period,iteration,tech,genshare = value)) %>% 
+  filter(period %in% model.periods.till2100) %>% 
+  mutate(dt.mv = dt.mv * genshare / 1e2) %>% 
+  dplyr::group_by(period,iteration) %>%
+  dplyr::summarise( dt.mv = sum(dt.mv), .groups = "keep" ) %>% 
+  dplyr::ungroup(period,iteration) %>% 
+  dplyr::group_by(iteration) %>%
+  dplyr::summarise( dt.mv = mean(dt.mv), .groups = "keep" ) %>% 
+  dplyr::ungroup(iteration) 
+  
+diff.mv.avg.yr <- list(rm.mv, dt.mv) %>%
+  reduce(full_join) %>% 
+  mutate(value = rm.mv - dt.mv) %>% 
+  mutate(variable = "Difference of weighted-average market value")
 
 # moving average
 diff.mv.avg.yr.movingavg <-diff.mv.avg.yr %>% 
@@ -235,9 +267,9 @@ p <-ggplot() +
   geom_line(data = diff.mv.avg.yr, aes(x = iteration, y = value, color = variable), size = 1.2, alpha = 0.5) +
   geom_line(data = diff.mv.avg.yr.movingavg, aes(x = iteration, y = value, color = variable), size = 2.5, alpha = 0.5) +
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
-  xlab("iteration") + ylab("< MV_R - MV_D > {t =<2100, tech}") +
-                           # "Diff of tech- and time-averaged MV (REMIND-DIETER)\n($/MWh)")  +
+  xlab("iteration") + ylab("Diff. of weighted-average market values (REMIND - DIETER)\n($/MWh)") +
   coord_cartesian(ylim = c(0,ymax)) +
+  theme(legend.title=element_blank())+
   theme(legend.position = "bottom") +
   guides(color = guide_legend(nrow = 2, byrow = TRUE))
 

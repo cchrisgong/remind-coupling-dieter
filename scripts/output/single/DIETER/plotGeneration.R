@@ -233,7 +233,7 @@ for (year_toplot in model.periods) {
     scale_color_manual(name = "Technology", values = color.mapping_vre) +
     theme(axis.text = element_text(size = 10),
           axis.title = element_text(size = 10, face = "bold")) +
-    xlab("iteration") + ylab(paste0("Usable generation (TWh)")) +
+    xlab("iteration") + ylab(paste0("Generation (TWh)")) +
     ggtitle(paste0("REMIND: ", reg, year_toplot)) +
     theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
   
@@ -267,7 +267,7 @@ for (year_toplot in model.periods) {
       scale_color_manual(name = "Technology", values = color.mapping_vre) +
       theme(axis.text = element_text(size = 10),
             axis.title = element_text(size = 10, face = "bold")) +
-      xlab("iteration") + ylab(paste0("Usable generation (TWh)")) +
+      xlab("iteration") + ylab(paste0("Generation (TWh)")) +
       ggtitle(paste0("DIETER: ", reg, year_toplot)) +
       theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
     
@@ -345,7 +345,7 @@ p1 <- ggplot() +
   scale_color_manual(name = "Technology", values = color.mapping_vre) +
   theme(axis.text = element_text(size = 10),
         axis.title = element_text(size = 10, face = "bold")) +
-  xlab("Year") + ylab(paste0("Usable generation (TWh)")) +
+  xlab("Year") + ylab("Generation (TWh)") +
   ggtitle(paste0("REMIND: ", reg, " (last iteration)")) +
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
 
@@ -379,7 +379,7 @@ if (length(dieter.files) != 0) {
     scale_color_manual(name = "Technology", values = color.mapping_vre) +
     theme(axis.text = element_text(size = 10),
           axis.title = element_text(size = 10, face = "bold")) +
-    xlab("Year") + ylab(paste0(c("total_generation", "usable_generation", "total_consumption"), "(TWh)")) +
+    xlab("Year") + ylab("Generation (TWh)") +
     ggtitle(paste0("DIETER: ", reg, " (last iteration)")) +
     theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
   
@@ -394,7 +394,7 @@ if (length(dieter.files) != 0) {
 
 swfigure(sw, grid.draw, p)
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/Generation_time.png"),  p,  width = 8, height =12, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/Generation_time.png"),  p,  width = 10, height =14, units = "in", dpi = 120)
 }
 
 
@@ -424,7 +424,7 @@ for (i in c(5,10,20,27,maxiter-1)){
     geom_label(size = 3, position = position_stack(vjust = 0.5)) +
     scale_fill_manual(name = "Technology", values = color.mapping)+
     theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
-    xlab("period") + ylab(paste0("Usable generation (TWh)")) +
+    xlab("period") + ylab(paste0("Generation (TWh)")) +
     ggtitle(paste0("Generation difference REMIND - DIETER"))+
     theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank()) +
     theme(aspect.ratio = .5) 
@@ -467,7 +467,7 @@ if (length(dieter.files) != 0) {
       geom_label(size = 3, position = position_stack(vjust = 0.5)) +
       scale_fill_manual(name = "Technology", values = color.mapping)+
       theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
-      xlab("period") + ylab(paste0("Usable generation (TWh)")) +
+      xlab("period") + ylab(paste0("Generation (TWh)")) +
       ggtitle(paste0("REMIND Generation (i=", i+1,") - REMIND Generation (i=", i,")"))+
       theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank()) +
       theme(aspect.ratio = .5) 

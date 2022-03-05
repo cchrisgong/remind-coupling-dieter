@@ -17,10 +17,10 @@ for (i in 1:length(dieter.files.report)){
     select(model=X..1, tall = X..2, var=X..4, tech=X..5, value) %>%
     filter(var %in% dieter.report.vars) %>% 
     revalue.levels(tech = dieter.tech.mapping) %>%
-    mutate(variable = case_when(var %in% dieter.report.cap ~ "Pre-inv. cap.",
-                                var %in% dieter.report.addcap ~ "Added cap.",
-                                var %in% dieter.report.divest ~ "Divestment")) %>% 
-    mutate(variable = factor(variable, levels=rev(c("Pre-inv. cap.", "Added cap.", "Divestment")))) %>% 
+    mutate(variable = case_when(var %in% dieter.report.cap ~ "Pre-investment capacities",
+                                var %in% dieter.report.addcap ~ "Added capacities",
+                                var %in% dieter.report.divest ~ "Early-retired capacities")) %>% 
+    mutate(variable = factor(variable, levels=rev(c("Pre-investment capacities", "Added capacities", "Early-retired capacities")))) %>% 
     mutate(iteration = it)
   
   out.dieter.report <- rbind(out.dieter.report, dieter.data)
@@ -48,22 +48,23 @@ for(iter.rep in c(start_i,start_i+1,start_i+2,start_i+3,start_i+5,start_i+8, max
     filter(tall %in%model.periods.till2100) %>%
     filter(iteration == iter.rep) %>% 
     mutate(tall = as.numeric(as.character(tall)) - 1) %>%  # Shift for dodged plot
-    mutate(value = ifelse(variable == "Divestment", -value, value))  # Divestment has negative value
+    mutate(value = ifelse(variable == "Early-retired capacities", -value, value))  # Early-retired capacities has negative value
   
   p <- ggplot() +
     geom_bar(data = plot.dieter, aes(x=tall, y=value, fill=model, alpha=variable), colour="black", stat="identity", position="stack", width=2) + 
     geom_bar(data = plot.remind, aes(x=tall, y=value, fill=model, alpha=variable), colour="black", stat="identity", position="stack", width=2) +
-    scale_alpha_manual(values=c("Pre-inv. cap."= 1, "Added cap."=0.5, "Divestment"=0.2), limits=c("Pre-inv. cap.", "Added cap.", "Divestment")) +
+    scale_alpha_manual(values=c("Pre-investment capacities"= 1, "Added capacities"=0.5, "Early-retired capacities"=0.2), limits=c("Pre-investment capacities", "Added capacities", "Early-retired capacities")) +
     facet_wrap(~tech, scales="free") +
     coord_cartesian(xlim = c(2020, 2100)) +
+    theme(legend.title=element_blank())+
     theme(legend.position="bottom") + 
     xlab("Time") + 
-    ylab("Capacity [GW]")
+    ylab("Capacity (GW)")
   
   swfigure(sw,print,p, sw_option="width=20, height=10")
   
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/DIETER/AddedCapacity_compare_i", iter.rep, ".png"),  p,  width = 17, height =10, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/AddedCapacity_compare_i", iter.rep, ".png"),  p,  width = 10, height =6.6, units = "in", dpi = 120)
   }
 }
 swlatex(sw,"\\twocolumn")
