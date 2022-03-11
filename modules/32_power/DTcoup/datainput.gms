@@ -106,20 +106,12 @@ Execute_Loadpoint 'input' vm_prodSe = vm_prodSe;
 Execute_Loadpoint 'input' vm_cap = vm_cap;
 Execute_Loadpoint 'input' vm_usableSe = vm_usableSe;
 Execute_Loadpoint 'input' vm_usableSeTe = vm_usableSeTe;
-**CG: can load a flat "historical CO2 tax" here, however, once loaded this parameter won't be updated by REMIND
-***(because it will overwrite f21_taxCO2eqHist in 21/datainput); in the future,
-***if we do not iterate DIETER from input.gdx, we can simply read in pm_taxCO2eq
-*Execute_Loadpoint 'input' f21_taxCO2eqHist = f21_taxCO2eqHist;
 Execute_Loadpoint 'input' pm_data = pm_data;
 Execute_Loadpoint 'input' vm_costTeCapital = vm_costTeCapital;
-Execute_Loadpoint 'input' fm_dataglob = fm_dataglob;
-Execute_Loadpoint 'input' pm_dataeta = pm_dataeta;
 Execute_Loadpoint 'input' pm_eta_conv = pm_eta_conv;
-Execute_Loadpoint 'input' p32_grid_factor = p32_grid_factor;
 Execute_Loadpoint 'input' pm_ts = pm_ts;
 Execute_Loadpoint 'input' vm_deltaCap = vm_deltaCap;
 Execute_Loadpoint 'input' vm_capEarlyReti = vm_capEarlyReti;
-Execute_Loadpoint 'input' fm_dataemiglob = fm_dataemiglob;
 Execute_Loadpoint 'input' pm_cf = pm_cf;
 Execute_Loadpoint 'input' vm_capFac = vm_capFac;
 Execute_Loadpoint 'input' pm_dataren = pm_dataren;
@@ -132,7 +124,6 @@ Execute_Loadpoint 'input' pm_ttot_val = pm_ttot_val;
 Execute_Loadpoint 'input' pm_prtp = pm_prtp;
 Execute_Loadpoint 'input' o_margAdjCostInv = o_margAdjCostInv;
 Execute_Loadpoint 'input' pm_priceCO2 = pm_priceCO2;
-*Execute_Loadpoint 'input' p_teAnnuity = p_teAnnuity;
 
 p32_realCapfacVRE(t,regi,teVRE)$(vm_cap.l(t,regi,teVRE,"1"))
     = ( sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)) - v32_storloss.l(t,regi,teVRE) )
@@ -267,6 +258,14 @@ $IFTHEN.DTwER %cm_DTnoER% == "off"
 s32_noER = 0;
 $ENDIF.DTwER
 
+*** CG: whether to turn on and couple storage
+$IFTHEN.DTstor %cm_DTstor% == "on"
+s32_DTstor = 1;
+$ENDIF.DTstor
+$IFTHEN.DTstoroff %cm_DTstor% == "off"
+s32_DTstor = 0;
+$ENDIF.DTstoroff
+
 p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
 p32_cf_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) = pm_cf(t,regi,te);
 
@@ -281,7 +280,7 @@ $ENDIF.curt_avg
 * REMIND data for DIETER
 execute_unload "RMdata_4DT.gdx",tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,
     s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,!! switches: H2 switch, mode switch, dispatch iterational switches,
-    s32_windoff,s32_scarPrice, s32_adjCost, s32_margVRE, s32_noER,!! switches: offshore switch, scarcity price switch, adjustment cost coupling switch, marginal VRE investment cost coupling switch,
+    s32_windoff,s32_scarPrice, s32_adjCost, s32_margVRE, s32_noER, s32_DTstor,!! switches: offshore switch, scarcity price switch, adjustment cost coupling switch, marginal VRE investment cost coupling switch, storage
     COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,      !! tech sets: REMIND technology definition
     vm_cap, vm_deltaCap, vm_capDistr, v32_storloss,vm_capEarlyReti,vm_prodSe,vm_usableSeTe, !! quantities: capacity, generation, curtailment,
     p32_realCapfacVRE,vm_capFac,pm_cf,pm_dataren, !! CF

@@ -112,6 +112,7 @@ scalars
     s32_adjCost             "switch for handing adjustment cost to DIETER"
     s32_margVRE             "switch for taking into account investment cost in DIETER for VRE should see the lowest grade potential capacity factor, not the average"
     s32_noER                "switch for taking into account investment cost in DIETER for early retirement (it's only a rough estimate in DIETER)"
+    s32_DTstor              "switch for DIETER storage coupling"
     sm_DTgenShDiff          "convergence criteria for DIETER coupled run"
 ;
 
