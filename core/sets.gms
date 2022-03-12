@@ -14,7 +14,6 @@
 SETS
 * Save select compiler flags as sets, to make them accessible from the final gdx
 c_expname       "c_expname as set for use in GDX"       /%c_expname%/
-c_description   "%c_description%"   /"for model description, see explanatory text"/
 cm_GDPscen      "cm_GDPscen as set for use in GDX"      /%cm_GDPscen%/
 *
 
@@ -925,7 +924,6 @@ sets
        emicapregi
        banking
        carbonprice
-       carbonpriceRegi
        regipol
        damages
        internalizeDamages
@@ -961,7 +959,6 @@ module2realisation(modules,*) "mapping of modules and active realisations" /
        emicapregi . %emicapregi%
        banking . %banking%
        carbonprice . %carbonprice%
-       carbonpriceRegi . %carbonpriceRegi%
        regipol . %regipol%
        damages . %damages%
        internalizeDamages . %internalizeDamages%
@@ -2343,8 +2340,8 @@ alias(esty,esty2);
 alias(rlf,rlf2);
 alias(regi,regi2,regi3);
 alias(steps,steps2);
-alias(all_emiMkt,emiMkt,emiMkt2);
-alias(emi_sectors,sector,sector2);
+alias(all_emiMkt,emiMkt);
+alias(emi_sectors,sector);
 alias(sector_types,type)
 
 ***-----------------------------------------------------------------------------

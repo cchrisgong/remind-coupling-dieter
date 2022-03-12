@@ -5,16 +5,14 @@
 *** |  REMIND License Exception, version 1.0 (see LICENSE file).
 *** |  Contact: remind@pik-potsdam.de
 *** SOF ./modules/47_regipol/module.gms
-
 *' @title Regional Policies
 *'
 *' @description  The 47_regipol module includes region specific policies.
 *'
 *'
-*'               The `regiCarbonPrice` realization allows to determine region specific year or budget targets for CO2 or GHG emissions.
-*'               It overwrites all other carbon prices for selected regions (for example those implemented by 45_carbonprice or 46_carbonpriceRegi).
+*'               The `regiCarbonPrice` realization allow to determine region specific year or budget targets for CO2 or GHG emissions.
 *'
-*' @authors Renato Rodrigues, Felix Schreyer
+*' @authors Renato Rodrigues, Felix Schreyer 
 
 *###################### R SECTION START (MODULETYPES) ##########################
 $Ifi "%regipol%" == "none" $include "./modules/47_regipol/none/realization.gms"

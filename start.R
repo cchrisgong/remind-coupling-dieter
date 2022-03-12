@@ -100,40 +100,38 @@ configure_cfg <- function(icfg, iscen, iscenarios, isettings) {
 
     # Edit run title
     icfg$title <- iscen
-    message("   Configuring cfg for ", iscen)
+    cat("   Configuring cfg for", iscen,"\n")
 
-    # Edit main model file, region settings and input data revision based on scenarios table, if cell non-empty
-    for (switchname in intersect(c("model", "regionmapping", "inputRevision"), names(iscenarios))) {
-      if ( ! is.na(iscenarios[iscen, switchname] )) {
-        icfg[[switchname]] <- iscenarios[iscen, switchname]
-      }
+    # Edit main file of model
+    if( "model" %in% names(iscenarios)){
+      icfg$model <- iscenarios[iscen,"model"]
     }
 
-    # Set description
-    if ("description" %in% names(iscenarios) && ! is.na(iscenarios[iscen, "description"])) {
-      icfg$description <- iscenarios[iscen, "description"]
-    } else {
-      icfg$description <- paste0("REMIND run ", iscen, " started by ", config.file, ".")
+    # Edit regional aggregation
+    if( "regionmapping" %in% names(iscenarios)){
+      icfg$regionmapping <- iscenarios[iscen,"regionmapping"]
+    }
+
+    # Edit input data revision
+    if( "inputRevision" %in% names(iscenarios)){
+      icfg$inputRevision <- iscenarios[iscen,"inputRevision"]
+    }
+
+    # Edit switches in default.cfg according to the values given in the scenarios table, if non-empty
+    for (switchname in intersect(names(icfg$gms), names(iscenarios))) {
+      if ( !is.na(iscenarios[iscen,switchname] )) {
+        icfg$gms[[switchname]] <- iscenarios[iscen,switchname]
+      }
     }
 
     # Set reporting script
-    if ("output" %in% names(iscenarios) && ! is.na(iscenarios[iscen, "output"])) {
-      icfg$output <- gsub('c\\("|\\)|"', '', strsplit(iscenarios[iscen, "output"],',')[[1]])
+    if( "output" %in% names(iscenarios)){
+      icfg$output <- gsub('c\\("|\\)|"','',strsplit(iscenarios[iscen,"output"],',')[[1]])
     }
 
-    # Edit switches in default.cfg based on scenarios table, if cell non-empty
-    for (switchname in intersect(names(icfg$gms), names(iscenarios))) {
-      if ( ! is.na(iscenarios[iscen, switchname] )) {
-        icfg$gms[[switchname]] <- iscenarios[iscen, switchname]
-      }
-    }
-
-    # for columns path_gdx…, check whether the cell is non-empty, and not the title of another run with start = 1
+    # for columns path_gdx, path_gdx_bau, path_gdx_ref, check whether the cell is non-empty, and not the title of another run with start = 1
     # if not a full path ending with .gdx provided, search for most recent folder with that title
-    if (any(iscen %in% isettings[iscen, path_gdx_list])) {
-      stop("Self-reference: ", iscen , " refers to itself in a path_gdx... column.")
-    }
-    for (path_to_gdx in path_gdx_list) {
+    for (path_to_gdx in c("path_gdx", "path_gdx_ref", "path_gdx_bau")) {
       if (!is.na(isettings[iscen, path_to_gdx]) & ! isettings[iscen, path_to_gdx] %in% row.names(iscenarios)) {
         if (! str_sub(isettings[iscen, path_to_gdx], -4, -1) == ".gdx") {
           # search for fulldata.gdx in output directories starting with the path_to_gdx cell content.
@@ -141,14 +139,11 @@ configure_cfg <- function(icfg, iscen, iscenarios, isettings) {
           dirs <- Sys.glob(file.path(paste0("./output/",isettings[iscen, path_to_gdx],"*/fulldata.gdx")))
           # if path_to_gdx cell content exactly matches folder name, use this one
           if (paste0("./output/",isettings[iscen, path_to_gdx],"/fulldata.gdx") %in% dirs) {
-            message(paste0("   For ", path_to_gdx, " = ", isettings[iscen, path_to_gdx], ", a folder with fulldata.gdx was found."))
+            cat(paste0("   For ", path_to_gdx, " stated as ", isettings[iscen, path_to_gdx], ", a folder with fulldata.gdx was found.\n"))
             isettings[iscen, path_to_gdx] <- paste0("./output/",isettings[iscen, path_to_gdx],"/fulldata.gdx")
           } else {
-            # didremindfinish is TRUE if full.log exists with status: Normal completion
-            didremindfinish <- function(fulldatapath) {
-              logpath <- paste0(str_sub(fulldatapath,1,-14),"/full.log")
-              return( file.exists(logpath) && any(grep("*** Status: Normal completion", readLines(logpath, warn = FALSE), fixed = TRUE)))
-            }
+            # didremindfinish is TRUE if log.txt states that remind finished
+            didremindfinish <- function(fulldatapath) return(any(grep("REMIND run finished!", readLines(paste0(str_sub(fulldatapath,1,-14),"/log.txt")))))
             # sort out unfinished runs and folder names that only _start_ with the path_to_gdx cell content
             # for folder names only allows: cell content, an optional _, datetimepattern
             # the optional _ can be appended in the scenario-config path_to_gdx cell to force using an
@@ -161,31 +156,35 @@ configure_cfg <- function(icfg, iscen, iscenarios, isettings) {
                 strptime(format='%Y-%m-%d_%H.%M.%S') %>%
                 as.numeric %>%
                 which.max -> latest_fulldata
-              message(paste0("   Use newest normally completed run for ", path_to_gdx, " = ", isettings[iscen, path_to_gdx], ":\n     ", str_sub(dirs[latest_fulldata],10,-14)))
+              cat(paste0("   For ", path_to_gdx, " stated as ", isettings[iscen, path_to_gdx], ", this run was the newest:\n     ", dirs[latest_fulldata], "\n   Its log.txt contains 'REMIND run finished!', but please check yourself whether it converged etc.\n"))
               isettings[iscen, path_to_gdx] <- dirs[latest_fulldata]
             }
           }
         }
         # if the above has not created a path to a valid gdx, stop
         if (!file.exists(isettings[iscen, path_to_gdx])){
-          stop(paste0("Can't find a gdx specified as ", isettings[iscen, path_to_gdx], " in column ", path_to_gdx, ". Please specify full path to gdx or name of output subfolder that contains a fulldata.gdx from a previous normally completed run."))
+          stop(paste0("Can't find a gdx specified as ", isettings[iscen, path_to_gdx], " in column ", path_to_gdx, ". Please specify full path to gdx or name of output subfolder that contains a fulldata.gdx from a previous run."))
         }
       }
     }
 
     # Define path where the GDXs will be taken from
-    gdxlist <- c(input.gdx               = isettings[iscen, "path_gdx"],
-                 input_ref.gdx           = isettings[iscen, "path_gdx_ref"],
-                 input_refpolicycost.gdx = isettings[iscen, "path_gdx_refpolicycost"],
-                 input_bau.gdx           = isettings[iscen, "path_gdx_bau"],
-                 input_carbonprice.gdx   = isettings[iscen, "path_gdx_carbonprice"]
-                 )
+    gdxlist <- c(input.gdx     = isettings[iscen, "path_gdx"],
+                 input_ref.gdx = isettings[iscen, "path_gdx_ref"],
+                 input_bau.gdx = isettings[iscen, "path_gdx_bau"])
+
+    # Determine whether we need a separate carbon price GDX or not and export it
+    has_carbonprice_path <- FALSE
+    if ("path_gdx_carbonprice" %in% colnames(isettings)) { if (!is.na(isettings[iscen,"path_gdx_carbonprice"])) {
+      has_carbonprice_path <- TRUE
+      gdxlist <- c(gdxlist, input_carbonprice.gdx = isettings[iscen, "path_gdx_carbonprice"])
+    }}
 
     # add gdxlist to list of files2export
     icfg$files2export$start <- c(icfg$files2export$start, gdxlist)
 
     # add table with information about runs that need the fulldata.gdx of the current run as input
-    icfg$RunsUsingTHISgdxAsInput <- iscenarios %>% select(contains("path_gdx")) %>%              # select columns that have "path_gdx" in their name
+    icfg$RunsUsingTHISgdxAsInput <- iscenarios %>% select(contains("path_gdx_")) %>%             # select columns that have "path_gdx_" in their name
                                                    filter(rowSums(. == iscen, na.rm = TRUE) > 0) # select rows that have the current scenario in any column
 
     return(icfg)
@@ -213,15 +212,11 @@ if(!exists("slurmConfig")) slurmConfig <- choose_slurmConfig()
 if ('--restart' %in% argv) {
   # choose results folder from list
   outputdirs <- choose_folder("./output","Please choose the runs to be restarted")
-  message("\nAlso restart subsequent runs? Enter Y, else leave empty:")
-  restart_subsequent_runs <- get_line() %in% c("Y", "y")
   for (outputdir in outputdirs) {
-    message("Restarting ", outputdir)
+    cat("Restarting",outputdir,"\n")
     load(paste0("output/",outputdir,"/config.Rdata")) # read config.Rdata from results folder
-    cfg$restart_subsequent_runs <- restart_subsequent_runs
     cfg$slurmConfig <- combine_slurmConfig(cfg$slurmConfig,slurmConfig) # update the slurmConfig setting to what the user just chose
     cfg$results_folder <- paste0("output/",outputdir) # overwrite results_folder in cfg with name of the folder the user wants to restart, because user might have renamed the folder before restarting
-    save(cfg,file=paste0("output/",outputdir,"/config.Rdata"))
     submit(cfg, restart = TRUE)
     #cat(paste0("output/",outputdir,"/config.Rdata"),"\n")
   }
@@ -247,42 +242,28 @@ if ('--restart' %in% argv) {
     settings <- read.csv2(config.file, stringsAsFactors = FALSE, row.names = 1, comment.char = "#", na.strings = "")
 
     # Add empty path_gdx_... columns if they are missing
-    path_gdx_list <- c("path_gdx", "path_gdx_ref", "path_gdx_refpolicycost", "path_gdx_bau", "path_gdx_carbonprice")
-    if ("path_gdx_ref" %in% names(settings) && ! "path_gdx_refpolicycost" %in% names(settings)) {
-      settings$path_gdx_refpolicycost <- settings$path_gdx_ref
-      message("No column path_gdx_refpolicycost for policy cost comparison found, using path_gdx_ref instead.")
-    }
-    settings[, path_gdx_list[! path_gdx_list %in% names(settings)]] <- NA
+    path_gdx_required <- c("path_gdx", "path_gdx_ref", "path_gdx_bau")
+    settings[, path_gdx_required[! path_gdx_required %in% names(settings)]] <- NA
     
-    # state if columns are unknown and probably will be ignored, and stop for some outdated parameters.
+    # state if columns are unknown and probably will be ignored. If you find false positives, add them to knownColumnNames
     source("config/default.cfg")
-    knownColumnNames <- c(names(cfg$gms), path_gdx_list, "start", "output", "description", "model", "regionmapping", "inputRevision")
-    unknownColumnNames <- names(settings)[! names(settings) %in% knownColumnNames]
-    if (length(unknownColumnNames) > 0) {
-      message("\nAutomated checks did not find counterparts in default.cfg for these config file columns:")
-      message("  ", paste(unknownColumnNames, collapse = ", "))
-      message("start.R might simply ignore them. Please check if these switches are not deprecated.")
-      message("This check was added Jan. 2022. If you find false positives, add them to knownColumnNames in start.R.\n")
-      forbiddenColumnNames <- list(   # specify forbidden column name and what should be done with it
-        "c_budgetCO2" = "Rename to c_budgetCO2from2020, adapt emission budgets, see https://github.com/remindmodel/remind/pull/640",
-        "c_budgetCO2FFI" = "Rename to c_budgetCO2from2020FFI, adapt emission budgets, see https://github.com/remindmodel/remind/pull/640"
-      )
-      for (i in intersect(names(forbiddenColumnNames), unknownColumnNames)) {
-        message("Column name ", i, " in ", config.file , " is outdated. ", forbiddenColumnNames[i])
-      }
-      if (any(names(forbiddenColumnNames) %in% unknownColumnNames)) {
-        stop("Outdated column names found that must not be used. Stopped.")
-      }
+    knownColumnNames <- c(names(cfg$gms), "start", "path_gdx_carbonprice", "path_gdx", "path_gdx_ref",
+                          "path_gdx_bau", "output", "model", "regionmapping", "inputRevision")
+    unknownColumns <- names(settings)[! names(settings) %in% knownColumnNames]
+    if (length(unknownColumns) > 0) {
+      cat("\nAutomated checks did not find counterparts in default.cfg for these config file columns:\n  ")
+      cat(paste(unknownColumns, collapse = ", "))
+      cat("\nstart.R might simply ignore them. Please check if these switches are not deprecated.\n")
+      cat("This check was added Jan. 2022. If you find false positives, add them to knownColumnNames in start.R.\n")
     }
 
-    # Select scenarios that are flagged to start, some checks for titles
-    scenarios <- settings[settings$start==1,]
-    if (any(nchar(rownames(scenarios)) > 75)) stop(paste0("These titles are too long: ", paste0(rownames(scenarios)[nchar(rownames(scenarios)) > 75], collapse = ", "), " – GAMS would not tolerate this, and quit working at a point where you least expect it. Stopping now."))
+    # Select scenarios that are flagged to start
+    scenarios  <- settings[settings$start==1,]
     if (length(grep("\\.", rownames(scenarios))) > 0) stop(paste0("These titles contain dots: ", paste0(rownames(scenarios)[grep("\\.", rownames(scenarios))], collapse = ", "), " – GAMS would not tolerate this, and quit working at a point where you least expect it. Stopping now."))
     if (length(grep("_$", rownames(scenarios))) > 0) stop(paste0("These titles end with _: ", paste0(rownames(scenarios)[grep("_$", rownames(scenarios))], collapse = ", "), ". This may lead start.R to select wrong gdx files. Stopping now."))
   } else {
     # if no csv was provided create dummy list with default as the only scenario
-    scenarios <- data.frame("default" = "default", row.names = "default")
+    scenarios <- data.frame("default" = "default",row.names = "default")
   }
 
   ###################### Loop over scenarios ###############################
@@ -299,11 +280,10 @@ if ('--restart' %in% argv) {
 
     # testOneRegi settings
     if (testOneRegi) {
-      cfg$title            <- "testOneRegi"
-      cfg$description      <- "A REMIND run using testOneRegi"
-      cfg$gms$optimization <- "testOneRegi"
+      cfg$title            <- 'testOneRegi'
+      cfg$gms$optimization <- 'testOneRegi'
       cfg$output           <- NA
-      cfg$results_folder   <- "output/testOneRegi"
+      cfg$results_folder   <- 'output/testOneRegi'
 
       # delete existing Results directory
       cfg$force_replace    <- TRUE
@@ -314,33 +294,29 @@ if ('--restart' %in% argv) {
     # configure cfg according to settings from csv if provided
     if (!is.na(config.file)) {
       cfg <- configure_cfg(cfg, scen, scenarios, settings)
-      # Directly start runs that have a gdx file location given as path_gdx... or where this field is empty
-      check_gdx <- c("input.gdx", "input_ref.gdx", "input_bau.gdx", "input_carbonprice.gdx")
-      gdx_specified <- grepl(".gdx", cfg$files2export$start[check_gdx], fixed = TRUE)
-      gdx_na <- is.na(cfg$files2export$start[check_gdx])
-      start_now <- all(gdx_specified | gdx_na)
-      if (start_now) {
-        message("   Run can be started using ", sum(gdx_specified), " specified gdx file(s).")
-        if (sum(gdx_specified) > 0) message("     ", paste0(check_gdx[gdx_specified], ": ", cfg$files2export$start[check_gdx][gdx_specified], collapse = "\n     "))
-      }
+      # Directly start runs that have a gdx file location given as path_gdx_ref or where this field is empty
+      gdx_exists <- (! is.na(cfg$files2export$start['input_ref.gdx']) && str_sub(cfg$files2export$start['input_ref.gdx'], -4, -1) == ".gdx")
+      if (gdx_exists) cat("   Using input_ref.gdx found here:", cfg$files2export$start['input_ref.gdx'], "\n")
+      start_now <- (gdx_exists || is.na(cfg$files2export$start['input_ref.gdx']))
     }
 
     # save the cfg object for the later automatic start of subsequent runs (after preceding run finished)
     filename <- paste0(scen,".RData")
-    message("   Writing cfg to file ", filename)
-    save(cfg, file=filename)
+    cat("   Writing cfg to file",filename,"\n")
+    save(cfg,file=filename)
 
     if (start_now){
       # Create results folder and start run
       submit(cfg)
       } else {
-      message("   Waiting for: ", paste(unique(cfg$files2export$start[check_gdx][! gdx_specified & ! gdx_na]), collapse = ", "))
+      cat("   Waiting for", scenarios[scen,'path_gdx_ref'] ,"\n")
     }
 
     # print names of subsequent runs if there are any
-    if (length(rownames(cfg$RunsUsingTHISgdxAsInput)) > 0) {
-      message("   Subsequent runs: ", paste(rownames(cfg$RunsUsingTHISgdxAsInput), collapse = ", "))
-    }
+    if (length(cfg$RunsUsingTHISgdxAsInput)[1] != 0) {
+      if (any(cfg$RunsUsingTHISgdxAsInput$path_gdx_ref == scen)) {
+      cat("   Subsequent runs:",rownames(cfg$RunsUsingTHISgdxAsInput[cfg$RunsUsingTHISgdxAsInput$path_gdx_ref == scen,]),"\n")
+    }}
 
   }
 }

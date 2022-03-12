@@ -297,6 +297,11 @@ prepare <- function() {
 
   # update input files based on previous runs if applicable
   # ATTENTION: modifying gms files
+  if(!is.null(cfg$gms$carbonprice) && (cfg$gms$carbonprice == "NDC")){
+    cat("\nRun scripts/input/prepare_NDC.R.\n")
+    source("scripts/input/prepare_NDC.R")
+    prepare_NDC(as.character(cfg$files2export$start["input_bau.gdx"]), cfg)
+  }
 
   # Create input file with exogenous CO2 tax using the CO2 price from another run
   if(!is.null(cfg$gms$carbonprice) && (cfg$gms$carbonprice == "exogenous") && (!is.na(cfg$files2export$start["input_carbonprice.gdx"]))){
@@ -335,7 +340,6 @@ prepare <- function() {
 
   # configure main model gms file (cfg$model) based on settings of cfg file
   cfg$gms$c_expname <- cfg$title
-  cfg$gms$c_description <- cfg$description
   # run main.gms if not further specified
   if(is.null(cfg$model)) cfg$model <- "main.gms"
   manipulateConfig(cfg$model, cfg$gms)
@@ -429,22 +433,13 @@ prepare <- function() {
                       paste0("CESparametersAndGDX_",cfg$CESandGDXversion,".tgz"))
   # download and distribute needed data 
   if(!setequal(input_new, input_old) | cfg$force_download) {
-      message("Your input data are outdated or in a different regional resolution. New data are downloaded and distributed.")
+      cat("Your input data are outdated or in a different regional resolution. New data are downloaded and distributed. \n")
       download_distribute(files        = input_new,
                           repositories = cfg$repositories, # defined in your local .Rprofile or on the cluster /p/projects/rd3mod/R/.Rprofile
                           modelfolder  = ".",
-                          debug        = FALSE)
-  } else {
-      message("No input data downloaded and distributed. To enable that, delete input/source_files.log or set cfg$force_download to TRUE.")
-  }
-
-  # extract BAU emissions for NDC runs to set up emission goals for region where only some countries have a target
-  if ((!is.null(cfg$gms$carbonprice) && (cfg$gms$carbonprice == "NDC")) | (!is.null(cfg$gms$carbonpriceRegi) && (cfg$gms$carbonpriceRegi == "NDC")) ){
-    cat("\nRun scripts/input/prepare_NDC.R.\n")
-    source("scripts/input/prepare_NDC.R")
-    prepare_NDC(as.character(cfg$files2export$start["input_bau.gdx"]), cfg)
-  }
-
+                          debug        = FALSE) 
+  } 
+    
   ############ update information ########################
   # update_info, which regional resolution and input data revision in cfg$model
   update_info(regionscode(cfg$regionmapping),cfg$inputRevision)
@@ -474,20 +469,18 @@ prepare <- function() {
   
   # copy right gdx file to the output folder
   gdx_name <- paste0("config/gdx-files/",cfg$gms$cm_CES_configuration,".gdx")
-  if (0 != system(paste('cp', gdx_name, 
-			file.path(cfg$results_folder, 'input.gdx')))) {
-    stop('Could not copy gdx file ', gdx_name)
-  }
+  system(paste0('cp ',gdx_name,' ',file.path(cfg$results_folder, "input.gdx")))
   
   # choose which conopt files to copy
   cfg$files2export$start <- sub("conopt3",cfg$gms$cm_conoptv,cfg$files2export$start)
 
   # Copy important files into output_folder (before REMIND execution)
-  namedfiles <- names(cfg$files2export$start[! is.na(cfg$files2export$start)])
-  for (namedfile in namedfiles["" != namedfiles]) {
-    message("Try to copy ", cfg$files2export$start[namedfile], " to ", namedfile, ".")
-  }
   .copy.fromlist(cfg$files2export$start,cfg$results_folder)
+
+  namedfiles <- names(cfg$files2export$start)["" != names(cfg$files2export$start)]
+  for (namedfile in namedfiles) {
+    message("Copied to ", namedfile, ": ", cfg$files2export$start[namedfile])
+  }
 
   # Save configuration
   save(cfg, file = file.path(cfg$results_folder, "config.Rdata"))
@@ -663,19 +656,6 @@ prepare <- function() {
     margs_manipulateThis <- c(margs_manipulateThis, 
                                 list(c("vm_shBioFe.M", "!!vm_shBioFe.M")))
 
-    # OR: renamed for sectoral taxation
-    levs_manipulateThis <- c(levs_manipulateThis,
-                             list(c("vm_emiCO2_sector.L", "vm_emiCO2Sector.L")),
-                             list(c("v21_taxrevCO2_sector.L", "v21_taxrevCO2Sector.L")))
-    margs_manipulateThis <- c(margs_manipulateThis,
-                             list(c("vm_emiCO2_sector.M", "vm_emiCO2Sector.M")),
-                             list(c("v21_taxrevCO2_sector.M", "v21_taxrevCO2Sector.M")),
-                             list(c("q_emiCO2_sector.M", "q_emiCO2Sector.M")),
-                             list(c("q21_taxrevCO2_sector.M", "q21_taxrevCO2Sector.M")))
-    fixings_manipulateThis <- c(fixings_manipulateThis,
-                             list(c("vm_emiCO2_sector.FX", "vm_emiCO2Sector.FX")),
-                             list(c("v21_taxrevCO2_sector.FX", "v21_taxrevCO2Sector.FX")))
-
     #RP filter out regipol items
     if(grepl("off", cfg$gms$cm_implicitFE, ignore.case = T)){
       margs_manipulateThis <- c(margs_manipulateThis,
@@ -697,6 +677,7 @@ prepare <- function() {
                                                                "$include \"fixings.gms\";",
                                                                "$include \"margs.gms\";",
                                                                "$onlisting", sep = "\n"))))
+
 
     # Perform actual manipulation on levs.gms, fixings.gms, and margs.gms in
     # single, respective, parses of the texts.
@@ -848,8 +829,8 @@ run <- function(start_subsequent_runs = TRUE) {
   # If REMIND actually did run
   if (cfg$action == "ce" && cfg$gms$c_skip_output != "on") {
 
-    # Print Message.
-    cat("\nREMIND run finished!\n\n")
+    # Print Message
+    cat("\nREMIND run finished!\n")
 
     # Create solution report for Nash runs
     if (cfg$gms$optimization == "nash" && cfg$gms$cm_nash_mode != "debug" && file.exists("fulldata.gdx")) {
@@ -858,14 +839,12 @@ run <- function(start_subsequent_runs = TRUE) {
       file.remove("output_nash.gms")
     }
   }
-  if (cfg$action == "c") {
-    cat("\nREMIND was compiled but not executed, because cfg$action was set to 'c'\n\n")
-  }
+
 
   # to facilitate debugging, look which files were created.
   message("Model summary:")
   # Print REMIND runtime
-  message("  gams_runtime is ", round(gams_runtime,1), " ", units(gams_runtime), ".")
+  message("  gams_runtime is ", gams_runtime, "")
   if (! file.exists("full.gms")) {
     message("! full.gms does not exist, so the REMIND GAMS code was not generated.")
   } else {
@@ -905,69 +884,80 @@ run <- function(start_subsequent_runs = TRUE) {
   setwd(cfg$remind_folder)
 
   #====================== Subsequent runs ===========================
-
+  
   # Use the name to check whether it is a coupled run (TRUE if the name ends with "-rem-xx")
   coupled_run <- grepl("-rem-[0-9]{1,2}$",cfg$title)
   # Don't start subsequent runs form here if REMIND runs coupled. They are started in start_coupled.R instead.
-  start_subsequent_runs <- (start_subsequent_runs | isTRUE(cfg$restart_subsequent_runs)) & !coupled_run
-
-  if (start_subsequent_runs & (length(rownames(cfg$RunsUsingTHISgdxAsInput)) > 0)) {
-    # track whether any subsequent run was actually started
-    started_any_subsequent_run <- FALSE
+  start_subsequent_runs <- start_subsequent_runs & !coupled_run
+ 
+  if (start_subsequent_runs & (length(cfg$RunsUsingTHISgdxAsInput)[1] != 0)) {
 
     # Save the current cfg settings into a different data object, so that they are not overwritten
     cfg_main <- cfg
-
-    # fulldatapath may be written into gdx paths of subsequent runs
-    fulldatapath <- paste0(cfg_main$remind_folder,"/",cfg_main$results_folder,"/fulldata.gdx")
-    possible_pathes_to_gdx <- c("input.gdx", "input_ref.gdx", "input_refpolicycost.gdx", "input_bau.gdx", "input_carbonprice.gdx")
-
-    # Loop possible subsequent runs, saving path to fulldata.gdx of current run (== cfg_main$title) to their cfg files
-
+    
+    # Save the path to the fulldata.gdx of the current run (== cfg_main$title) to the cfg files of the runs that ... (see below at 1., 2., 3.)
     for (run in rownames(cfg_main$RunsUsingTHISgdxAsInput)) {
-      message("\nPrepare subsequent run ", run, ":")
-      RData_file <- paste0(run,".RData")
-      load(RData_file)
+       
+       RData_file <- paste0(run,".RData")
+       load(RData_file)
+       
+       # 1. ... use it as 'input_bau.gdx'
+       if ("path_gdx_bau" %in% names(cfg_main$RunsUsingTHISgdxAsInput)) {
+          if (!is.na(cfg_main$RunsUsingTHISgdxAsInput[run,,drop=FALSE]$path_gdx_bau)) {
+             if (cfg_main$RunsUsingTHISgdxAsInput[run,,drop=FALSE]$path_gdx_bau == cfg_main$title) {
+          cat("Writing the path for input_bau.gdx to ",RData_file,"\n")
+          # ...change the path_gdx_bau field of the subsequent run to the fulldata gdx of the current run ...
+          cfg$files2export$start['input_bau.gdx'] <- paste0(cfg_main$remind_folder,"/",cfg_main$results_folder,"/fulldata.gdx")
+       }
+          }
+       }
+       
+       # 2. ... use it as 'input_carbonprice.gdx'
+       if ("path_gdx_carbonprice" %in% names(cfg_main$RunsUsingTHISgdxAsInput)) { 
+          if (!is.na(cfg_main$RunsUsingTHISgdxAsInput[run,,drop=FALSE]$path_gdx_carbonprice)) {
+             if (cfg_main$RunsUsingTHISgdxAsInput[run,,drop=FALSE]$path_gdx_carbonprice == cfg_main$title) {
+                cat("Writing the path for input_carbonprice.gdx to ",RData_file,"\n")
+                # ...change the path_gdx_carbonprice field of the subsequent run to the fulldata gdx of the current run ...
+                cfg$files2export$start['input_carbonprice.gdx'] <- paste0(cfg_main$remind_folder,"/",cfg_main$results_folder,"/fulldata.gdx")
+             }
+          }
+       }
+       
+       save(cfg, file = RData_file)
 
-      pathes_to_gdx <- intersect(possible_pathes_to_gdx, names(cfg$files2export$start))
-
-      gdx_na <- is.na(cfg$files2export$start[pathes_to_gdx])
-      needfulldatagdx <- names(cfg$files2export$start[pathes_to_gdx][cfg$files2export$start[pathes_to_gdx] == cfg_main$title & !gdx_na])
-      message("In ", RData_file, ", use current fulldata.gdx path for ", paste(needfulldatagdx, collapse = ", "), ".")
-      cfg$files2export$start[needfulldatagdx] <- fulldatapath
-
-      save(cfg, file = RData_file)
-
-      # Subsequent runs will be started using submit.R, if all necessary gdx files were generated
-      gdx_exist <- grepl(".gdx", cfg$files2export$start[pathes_to_gdx])
-
-      if (all(gdx_exist | gdx_na)) {
-        message("Starting subsequent run ",run)
-        source("scripts/start/submit.R")
-        submit(cfg)
-        started_any_subsequent_run <- TRUE
-      } else {
-        message(run, " is still waiting for: ",
-        paste(unique(cfg$files2export$start[pathes_to_gdx][!(gdx_exist | gdx_na)]), collapse = ", "), ".")
-      }
-    } # end of loop through possible subsequent runs
+       # 3. ... use it as 'input_ref.gdx' and start these runs (known as subsequent runs).
+       if (cfg_main$RunsUsingTHISgdxAsInput[run,,drop=FALSE]$path_gdx_ref == cfg_main$title) {
+          load(RData_file)
+          cat("Writing the path for input_ref.gdx to ",RData_file,"\n")
+          # ...change the path_gdx_ref field of the subsequent run to the fulldata gdx of the current run ...
+          cfg$files2export$start['input_ref.gdx'] <- paste0(cfg_main$remind_folder,"/",cfg_main$results_folder,"/fulldata.gdx")
+          save(cfg, file = RData_file)
+          # Subsequent runs will be started in submit.R using the RData files written above after the current run has finished.
+          cat("Starting subsequent run ",run,"\n")
+          source("scripts/start/submit.R")
+          submit(cfg)
+       } else {
+          cat('\nNo subsequent run was set for this scenario\n')
+       }
+       
+    }
 
     # Set cfg back to original
     cfg <- cfg_main
 
-    # Create script file that can be used later to restart the subsequent runs manually.
+    # 4. Create script file that can be used later to restart the subsequent runs manually.
     # In case there are no subsequent runs (or it's coupled runs), the file contains only
     # a small message.
 
     subseq_start_file  <- paste0(cfg$results_folder,"/start_subsequentruns_manually.R")
   
-    if(!any(cfg$RunsUsingTHISgdxAsInput == cfg$title)) {
-      write("cat('\nNo subsequent run was set for this scenario\n')", file=subseq_start_file)
+    if(!any(cfg$RunsUsingTHISgdxAsInput$path_gdx_ref == cfg$title)) {
+      write("cat('\nNo subsequent run was set for this scenario\n')",file=subseq_start_file)
     } else {
       #  go up to the main folder, where the cfg. files for subsequent runs are stored
       filetext <- paste0("setwd('",cfg$remind_folder,"')\n")
       filetext <- paste0(filetext,"source('scripts/start/submit.R')\n")
-      for (run in rownames(cfg$RunsUsingTHISgdxAsInput)) {
+      for(run in rownames(cfg_main$RunsUsingTHISgdxAsInput)[cfg$RunsUsingTHISgdxAsInput$path_gdx_ref == cfg$title]){
         filetext <- paste0(filetext,"\n")
         filetext <- paste0(filetext,"load('",run,".RData')\n")
         #filetext <- paste0(filetext,"cfg$results_folder <- 'output/:title::date:'\n")
@@ -975,10 +965,8 @@ run <- function(start_subsequent_runs = TRUE) {
         filetext <- paste0(filetext,"submit(cfg)\n")
       }
       # Write the text to the file
-      write(filetext, file=subseq_start_file)
+      write(filetext,file=subseq_start_file)
     }
-  } else {
-    message("\nDid not try to start subsequent runs.\n")
   }
 
   #=================== END - Subsequent runs ========================

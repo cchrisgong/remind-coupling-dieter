@@ -4,10 +4,9 @@
 *** |  AGPL-3.0, you are granted additional permissions described in the
 *** |  REMIND License Exception, version 1.0 (see LICENSE file).
 *** |  Contact: remind@pik-potsdam.de
-*** SOF ./modules/37_industry/subsectors/realization.gms
+*** SOF ./modules/37_industry/subsectors.gms
 
-*' @description subsectors models industry subsectors explicitly with individual
-*' CES nests for cement, chemicals, steel, and otherInd production.
+*' @description Under development.  Do not use.
 
 *####################### R SECTION START (PHASES) ##############################
 $Ifi "%phase%" == "sets" $include "./modules/37_industry/subsectors/sets.gms"
@@ -19,5 +18,5 @@ $Ifi "%phase%" == "bounds" $include "./modules/37_industry/subsectors/bounds.gms
 $Ifi "%phase%" == "presolve" $include "./modules/37_industry/subsectors/presolve.gms"
 $Ifi "%phase%" == "postsolve" $include "./modules/37_industry/subsectors/postsolve.gms"
 *######################## R SECTION END (PHASES) ###############################
-*** EOF ./modules/37_industry/subsectors/realization.gms
+*** EOF ./modules/37_industry/subsectors.gms
 

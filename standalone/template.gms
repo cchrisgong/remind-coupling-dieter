@@ -42,9 +42,8 @@ $ONeolcom
 *** remove the warnings for very small exponents (x**-60) when post-processing
 $offdigit
 
-***---------------------    Run name and description    -------------------------
-$setGlobal c_expname      default
-$setGlobal c_description  "REMIND standalone template"
+***---------------------    Run name    -----------------------------------------
+$setGlobal c_expname  default
 
 ***------------------------------------------------------------------------------
 ***                           MODULES
