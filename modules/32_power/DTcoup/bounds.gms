@@ -39,16 +39,37 @@ if ((cm_DTcoup_eq eq 1),
 				loop(te$(CFcoupSuppte32(te)),
 				vm_capFac.lo(t,regi,te)=0;
 				vm_capFac.up(t,regi,te)=INF;  !! must not be capped by one, as some vm_capFac are larger than 1 due to scaling
-* these cause infes in DTmode = none...
-*$IFTHEN.hasbound not %cm_DTmode% == "none"
-* vm_capFac.up(t,regi,te)$(DISPATCHte32(te)) = 0.8; !! set CF of non nuclear dispatchables to be less than 80% (this is consistent with eqn con2c_maxprodannual_conv in DIETER)
-* vm_capFac.up(t,regi,"tnrs")$(tDT32(t) AND (t.val gt 2030)) = 0.85; !! set CF of nuc to be less than 85% (this is consistent with eqn con2c_maxprodannual_conv_nuc in DIETER)
-* vm_capFac.up(t,regi,"tnrs")$(tDT32(t) AND (t.val le 2030)) = 0.9; !! otherwise might cause infes
-*$ENDIF.hasbound
 				);
 			);
 		);
 );
+
+* $IFTHEN.hasbound not %cm_DTmode% == "none"
+* if ((cm_DTcoup_eq eq 1),
+* 		loop(regi$(regDTCoup(regi)),
+* 			loop(t$(tDT32(t)),
+* 				loop(te$(DISPATCHte32(te)),
+*           vm_capFac.up(t,regi,te) = 0.8; !! set CF of non nuclear dispatchables to be less than 80% (same as in DIETER)
+* *          vm_capFac.up(t,regi,"tnrs")$(tDT32(t) AND (t.val gt 2030)) = 0.85; !! set CF of nuc to be less than 85% (this is consistent with eqn con2c_maxprodannual_conv_nuc in DIETER)
+* *          vm_capFac.up(t,regi,"tnrs")$(tDT32(t) AND (t.val le 2030)) = 0.9; !! otherwise might cause infes
+* *          vm_capFac.up(t,regi,"tnrs")$(tDT32(t)) = 1; !! set CF of nuc to be less than 85% (this is consistent with eqn con2c_maxprodannual_conv_nuc in DIETER)
+* 				);
+* 			);
+* 		);
+* );
+* $ENDIF.hasbound
+
+$IFTHEN.nobound %cm_DTmode% == "none"
+if ((cm_DTcoup_eq eq 1),
+		loop(regi$(regDTCoup(regi)),
+			loop(t$(tDT32(t)),
+				loop(te$(DISPATCHte32(te)),
+          vm_capFac.up(t,regi,te) = 1; !! set CF of dispatchables to be less than 100%
+			);
+		);
+	);
+);
+$ENDIF.nobound
 
 $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
 if ((cm_DTcoup_eq eq 1),
@@ -149,10 +170,6 @@ $ENDIF.WindOff
 vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regNoDTCoup(regi)) = 0;
 vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi) AND not tDT32(t)) = 0;
 
-***CG: bound shares between 0 and 100
-v32_shStor.up(t,regi,teVRE) = 100;
-v32_shStor.lo(t,regi,teVRE) = 0;
-
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
@@ -171,8 +188,15 @@ v32_shSeEl.lo(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 0;
 v32_shSeElDisp.up(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 100;
 v32_shSeElDisp.lo(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 0;
 
-*this turns off storage for coupled region, no need to put any additional switches on the storage equations
+***CG: bound storage shares between 0 and 100
+v32_shStor.up(t,regi,teVRE) = 100;
+v32_shStor.lo(t,regi,teVRE) = 0;
+
+*** this turns off storage for coupled region, no need to put any additional switches on the storage equations
+$IFTHEN.noStor %cm_DTstor% == "none"
 v32_shStor.fx(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
+$ENDIF.noStor
+
 
 *** Fix capacity for seh2 -> seel for coupled region for now (no H2 as grid storage)
 vm_cap.fx(t,regi,"h2turbVRE","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;

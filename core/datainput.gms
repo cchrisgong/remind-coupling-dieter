@@ -1148,6 +1148,26 @@ if( cm_solwindenergyscen = 3,
     );
 );
 
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+$IFTHEN.DTstor %cm_DTstor% == "on"
+
+table fm_stordata_DIETER(char, all_te)  "storage technology cost for DIETER coupled runs"
+$include "./core/input/generisdata_tech_DIETER_storage.prn"
+;
+
+fm_stordata_DIETER("inco0",te)              = sm_D2015_2_D2005 * fm_stordata_DIETER("inco0",te);
+fm_stordata_DIETER("incolearn",te)          = sm_D2015_2_D2005 * fm_stordata_DIETER("incolearn",te);
+fm_stordata_DIETER("omv",te)                = sm_D2015_2_D2005 * fm_stordata_DIETER("omv",te);
+fm_stordata_DIETER("inco0",te)              = sm_TWa_2_MWh / 1e12 * fm_stordata_DIETER("inco0",te);
+fm_stordata_DIETER("incolearn",te)          = sm_TWa_2_MWh / 1e12 * fm_stordata_DIETER("incolearn",te);
+fm_stordata_DIETER("omv",te)                = sm_TWa_2_MWh / 1e12 * fm_stordata_DIETER("omv",te);
+
+pm_data(all_regi,char,te)$(regDTCoup(all_regi) AND teStor(te)) = fm_stordata_DIETER(char,te);
+
+display fm_stordata_DIETER;
+$ENDIF.DTstor
+$ENDIF.DTcoup
+
 ***calculate default floor costs for learning technologies
 pm_data(regi,"floorcost",teLearn(te)) = pm_data(regi,"inco0",te) - pm_data(regi,"incolearn",te);
 
@@ -1193,7 +1213,7 @@ $if %cm_techcosts% == "REG"   pm_data(regi,"learnMult_wFC",teLearn(te))    = pm_
 $if %cm_techcosts% == "REG"   pm_data(regi,"learnMult_wFC","spv")    = pm_data(regi,"incolearn","spv")/(sum(regi2,p_capCum("2020",regi2,"spv"))**pm_data(regi,"learnExp_wFC","spv"));
 
 display p_capCum;
-display pm_data;
+display "chris core datainput", pm_data;
 
 *** end learning parameters
 

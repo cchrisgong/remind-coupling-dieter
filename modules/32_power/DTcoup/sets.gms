@@ -73,6 +73,8 @@ pcc
 pco
 storspv
 storwind
+storwindoff
+storcsp
 tnrs
 fnrs
 gridwind
@@ -86,6 +88,7 @@ COALte32(all_te) "coal to seel tech in REMIND" /igcc,igccc,pc,pcc,pco/
 NonPeakGASte32(all_te) "gas to seel tech in REMIND" /ngcc,ngccc/
 BIOte32(all_te) "biomass to seel tech in REMIND" /bioigcc,bioigccc/
 DISPATCHte32(all_te) "dispatchable technologies in REMIND" /igcc,igccc,pc,pcc,pco,ngcc,ngccc,bioigcc,bioigccc,ngt,tnrs,fnrs/
+STOte32(all_te) "storage technologies in REMIND"  /storspv, storwind, storwindoff,storcsp/
 REMINDte4DT32(all_te) "REMIND tech for DIETER"
 /
 spv
