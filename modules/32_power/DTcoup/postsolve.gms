@@ -340,7 +340,9 @@ p32_MVupscaled(t,regi,te)$(COALte32(te)) = p32_MVAvgW(t,regi,"coal");
 ***CG: calculate model generation share difference
 p32_REMINDUpscaledShare(t,regi,"solar") = p32_shSeElDisp(t,regi,"spv");
 p32_REMINDUpscaledShare(t,regi,"windon") = p32_shSeElDisp(t,regi,"wind");
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
 p32_REMINDUpscaledShare(t,regi,"windoff") = p32_shSeElDisp(t,regi,"windoff");
+$ENDIF.WindOff
 p32_REMINDUpscaledShare(t,regi,"hydro") = p32_shSeElDisp(t,regi,"hydro");
 p32_REMINDUpscaledShare(t,regi,"ocgt") = p32_shSeElDisp(t,regi,"ngt");
 p32_REMINDUpscaledShare(t,regi,"biomass") = sum(te$(BIOte32(te)),p32_shSeElDisp(t,regi,te));
@@ -352,8 +354,10 @@ p32_modelGenShDiff(t,regi,"solar") =
   sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"solar","gen_share")) - p32_REMINDUpscaledShare(t,regi,"solar") ;
 p32_modelGenShDiff(t,regi,"windon") =
   sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","gen_share")) - p32_REMINDUpscaledShare(t,regi,"windon") ;
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
 p32_modelGenShDiff(t,regi,"windoff") =
   sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_off","gen_share")) - p32_REMINDUpscaledShare(t,regi,"windoff") ;
+$ENDIF.WindOff
 p32_modelGenShDiff(t,regi,"hydro") =
   sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"ror","gen_share")) - p32_REMINDUpscaledShare(t,regi,"hydro") ;
 p32_modelGenShDiff(t,regi,"ocgt") =

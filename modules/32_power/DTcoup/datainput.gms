@@ -126,28 +126,6 @@ Execute_Loadpoint 'input' pm_prtp = pm_prtp;
 Execute_Loadpoint 'input' o_margAdjCostInv = o_margAdjCostInv;
 Execute_Loadpoint 'input' pm_priceCO2 = pm_priceCO2;
 
-
-* $IFTHEN.DTcoup %cm_DTcoup% == "on"
-* $IFTHEN.DTstor %cm_DTstor% == "on"
-*
-* table fm_stordata_DIETER(char, all_te)  "storage technology cost for DIETER coupled runs"
-* $include "./modules/32_power/DTcoup/input/f32_generisdata_tech_DIETER_storage.prn"
-* ;
-*
-* fm_stordata_DIETER("inco0",te)              = sm_D2015_2_D2005 * fm_stordata_DIETER("inco0",te);
-* fm_stordata_DIETER("incolearn",te)          = sm_D2015_2_D2005 * fm_stordata_DIETER("incolearn",te);
-* fm_stordata_DIETER("omv",te)                = sm_D2015_2_D2005 * fm_stordata_DIETER("omv",te);
-* fm_stordata_DIETER("inco0",te)              = s_DpKWa_2_TDpTWa * fm_stordata_DIETER("inco0",te);
-* fm_stordata_DIETER("incolearn",te)          = s_DpKWa_2_TDpTWa * fm_stordata_DIETER("incolearn",te);
-* fm_stordata_DIETER("omv",te)                = s_DpKWa_2_TDpTWa * fm_stordata_DIETER("omv",te);
-*
-* pm_data(all_regi,char,te)$(regDTCoup(all_regi) AND teStor(te)) = fm_stordata_DIETER(char,te);
-*
-* display pm_data;
-* $ENDIF.DTstor
-* $ENDIF.DTcoup
-
-
 p32_realCapfacVRE(t,regi,teVRE)$(vm_cap.l(t,regi,teVRE,"1"))
     = ( sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)) - v32_storloss.l(t,regi,teVRE) )
     / vm_cap.l(t,regi,teVRE,"1") *100;
