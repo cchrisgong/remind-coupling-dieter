@@ -344,8 +344,10 @@ p1 <- ggplot() +
   scale_fill_manual(name = "Technology", values = color.mapping) +
   scale_color_manual(name = "Technology", values = color.mapping_vre) +
   theme(axis.text = element_text(size = 10),
-        axis.title = element_text(size = 10, face = "bold")) +
+        axis.title = element_text(size = 15, face = "bold")) +
   xlab("Year") + ylab("Generation (TWh)") +
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
+  theme(axis.text=element_text(size=15), axis.title=element_text(size= 13, face="bold"),strip.text = element_text(size=13)) +
   ggtitle(paste0("REMIND: ", reg, " (last iteration)")) +
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
 
@@ -378,8 +380,10 @@ if (length(dieter.files) != 0) {
     scale_fill_manual(name = "Technology", values = color.mapping) +
     scale_color_manual(name = "Technology", values = color.mapping_vre) +
     theme(axis.text = element_text(size = 10),
-          axis.title = element_text(size = 10, face = "bold")) +
+          axis.title = element_text(size = 15, face = "bold")) +
     xlab("Year") + ylab("Generation (TWh)") +
+    theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
+    theme(axis.text=element_text(size=15), axis.title=element_text(size= 13, face="bold"),strip.text = element_text(size=13)) +
     ggtitle(paste0("DIETER: ", reg, " (last iteration)")) +
     theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
   
@@ -394,7 +398,7 @@ if (length(dieter.files) != 0) {
 
 swfigure(sw, grid.draw, p)
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/Generation_time.png"),  p,  width = 10, height =14, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/Generation_time.png"),  p,  width = 12, height =14, units = "in", dpi = 120)
 }
 
 

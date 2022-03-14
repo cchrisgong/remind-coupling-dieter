@@ -212,9 +212,11 @@ plot.remind.capacity <- out.remind.capacity %>%
 p1<-ggplot() +
   geom_area(data = plot.remind.capacity%>% filter(period %in% model.periods.till2100) , aes(x = period, y = value, fill = tech), size = 1.2, alpha = 0.5) +
   scale_fill_manual(name = "Technology", values = color.mapping.cap) +
+  theme(legend.position="none")+
+  theme(axis.text=element_text(size=15), axis.title=element_text(size= 20, face="bold"),strip.text = element_text(size=13)) +
   xlab("period") + ylab(paste0("Capacity (GW)")) +
-  ggtitle(paste0("REMIND Last iteration: ", reg))+
-  theme(legend.title = element_blank()) 
+  ggtitle(paste0("REMIND last iteration: ", reg))+
+  theme(plot.title = element_text(size = 20, face = "bold"))
 
 if (length(dieter.files) != 0) {
 plot.dieter.capacity <- out.dieter.capacity %>%
@@ -223,10 +225,13 @@ plot.dieter.capacity <- out.dieter.capacity %>%
 p2<-ggplot() +
     geom_area(data = plot.dieter.capacity%>% filter(period %in% model.periods.till2100), aes(x = as.numeric(period), y = value, fill = tech), size = 1.2, alpha = 0.5) +
     scale_fill_manual(name = "Technology", values = color.mapping.cap) +
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
+  theme(axis.text=element_text(size=15), axis.title=element_text(size= 20, face="bold"),strip.text = element_text(size=13)) +
     xlab("period") + ylab(paste0("Capacity (GW)")) +
-    ggtitle(paste0("DIETER Last iteration: ", reg))+
-    # theme(aspect.ratio = .7)+
-    theme( legend.title = element_blank()) 
+    ggtitle(paste0("DIETER last iteration: ", reg))+
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=20))+
+  theme(plot.title = element_text(size = 20, face = "bold"))
+
 }
 
 grid.newpage()

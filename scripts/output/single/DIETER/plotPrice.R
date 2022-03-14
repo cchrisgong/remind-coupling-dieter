@@ -3,6 +3,7 @@
 cat("Plot Seel price \n")
 
 out.SEPrice <- NULL
+out.SEPrice.rollmean <- NULL
 out.RMprice <- NULL
 out.DTprice <- NULL
 out.totalDem <- NULL
@@ -19,10 +20,11 @@ for (i in 2:length(remind.files)){
     mutate(variable= "REMIND secondary electricity price ($/MWh)")
   
   DTprice  <- file.path(outputdir, remind.files[i]) %>% 
-    read.gdx( "p32_DIETER_elecprice", squeeze = FALSE) %>% 
+    read.gdx( "p32_DIETER_elecprice_wscar", squeeze = FALSE) %>% 
     select(period=ttot, value) %>%
     mutate(iteration = i-1) %>%
-    mutate(variable = "DIETER secondary electricity price ($/MWh)")
+    mutate(variable = "DIETER secondary electricity price ($/MWh)") %>% 
+    mutate(value = value *1.2) # convert to 2015 dollar
   
   p32_seelTotDem <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx( "p32_seelTotDem", factor = FALSE)  %>% 
@@ -33,16 +35,18 @@ for (i in 2:length(remind.files)){
     mutate(iteration = i-1)  %>%
     mutate(variable = "Total demand (Twh)")
   
+  RMprice.rollmean <- RMprice  %>% 
+    mutate(value = frollmean(value, 3, align = "center", fill = NA))
+  
   out.RMprice <- rbind(out.RMprice, RMprice)
   out.DTprice <- rbind(out.DTprice, DTprice)
   out.SEPrice <- rbind(out.SEPrice, RMprice, DTprice)
+  out.SEPrice.rollmean <- rbind(out.SEPrice.rollmean, RMprice.rollmean, DTprice)
   out.totalDem <- rbind(out.totalDem, p32_seelTotDem)
 }
 
 RM.SEprice <- out.RMprice %>% 
-  select(period, value,iteration,tech=variable) %>% 
-  filter(period %in% model.periods)
-
+  select(period, value,iteration,tech=variable)
 # Plotting ----------------------------------------------------------------
 
 swlatex(sw,"\\onecolumn")
@@ -107,15 +111,37 @@ if (save_png == 1){
 swlatex(sw, paste0("\\subsection{secondary electricity price over time for both models}"))
 
 plot.seelprice <- out.SEPrice %>% 
-  filter(iteration %in% c(1,2,3,4,5,10,maxiter-1))
+  filter(iteration %in% c(1,2,3,maxiter-1))%>% 
+  filter(period %in% model.periods.till2100) 
 
 p <- ggplot() + 
   geom_line(data=plot.seelprice, aes(x=as.numeric(period), y=value, color = variable), size = 2, alpha = 0.5) +
-  xlab("Time")+
-  facet_wrap(~iteration, nrow = 3)
+  xlab("Period")+ylab("")+
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
+  theme(axis.text=element_text(size=15), axis.title=element_text(size= 18, face="bold"),strip.text = element_text(size=15)) +
+  coord_cartesian(ylim = c(0,150))+
+  facet_wrap(~iteration, nrow = 3,labeller = label_both)
 
 swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/SE_elec_price_RMDT_time.png"),  p,  width = 12, height =7, units = "in", dpi = 120)
 }
 
+swlatex(sw, paste0("\\subsection{secondary electricity price over time for both models (REMIND price rolling mean)}"))
+
+plot.seelprice <- out.SEPrice.rollmean %>% 
+  filter(iteration %in% c(1,2,3,maxiter-1)) %>% 
+  filter(period %in% model.periods.till2100) 
+
+p <- ggplot() + 
+  geom_line(data=plot.seelprice, aes(x=as.numeric(period), y=value, color = variable), size = 2, alpha = 0.5) +
+  xlab("Period")+ylab("")+
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
+  theme(axis.text=element_text(size=15), axis.title=element_text(size= 18, face="bold"),strip.text = element_text(size=15)) +
+  coord_cartesian(ylim = c(0,150))+
+  facet_wrap(~iteration, nrow = 3,labeller = label_both)
+
+swfigure(sw,print,p,sw_option="width=20, height=12")
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/DIETER/SE_elec_price_RMDT_RMrollmean_time.png"),  p,  width = 12, height =7, units = "in", dpi = 120)
+}
