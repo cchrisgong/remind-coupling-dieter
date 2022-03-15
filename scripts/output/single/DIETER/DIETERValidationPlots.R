@@ -400,6 +400,24 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                            vregrid = "VRE grid",
                            NULL)
   
+  
+  dieter.tech.mapping.hrly <- c(coal = "Coal",
+                                nuc = "Nuclear",
+                                OCGT_eff = "OCGT",
+                                CCGT = "CCGT",
+                                bio = "Biomass",
+                                ror = "Hydro",
+                                Wind_on = "Wind_Onshore",
+                                Wind_off = "Wind_Offshore",
+                                Solar = "Solar",
+                                elh2 = "Electrolyzers",
+                                el = "Electricity",
+                               lith = "Lithium_ion_Battery",
+                               PSH = "Pumped_Storage_Hydro",
+                               hydrogen = "Hydrogen_Storage",
+                               caes = "Compressed_Air_Energy_Storage",
+                               NULL)
+  
   running_lcoe_components <- c(
     "Grid Cost",
     "Adjustment Cost",
@@ -433,6 +451,15 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     `shadow price of capacity bound from REMIND - avg ($/MWh)` = 'Shadow Price',
     `Total Markup` = 'Total Markup',
     NULL)
+  
+  dieter.hourly.variables <- c( 
+    "generation (GWh)",
+    "curtailment renewable (GWh)",
+    "storage generation (GWh)",
+    "storage loading (GWh)",
+    "consumption (GWh)",
+    NULL)
+  
   
   # color mapping
   cost.colors_DT <- c(
