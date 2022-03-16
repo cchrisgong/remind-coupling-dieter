@@ -404,7 +404,7 @@ if (save_png == 1){
 
 #####################################################################################################
 if (length(dieter.files) != 0) {
-for (i in c(5,10,20,27,maxiter-1)){
+  for (i in c(start_i+1,start_i+5,start_i+10,maxiter-1)){
    # i = 27
     plot.remind.snap <- out.remind %>% 
     filter(iteration == i) %>% 
@@ -446,7 +446,7 @@ for (i in c(5,10,20,27,maxiter-1)){
 
 if (length(dieter.files) != 0) {
   
-  for (i in c(0,1,2,3,5,maxiter-2)){
+  for (i in c(start_i,start_i+1,start_i+2,start_i+3,start_i+5,start_i+10,maxiter-2)){
     
     plot.remind.i0 <- out.remind %>% 
       filter(iteration == 0+i) %>% 

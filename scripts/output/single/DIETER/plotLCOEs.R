@@ -306,7 +306,9 @@ swlatex(sw, paste0("\\subsection{Technology LCOE - DIETER}"))
 
 out.cost_bkdw_avg <- NULL
 
-for (i in c(1,2,length(dieter.files.report))){
+for (i in c(2,3,length(dieter.files.report))){
+  
+  iter = as.numeric(str_extract(dieter.files.report[i], "[0-9]+"))
   
 cost_bkdw_avg <- file.path(outputdir, dieter.files.report[i]) %>%
     read.gdx("report_tech", factors = FALSE, squeeze = FALSE) %>%
@@ -321,7 +323,7 @@ cost_bkdw_avg <- file.path(outputdir, dieter.files.report[i]) %>%
     mutate(variable = factor(variable, levels = rev(unique(dieter.variable.mapping)))) %>%
     select(period, tech, variable, value) %>% 
     mutate(period = as.numeric(period)) %>% 
-    mutate(iteration = i-1)
+    mutate(iteration = iter)
 
 out.cost_bkdw_avg <- rbind(out.cost_bkdw_avg, cost_bkdw_avg)
 }
@@ -435,7 +437,7 @@ dieter.teloceprice_avg <- list(dieter.price, dieter.telcoe_avg) %>%
   mutate(period = as.numeric(period))%>%
   filter(!tech == "VRE grid")
 
-for (iter in c(0,1,maxiter-1)){
+for (iter in c(start_i,start_i+1,maxiter-1)){
   
 # 2020 has very high LCOE due to shadow price for biomass and OCGT, exclude from plotting
 p <- ggplot() +
@@ -817,7 +819,9 @@ swlatex(sw, paste0("\\subsection{Marginal and average DIETER system LCOE vs. mar
 
 out.prices_DT <- NULL
 
-for (i in c(1,2,length(dieter.files.report))){
+for (i in c(2,3,length(dieter.files.report))){
+  
+  iter = as.numeric(str_extract(dieter.files.report[i], "[0-9]+"))
   
 prices_DT <- file.path(outputdir, dieter.files.report[i]) %>% 
   read.gdx("report", squeeze=F) %>% 
@@ -828,7 +832,7 @@ prices_DT <- file.path(outputdir, dieter.files.report[i]) %>%
   revalue.levels(variable = dieter.variable.mapping) %>%
   mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>% 
   mutate(period = as.numeric(period)) %>% 
-  mutate(iteration = i - 1) %>% 
+  mutate(iteration = iter)%>% 
   select(model,iteration,period, variable, value)
 
 out.prices_DT <-  rbind(out.prices_DT, prices_DT)
@@ -965,8 +969,8 @@ if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/sys_avgLCOE_price_compare_line.png"),  p.sysLCOE_compare,  width = 14, height =9, units = "in", dpi = 120)
 }
 
-for (iter in c(1,2,length(dieter.files.report))-1){
-
+for (iter in c(start_i,start_i+1,maxiter-1)){
+  
   out.prices_DT_bar <- out.prices_DT %>% 
     filter(!variable == 'DIETER annual average electricity price') %>%
     mutate(value = -value)
@@ -980,7 +984,7 @@ for (iter in c(1,2,length(dieter.files.report))-1){
               aes(period, value, fill=variable)) +
     scale_y_continuous("LCOE and DIETER Price\n(USD2015/MWh)") +
     scale_x_continuous(breaks = seq(2010,2100,10)) +
-    coord_cartesian(ylim = c(-200,200)) +
+    # coord_cartesian(ylim = c(-200,200)) +
     scale_color_manual(name = "variable", values = price.colors) +
     scale_fill_manual(values = cost.colors.dieter) +
     theme_bw() +
@@ -997,14 +1001,14 @@ for (iter in c(1,2,length(dieter.files.report))-1){
 
   DIETER_bar_avg <- list(out.prices_DT_bar, sysLCOE_avg_DT) %>%
     reduce(full_join)  %>% 
-    filter(iteration %in% c(0,maxiter-1))
+    filter(iteration %in% c(start_i+1,maxiter-1))
   
   p.sysLCOEprice_DIETER_iters <- ggplot() + 
     geom_col( data = DIETER_bar_avg %>% filter(period %in% model.periods.till2100, period < 2090) ,
               aes(period, value, fill=variable)) +
     scale_y_continuous("LCOE and DIETER Price\n(USD2015/MWh)") +
     scale_x_continuous(breaks = seq(2010,2100,10)) +
-    coord_cartesian(ylim = c(-115,215)) +
+    coord_cartesian(ylim = c(-115,265)) +
     scale_color_manual(name = "variable", values = price.colors) +
     scale_fill_manual(values = cost.colors.dieter) +
     theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
@@ -1020,7 +1024,7 @@ for (iter in c(1,2,length(dieter.files.report))-1){
     ggsave(filename = paste0(outputdir, "/DIETER/avgLCOE_price_bar_iterations.png"), p.sysLCOEprice_DIETER_iters, width = 12, height =7, units = "in", dpi = 120)
   }
   
-# DIETER system marginal LCOE
+  # DIETER system marginal LCOE
 
 sysLCOE_marg_DT <- dieter.telcoe_marg %>%
   select(period,tech,variable,value) %>%
@@ -1066,28 +1070,6 @@ if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/sys_margLCOE_price_compare_line.png"),  p,  width = 17, height =7, units = "in", dpi = 120)
 }
 
-# 
-# DIETER_bar_marg <- list(prices_bar, sysLCOE_marg_DT) %>%
-#   reduce(full_join) 
-# 
-# p.sysLCOEprice_DIETER <- ggplot() + 
-#   geom_col( data = DIETER_bar_marg, 
-#             aes(period, value, fill=variable)) +
-#   facet_wrap(~model, scales = "free_y") +
-#   scale_y_continuous("LCOE and DIETER Price\n(USD2015/MWh)") +
-#   scale_x_continuous(breaks = seq(2010,2100,10)) +
-#   scale_color_manual(name = "variable", values = price.colors) +
-#   # coord_cartesian(ylim = c(-115,115))+
-#   scale_fill_manual(values = cost.colors.dieter) +
-#   theme_bw() +
-#   theme( axis.text.x = element_text(angle = 90),
-#          strip.background = element_blank())
-# 
-# swfigure(sw,print,p)
-# 
-# if (save_png == 1){
-#   ggsave(filename = paste0(outputdir, "/DIETER/margLCOE_price_compare_bar.png"),  p,  width = 17, height =7, units = "in", dpi = 120)
-# }
 ########################################################################################################
 swlatex(sw, paste0("\\subsectionDIETER's VRE total LCOEs compared to fossil fuel plants running cost}"))
 

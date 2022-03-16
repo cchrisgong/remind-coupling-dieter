@@ -112,7 +112,7 @@ if (save_png == 1){
 swlatex(sw, paste0("\\subsection{secondary electricity price over time for both models}"))
 
 plot.seelprice <- out.SEPrice %>% 
-  filter(iteration %in% c(1,2,3,maxiter-1))%>% 
+  filter(iteration %in% c(start_i,start_i+1,start_i+2,maxiter-1))%>% 
   filter(period %in% model.periods.till2100) 
 
 p <- ggplot() + 

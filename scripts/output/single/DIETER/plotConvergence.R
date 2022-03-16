@@ -94,9 +94,9 @@ remind.gensh <- plot.remind.genshare %>%
 
 diff.gensh <- out.dieter.report.gensh %>% 
   select(period, tech, genshareDT = value, iteration) %>% 
-  # mutate(period = as.numeric(period)) %>% 
   left_join(remind.gensh) %>% 
-  mutate(delGenshare = genshareRM - genshareDT)
+  mutate(delGenshare = genshareRM - genshareDT) %>% 
+  filter(iteration >0)
 
 p <-ggplot() +
   geom_line(data = diff.gensh, aes(x = iteration, y = delGenshare, color = tech), size = 1.2, alpha = 0.5) +
@@ -126,12 +126,12 @@ diff.price <- out.RMprice %>%
   filter(period %in% model.periods) %>% 
   filter(!value == 0) %>% 
   select(period,iteration,rmprice=value) %>% 
-  # mutate( rmprice = frollmean(rmprice, 3, align = "center", fill = 0)) %>%
   left_join(out.DTprice) %>% 
   filter(period %in% model.periods.till2100) %>% 
   select(period,iteration,rmprice, value) %>% 
-  mutate(value = abs(rmprice - value))%>% 
-  select(-rmprice)
+  mutate(value = rmprice - value) %>% 
+  select(-rmprice)%>% 
+  filter(iteration > start_i-1)
 
 p <-ggplot() +
   geom_line(data = diff.price, aes(x = iteration, y = value,), size = 1.2, alpha = 0.5) +
@@ -148,25 +148,90 @@ swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/Diff_elec_price_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
 }
+##################################################################################################
+
+swlatex(sw, paste0("\\subsection{Absolute electricity price difference over iterations}"))
+
+abs.diff.price <- diff.price %>% 
+  mutate(value = abs(value)) 
+
+p <-ggplot() +
+  geom_line(data = abs.diff.price, aes(x = iteration, y = value,), size = 1.2, alpha = 0.5) +
+  theme(axis.text=element_text(size=20), axis.title=element_text(size= 20,face="bold")) +
+  xlab("iteration") + ylab(paste0("Difference of electricity price (REMIND-DIETER)\n($/MWh)"))  +
+  theme(legend.title = element_text(size=25),legend.text = element_text(size=25)) +
+  theme(legend.text = element_text(size=20), strip.text = element_text(size = 20)) +
+  # coord_cartesian(ylim = c(-10,10)) +
+  theme(legend.position = "bottom") +
+  guides(color = guide_legend(nrow = 2, byrow = TRUE))+
+  facet_wrap(~period, nrow = 3)
+
+swfigure(sw,print,p,sw_option="width=20, height=12")
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/DIETER/Abs_diff_elec_price_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
+}
+
+##################################################################################################
+
+swlatex(sw, paste0("\\subsection{Electricity price difference over iterations (REMIND price = rolling mean)}"))
+
+diff.price.rollmean <- out.RMprice %>% 
+  filter(period %in% model.periods) %>% 
+  filter(!value == 0) %>% 
+  select(period,iteration,rmprice=value) %>% 
+  mutate( rmprice = frollmean(rmprice, 3, align = "center", fill = 0)) %>%
+  left_join(out.DTprice) %>% 
+  filter(period %in% model.periods.till2100) %>% 
+  select(period,iteration,rmprice, value) %>% 
+  mutate(value = rmprice - value) %>% 
+  select(-rmprice)%>% 
+  filter(iteration > start_i-1)
+
+p <-ggplot() +
+  geom_line(data = diff.price.rollmean, aes(x = iteration, y = value,), size = 1.2, alpha = 0.5) +
+  theme(axis.text=element_text(size=20), axis.title=element_text(size= 20,face="bold")) +
+  xlab("iteration") + ylab(paste0("Difference of electricity price (REMIND-DIETER)\n($/MWh)"))  +
+  theme(legend.title = element_text(size=25),legend.text = element_text(size=25)) +
+  theme(legend.text = element_text(size=20), strip.text = element_text(size = 20)) +
+  # coord_cartesian(ylim = c(-10,10)) +
+  theme(legend.position = "bottom") +
+  guides(color = guide_legend(nrow = 2, byrow = TRUE))+
+  facet_wrap(~period, nrow = 3)
+
+swfigure(sw,print,p,sw_option="width=20, height=12")
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/DIETER/Diff_RMrollmean_elec_price_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
+}
+##################################################################################################
+
+swlatex(sw, paste0("\\subsection{Absolute electricity price difference over iterations (REMIND price = rolling mean)}"))
+
+abs.diff.price.rollmean <- diff.price.rollmean %>% 
+  mutate(value = abs(value))
+
+p <-ggplot() +
+  geom_line(data = abs.diff.price.rollmean, aes(x = iteration, y = value,), size = 1.2, alpha = 0.5) +
+  theme(axis.text=element_text(size=20), axis.title=element_text(size= 20,face="bold")) +
+  xlab("iteration") + ylab(paste0("Difference of electricity price (REMIND-DIETER)\n($/MWh)"))  +
+  theme(legend.title = element_text(size=25),legend.text = element_text(size=25)) +
+  theme(legend.text = element_text(size=20), strip.text = element_text(size = 20)) +
+  # coord_cartesian(ylim = c(-10,10)) +
+  theme(legend.position = "bottom") +
+  guides(color = guide_legend(nrow = 2, byrow = TRUE))+
+  facet_wrap(~period, nrow = 3)
+
+swfigure(sw,print,p,sw_option="width=20, height=12")
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/DIETER/Abs_diff_RMrollmean_elec_price_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
+}
+
 
 ##################################################################################################
 
 swlatex(sw, paste0("\\subsection{Electricity price difference over iterations - surface plot}"))
-library(metR)
 
-diff.price.abs <- diff.price %>% 
-  mutate(value = abs(value))
-
-# p<- ggplot(diff.price.abs, aes(iteration, period, z = value)) +
-#   geom_contour_filled(breaks = MakeBreaks(binwidth = 2)) +
-#   ggtitle("Convergence surface") +
-#   xlab("iteration") + ylab("Period")  +
-#   theme(axis.text = element_text(size = 12),
-#         title = element_text(size = 12,face="bold"),
-#         panel.border= element_rect(size=2,color="black",fill=NA)) 
-  
 p<- ggplot() +
-  geom_contour_filled(aes(iteration, period, z = value), diff.price.abs)+
+  geom_contour_filled(aes(iteration, period, z = value), diff.price)+
   ggtitle("Convergence surface") +
   xlab("iteration") + ylab("Period")  +
   theme(axis.text = element_text(size = 12),
@@ -178,6 +243,56 @@ if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/Diff_elec_price_convergence_iteration_surface.png"),  p,  width = 14, height =7, units = "in", dpi = 120)
 }
 
+##################################################################################################
+
+swlatex(sw, paste0("\\subsection{Electricity price difference over iterations (REMIND price = rolling mean) - surface plot}"))
+
+p<- ggplot() +
+  geom_contour_filled(aes(iteration, period, z = value), diff.price.rollmean)+
+  ggtitle("Convergence surface") +
+  xlab("iteration") + ylab("Period")  +
+  theme(axis.text = element_text(size = 12),
+        title = element_text(size = 12,face="bold"),
+        panel.border= element_rect(size=2,color="black",fill=NA))
+
+swfigure(sw,print,p,sw_option="width=20, height=12")
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/DIETER/Diff_elec_price_convergence_iteration_surface.png"),  p,  width = 14, height =7, units = "in", dpi = 120)
+}
+
+##################################################################################################
+
+swlatex(sw, paste0("\\subsection{Abs electricity price difference over iterations - surface plot}"))
+
+p<- ggplot() +
+  geom_contour_filled(aes(iteration, period, z = value), abs.diff.price)+
+  ggtitle("Convergence surface") +
+  xlab("iteration") + ylab("Period")  +
+  theme(axis.text = element_text(size = 12),
+        title = element_text(size = 12,face="bold"),
+        panel.border= element_rect(size=2,color="black",fill=NA))
+
+swfigure(sw,print,p,sw_option="width=20, height=12")
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/DIETER/Abs_diff_elec_price_convergence_iteration_surface.png"),  p,  width = 14, height =7, units = "in", dpi = 120)
+}
+
+##################################################################################################
+
+swlatex(sw, paste0("\\subsection{Abs electricity price difference over iterations (REMIND price is rolling mean) - surface plot}"))
+
+p<- ggplot() +
+  geom_contour_filled(aes(iteration, period, z = value), abs.diff.price.rollmean)+
+  ggtitle("Convergence surface") +
+  xlab("iteration") + ylab("Period")  +
+  theme(axis.text = element_text(size = 12),
+        title = element_text(size = 12,face="bold"),
+        panel.border= element_rect(size=2,color="black",fill=NA))
+
+swfigure(sw,print,p,sw_option="width=20, height=12")
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/DIETER/Abs_diff_RMrollmean_elec_price_convergence_iteration_surface.png"),  p,  width = 14, height =7, units = "in", dpi = 120)
+}
 
 ##################################################################################################
 
@@ -209,6 +324,39 @@ p <-ggplot() +
 swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/Diff_avg_elec_price_convergence_iteration.png"),  p,  width = 7, height =4.5, units = "in", dpi = 120)
+}
+
+
+##################################################################################################
+
+swlatex(sw, paste0("\\subsection{Abs electricity price difference (time average) over iterations}"))
+
+abs.diff.price.avg.yr <- abs.diff.price %>% 
+  dplyr::group_by(iteration) %>%
+  dplyr::summarise( value = mean(value), .groups = "keep" ) %>% 
+  dplyr::ungroup(iteration) %>% 
+  mutate(variable = "Abs difference of electricity price")
+
+# moving average
+abs.diff.price.avg.yr.movingavg <-abs.diff.price.avg.yr %>% 
+  mutate( value = frollmean(value, 3, align = "center", fill = NA)) %>% 
+  mutate(variable = "Moving average")
+
+ymax = max(abs.diff.price.avg.yr$value) * 1.1
+
+p <-ggplot() +
+  geom_line(data = abs.diff.price.avg.yr, aes(x = iteration, y = value, color = variable), size = 1.2, alpha = 0.5) +
+  geom_line(data = abs.diff.price.avg.yr.movingavg, aes(x = iteration, y = value, color = variable), size = 2.5, alpha = 0.5) +
+  theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+  xlab("iteration") + ylab(paste0("Difference of electricity price (REMIND-DIETER)\n($/MWh)"))  +
+  coord_cartesian(ylim = c(0,ymax)) +
+  theme(legend.position = "bottom") +
+  theme(legend.title=element_blank())+
+  guides(color = guide_legend(nrow = 2, byrow = TRUE))
+
+swfigure(sw,print,p,sw_option="width=20, height=12")
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/DIETER/Abs_diff_avg_elec_price_convergence_iteration.png"),  p,  width = 7, height =4.5, units = "in", dpi = 120)
 }
 
 ##################################################################################################

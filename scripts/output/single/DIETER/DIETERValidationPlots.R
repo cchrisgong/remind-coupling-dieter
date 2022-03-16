@@ -50,6 +50,9 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   report.periods <- c(seq(2005, 2060, 5), seq(2070, 2100, 10), seq(2110, 2150, 20))
 
+  ## load the number of iteration when coupling starts
+  start_i = as.numeric(str_extract(dieter.files[2], "[0-9]+"))
+  
   # load coupled region
   DTcoupreg <- file.path(outputdir, remind.files[2]) %>%  
     read.gdx("regDTcoup", factor = FALSE) 
