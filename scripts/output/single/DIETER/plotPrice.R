@@ -20,7 +20,8 @@ for (i in 2:length(remind.files)){
     mutate(variable= "REMIND secondary electricity price ($/MWh)")
   
   DTprice  <- file.path(outputdir, remind.files[i]) %>% 
-    read.gdx( "p32_DIETER_elecprice_wscar", squeeze = FALSE) %>% 
+    # read.gdx( "p32_DIETER_elecprice_wscar", squeeze = FALSE) %>% 
+    read.gdx( "p32_DIETER_elecprice", squeeze = FALSE) %>% 
     select(period=ttot, value) %>%
     mutate(iteration = i-1) %>%
     mutate(variable = "DIETER secondary electricity price ($/MWh)") %>% 
@@ -73,7 +74,7 @@ secAxisScale = 0.4
 
 p<-ggplot() +
   geom_line(data = out.RMprice, aes(x = iteration, y = value, color = variable), size = 1.2, alpha = 0.5) +
-  geom_line(data = out.totalDem, aes(x = iteration, y = value *secAxisScale , color =variable), size = 1.2, alpha = 0.5) +
+  geom_line(data = out.totalDem, aes(x = iteration, y = value * secAxisScale , color =variable), size = 1.2, alpha = 0.5) +
   theme(axis.text=element_text(), axis.title=element_text()) +
   scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0("total demand ", "(TWh)")))+
   xlab("iteration") + ylab(paste0("REMIND secondary electricity price ($/MWh)"))  +

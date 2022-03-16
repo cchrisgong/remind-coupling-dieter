@@ -117,15 +117,21 @@ if (save_png == 1){
 }
 
 ##################################################################################################
+
+###### comparison of electricity price should be without scarcity price hour in DIETER and the normal price in REMIND (which is without scarcity price hour) ################################################################
+
 swlatex(sw, paste0("\\subsection{Electricity price difference over iterations}"))
 
 diff.price <- out.RMprice %>% 
   filter(period %in% model.periods) %>% 
   filter(!value == 0) %>% 
   select(period,iteration,rmprice=value) %>% 
+  # mutate( rmprice = frollmean(rmprice, 3, align = "center", fill = 0)) %>%
   left_join(out.DTprice) %>% 
+  filter(period %in% model.periods.till2100) %>% 
   select(period,iteration,rmprice, value) %>% 
-  mutate(value = rmprice - value)
+  mutate(value = abs(rmprice - value))%>% 
+  select(-rmprice)
 
 p <-ggplot() +
   geom_line(data = diff.price, aes(x = iteration, y = value,), size = 1.2, alpha = 0.5) +
@@ -144,10 +150,40 @@ if (save_png == 1){
 }
 
 ##################################################################################################
+
+swlatex(sw, paste0("\\subsection{Electricity price difference over iterations - surface plot}"))
+library(metR)
+
+diff.price.abs <- diff.price %>% 
+  mutate(value = abs(value))
+
+# p<- ggplot(diff.price.abs, aes(iteration, period, z = value)) +
+#   geom_contour_filled(breaks = MakeBreaks(binwidth = 2)) +
+#   ggtitle("Convergence surface") +
+#   xlab("iteration") + ylab("Period")  +
+#   theme(axis.text = element_text(size = 12),
+#         title = element_text(size = 12,face="bold"),
+#         panel.border= element_rect(size=2,color="black",fill=NA)) 
+  
+p<- ggplot() +
+  geom_contour_filled(aes(iteration, period, z = value), diff.price.abs)+
+  ggtitle("Convergence surface") +
+  xlab("iteration") + ylab("Period")  +
+  theme(axis.text = element_text(size = 12),
+        title = element_text(size = 12,face="bold"),
+        panel.border= element_rect(size=2,color="black",fill=NA))
+
+swfigure(sw,print,p,sw_option="width=20, height=12")
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/DIETER/Diff_elec_price_convergence_iteration_surface.png"),  p,  width = 14, height =7, units = "in", dpi = 120)
+}
+
+
+##################################################################################################
+
 swlatex(sw, paste0("\\subsection{Electricity price difference (time average) over iterations}"))
 
 diff.price.avg.yr <- diff.price %>% 
-  filter(period %in% model.periods.till2100) %>% 
   dplyr::group_by(iteration) %>%
   dplyr::summarise( value = mean(value), .groups = "keep" ) %>% 
   dplyr::ungroup(iteration) %>% 
