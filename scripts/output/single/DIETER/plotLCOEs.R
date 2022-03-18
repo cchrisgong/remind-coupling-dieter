@@ -746,10 +746,10 @@ if (h2switch == "on"){
 }
 
 df.pricelcoe_minus_tax.plot <- df.pricelcoe_minus_tax.plot %>% 
-  filter(period > 2020)
+  filter(period > 2015)
 
 df.lcoe.components.plot <- df.lcoe.components.plot%>% 
-  filter(period > 2020)
+  filter(period > 2015)
 
 ymax = max(df.pricelcoe_minus_tax.plot$value) * 1.1
 ymin = min(df.lcoe.components.plot$value) * 1.1
@@ -877,6 +877,7 @@ prices_w2Shad_RM <- prices_wShad_RM %>%
 
 prices_RM.movingavg <- df.price0 %>%
   filter(tech == "System") %>% 
+  filter(period > 2010) %>% 
   select(period, variable, value)%>%
   mutate(model = "REMIND") %>% 
   mutate(value = frollmean(value, 3, align = "center", fill = NA)) %>% 
@@ -890,7 +891,11 @@ elec_prices_DT_wShadPrice_laIter <- elec_prices_DT_wShadPrice %>%
   filter(iteration == maxiter -1) %>% 
   select(-iteration)
 
-prices_lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter, prices_RM) %>%
+# prices_lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter, prices_RM) %>%
+#   reduce(full_join)
+
+
+prices_lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter) %>%
   reduce(full_join)
 
 genshare.dieter <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>% 
@@ -950,7 +955,7 @@ p.sysLCOE_compare <- ggplot() +
   geom_col( data = sys_avgLCOE_compare, 
             aes(period, value, fill=variable)) +
   geom_line(data = prices_lines %>% filter(period %in% model.periods.till2100) ,
-            aes(period, value, color=variable), size=1.2) +  
+            aes(period, value, color=variable), alpha = 0.7, size=2) +  
   geom_line(data = prices_RM.movingavg %>% filter(period %in% model.periods.till2100) ,
             aes(period, value, color=variable), alpha = 0.5, size=2) +  
   scale_y_continuous("LCOE and power price\n(USD2015/MWh)") +
@@ -966,7 +971,7 @@ p.sysLCOE_compare <- ggplot() +
 swfigure(sw,print,p.sysLCOE_compare)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/sys_avgLCOE_price_compare_line.png"),  p.sysLCOE_compare,  width = 14, height =9, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/sys_avgLCOE_price_compare_line.png"), p.sysLCOE_compare, width = 14, height =9, units = "in", dpi = 120)
 }
 
 for (iter in c(start_i,start_i+1,maxiter-1)){

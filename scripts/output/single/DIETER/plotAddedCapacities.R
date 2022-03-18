@@ -54,7 +54,7 @@ for(iter.rep in c(0,start_i,start_i+1,start_i+2,start_i+5,start_i+8, max(maxiter
     scale_alpha_manual(values=c("Pre-investment capacities"= 1, "Added capacities"=0.5, "Early-retired capacities"=0.2), limits=c("Pre-investment capacities", "Added capacities", "Early-retired capacities")) +
     facet_wrap(~tech, scales="free") +
     coord_cartesian(xlim = c(2020, 2100)) +
-    theme(legend.title=element_blank())+
+    theme(legend.title=element_blank()) +
     theme(legend.position="bottom") + 
     xlab("Time") + 
     ylab("Capacity (GW)")
@@ -66,3 +66,5 @@ for(iter.rep in c(0,start_i,start_i+1,start_i+2,start_i+5,start_i+8, max(maxiter
   }
 }
 swlatex(sw,"\\twocolumn")
+
+

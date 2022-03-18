@@ -16,6 +16,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   ##
   # whether to save png
   save_png = 1
+  CAPwith_CF = 0 # whether to plot capacities with CF
   options(warn=-1)
   
   # Directories -------------------------------------------------------------
@@ -249,8 +250,10 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   color.mapping_vre <- c("Solar" = "#ffcc00", "Wind Onshore" = "#337fff", "Wind Offshore" = "#334cff")
   
-  color.mapping.capfac.line <- c(color.mapping,
-                      "peak hourly residual demand" = "#0c0c0c", NULL)
+  color.mapping.cap.line <- c("peak hourly residual demand" = "#0c0c0c")
+  
+  color.mapping.capfac.line <- c(color.mapping,color.mapping.cap.line,
+                                 NULL)
   
   color.mapping.seel.line <- c(color.mapping,
                                "REMIND secondary electricity price ($/MWh)" = "#FFA500", 
@@ -497,11 +500,11 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                    NULL)
   
   price.colors <- c(
-    "REMIND Price" = "darkblue",
-    "REMIND price moving average" = "#8DB600",
+    # "REMIND Price" = "darkblue",
+    "REMIND price moving average" = "darkorchid",
     # "Total (marginal) LCOE + Markup" = "darkorchid",
     # "DIETER annual average electricity price" = "darkcyan",
-    "DIETER annual average electricity price with scarcity price" = "indianred",
+    "DIETER annual average electricity price with scarcity price" = "#8DB600",
     "DIETER annual average electricity price with scarcity price + shadow price" = "violet",
     # "REMIND price + shadow price (historical and peak load bound on cap.)" = "#ff0090",
     # 'DIETER shadow price due to capacity constraint from REMIND' = "DodgerBlue4",

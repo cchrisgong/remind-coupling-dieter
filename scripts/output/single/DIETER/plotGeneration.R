@@ -401,7 +401,38 @@ if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/Generation_time.png"),  p,  width = 12, height =14, units = "in", dpi = 120)
 }
 
+##################################################################################################
+swlatex(sw, "\\subsection{Generation last iteration - double bar plot}")
 
+if (length(dieter.files) != 0) {
+  plot.dieter.gen2 <- plot.dieter%>% 
+    filter(period %in% model.periods.till2100) %>% 
+    mutate(period = as.numeric(as.character(period)) + 1) %>% 
+    mutate(model = "DIETER") %>% 
+    filter(iteration == maxiter-1) 
+  
+  plot.remind.gen2 <- plot.remind %>% 
+    filter(period %in% model.periods.till2100) %>% 
+    mutate(period = as.numeric(as.character(period)) - 1) %>% 
+    mutate(model = "REMIND") %>% 
+    filter(iteration == maxiter-1)
+  
+  p<-ggplot() +
+    geom_bar(data = plot.dieter.gen2, aes(x=period, y=value, fill=all_te, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
+    geom_bar(data = plot.remind.gen2, aes(x=period, y=value, fill=all_te, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
+    scale_fill_manual(name = "Technology", values = color.mapping) +
+    scale_linetype_manual(name = "model", values = linetype.map) +
+    guides(linetype = guide_legend(override.aes = list(fill = NA, col = "black"))) +
+    xlab("period") + ylab(paste0("Generation (TWh)")) +
+    ggtitle(paste0(reg)) +
+    theme(legend.title = element_blank()) 
+  
+  swfigure(sw,print,p)
+  if (save_png == 1){
+    ggsave(filename = paste0(outputdir, "/DIETER/Generation_doublebar_time.png"),  p,  width = 9, height = 4.5, units = "in", dpi = 120)
+  }
+  
+}
 #####################################################################################################
 if (length(dieter.files) != 0) {
   for (i in c(start_i+1,start_i+5,start_i+10,maxiter-1)){
