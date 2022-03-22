@@ -18,7 +18,7 @@ df.mod <- read.quitte(mifpath)
 #*account for the early retirement sunk cost whereas the CAPEX reported from my DIETER
 #*reporting does. This for example will cause a seemingly huge mismatch for te LCOE 
 #*when CO2 price is high and e.g. 90% of CCGT is suddenly retired at 2020
-#*
+
 lcoe.file <- grep("REMIND_LCOE.*", list.files(outputdir, full.names = T), value=T)
 df.lcoe <- read.csv(lcoe.file, sep = ";", header = T, colClasses = c(rep("factor", 3), "numeric", rep("factor", 6), "numeric") )
   
@@ -70,10 +70,12 @@ mrkup <- out.remind.mrkup %>%
 
 mv.agg <- out.remind.mv %>% 
   mutate(cost = "Market value") %>% 
-  filter(period %in% model.periods.till2100) %>% 
+  filter(period >2010 & period < 2130) %>% 
   filter(iteration == iter_toplot - 1) %>% 
-  select(-iteration)
-
+  select(-iteration) %>% 
+  # mutate(value = frollmean(value, 3, align = "center", fill = NA)) %>%
+  filter(period %in% model.periods.till2100)
+    
 if (h2switch == "off"){
   mv.agg <- mv.agg %>% 
     filter(!tech %in% remind.sector.coupling.mapping)
@@ -248,8 +250,15 @@ df.mrkup.plot <- remind.mrkup.non0gen %>%
   select(-iteration) %>% 
   mutate(cost = "Markup subsidy/tax")
 
-df.lcoe.te.plot <- df.lcoe.teAgg %>% 
-  full_join(df.mrkup.plot)
+# df.lcoe.te.plot <- df.lcoe.teAgg 
+# %>% 
+  # full_join(df.mrkup.plot)
+
+# df.lcoe.teAgg.wAdj <- list(df.lcoe.teAgg, adjcost_marg) %>%
+#   reduce(full_join) %>% 
+#   filter(period %in% model.periods.till2100) %>% 
+#   mutate(cost = factor(cost, levels=rev(unique(c(dieter.variable.mapping,"Curtailment Cost")))))
+
   
 df.total.lcoe.teAgg <- df.lcoe.teAgg %>% 
   dplyr::group_by(period, tech) %>%
@@ -263,16 +272,17 @@ df.lcoe_minus_markup.te <- df.total.lcoe.teAgg %>%
                   mutate(totalLCOE = totalLCOE + value) %>%
                   mutate(cost = "Total (marginal) LCOE + Markup")
 
+df.total.lcoe.teAgg.plot <- df.total.lcoe.teAgg %>%
+  dplyr::rename( value = totalLCOE ) %>% 
+  mutate(cost = "Total (marginal) LCOE")
+
 df.lcoe_minus_markup.te.plot <- df.lcoe_minus_markup.te %>% 
   select(-value) %>% 
   dplyr::rename( value = totalLCOE )
 
-df.telcoe_mv.plot <- list(df.lcoe_minus_markup.te.plot, mv.agg) %>% 
-  reduce(full_join) %>%
-  filter(period %in% model.periods.till2100)
 
 # weighted total system (average) shadow price
-df.sp.sys <- list(prod_share, sp) %>% 
+df.sp.capcon.sys <- list(prod_share, sp.capcon) %>% 
   reduce(full_join) %>% 
   replace(is.na(.), 0) %>% 
   mutate_all(function(x) ifelse(is.infinite(x), 0, x)) %>% 
@@ -282,8 +292,55 @@ df.sp.sys <- list(prod_share, sp) %>%
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
   dplyr::ungroup(period) 
 
+sp.capcon.agg <- list(prod_shareType_RM, sp.capcon) %>% 
+  reduce(full_join)%>% 
+  replace(is.na(.), 0) %>% 
+  revalue.levels(tech = remind.tech.mapping) %>% 
+  mutate(value = share * value) %>% 
+  select(-share) %>% 
+  dplyr::group_by(period,tech) %>%
+  dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
+  dplyr::ungroup(period,tech) %>% 
+  mutate(period = as.numeric(period)) %>% 
+  filter(period %in% model.periods.till2100) %>% 
+  select(period,tech, sp_capcon=value) %>% 
+  dplyr::group_by(tech) %>%
+  mutate(sp_capcon = frollmean(sp_capcon, 3, align = "center", fill = NA)) %>% 
+  dplyr::ungroup(tech) %>% 
+  replace(is.na(.), 0) 
+
 # weighted total system (average) shadow price
-df.sp.capcon.sys <- list(prod_share, sp.capcon) %>% 
+df.sp.agg <- list(prod_shareType_RM, sp) %>% 
+  reduce(full_join) %>% 
+  replace(is.na(.), 0) %>% 
+  revalue.levels(tech = remind.tech.mapping) %>% 
+  mutate(value = share * value) %>% 
+  select(-share) %>% 
+  dplyr::group_by(period,tech) %>%
+  dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
+  dplyr::ungroup(period,tech) %>% 
+  mutate(period = as.numeric(period)) %>% 
+  filter(period %in% model.periods.till2100) %>% 
+  select(period,tech, sp=value) %>% 
+  dplyr::group_by(tech) %>%
+  mutate(sp = frollmean(sp, 3, align = "center", fill = NA)) %>% 
+  dplyr::ungroup(tech) %>% 
+  replace(is.na(.), 0) 
+
+#market value + capacity constraint shadow price
+mv.plus.sp.agg <- list(sp.capcon.agg, mv.agg, df.sp.agg) %>% 
+  reduce(full_join) %>% 
+  select(-cost) %>% 
+  mutate(value = value + sp_capcon + sp) %>% 
+  select(-sp_capcon,sp) %>% 
+  mutate(cost = "Market value + capacity shadow price")
+
+df.telcoe_mv.plot <- list(df.total.lcoe.teAgg.plot, mv.plus.sp.agg, mv.agg) %>% 
+  reduce(full_join) %>%
+  filter(period %in% model.periods.till2100)
+
+# weighted total system (average) shadow price
+df.sp.sys <- list(prod_share, sp) %>% 
   reduce(full_join) %>% 
   replace(is.na(.), 0) %>% 
   mutate_all(function(x) ifelse(is.infinite(x), 0, x)) %>% 
@@ -403,6 +460,12 @@ if (h2switch == "off"){
   adjcost_marg <- adjcost_marg %>%
     filter(!tech %in% c(remind.sector.coupling.mapping))
 }
+
+df.lcoe.teAgg.wAdj <- list(df.lcoe.teAgg, adjcost_marg) %>%
+  reduce(full_join) %>% 
+  filter(period %in% model.periods.till2100) %>% 
+  mutate(cost = factor(cost, levels=rev(unique(c(dieter.variable.mapping,"Curtailment Cost")))))
+
 
 # marginal adj cost for the system in DIETER  
 adjcost.sys.marg <- adjcost_marg %>% 
@@ -596,18 +659,17 @@ if (save_png == 1){
 ########################################################################################################
 swlatex(sw, paste0("\\subsection{Technology LCOE - REMIND}"))
 
-
 # 2020 has very high LCOE for biomass and OCGT, exclude from plotting
 p.teLCOE <- ggplot() +
-  geom_col( data = df.lcoe.te.plot %>% filter(period %in% model.periods.till2100, period >2020),
+  geom_col( data = df.lcoe.teAgg.wAdj %>% filter(period %in% model.periods.till2100, period >2020),
             aes(period, value, fill=cost)) +
   geom_line(data = df.telcoe_mv.plot %>% filter(period >2020),
             aes(period, value, linetype=cost), size=1.2) +
   facet_wrap(~tech, scales = "free_y") +
   scale_y_continuous("LCOE and REMIND Price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2020,2100,10)) +
-  scale_fill_manual(values = cost.colors.te) +
-  # coord_cartesian(ylim = c(ymin,ymax))+
+  scale_fill_manual(values = cost.colors) +
+  # coord_cartesian(ylim = c(ymin,ymax)) +
   theme_bw() +
   theme( axis.text.x = element_text(angle = 90),
          strip.background = element_blank())
@@ -618,7 +680,6 @@ if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_REMIND.png"),  p.teLCOE,  width = 17, height =7, units = "in", dpi = 120)
 }
 
-
 ########################################################################################################
 swlatex(sw, paste0("\\subsection{Technology LCOE (DIETER average LCOE, REMIND marginal LCOE) - Comparison}"))
 
@@ -628,11 +689,7 @@ df.lcoe.avg.dieter <- cost_bkdw_avg_DT %>%
   filter(period %in% model.periods.till2100)
 
 barwidth = 1.5
-df.lcoe.teAgg.wAdj <- list(df.lcoe.teAgg, adjcost_marg) %>%
-  reduce(full_join) %>% 
-  filter(period %in% model.periods.till2100) %>% 
-  mutate(cost = factor(cost, levels=rev(unique(c(dieter.variable.mapping,"Curtailment Cost")))))
-  
+
 p.techLCOE_compare<-ggplot() +
   geom_col(data = df.lcoe.teAgg.wAdj %>% 
              filter(period > 2020)
@@ -891,12 +948,11 @@ elec_prices_DT_wShadPrice_laIter <- elec_prices_DT_wShadPrice %>%
   filter(iteration == maxiter -1) %>% 
   select(-iteration)
 
-# prices_lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter, prices_RM) %>%
-#   reduce(full_join)
-
-
-prices_lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter) %>%
+prices_lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter, prices_RM) %>%
   reduce(full_join)
+
+# prices_lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter) %>%
+#   reduce(full_join)
 
 genshare.dieter <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>% 
   read.gdx("report_tech", squeeze=F) %>% 

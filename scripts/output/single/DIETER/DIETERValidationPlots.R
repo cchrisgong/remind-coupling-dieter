@@ -500,7 +500,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                    NULL)
   
   price.colors <- c(
-    # "REMIND Price" = "darkblue",
+    "REMIND Price" = "darkblue",
     "REMIND price moving average" = "darkorchid",
     # "Total (marginal) LCOE + Markup" = "darkorchid",
     # "DIETER annual average electricity price" = "darkcyan",
