@@ -47,11 +47,11 @@ mv <- file.path(outputdir, remind.files[iter_toplot]) %>%
   mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2)
 
 sp <- file.path(outputdir, remind.files[iter_toplot]) %>% 
-  read.gdx("p32_shadowPrice", squeeze=F)  %>% 
+  read.gdx("p32_shadowPrice", squeeze=F) %>% 
   filter(all_regi == reg) %>%
   filter(all_te %in% names(remind.tech.mapping)) %>% 
   select(period = ttot, tech = all_te, value) %>%
-  filter(period %in% model.periods.till2100) %>% 
+  # filter(period %in% model.periods.till2100) %>% 
   mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2)
 
 sp.capcon <- file.path(outputdir, remind.files[iter_toplot]) %>% 
@@ -320,12 +320,12 @@ df.sp.agg <- list(prod_shareType_RM, sp) %>%
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
   dplyr::ungroup(period,tech) %>% 
   mutate(period = as.numeric(period)) %>% 
-  filter(period %in% model.periods.till2100) %>% 
   select(period,tech, sp=value) %>% 
   dplyr::group_by(tech) %>%
   mutate(sp = frollmean(sp, 3, align = "center", fill = NA)) %>% 
   dplyr::ungroup(tech) %>% 
-  replace(is.na(.), 0) 
+  replace(is.na(.), 0) %>% 
+  filter(period %in% model.periods.till2100) 
 
 #market value + capacity constraint shadow price
 mv.plus.sp.agg <- list(sp.capcon.agg, mv.agg, df.sp.agg) %>% 

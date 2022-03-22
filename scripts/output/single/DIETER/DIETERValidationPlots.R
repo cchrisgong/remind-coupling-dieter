@@ -98,14 +98,16 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                                       tdels = "Stationary Electricity",
                                       tdelt = "Transport Electricity")
  
+  remind.grid.mapping <- c(gridwindoff = "VRE Grid")
+  
   remind.sector.coupling.mapping.narrow <- c(elh2 = "Electrolyzers")
   
   remind.sector.coupling.mapping.exclude <- c(tdels = "Stationary Electricity",
                                               tdelt = "Transport Electricity")
 
-    
   remind.tech.mapping <- c(remind.nonvre.mapping.whyd, remind.vre.mapping, remind.sector.coupling.mapping)
   
+  ## only report electrolyers in demand side tech
   remind.tech.mapping.narrow <- c(remind.nonvre.mapping.whyd, remind.vre.mapping, remind.sector.coupling.mapping.narrow)
   
   
@@ -551,6 +553,8 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
 
   swlatex(sw, "\\tableofcontents\\newpage")
   
+###  Coupled model plots (annual resolution)
+  
   # Capacity factors --------------------------------------------------------
 
   # Capacities --------------------------------------------------------------
@@ -589,6 +593,12 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   # this needs plotMarketValuePrice.R
   source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
 
+  # (Residual) load duration curves -----------------------------------------
+  
+  source(file.path(dieter.scripts.folder, "plotRLDC_REMIND.R"), local=TRUE) 
+  
+###  DIETER plots (hourly resolution)
+  
   # (Residual) load duration curves -----------------------------------------
 
   # source(file.path(dieter.scripts.folder, "plotRLDCs.R"), local=TRUE) # Attention: computationally heavy on standard PC
