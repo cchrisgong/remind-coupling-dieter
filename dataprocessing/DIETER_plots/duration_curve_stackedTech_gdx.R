@@ -52,7 +52,7 @@ color.mapping <- c("CCGT" = "#999959", "Coal" = "#0c0c0c",
 
 #####################################################
 # specify output file
-dieter.runningcost.variables = c("fuel cost - divided by eta ($/MWh)","CO2 cost ($/MWh)")
+dieter.runningcost.variables = c("fuel cost - divided by eta ($/MWh)","CO2 cost ($/MWh)","O&M var cost ($/MWh)")
 
 dieter.dispatch.tech = c("CCGT", "coal","bio", "OCGT_eff", "nuc")
 dieter.dispatch.tech.whyd = c("CCGT", "coal","bio", "OCGT_eff", "nuc","ror")
