@@ -429,7 +429,7 @@ if (length(dieter.files) != 0) {
   
   swfigure(sw,print,p)
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/DIETER/Generation_doublebar_time.png"),  p,  width = 9, height = 4.5, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/Generation_doublebar_time.png"),  p,  width = 9, height = 6, units = "in", dpi = 120)
   }
   
 }

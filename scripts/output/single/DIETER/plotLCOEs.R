@@ -28,15 +28,17 @@ df.lcoe <- read.csv(lcoe.file, sep = ";", header = T, colClasses = c(rep("factor
 # generation share:　out.remind.genshare
 
 # load generation share
-prod_share <- file.path(outputdir, remind.files[iter_toplot]) %>% 
+prod_share.broad <- file.path(outputdir, remind.files[iter_toplot]) %>% 
     read.gdx("v32_shSeElDisp", squeeze = F)  %>% 
     filter(all_regi == reg) %>% 
     filter(all_te %in% names(remind.tech.mapping)) %>% 
     select(period=ttot, tech=all_te, genshare = value) %>% 
-    filter(period %in% model.periods.till2100) %>% 
     mutate(genshare = genshare / 1e2) %>% 
     mutate(period = as.numeric(period))
   
+prod_share <- prod_share.broad %>% 
+  filter(period %in% model.periods.till2100) 
+
 mv <- file.path(outputdir, remind.files[iter_toplot]) %>% 
   read.gdx("p32_marketValue", squeeze=F)  %>% 
   filter(all_regi == reg) %>%
@@ -52,7 +54,7 @@ sp <- file.path(outputdir, remind.files[iter_toplot]) %>%
   filter(all_te %in% names(remind.tech.mapping)) %>% 
   select(period = ttot, tech = all_te, value) %>%
   # filter(period %in% model.periods.till2100) %>% 
-  mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2)
+  mutate(value = -value * 1e12 / sm_TWa_2_MWh * 1.2)
 
 sp.capcon <- file.path(outputdir, remind.files[iter_toplot]) %>% 
   read.gdx("p32_capConShadowPrice", squeeze=F)  %>% 
@@ -73,7 +75,7 @@ mv.agg <- out.remind.mv %>%
   filter(period >2010 & period < 2130) %>% 
   filter(iteration == iter_toplot - 1) %>% 
   select(-iteration) %>% 
-  # mutate(value = frollmean(value, 3, align = "center", fill = NA)) %>%
+  # mutate(value = frollmean(value, 5, align = "center", fill = NA)) %>%
   filter(period %in% model.periods.till2100)
     
 if (h2switch == "off"){
@@ -103,23 +105,26 @@ flexadj <- out.remind.flexadj %>%
   mutate(sector = "supply-side") 
 
 # aggregated production share per upscaled technology
-prod_aggShare_RM <- prod_share %>% 
+prod_aggShare_RM <- prod_share.broad %>% 
   revalue.levels(tech = remind.tech.mapping) %>% 
   dplyr::group_by(period,tech) %>%
   dplyr::summarise( genshare = sum(genshare), .groups = "keep" ) %>% 
   dplyr::ungroup(period,tech) %>% 
   select(period,tech,aggshare = genshare)
 
-prod_share_RM <- prod_share %>%
+prod_share_RM <- prod_share.broad %>%
   mutate(tech2 = tech) %>%
   revalue.levels(tech = remind.tech.mapping)
 
 #share of REMIND tech production within a DIETER type
-prod_shareType_RM <- list(prod_aggShare_RM, prod_share_RM) %>%
+prod_shareType_RM.broad <- list(prod_aggShare_RM, prod_share_RM) %>%
   reduce(full_join) %>%
   mutate(share = genshare / aggshare) %>%
   select(period,tech=tech2,share) %>% 
   mutate(period = as.numeric(period))
+
+prod_shareType_RM <- prod_shareType_RM.broad %>% 
+  filter(period %in% model.periods.till2100) 
 
 #####################################################################################################
 #REMIND marginal LCOE component for each tech (marginal in the sense of one additional added unit of generation of each tech)
@@ -272,10 +277,6 @@ df.lcoe_minus_markup.te <- df.total.lcoe.teAgg %>%
                   mutate(totalLCOE = totalLCOE + value) %>%
                   mutate(cost = "Total (marginal) LCOE + Markup")
 
-df.total.lcoe.teAgg.plot <- df.total.lcoe.teAgg %>%
-  dplyr::rename( value = totalLCOE ) %>% 
-  mutate(cost = "Total (marginal) LCOE")
-
 df.lcoe_minus_markup.te.plot <- df.lcoe_minus_markup.te %>% 
   select(-value) %>% 
   dplyr::rename( value = totalLCOE )
@@ -302,15 +303,16 @@ sp.capcon.agg <- list(prod_shareType_RM, sp.capcon) %>%
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
   dplyr::ungroup(period,tech) %>% 
   mutate(period = as.numeric(period)) %>% 
-  filter(period %in% model.periods.till2100) %>% 
   select(period,tech, sp_capcon=value) %>% 
-  dplyr::group_by(tech) %>%
-  mutate(sp_capcon = frollmean(sp_capcon, 3, align = "center", fill = NA)) %>% 
+  dplyr::group_by(tech) %>% 
+  filter(!sp_capcon ==0) %>% 
+  mutate(sp_capcon = frollmean(sp_capcon, 5, align = "center", fill = NA)) %>% 
   dplyr::ungroup(tech) %>% 
-  replace(is.na(.), 0) 
+  replace(is.na(.), 0) %>% 
+  filter(period %in% model.periods.till2100)
 
-# weighted total system (average) shadow price
-df.sp.agg <- list(prod_shareType_RM, sp) %>% 
+# weighted total system (average) shadow price (including historical periods)
+df.sp.agg <- list(prod_shareType_RM.broad, sp) %>% 
   reduce(full_join) %>% 
   replace(is.na(.), 0) %>% 
   revalue.levels(tech = remind.tech.mapping) %>% 
@@ -322,9 +324,9 @@ df.sp.agg <- list(prod_shareType_RM, sp) %>%
   mutate(period = as.numeric(period)) %>% 
   select(period,tech, sp=value) %>% 
   dplyr::group_by(tech) %>%
-  mutate(sp = frollmean(sp, 3, align = "center", fill = NA)) %>% 
+  mutate(sp = frollmean(sp, 5, align = "center", fill = NA)) %>% 
   dplyr::ungroup(tech) %>% 
-  replace(is.na(.), 0) %>% 
+  replace(is.na(.), 0) %>%  
   filter(period %in% model.periods.till2100) 
 
 #market value + capacity constraint shadow price
@@ -332,12 +334,8 @@ mv.plus.sp.agg <- list(sp.capcon.agg, mv.agg, df.sp.agg) %>%
   reduce(full_join) %>% 
   select(-cost) %>% 
   mutate(value = value + sp_capcon + sp) %>% 
-  select(-sp_capcon,sp) %>% 
+  select(-sp_capcon, -sp) %>% 
   mutate(cost = "Market value + capacity shadow price")
-
-df.telcoe_mv.plot <- list(df.total.lcoe.teAgg.plot, mv.plus.sp.agg, mv.agg) %>% 
-  reduce(full_join) %>%
-  filter(period %in% model.periods.till2100)
 
 # weighted total system (average) shadow price
 df.sp.sys <- list(prod_share, sp) %>% 
@@ -456,6 +454,19 @@ adjcost_marg <- cost_bkdw_marg_4RM %>%
   filter(!tech == "VRE grid") %>%
   select(period,tech,cost=variable,value)
 
+df.total.lcoe.teAgg.plot <- df.total.lcoe.teAgg %>%
+  full_join( adjcost_marg %>% select(period,tech,adjcost=value)) %>% 
+  replace(is.na(.), 0) %>% 
+  mutate(totalLCOE = totalLCOE + adjcost) %>%
+  dplyr::rename( value = totalLCOE ) %>% 
+  select(-adjcost) %>% 
+  mutate(cost = "Total (marginal) LCOE")
+
+df.telcoe_mv.plot <- list(df.total.lcoe.teAgg.plot, mv.plus.sp.agg, mv.agg) %>% 
+  reduce(full_join) %>% 
+  filter(!tech %in% c("VRE grid", "Electrolyzers")) %>% 
+  filter(period %in% model.periods.till2100)
+
 if (h2switch == "off"){
   adjcost_marg <- adjcost_marg %>%
     filter(!tech %in% c(remind.sector.coupling.mapping))
@@ -464,6 +475,7 @@ if (h2switch == "off"){
 df.lcoe.teAgg.wAdj <- list(df.lcoe.teAgg, adjcost_marg) %>%
   reduce(full_join) %>% 
   filter(period %in% model.periods.till2100) %>% 
+  filter(!tech %in% c("VRE grid", "Electrolyzers")) %>% 
   mutate(cost = factor(cost, levels=rev(unique(c(dieter.variable.mapping,"Curtailment Cost")))))
 
 
@@ -492,13 +504,13 @@ dieter.price <- cost_bkdw_avg_DT %>%
 dieter.telcoe_avg <- cost_bkdw_avg_DT %>%
   filter(!variable %in% label.price)%>%
   filter(period %in% model.periods.till2100)%>%
-  filter(!tech == "VRE grid")
+  filter(!tech %in% c("VRE grid",dieter.demand.tech.mapping))
 
 dieter.teloceprice_avg <- list(dieter.price, dieter.telcoe_avg) %>%
   reduce(full_join) %>% 
   filter(period %in% model.periods.till2100) %>%
   mutate(period = as.numeric(period))%>%
-  filter(!tech == "VRE grid")
+  filter(!tech %in% c("VRE grid",dieter.demand.tech.mapping))
 
 for (iter in c(start_i,start_i+1,maxiter-1)){
   
@@ -541,7 +553,7 @@ if (save_png == 1){
 plot.dieter.telcoe_avg <- dieter.telcoe_avg %>%
   mutate(period = as.numeric(period)) %>%
   filter(period %in% model.periods.till2100) %>%
-  filter(!tech == "VRE grid")%>% 
+  filter(!tech %in% c("VRE grid",dieter.demand.tech.mapping))%>% 
   filter(iteration == maxiter-1)%>% 
   select(-iteration)
 # 
@@ -559,6 +571,7 @@ plot.dieter.price.spread <- spread(plot.dieter.price0, period,value) %>%
 
 plot.dieter.price <- plot.dieter.price.spread %>% 
   gather(period,value,-tech,-variable)%>%
+  filter(!tech %in% c("VRE grid",dieter.demand.tech.mapping))%>% 
   mutate(period = as.numeric(period))
 
 plot.dieter.price.total <- plot.dieter.price %>% 
@@ -686,7 +699,8 @@ swlatex(sw, paste0("\\subsection{Technology LCOE (DIETER average LCOE, REMIND ma
 df.lcoe.avg.dieter <- cost_bkdw_avg_DT %>% 
   filter(!variable %in% label.price) %>% 
   mutate(period = as.numeric(period)) %>% 
-  filter(period %in% model.periods.till2100)
+  filter(period %in% model.periods.till2100) %>% 
+  filter(!tech %in% c("VRE grid",dieter.demand.tech.mapping))
 
 barwidth = 1.5
 
@@ -821,7 +835,8 @@ p.sysLCOE_wmarkup <- ggplot() +
   scale_y_continuous("LCOE and REMIND Price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
   scale_fill_manual(values = cost.colors.sys.wh2) +
-  coord_cartesian(ylim = c(ymin,ymax))+
+  # coord_cartesian(ylim = c(ymin,ymax))+
+  coord_cartesian(ylim = c(ymin,200))+
   theme_bw() +
   ggtitle(paste0("System LCOE for 1 MWh of generated power: ", reg))+
   theme(plot.title = element_text(size = 16, face = "bold"))+

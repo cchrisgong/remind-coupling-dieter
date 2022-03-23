@@ -19,7 +19,7 @@ for (i in 2:(length(remind.files))){
     select(period = ttot, q32_peakDemandDT.m = m) %>% 
     filter(period %in% model.periods) %>% 
     left_join(remind.qm_budget) %>% 
-    mutate(q32_peakDemandDT.m = q32_peakDemandDT.m/qm_budget.m * 1e12 / 1e9 * 1.2) %>% # (10^12 2005$)/TW-> 2015$/kW
+    mutate(q32_peakDemandDT.m = q32_peakDemandDT.m / qm_budget.m * 1e12 / 1e9 * 1.2) %>% # (10^12 2005$)/TW-> 2015$/kW
     replace(is.na(.), 0) %>%
     select(period,value=q32_peakDemandDT.m) %>% 
     mutate(iteration = i-1)
