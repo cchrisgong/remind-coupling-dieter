@@ -12,7 +12,7 @@ p32_realCapfacVRE(t,regi,teVRE)$(vm_cap.l(t,regi,teVRE,"1"))
     / vm_cap.l(t,regi,teVRE,"1") * 100;
 
 * "real" VRE capfac for all technologies
-p32_realCapfac(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (teDTCoupSupp(te) OR CFcoupDemte32(te)))
+p32_realCapfac(t,regi,te)$(regDTCoup(regi) AND (teDTCoupSupp(te) OR CFcoupDemte32(te)))
     = p32_realCapfacVRE(t,regi,te)$(teVRE(te)) +
     vm_capFac.l(t,regi,te)$((teDTCoupSupp(te) OR CFcoupDemte32(te)) AND not teVRE(te)) * 100;
 
@@ -46,7 +46,7 @@ $ENDIF.DTcoup
 p32_valueFactor(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))
       = p32_marketValue(t,regi,te)$regDTCoup(regi)/(pm_SEPrice(t,regi,"seel")$regDTCoup(regi) + sm_eps);
 
-p32_shadowPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (p32_realCapfac(t,regi,te)))
+p32_shadowPrice(t,regi,te)$(regDTCoup(regi) AND teDTCoupSupp(te) AND (p32_realCapfac(t,regi,te)))
       = vm_cap.m(t,regi,te,"1") / (p32_realCapfac(t,regi,te) / 1e2);
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
