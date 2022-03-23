@@ -1,7 +1,7 @@
 # plot hourly energy mix for several years from results of DIETER
 
 mypath = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
-runnumber = "hydro601"
+runnumber = "hydro910"
 mydatapath = paste0("~/remind-coupling-dieter/output/", runnumber, "/")
 
 # specify output file
@@ -11,32 +11,27 @@ iteration = maxiter
 
 # import library
 source(paste0(mypath, "library_import.R"))
-source(paste0(mypath, "GDXtoQuitte.R"))
 library(readr)
 
-igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
-
-
-dieter.tech.mapping <- c(hc = "Hard coal",
-                         lig = "Lignite",
-                         coal = "Coal (Lig + HC)",
+dieter.tech.mapping <- c(
+                         coal = "Coal",
                          nuc = "Nuclear",
                          OCGT_eff = "OCGT",
                          CCGT = "CCGT",
                          bio = "Biomass",
                          ror = "Hydro",
-                         Wind_on = "Wind",
+                         Wind_on = "Wind Onshore",
+                         Wind_off = "Wind Offshore",
                          Solar = "Solar",
                          el = "Electricity",
                          elh2 = "Electrolyzer",
                          NULL)
 
-color.mapping <- c("CCGT" = "#999959", "Lignite" = "#0c0c0c", 
-                   # "Coal (Lig + HC)" = "#0c0c0c",
+color.mapping <- c("CCGT" = "#999959", "Coal" = "#0c0c0c", 
                    "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
                    "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
-                   # "Hard coal" = "#808080",
-                   # "peak demand" = "#0c0c0c", "Sto2" = "#e51900",  
+                   "Wind Onshore" = "#337fff", 
+                   "Wind Offshore" = "#334cff",
                    "Electrolyzer" = "#66cccc", "Electricity" = "red")
 
 #####################################################
@@ -96,10 +91,9 @@ for(year_toplot in year_toplot_list){
     geom_col(generation , mapping = aes(x=hour, y=value, fill=tech), alpha = 0.7)  +
     # geom_col(generationANDstorage , mapping = aes(x=hour, y=value, fill=tech), alpha = 0.7)  + 
     geom_point(data=price, mapping = aes(x=hour, y=value*plot_scale), color = "blue", group = 2)+
-    # geom_point(data=demand, mapping = aes(x=hour, y=value), color = "red", group = 1)+
-    geom_col(consumption, mapping = aes(x=hour, y=value, fill=tech), alpha = 0.7)  + 
-    # scale_y_continuous("Generation vs Consumption (GWh)") + xlab("") +
-    scale_fill_manual(name = "(GWh)", values = color.mapping)
+    # geom_col(consumption, mapping = aes(x=hour, y=value, fill=tech), alpha = 0.7)  + 
+    # scale_y_continuous("Hourly generation (GWh)") + xlab("") +
+    scale_fill_manual(name = "Technology", values = color.mapping)
   
   # p <- p + geom_line(data=demand, mapping = aes(x=hour, y=value, group = 1))
   # p <- p + geom_line(data=price, mapping = aes(x=hour, y=value*plot_scale, group = 2), alpha = 0.5)
@@ -108,7 +102,7 @@ for(year_toplot in year_toplot_list){
   
   # modifying colours and theme options
   # p <- p + scale_colour_manual(values = c("blue", "red"))
-  p <- p + labs(y = "Generation vs Consumption (GWh)",
+  p <- p + labs(y = "Hourly generation (GWh)",
                 x = "Hour of the Day",
                 colour = "")
   p <- p + theme(legend.position = c(0.95, 0.8))

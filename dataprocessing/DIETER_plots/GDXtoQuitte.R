@@ -10,8 +10,7 @@ options(scipen = 999) #disable scientific notation
 
 myDIETERPLOT_path = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
 
-source(paste0(myDIETERPLOT_path, "library_import.R"))
-igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
+# source(paste0(myDIETERPLOT_path, "library_import.R"))
 
 # variable_units <- read.csv(paste0(myDIETERPLOT_path, "variable_dict.csv"), sep = ',', header = T, stringsAsFactors = F)
 # variables <- unique(variable_units$dieter_name)

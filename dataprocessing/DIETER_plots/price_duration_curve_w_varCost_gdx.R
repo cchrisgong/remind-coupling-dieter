@@ -1,37 +1,26 @@
-myDIETERPLOT_path = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
+# plot hourly energy mix for several years from results of DIETER
 
-runnumber = "hydro910"
-mydatapath = paste0("~/remind-coupling-dieter/output/", runnumber, "/")
+# file = "full_DIETER_y10.gdx"
+file = "full_DIETER.gdx"
 
-filenames <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
-maxiter = length(filenames)-1
-source(paste0(myDIETERPLOT_path, "library_import.R"))
-source(paste0(myDIETERPLOT_path, "GDXtoQuitte.R"))
+outputdir = "output/hydro945"
+dir = "/home/chengong/remind-coupling-dieter/"
+mypath =paste0(dir,outputdir)
+
+mydatapath = paste0(mypath, "/", file)
+source("~/remind-coupling-dieter/dataprocessing/DIETER_plots/library_import.R")
 library(readr)
 
-# specify output file
-iteration = maxiter
-file = paste0("report_DIETER_i", iteration, ".gdx")
-
-annual_reportCSV = read.csv(paste0(myDIETERPLOT_path, runnumber, "_i", iteration, "_annualreport.csv"), sep = ';', header = T, stringsAsFactors = F)
-
 VAR_report_key_DT = c("fuel cost - divided by eta ($/MWh)","CO2 cost ($/MWh)","O&M var cost ($/MWh)")
-
-# gdxToQuitte_hourly(mydatapath, file,runnumber)
-
-hourly_reportCSV = read.csv(paste0(myDIETERPLOT_path, runnumber, "_i", iteration, "_hourlyreport.csv"), sep = ';', header = T, stringsAsFactors = F)
-hourly_reportQUITT <- as.quitte(hourly_reportCSV) 
-QUITTobj = hourly_reportQUITT
 
 TECH_DISPATCH_DT = c("CCGT", "lig","bio", "OCGT_eff", "nuc", "hc")
 
 color.mapping <- c("CCGT" = "#999959", 
-                   # "Lignite" = "#0c0c0c", 
-                   # "Coal (Lig + HC)" = "#0c0c0c",
+                   "Coal" = "#0c0c0c",
                    "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
                    "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff",
-                   # "Hard coal" = "#808080", 
                    "Electrolyzers" = "#48D1CC")
+
 #####################################################
 #plot hourly price duration curve
 
@@ -54,7 +43,7 @@ for(year_toplot in year_toplot_list){
     dplyr::group_by(tech) %>%
     dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
     dplyr::ungroup(tech)
- 
+  
   running_cost$maxT <-8760
   
   expanded_running_cost <- data.frame(tech = rep(running_cost$tech, running_cost$maxT),
@@ -67,7 +56,7 @@ for(year_toplot in year_toplot_list){
     filter(period == year_toplot) %>% 
     mutate(unit = "$/MWh", tech, value) %>% 
     select(variable, period, hour, tech, value)
-
+  
   price_Hr_plot <- price_hr %>% arrange(desc(value))
   price_Hr_plot$sorted_x <- seq(1, 8760)
   max_price <- max(price_Hr_plot$value)
