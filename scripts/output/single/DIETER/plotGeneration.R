@@ -65,15 +65,13 @@ remind.consumption <- NULL
 for (i in 2:length(remind.files)) {
   
   h2consum <- file.path(outputdir, remind.files[i]) %>%
-    read.gdx("vm_demSe",
+    read.gdx("p32_seh2elh2Dem",
              factors = FALSE,
-             field = "l",
              squeeze = FALSE) %>%
     filter(ttot %in% model.periods) %>%
     filter(all_regi == reg) %>%
-    filter(all_te == "elh2") %>%
     mutate(value = value * sm_TWa_2_MWh / 1e6) %>%
-    select(all_te,period = ttot, value) 
+    select(period = ttot, h2dem = value) 
   
   totalConsum <- file.path(outputdir, remind.files[i]) %>%
     read.gdx("p32_usableSeDisp",
@@ -83,12 +81,20 @@ for (i in 2:length(remind.files)) {
     filter(all_regi == reg) %>%
     mutate(value = value * sm_TWa_2_MWh / 1e6) %>%
     mutate(all_te="seel") %>% 
-    select(all_te,period = ttot, value)
+    select(all_te,period = ttot, value) %>% 
+    full_join(h2consum) %>% 
+    replace(is.na(.), 0) %>% 
+    mutate(value = value -h2dem) %>% 
+    select(-h2dem)
   
-  consumption.data <- list(h2consum, totalConsum) %>%
+  h2consum2 <- h2consum %>% 
+    mutate(all_te="elh2") %>% 
+    select(period, all_te,value=h2dem)
+  
+  consumption.data <- list(h2consum2, totalConsum) %>%
     reduce(full_join) %>%
     revalue.levels(all_te = remind.tech.mapping) %>%
-    mutate(iteration = i-1)
+    mutate(iteration = i-1) 
   
   remind.consumption <- rbind(remind.consumption, consumption.data)
   
@@ -401,6 +407,101 @@ if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/Generation_time.png"),  p,  width = 12, height =14, units = "in", dpi = 120)
 }
 
+#####################################################################################################
+swlatex(sw, "\\subsection{Generation and consumption over time (last iteration)}")
+
+p1 <- ggplot() +
+  geom_area(
+    data = plot.remind %>% filter(period <2110),
+    aes(x = period, y = value, fill = all_te),
+    size = 1.2,
+    alpha = 0.5,
+    stat = "identity"
+  ) +
+  geom_area(
+    data = plot.remind.generation.withCurt%>% filter(period <2110),
+    aes(x = period, y = value, color = all_te),
+    size = 1,
+    alpha = 0,
+    linetype = "dotted"
+  ) +
+  geom_area(
+    data = plot.remind.consumption%>% filter(period <2110)%>% mutate(value = -value),
+    aes(x = period, y = value, fill = all_te),
+    size = 1.2,
+    alpha = 0.5,
+    stat = "identity"
+  ) +
+  
+  scale_fill_manual(name = "Technology", values = color.mapping) +
+  scale_color_manual(name = "Technology", values = color.mapping_vre) +
+  theme(axis.text = element_text(size = 10),
+        axis.title = element_text(size = 15, face = "bold")) +
+  xlab("Year") + ylab("Generation (TWh)") +
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
+  theme(axis.text=element_text(size=15), axis.title=element_text(size= 13, face="bold"),strip.text = element_text(size=13)) +
+  ggtitle(paste0("REMIND: ", reg, " (last iteration)")) +
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
+
+
+
+if (length(dieter.files) != 0) {
+  p2 <- ggplot() +
+    geom_area(
+      data = plot.dieter%>% filter(period <2110),
+      aes(
+        x = as.numeric(period),
+        y = value,
+        fill = all_te
+      ),
+      size = 1.2,
+      alpha = 0.5
+    ) +
+    geom_area(
+      data = plot.dieter.gen.wCurt%>% filter(period <2110),
+      aes(
+        x = as.numeric(period),
+        y = value,
+        color = all_te
+      ),
+      size = 1,
+      alpha = 0,
+      linetype = "dotted"
+    ) +
+    geom_area(
+      data = plot.dieter.consumption%>% filter(period <2110) %>% mutate(value = -value),
+      aes(
+        x = as.numeric(period),
+        y = value,
+        fill = all_te
+      ),
+      size = 1.2,
+      alpha = 0.5
+    ) +
+    
+    scale_fill_manual(name = "Technology", values = color.mapping) +
+    scale_color_manual(name = "Technology", values = color.mapping_vre) +
+    theme(axis.text = element_text(size = 10),
+          axis.title = element_text(size = 15, face = "bold")) +
+    xlab("Year") + ylab("Generation (TWh)") +
+    theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
+    theme(axis.text=element_text(size=15), axis.title=element_text(size= 13, face="bold"),strip.text = element_text(size=13)) +
+    ggtitle(paste0("DIETER: ", reg, " (last iteration)")) +
+    theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
+  
+}
+
+grid.newpage()
+if (length(dieter.files) != 0) {
+  p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
+} else {
+  p <- p1
+}
+
+swfigure(sw, grid.draw, p)
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/DIETER/Generation_wConsumption_time.png"),  p,  width = 12, height =14, units = "in", dpi = 120)
+}
 ##################################################################################################
 swlatex(sw, "\\subsection{Generation last iteration - double bar plot}")
 
