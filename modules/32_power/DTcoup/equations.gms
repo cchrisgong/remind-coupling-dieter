@@ -4,6 +4,8 @@
 *** |  AGPL-3.0, you are granted additional permissions described in the
 *** |  REMIND License Exception, version 1.0 (see LICENSE file).
 *** |  Contact: remind@pik-potsdam.de
+*** SOF ./modules/32_power/DTcoup/equations.gms
+
 ***---------------------------------------------------------------------------
 *** Balance equation for electricity secondary energy type:
 ***---------------------------------------------------------------------------
@@ -460,4 +462,4 @@ q32_flexAdj(t,regi,te)$(teFlexTax(te))..
 
 $ENDIF.DTcoup_off
 
-*** EOF ./modules/32_power/DTcoup2/equations.gms
+*** EOF ./modules/32_power/DTcoup/equations.gms
