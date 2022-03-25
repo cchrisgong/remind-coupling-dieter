@@ -14,9 +14,6 @@
 # Ignore DIETER folder because of seperate repo
 scripts/iterative/DIETER/
 
-# ignore libreoffice lock files
-.~*#
-
 # Ignore everything in "input" folders
 input/
 
