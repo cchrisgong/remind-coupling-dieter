@@ -32,9 +32,7 @@ for (i in 1:length(dieter.files.report)){
 swlatex(sw,"\\onecolumn")
 swlatex(sw, paste0("\\section{Added capacities}"))
 
-start_i = as.numeric(str_extract(dieter.files[1], "[0-9]+"))
-
-for(iter.rep in c(start_i,start_i+1,start_i+2,start_i+3,start_i+5,start_i+8, max(maxiter-1,start_i+10))){
+for(iter.rep in c(0,start_i,start_i+1,start_i+2,start_i+5,start_i+8, max(maxiter-1,start_i+10))){
   swlatex(sw, paste0("\\subsection{Added capacities in iteration ", iter.rep, "}"))
   
   plot.dieter <- out.dieter.report %>%
@@ -56,7 +54,7 @@ for(iter.rep in c(start_i,start_i+1,start_i+2,start_i+3,start_i+5,start_i+8, max
     scale_alpha_manual(values=c("Pre-investment capacities"= 1, "Added capacities"=0.5, "Early-retired capacities"=0.2), limits=c("Pre-investment capacities", "Added capacities", "Early-retired capacities")) +
     facet_wrap(~tech, scales="free") +
     coord_cartesian(xlim = c(2020, 2100)) +
-    theme(legend.title=element_blank())+
+    theme(legend.title=element_blank()) +
     theme(legend.position="bottom") + 
     xlab("Time") + 
     ylab("Capacity (GW)")
@@ -68,3 +66,5 @@ for(iter.rep in c(start_i,start_i+1,start_i+2,start_i+3,start_i+5,start_i+8, max
   }
 }
 swlatex(sw,"\\twocolumn")
+
+

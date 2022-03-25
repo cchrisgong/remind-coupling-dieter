@@ -1,17 +1,18 @@
 mypath = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
-runnumber = "hydro601"
+runnumber = "hydro910"
 
 mydatapath = paste0("~/remind-coupling-dieter/output/", runnumber, "/")
 
 filenames <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
+
 maxiter = length(filenames)-1
+iteration = maxiter
 # import library
 
-source(paste0(mypath, "library_import.R"))
+# source(paste0(mypath, "library_import.R"))
 source(paste0(mypath, "GDXtoQuitte.R"))
 library(readr)
 
-igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
 # specify output file
 file1 = paste0("report_DIETER_i",maxiter,".gdx")
 
@@ -21,27 +22,24 @@ file1 = paste0("report_DIETER_i",maxiter,".gdx")
 annual_reportCSV = read.csv(paste0(myDIETERPLOT_path, runnumber, "_i", maxiter, "_annualreport.csv"), sep = ';', header = T, stringsAsFactors = F)
 VAR_report_key_DT = c("fuel cost - divided by eta ($/MWh)","CO2 cost ($/MWh)")
 
-# TECH_DISPATCH_DT = c("CCGT", "lig","bio", "OCGT_eff", "nuc", "hc")
-TECH_DISPATCH_DT = c("CCGT", "lig","bio", "OCGT_eff", "nuc")
-dieter.tech.mapping <- c(hc = "Hard coal",
-                         lig = "Coal",
-                         coal = "Coal (Lig + HC)",
+TECH_DISPATCH_DT = c("CCGT", "coal","bio", "OCGT_eff", "nuc")
+
+dieter.tech.mapping <- c(coal = "Coal",
                          nuc = "Nuclear",
                          OCGT_eff = "OCGT",
                          CCGT = "CCGT",
                          bio = "Biomass",
                          ror = "Hydro",
-                         Wind_on = "Wind",
+                         Wind_on = "Wind Onshore",
+                         Wind_off = "Wind Offshore",
                          Solar = "Solar",
                          NULL)
 
-color.mapping <- c("CCGT" = "#999959", "Coal" = "#0c0c0c", 
-                   # "Coal (Lig + HC)" = "#0c0c0c",
-                   "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
+color.mapping <- c("CCGT" = "#999959", "Coal" = "#0c0c0c", "Wind Onshore" = "#337fff", 
+                   "Wind" = "#337fff", 
+                   "Wind Offshore" = "#334cff",
+                   "Solar" = "#ffcc00", "Biomass" = "#005900",
                    "OCGT" = "#e51900", "Hydro" = "#191999", "Nuclear" = "#ff33ff"
-                   # ,
-                   # "Hard coal" = "#808080"
-                   # , "peak demand" = "#0c0c0c"
                    )
 
 #####################################################
@@ -109,9 +107,12 @@ RLDC1$te <- "Wind"
 
 Wind<- QUITTobj %>% 
   filter(variable == "generation (GWh)") %>% 
-  filter(tech == "Wind")%>% 
+  filter(tech %in% c("Wind Onshore","Wind Offshore"))%>% 
+  select(hour, value, tech) %>% 
+  dplyr::group_by(hour) %>%
+  dplyr::summarise(value = sum(value), .groups = "keep") %>%
+  dplyr::ungroup(hour) %>% 
   select(hour, value) %>% 
-  mutate(value = value)%>% 
   dplyr::rename(windgen = value)
 
 # RLDC_checkpeak = list(LDC, PV, Wind) %>% 
@@ -120,8 +121,11 @@ Wind<- QUITTobj %>%
 
 CU_VRE_wind <- QUITTobj %>% 
   filter(variable == "curtailment renewable (GWh)") %>% 
-  filter(tech == "Wind")%>% 
-  mutate(value = value)%>% 
+  filter(tech %in% c("Wind Onshore","Wind Offshore"))%>% 
+  select(hour, value, tech) %>% 
+  dplyr::group_by(hour) %>%
+  dplyr::summarise(value = sum(value), .groups = "keep") %>%
+  dplyr::ungroup(hour) %>% 
   select(hour, value) %>% 
   dplyr::rename(curt_w = value)
 
@@ -285,14 +289,14 @@ p1<-ggplot() +
     geom_area(data = RLDC5, aes(x = sorted_x, y = rldc5, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC6, aes(x = sorted_x, y = rldc6, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC7, aes(x = sorted_x, y = rldc7, fill = te), size = 1.2, alpha = 1) +
-    coord_cartesian(ylim = c(-120,270))+
+    coord_cartesian(ylim = c(-120,170))+
     # geom_area(data = RLDC8, aes(x = sorted_x, y = rldc8, fill = te), size = 1.2, alpha = 1) +
     # geom_area(data = RLDC9, aes(x = sorted_x, y = rldc9), size = 1.2, alpha = 0.8) +
     scale_fill_manual(name = "Technology", values = color.mapping)+
     xlab("hour") + ylab("residual load (GW)")+
     ggtitle(paste0("DIETER ", year_toplot))
   
-  ggsave(filename = paste0(mypath, "RLDC_xNte_", runnumber, "_iter=", iteration, "_yr=", year_toplot, ".png"),  width = 8, height =8, units = "in", dpi = 120)
+  ggsave(filename = paste0(mypath, "RLDC_", runnumber, "_iter=", iteration, "_yr=", year_toplot, ".png"),  width = 8, height =8, units = "in", dpi = 120)
   
   }
   

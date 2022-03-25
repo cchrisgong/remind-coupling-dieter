@@ -19,7 +19,7 @@ for (i in 2:(length(remind.files))){
     select(period = ttot, q32_peakDemandDT.m = m) %>% 
     filter(period %in% model.periods) %>% 
     left_join(remind.qm_budget) %>% 
-    mutate(q32_peakDemandDT.m = q32_peakDemandDT.m/qm_budget.m * 1e12 / 1e9 * 1.2) %>% # (10^12 2005$)/TW-> 2015$/kW
+    mutate(q32_peakDemandDT.m = q32_peakDemandDT.m / qm_budget.m * 1e12 / 1e9 * 1.2) %>% # (10^12 2005$)/TW-> 2015$/kW
     replace(is.na(.), 0) %>%
     select(period,value=q32_peakDemandDT.m) %>% 
     mutate(iteration = i-1)
@@ -199,7 +199,7 @@ p <- ggplot() +
   xlab("Time") + 
   ggtitle(paste0("REMIND: ", reg)) +
   ylab("Capacity constraint shadow price ($/kW)")+
-  facet_wrap(~iteration, nrow = 3)
+  facet_wrap(~iteration, nrow = 3,labeller = label_both)
 
 swfigure(sw,print,p)
 
@@ -222,12 +222,14 @@ if (h2switch == "off"){
 
 p <- ggplot() + 
   geom_line(data=out.remind.mrkup %>% filter(iteration %in% c(1,2,maxiter-1), period <2100), aes(x=period, y=-value, color = tech)) +
-  theme(legend.position = "bottom") +
+  # theme(legend.position = "bottom") +
   scale_color_manual(name = "Technology", values = color.mapping) +
   xlab("Time") + 
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
+  theme(axis.text=element_text(size=15), axis.title=element_text(size= 13, face="bold"),strip.text = element_text(size=13)) +
   ggtitle(paste0("REMIND: ", reg))+
   ylab(paste0("Markup (USD/MWh)"))+
-  facet_wrap(~iteration, nrow = 3)
+  facet_wrap(~iteration, nrow = 3, labeller = label_both)
 
 swfigure(sw,print,p)
 
@@ -270,7 +272,7 @@ p <- ggplot() +
   xlab("Time") + 
   ggtitle(paste0("REMIND: ", reg))+
   ylab(paste0("Market Value (moving average) (USD/MWh)"))+
-  facet_wrap(~iteration, nrow = 3)
+  facet_wrap(~iteration, nrow = 3,labeller = label_both)
 
 swfigure(sw,print,p)
 

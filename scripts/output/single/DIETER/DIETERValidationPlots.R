@@ -16,6 +16,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   ##
   # whether to save png
   save_png = 1
+  CAPwith_CF = 0 # whether to plot capacities with CF
   options(warn=-1)
   
   # Directories -------------------------------------------------------------
@@ -50,6 +51,9 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   report.periods <- c(seq(2005, 2060, 5), seq(2070, 2100, 10), seq(2110, 2150, 20))
 
+  ## load the number of iteration when coupling starts
+  start_i = as.numeric(str_extract(dieter.files[2], "[0-9]+"))
+  
   # load coupled region
   DTcoupreg <- file.path(outputdir, remind.files[2]) %>%  
     read.gdx("regDTcoup", factor = FALSE) 
@@ -94,14 +98,16 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                                       tdels = "Stationary Electricity",
                                       tdelt = "Transport Electricity")
  
+  remind.grid.mapping <- c(gridwindoff = "VRE Grid")
+  
   remind.sector.coupling.mapping.narrow <- c(elh2 = "Electrolyzers")
   
   remind.sector.coupling.mapping.exclude <- c(tdels = "Stationary Electricity",
                                               tdelt = "Transport Electricity")
 
-    
   remind.tech.mapping <- c(remind.nonvre.mapping.whyd, remind.vre.mapping, remind.sector.coupling.mapping)
   
+  ## only report electrolyers in demand side tech
   remind.tech.mapping.narrow <- c(remind.nonvre.mapping.whyd, remind.vre.mapping, remind.sector.coupling.mapping.narrow)
   
   
@@ -246,8 +252,10 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   color.mapping_vre <- c("Solar" = "#ffcc00", "Wind Onshore" = "#337fff", "Wind Offshore" = "#334cff")
   
-  color.mapping.capfac.line <- c(color.mapping,
-                      "peak hourly residual demand" = "#0c0c0c", NULL)
+  color.mapping.cap.line <- c("peak hourly residual demand" = "#0c0c0c")
+  
+  color.mapping.capfac.line <- c(color.mapping,color.mapping.cap.line,
+                                 NULL)
   
   color.mapping.seel.line <- c(color.mapping,
                                "REMIND secondary electricity price ($/MWh)" = "#FFA500", 
@@ -279,15 +287,16 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   
   # cost components
-  cost.colors <- c("Additional H2 t&d Cost" = "grey",
-                      "FE Tax" = "darkseagreen",
+  cost.colors <- c(
+                      # "Additional H2 t&d Cost" = "grey",
+                      # "FE Tax" = "darkseagreen",
                       "Markup" = "lightblue",
-                      "CO2 Provision Cost" = "grey80",
+                      # "CO2 Provision Cost" = "grey80",
                       "Curtailment Cost" = "darkblue",
                       "Storage Cost" = "darkorchid",
                       "Grid Cost" = "darkolivegreen3",
                       "CCS Cost" = "darkgoldenrod2",
-                      "Second Fuel Cost" = "violet",
+                      # "Second Fuel Cost" = "violet",
                       "CO2 Tax Cost" = "indianred",
                       "OMV Cost" = "cyan",
                       "OMF Cost" = "darkcyan",
@@ -399,6 +408,24 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                            vregrid = "VRE grid",
                            NULL)
   
+  
+  dieter.tech.mapping.hrly <- c(coal = "Coal",
+                                nuc = "Nuclear",
+                                OCGT_eff = "OCGT",
+                                CCGT = "CCGT",
+                                bio = "Biomass",
+                                ror = "Hydro",
+                                Wind_on = "Wind_Onshore",
+                                Wind_off = "Wind_Offshore",
+                                Solar = "Solar",
+                                elh2 = "Electrolyzers",
+                                el = "Electricity",
+                               lith = "Lithium_ion_Battery",
+                               PSH = "Pumped_Storage_Hydro",
+                               hydrogen = "Hydrogen_Storage",
+                               caes = "Compressed_Air_Energy_Storage",
+                               NULL)
+  
   running_lcoe_components <- c(
     "Grid Cost",
     "Adjustment Cost",
@@ -432,6 +459,15 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     `shadow price of capacity bound from REMIND - avg ($/MWh)` = 'Shadow Price',
     `Total Markup` = 'Total Markup',
     NULL)
+  
+  dieter.hourly.variables <- c( 
+    "generation (GWh)",
+    "curtailment renewable (GWh)",
+    "storage generation (GWh)",
+    "storage loading (GWh)",
+    "consumption (GWh)",
+    NULL)
+  
   
   # color mapping
   cost.colors_DT <- c(
@@ -467,14 +503,13 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   price.colors <- c(
     "REMIND Price" = "darkblue",
-    "REMIND price moving average" = "#8DB600",
+    "REMIND price moving average" = "darkorchid",
     # "Total (marginal) LCOE + Markup" = "darkorchid",
     # "DIETER annual average electricity price" = "darkcyan",
-    "DIETER annual average electricity price with scarcity price" = "indianred",
-    "DIETER annual average electricity price with scarcity price + shadow price from REMIND" = "violet",
-    "REMIND price + shadow price (historical and peak load bound on cap.)" = "#ff0090",
-    # ,
-    # 'DIETER shadow price due to capacity constraint from REMIND' = "DodgerBlue4"
+    "DIETER annual average electricity price with scarcity price" = "#8DB600",
+    "DIETER annual average electricity price with scarcity price + shadow price" = "violet",
+    # "REMIND price + shadow price (historical and peak load bound on cap.)" = "#ff0090",
+    # 'DIETER shadow price due to capacity constraint from REMIND' = "DodgerBlue4",
     NULL
   )
   
@@ -518,6 +553,8 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
 
   swlatex(sw, "\\tableofcontents\\newpage")
   
+###  Coupled model plots (annual resolution)
+  
   # Capacity factors --------------------------------------------------------
 
   # Capacities --------------------------------------------------------------
@@ -556,6 +593,12 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   # this needs plotMarketValuePrice.R
   source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
 
+  # (Residual) load duration curves -----------------------------------------
+  
+  source(file.path(dieter.scripts.folder, "plotRLDC_REMIND.R"), local=TRUE) 
+  
+###  DIETER plots (hourly resolution)
+  
   # (Residual) load duration curves -----------------------------------------
 
   # source(file.path(dieter.scripts.folder, "plotRLDCs.R"), local=TRUE) # Attention: computationally heavy on standard PC

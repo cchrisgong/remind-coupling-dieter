@@ -1,6 +1,6 @@
 myDIETERPLOT_path = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
 
-runnumber = "hydro601"
+runnumber = "hydro910"
 mydatapath = paste0("~/remind-coupling-dieter/output/", runnumber, "/")
 
 filenames <- list.files(mydatapath, pattern="fulldata_[0-9]+\\.gdx")
@@ -9,17 +9,13 @@ source(paste0(myDIETERPLOT_path, "library_import.R"))
 source(paste0(myDIETERPLOT_path, "GDXtoQuitte.R"))
 library(readr)
 
-igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
-# import library
-
-
 # specify output file
 iteration = maxiter
 file = paste0("report_DIETER_i", iteration, ".gdx")
 
 annual_reportCSV = read.csv(paste0(myDIETERPLOT_path, runnumber, "_i", iteration, "_annualreport.csv"), sep = ';', header = T, stringsAsFactors = F)
 
-VAR_report_key_DT = c("fuel cost - divided by eta ($/MWh)","CO2 cost ($/MWh)")
+VAR_report_key_DT = c("fuel cost - divided by eta ($/MWh)","CO2 cost ($/MWh)","O&M var cost ($/MWh)")
 
 # gdxToQuitte_hourly(mydatapath, file,runnumber)
 
@@ -50,6 +46,7 @@ for(year_toplot in year_toplot_list){
   running_cost <- annual_reportQUITT %>% 
     filter(period %in% year_toplot) %>% 
     filter(tech %in% TECH_DISPATCH_DT) %>% 
+    filter(model == "DIETER") %>% 
     filter(variable %in% VAR_report_key_DT) %>% 
     revalue.levels(tech = dieter.tech.mapping) %>%
     mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))) %>% 

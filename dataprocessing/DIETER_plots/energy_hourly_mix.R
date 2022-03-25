@@ -1,19 +1,16 @@
 # plot hourly energy mix for several years from results of DIETER
 
 mypath = "~/remind-coupling-dieter/dataprocessing/DIETER_plots/"
-runnumber = "hydro101"
+runnumber = "hydro910"
 mydatapath = paste0("~/remind-coupling-dieter/output/", runnumber, "/")
 
 # import library
 
 source(paste0(mypath, "library_import.R"))
-source(paste0(mypath, "GDXtoQuitte.R"))
 library(readr)
 
-igdx("/opt/gams/gams30.2_linux_x64_64_sfx")
-
 # specify output file
-iteration =30
+iteration =maxiter
 file = paste0("report_DIETER_i", iteration, ".gdx")
 
 dieter.tech.mapping <- c(hc = "Hard coal",
@@ -89,12 +86,12 @@ for(year_toplot in year_toplot_list){
     # geom_col(generationANDstorage , mapping = aes(x=hour, y=value, fill=tech), alpha = 0.7)  + 
     geom_point(data=price, mapping = aes(x=hour, y=value*plot_scale), color = "blue", group = 2)+
     geom_point(data=el_demand, mapping = aes(x=hour, y=value), color = "red", group = 1)+
-    geom_point(data=H2_demand, mapping = aes(x=hour, y=value), color = "purple", group = 1)+
+    # geom_point(data=H2_demand, mapping = aes(x=hour, y=value), color = "purple", group = 1)+
     scale_y_continuous("Generation (GWh)") + xlab("") +
     scale_fill_manual(name = "hourly generation (GWh)", values = color.mapping)
   
   p <- p + geom_line(data=el_demand, mapping = aes(x=hour, y=value, group = 1))
-  p <- p + geom_line(data=H2_demand, mapping = aes(x=hour, y=value, group = 2))
+  # p <- p + geom_line(data=H2_demand, mapping = aes(x=hour, y=value, group = 2))
   p <- p + geom_line(data=price, mapping = aes(x=hour, y=value*plot_scale, group = 3), alpha = 0.5)
   
   p <- p + scale_y_continuous(sec.axis = sec_axis(~./plot_scale, name = "Hourly price ($/kWh) (blue)"))
