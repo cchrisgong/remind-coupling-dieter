@@ -9,6 +9,8 @@
 *nb* lower bounds on CES values
 vm_cons.lo(t,regi)     = 1e-3;
 vm_cesIO.lo(t,regi,in)$( NOT in_industry_dyn37(in) ) = 1e-6;
+*CG* lower bound on enhgab, otherwise infes
+vm_cesIO.lo(t,regi,"enhgab") = 1e-9;
 vm_cesIOdelta.lo(t,regi,in_putty) = 1e-6;
 
 *** fix energy inputs to CES structure in t0 to the parameter values
