@@ -895,17 +895,17 @@ for (i in c(2,3,length(dieter.files.report))){
   
   iter = as.numeric(str_extract(dieter.files.report[i], "[0-9]+"))
   
-prices_DT <- file.path(outputdir, dieter.files.report[i]) %>% 
-  read.gdx("report", squeeze=F) %>% 
-  select(model = X..1, period = X..2, variable = X..4, value) %>%
-  filter(variable %in% report_DT_prices) %>% 
-  filter(period %in% model.periods) %>% 
-  filter(model == "DIETER")%>% 
-  revalue.levels(variable = dieter.variable.mapping) %>%
-  mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>% 
-  mutate(period = as.numeric(period)) %>% 
-  mutate(iteration = iter)%>% 
-  select(model,iteration,period, variable, value)
+  prices_DT <- file.path(outputdir, dieter.files.report[i]) %>% 
+    read.gdx("report", squeeze=F) %>% 
+    select(model = X..1, period = X..2, variable = X..4, value) %>%
+    filter(variable %in% report_DT_prices) %>% 
+    filter(period %in% model.periods) %>% 
+    filter(model == "DIETER")%>% 
+    revalue.levels(variable = dieter.variable.mapping) %>%
+    mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>% 
+    mutate(period = as.numeric(period)) %>% 
+    mutate(iteration = iter)%>% 
+    select(model,iteration,period, variable, value)
 
 out.prices_DT <-  rbind(out.prices_DT, prices_DT)
 }
@@ -949,10 +949,10 @@ prices_w2Shad_RM <- prices_wShad_RM %>%
 
 prices_RM.movingavg <- df.price0 %>%
   filter(tech == "System") %>% 
-  filter(period > 2010) %>% 
+  # filter(period > 2010) %>% 
   select(period, variable, value)%>%
   mutate(model = "REMIND") %>% 
-  mutate(value = frollmean(value, 3, align = "center", fill = NA)) %>% 
+  mutate(value = frollmean(value, 4, align = "center", fill = NA)) %>% 
   mutate(variable = "REMIND price moving average")
 
 elec_prices_DT_laIter <- elec_prices_DT %>% 

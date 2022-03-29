@@ -425,14 +425,6 @@ p1 <- ggplot() +
     alpha = 0,
     linetype = "dotted"
   ) +
-  geom_area(
-    data = plot.remind.consumption%>% filter(period <2110)%>% mutate(value = -value),
-    aes(x = period, y = value, fill = all_te),
-    size = 1.2,
-    alpha = 0.5,
-    stat = "identity"
-  ) +
-  
   scale_fill_manual(name = "Technology", values = color.mapping) +
   scale_color_manual(name = "Technology", values = color.mapping_vre) +
   theme(axis.text = element_text(size = 10),
@@ -468,17 +460,6 @@ if (length(dieter.files) != 0) {
       alpha = 0,
       linetype = "dotted"
     ) +
-    geom_area(
-      data = plot.dieter.consumption%>% filter(period <2110) %>% mutate(value = -value),
-      aes(
-        x = as.numeric(period),
-        y = value,
-        fill = all_te
-      ),
-      size = 1.2,
-      alpha = 0.5
-    ) +
-    
     scale_fill_manual(name = "Technology", values = color.mapping) +
     scale_color_manual(name = "Technology", values = color.mapping_vre) +
     theme(axis.text = element_text(size = 10),
@@ -491,6 +472,28 @@ if (length(dieter.files) != 0) {
   
 }
 
+if (h2switch == "on"){
+p1 <- p1 + geom_area(
+  data = plot.dieter.consumption%>% filter(period <2110) %>% mutate(value = -value),
+  aes(
+    x = as.numeric(period),
+    y = value,
+    fill = all_te
+  ),
+  size = 1.2,
+  alpha = 0.5
+)
+  
+  
+p2 <- p2+  geom_area(
+    data = plot.remind.consumption%>% filter(period <2110)%>% mutate(value = -value),
+    aes(x = period, y = value, fill = all_te),
+    size = 1.2,
+    alpha = 0.5,
+    stat = "identity"
+  ) 
+} 
+  
 grid.newpage()
 if (length(dieter.files) != 0) {
   p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
