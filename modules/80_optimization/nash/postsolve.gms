@@ -297,8 +297,8 @@ if (sm_globalBudget_dev gt 1.01 OR sm_globalBudget_dev lt 0.99,
 );
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-*** check DIETER coupling target, must be within 4% of target value
-if (sm_DTgenShDiff gt 5,
+*** check DIETER coupling target, must be within 6% of target value
+if (sm_DTgenShDiff gt 6,
   s80_bool = 0;
   p80_messageShow("target") = YES;
 );
