@@ -9,6 +9,8 @@
 * *** calculate CF for dispatchable from solar pv share
 * pm_cf_linear(tDT32,regi,DISPATCHte32_2)$regDTCoup(regi) = pm_cf(tDT32,regi,DISPATCHte32_2)$regDTCoup(regi) * ( 1 - 0.5 * v32_shSeEl.l(tDT32,regi,"spv")$regDTCoup(regi) / 100);
 
+
+
 *** calculation of SE electricity price (useful for internal use and reporting purposes)
 pm_SEPrice(t,regi,entySE)$(abs (qm_budget.m(t,regi)) gt sm_eps AND sameas(entySE,"seel")) =
        q32_balSe.m(t,regi,entySE) / qm_budget.m(t,regi);
@@ -222,8 +224,11 @@ $ENDIF.WindOff
 * ror capfac is harmonized by setting capfac in DIETER to be the same as that in REMIND
 $ENDIF.curt_avg
 
+p32_REMINDUpscaledShareLaIter(t,regi,techUpscaledNames32) = p32_REMINDUpscaledShare(t,regi,techUpscaledNames32);
 
 );
+
+
 
 $ENDIF.DTcoup
 

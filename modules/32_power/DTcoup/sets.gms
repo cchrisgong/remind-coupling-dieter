@@ -40,6 +40,16 @@ $ENDIF.WindOff
 solar
 hydro/
 
+techUpscaledConv32 "tech for which inter-iteration convergence is checked"
+/coal
+ccgt
+ocgt
+windon
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+windoff
+$ENDIF.WindOff
+solar/
+
 DIETERvarname32 "DIETER name" /capfac,ResPeakDem_relFac,value_factor,gen_share,
 market_value,market_price,elec_price, elec_price_wscar,curt_share,curt_ratio,
 dem_share,usable_generation,model_status,peak_gen_bin/

@@ -337,7 +337,7 @@ p32_MVupscaled(t,regi,te)$(COALte32(te)) = p32_MVAvgW(t,regi,"coal");
 
 );
 
-***CG: calculate model generation share difference
+***CG: calculate model generation share difference DIETER-REMIND
 p32_REMINDUpscaledShare(t,regi,"solar") = p32_shSeElDisp(t,regi,"spv");
 p32_REMINDUpscaledShare(t,regi,"windon") = p32_shSeElDisp(t,regi,"wind");
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
@@ -375,6 +375,18 @@ sm_DTgenShDiff = smax(t,
   smax(techUpscaledNames32,
     abs(
       sum(regi,p32_modelGenShDiff(t,regi,techUpscaledNames32)$( (t.val lt 2100) AND (regDTCoup(regi))) )
+      )
+    )
+    );
+
+***CG: calculate inter-iteration generation share difference REMIND_upscaled(i)- REMIND_upscaled(i-1)
+p32_iterGenShDiff(t,regi,techUpscaledNames32)$(techUpscaledConv32(techUpscaledNames32)) =
+p32_REMINDUpscaledShare(t,regi,techUpscaledNames32) - p32_REMINDUpscaledShareLaIter(t,regi,techUpscaledNames32);
+
+sm_DTgenShDiffIter = smax(t,
+  smax(techUpscaledConv32(techUpscaledNames32),
+    abs(
+      sum(regi,p32_iterGenShDiff(t,regi,techUpscaledNames32)$( (t.val lt 2100) AND (regDTCoup(regi))) )
       )
     )
     );

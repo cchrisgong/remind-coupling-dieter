@@ -83,7 +83,9 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_MVAvgW(ttot,all_regi,Aggte32)                                    "aggregated weighted average market value"
     p32_MVupscaled(ttot,all_regi,all_te)                   "market value upscaled to aggregated technological type"
     p32_REMINDUpscaledShare(ttot,all_regi,techUpscaledNames32)  "REMIND generation share for upscaled technology groups"
-    p32_modelGenShDiff(ttot,all_regi,techUpscaledNames32)  "generation share difference for upscaled technology groups"
+    p32_REMINDUpscaledShareLaIter(ttot,all_regi,techUpscaledNames32)  "REMIND generation share for upscaled technology groups - last iteration"
+    p32_modelGenShDiff(ttot,all_regi,techUpscaledNames32)  "generation share difference for upscaled technology groups - between two models"
+    p32_iterGenShDiff(ttot,all_regi,techUpscaledNames32)  "generation share difference for upscaled technology groups - between iterations of REMIND"
 
 $ENDIF.DTcoup
 
@@ -114,7 +116,8 @@ scalars
     s32_margVRE             "switch for taking into account investment cost in DIETER for VRE should see the lowest grade potential capacity factor, not the average"
     s32_noER                "switch for taking into account investment cost in DIETER for early retirement (it's only a rough estimate in DIETER)"
     s32_DTstor              "switch for DIETER storage coupling"
-    sm_DTgenShDiff          "convergence criteria for DIETER coupled run"
+    sm_DTgenShDiff          "convergence criteria for DIETER coupled run - between coupled models"
+    sm_DTgenShDiffIter      "convergence criteria for DIETER coupled run - between consecutive iterations"
 ;
 
 positive variables

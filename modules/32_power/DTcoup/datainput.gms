@@ -277,6 +277,8 @@ p32_DIETERCurtRatioLaIter(t,regi,"windoff")$(tDT32(t) AND regDTCoup(regi)) = v32
 $ENDIF.WindOff
 $ENDIF.curt_avg
 
+p32_REMINDUpscaledShare(t,regi,techUpscaledNames32) = 0;
+
 * REMIND data for DIETER
 execute_unload "RMdata_4DT.gdx",tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,
     s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,!! switches: H2 switch, mode switch, dispatch iterational switches,

@@ -304,6 +304,12 @@ if (sm_DTgenShDiff gt cm_DTcoup_tol,
   p80_messageShow("target") = YES;
 );
 $ENDIF.hasbound
+
+if (sm_DTgenShDiffIter gt cm_DTcoup_tol_i,
+  s80_bool = 0;
+  p80_messageShow("target") = YES;
+);
+
 $ENDIF.DTcoup
 
 
