@@ -322,6 +322,7 @@ cm_DTcoup_eq                "switch for DIETER coupling equations"
 cm_DT_dispatch_i1           "iteration when VRE capacities are passed to DIETER as fixed values under dispatch mode of coupling"
 cm_DT_dispatch_i2	    "iteration when all capacities are passed to DIETER as fixed values under dispatch mode of coupling"
 cm_DTcoup_flatco2           "flat CO2 price for testing dieter coupling"
+cm_DTcoup_tol               "DIETER coupled run generation share difference convergence tolerance (percentage)"
 cm_DTcoup_sIter             "starting iteration of DIETER coupling"
 cm_flexMax_elh2             "switch for setting the maximum relative reduction of the electricity price electrolysis sees when flex. tax is enabled"
 cm_H2targets                "switches on capacity targets for electrolysis in NDC techpol following national Hydrogen Strategies"
@@ -600,7 +601,8 @@ $setglobal cm_DTcf_avg  on         !! def = on
 $setglobal cm_DTfc_avg  on         !! def = on
 $setglobal cm_DTcurt_avg  on       !! def = on
 $setglobal cm_DTdem_avg  on       !! def = on
-cm_DTcoup_flatco2 = 25;           !!def <- 25 flat CO2 price for testing dieter coupling
+cm_DTcoup_flatco2 = 25;           !!def <- 25
+cm_DTcoup_tol = 50;         !!def <- 50
 cm_DTcoup_sIter = 3;              !!def <- 1 
 
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
