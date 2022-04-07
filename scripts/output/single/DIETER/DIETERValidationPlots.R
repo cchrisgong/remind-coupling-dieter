@@ -611,6 +611,11 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
 
   # source(file.path(dieter.scripts.folder, "plotInverseScreeningCurve.R"), local=TRUE)
 
+
+# Figures for GMD paper ---------------------------------------------------
+
+  source(file.path(dieter.scripts.folder, "plotPaperFigures.R"), local = TRUE)
+  
   # Close LaTeX PDF ---------------------------------------------------------
 
   swclose(sw)
