@@ -278,6 +278,7 @@ $ENDIF.WindOff
 $ENDIF.curt_avg
 
 p32_REMINDUpscaledShare(t,regi,techUpscaledNames32) = 0;
+p32_iterGenShDiff(t,regi,techUpscaledNames32)$(techUpscaledConv32(techUpscaledNames32)) = 0;
 
 * REMIND data for DIETER
 execute_unload "RMdata_4DT.gdx",tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,
