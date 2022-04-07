@@ -529,8 +529,9 @@ $ifthen.Base_techpol %techpol% == "none"
 *pm_regiEarlyRetiRate(t,regi,"pc")$(t.val gt 2025) = 0.01;
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 $IFTHEN.noEarlyReti %cm_DTnoER% == "on"
-pm_regiEarlyRetiRate(t,regi,te)$((t.val ge 2020) AND regDTCoup(regi)) = 0;
+pm_regiEarlyRetiRate(t,regi,te)$((t.val ge 2020) AND regDTCoup(regi) AND not sameas(te,"tnrs")) = 0;
 $ENDIF.noEarlyReti
+pm_regiEarlyRetiRate(t,regi,te)$((t.val ge 2020) AND regDTCoup(regi) AND sameas(te,"tnrs")) = 0.2;
 $ENDIF.DTcoup
 $endif.Base_techpol
 $endif.Base_Cprice
