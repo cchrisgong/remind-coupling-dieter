@@ -149,8 +149,7 @@ $ENDIF.elh2_coup
 
 *** CG: start of DIETER coupling
 
-* if( ((sm32_iter ge sm32_DTiter) and ( mod(sm32_iter, 3) eq 0)),
-
+* if( ((sm32_iter ge sm32_DTiter-1) and ( mod(sm32_iter, 3) eq 0)),
  if( ((sm32_iter ge sm32_DTiter-1) and ( mod(sm32_iter, 1) eq 0)),
 
 *** CG: fuel cost to be passed on to DIETER

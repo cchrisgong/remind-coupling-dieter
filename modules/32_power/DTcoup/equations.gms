@@ -34,7 +34,7 @@ q32_usableSe(t,regi,entySe)$(sameas(entySe,"seel"))..
 	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
 	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
 	+ sum(pc2te(entyPe,entySe(enty3),te,entySe)$(pm_prodCouple(regi,entyPe,enty3,te,entySe) gt 0),
-		pm_prodCouple(regi,entyPe,enty3,te,entySe)*vm_prodSe(t,regi,entyPe,enty3,te) )
+		pm_prodCouple(regi,entyPe,enty3,te,entySe) * vm_prodSe(t,regi,entyPe,enty3,te) )
 	- sum(teVRE, v32_storloss(t,regi,teVRE) )
 ;
 
@@ -219,11 +219,11 @@ q32_operatingReserve(t,regi)$((t.val ge 2010) AND regNoDTCoup(regi))..
 	+ sum(se2se(enty,"seel",te)$(NOT teVRE(te)),
 		pm_data(regi,"flexibility",te) * vm_prodSe(t,regi,enty,"seel",te) )
 	+ sum(pe2se(enty,"seel",teVRE),
-		pm_data(regi,"flexibility",teVRE) * (vm_prodSe(t,regi,enty,"seel",teVRE)-v32_storloss(t,regi,teVRE)) )
+		pm_data(regi,"flexibility",teVRE) * (vm_prodSe(t,regi,enty,"seel",teVRE) - v32_storloss(t,regi,teVRE)) )
 	+
 	sum(pe2se(enty,"seel",teVRE),
 		sum(VRE2teStor(teVRE,teStor),
-			pm_data(regi,"flexibility",teStor) * (vm_prodSe(t,regi,enty,"seel",teVRE)-v32_storloss(t,regi,teVRE)) ) )
+			pm_data(regi,"flexibility",teStor) * (vm_prodSe(t,regi,enty,"seel",teVRE) - v32_storloss(t,regi,teVRE)) ) )
 	) * 1$( regNoDTCoup(regi) )
 ;
 $ENDIF.DTcoup_off

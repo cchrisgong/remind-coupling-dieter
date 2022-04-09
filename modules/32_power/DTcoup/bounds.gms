@@ -52,10 +52,8 @@ if ((cm_DTcoup_eq eq 1),
 			loop(t$(tDT32(t)),
 				loop(te$(DISPATCHte32(te)),
           vm_capFac.up(t,regi,te) = 0.8; !! set CF of non nuclear dispatchables to be less than 80% (same as in DIETER)
-*          vm_capFac.up(t,regi,"tnrs")$(t.val gt 2030) = 0.85; !! set CF of nuc to be less than 85% (this is consistent with eqn con2c_maxprodannual_conv_nuc in DIETER)
-*          vm_capFac.up(t,regi,"tnrs")$(t.val le 2030) = 0.9; !! otherwise might cause infes
-           vm_capFac.up(t,regi,"tnrs") = 1; !! set CF of nuc to be less than 100% (this is not quite consistent with eqn con2c_maxprodannual_conv_nuc in DIETER)
-           vm_capFac.up(t,regi,"fnrs") = 1; !! set CF of nuc to be less than 100% (this is not quite consistent with eqn con2c_maxprodannual_conv_nuc in DIETER)
+           vm_capFac.up(t,regi,"tnrs") = 0.85; !! set CF of nuc to be less than 85%
+           vm_capFac.up(t,regi,"fnrs") = 0.85; !! set CF of nuc to be less than 85%
 				);
 			);
 		);
@@ -172,7 +170,6 @@ $ENDIF.WindOff
 *** so one can turn off electrolysers subsidies for non coupled regions, without distortions
 vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regNoDTCoup(regi)) = 0;
 vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi) AND not tDT32(t)) = 0;
-
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 

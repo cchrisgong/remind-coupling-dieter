@@ -43,7 +43,6 @@ hydro/
 techUpscaledConv32 "tech for which inter-iteration convergence is checked"
 /coal
 ccgt
-ocgt
 windon
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
 windoff
