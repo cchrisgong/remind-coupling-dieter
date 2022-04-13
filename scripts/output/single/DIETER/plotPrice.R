@@ -20,8 +20,8 @@ for (i in 2:length(remind.files)){
     mutate(variable= "REMIND secondary electricity price ($/MWh)")
   
   DTprice  <- file.path(outputdir, remind.files[i]) %>% 
-    # read.gdx( "p32_DIETER_elecprice_wscar", squeeze = FALSE) %>% 
-    read.gdx( "p32_DIETER_elecprice", squeeze = FALSE) %>% 
+    read.gdx( "p32_DIETER_elecprice_wscar", squeeze = FALSE) %>%
+    # read.gdx( "p32_DIETER_elecprice", squeeze = FALSE) %>% 
     select(period=ttot, value) %>%
     mutate(iteration = i-1) %>%
     mutate(variable = "DIETER secondary electricity price ($/MWh)") %>% 

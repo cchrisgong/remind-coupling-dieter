@@ -146,6 +146,15 @@ df.lcoe.grid <- df.lcoe %>%
   replace(is.na(.), 0) %>% 
   select(period, tech, cost, lcoe=value)
 
+df.lcoe.ccs <- df.lcoe %>% 
+  filter(region == reg,
+         period %in% model.periods, type == "average",
+         tech %in% map.price.tech$tech, sector %in% plot.sector) %>% 
+  filter(cost == "CCS Cost") %>% 
+  filter(output %in% c("seel","seh2")) %>% 
+  replace(is.na(.), 0) %>% 
+  select(period, tech, cost, lcoe=value)
+
 #component (marginal) LCOE per tech
 df.lcoe.te.components <- df.lcoe %>% 
   filter(region == reg,
@@ -158,6 +167,7 @@ df.lcoe.te.components <- df.lcoe %>%
   replace(is.na(.), 0) %>% 
   select(period, tech, cost, lcoe=value) %>% 
   full_join(df.lcoe.grid) %>% 
+  full_join(df.lcoe.ccs) %>% 
   mutate(period = as.numeric(period))
 
 df.lcoe.te.components[mapply(is.infinite, df.lcoe.te.components)] <- 0
@@ -166,6 +176,9 @@ if (h2switch == "off"){
   df.lcoe.te.components <- df.lcoe.te.components %>% 
     filter(!tech %in% names(remind.sector.coupling.mapping))
 }
+
+df.lcoe.te.components.test <- df.lcoe.te.components %>% 
+ filter(tech == "tnrs")
 
 #weighted total system (marginal) LCOE (with cost breakdown)
 df.lcoe.sys.components <- list(prod_share, df.lcoe.te.components) %>% 

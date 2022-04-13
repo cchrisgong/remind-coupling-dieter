@@ -295,7 +295,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                       "Curtailment Cost" = "darkblue",
                       "Storage Cost" = "darkorchid",
                       "Grid Cost" = "darkolivegreen3",
-                      "CCS Cost" = "darkgoldenrod2",
+                      "CCS Cost" = "violet",
                       # "Second Fuel Cost" = "violet",
                       "CO2 Tax Cost" = "indianred",
                       "OMV Cost" = "cyan",
@@ -610,10 +610,9 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   # (Inverse) screening curves ----------------------------------------------
 
   # source(file.path(dieter.scripts.folder, "plotInverseScreeningCurve.R"), local=TRUE)
-
-
+  
 # Figures for GMD paper ---------------------------------------------------
-
+  
   source(file.path(dieter.scripts.folder, "plotPaperFigures.R"), local = TRUE)
   
   # Close LaTeX PDF ---------------------------------------------------------
