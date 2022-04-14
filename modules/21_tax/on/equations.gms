@@ -246,7 +246,8 @@ q21_taxrevMrkup(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0))..
   sum(en2en(enty,enty2,te)$(teDTCoupSupp(te)),
 *** vm_Mrkup is markup or markdown for generation technologies (positive if market value above
 *** wholesale annual price, negative if below)
-   - vm_Mrkup(t,regi,te) * vm_prodSe(t,regi,enty,enty2,te))
+*  - vm_Mrkup(t,regi,te) * vm_prodSe(t,regi,enty,enty2,te))
+   - vm_Mrkup(t,regi,te) * (vm_prodSe(t,regi,enty,enty2,te) - v32_storloss(t,regi,te)) )
    - p21_taxrevMrkup0(t,regi)
 ;
 ***---------------------------------------------------------------------------
