@@ -52,8 +52,11 @@ if ((cm_DTcoup_eq eq 1),
 			loop(t$(tDT32(t)),
 				loop(te$(DISPATCHte32(te)),
           vm_capFac.up(t,regi,te) = 0.8; !! set CF of non nuclear dispatchables to be less than 80% (same as in DIETER)
-           vm_capFac.up(t,regi,"tnrs") = 0.85; !! set CF of nuc to be less than 85%
-           vm_capFac.up(t,regi,"fnrs") = 0.85; !! set CF of nuc to be less than 85%
+*           vm_capFac.up(t,regi,"tnrs") = 0.85; !! set CF of nuc to be less than 85%
+*           vm_capFac.up(t,regi,"fnrs") = 0.85; !! set CF of nuc to be less than 85%
+            vm_capFac.up(t,regi,"tnrs") = 1; !! set CF of nuc to be less than 100% (this is not quite consistent with eqn con2c_maxprodannual_conv_nuc in DIETER)
+            vm_capFac.up(t,regi,"fnrs") = 1; !! set CF of nuc to be less than 100% (this is not quite consistent with eqn con2c_maxprodannual_conv_nuc in DIETER)
+
 				);
 			);
 		);
@@ -135,13 +138,6 @@ vm_usableSe.lo(t,regi,"seel")  = 1e-6;
 *** Fix capacity for h2curt technology (modeled only in RLDC)
 vm_cap.fx(t,regi,"h2curt",rlf) = 0;
 
-*RP To ensure that the REMIND model doesn't overlook CSP due to gdx effects, ensure some minimum use in regions with good solar insolation, here proxied from the csp storage factor:
-loop(regi$(p32_factorStorage(regi,"csp") < 1),
-  v32_shSeEl.lo(t,regi,"csp")$(t.val > 2025) = 0.5;
-  v32_shSeEl.lo(t,regi,"csp")$(t.val > 2050) = 1;
-  v32_shSeEl.lo(t,regi,"csp")$(t.val > 2100) = 2;
-);
-
 *** Fix capacity to 0 for elh2VRE now that the equation q32_elh2VREcapfromTestor pushes elh2, not anymore elh2VRE, and capital costs are 1
 vm_cap.fx(t,regi,"elh2VRE",rlf) = 0;
 
@@ -155,6 +151,16 @@ vm_capFac.fx(t,regi,"gaschp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(re
 vm_capFac.fx(t,regi,"coalchp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
 $endif.chpoff
 
+
+*RP To ensure that the REMIND model doesn't overlook CSP due to gdx effects, ensure some minimum use in regions with good solar insolation, here proxied from the csp storage factor:
+loop(regi$(p32_factorStorage(regi,"csp") < 1),
+  v32_shSeEl.lo(t,regi,"csp")$(t.val > 2025) = 0.5;
+  v32_shSeEl.lo(t,regi,"csp")$(t.val > 2050) = 1;
+  v32_shSeEl.lo(t,regi,"csp")$(t.val > 2100) = 2;
+);
+
+*** for coupled run, turn off small shares of tech
+v32_shSeEl.fx(t,regi,"csp")$(t.val>2020) = 0;  !! due to above lower bound for VRE
 vm_capFac.fx(t,regi,"csp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 vm_capFac.fx(t,regi,"dot")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 vm_capFac.fx(t,regi,"geohdr")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
@@ -164,6 +170,8 @@ $IFTHEN.WindOff %cm_wind_offshore% == "0"
 vm_capFac.fx(t,regi,"windoff")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
 vm_prodSe.fx(t,regi,"pewin","seel","windoff")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
 $ENDIF.WindOff
+
+v32_storloss.fx(t,regi,te)$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi) and (teDTCoupSupp(te) and not teVRE(te))) = 0;
 
 *** all flexible subsidies are set to 0 for non-coupled regions in DTcoup realization (regardless of whether cm_DTcoup is on, or elh2_coup is on)
 *** This is because in calibration cm_flex_tax is turned off, and only in policy runs they are turned on
