@@ -4,6 +4,8 @@ library(cowplot)  # Useful for themes and for arranging plots
 library(ggnewscale)  # Useful for multiple legends (not yet required)
 library(metR)  # Useful for contour_fill
 
+font.size = 8
+
 # Plotting style ----------------------------------------------------------
 theme_set(theme_cowplot(font_size = 8))  # Use simply theme and set font size
 

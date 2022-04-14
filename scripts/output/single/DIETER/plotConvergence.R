@@ -117,11 +117,11 @@ p<-ggplot() +
   geom_line(data = plot.remind.genshare, aes(x = iteration, y = genshare, color = tech,linetype=model), size = 1.2, alpha = 0.5) +
   geom_line(data = out.dieter.report.gensh, aes(x = iteration, y = value, color = tech,linetype=model), size = 1.2, alpha = 0.5) +
   theme(axis.text=element_text(size=20), axis.title=element_text(size= 20,face="bold")) +
-  xlab("iteration") + ylab(paste0("generation share (%)"))  +
-  scale_color_manual(name = "tech", values = color.mapping)+
-  scale_linetype_manual(name = "model", values = linetype.map)+
+  xlab("iteration") + ylab(paste0("generation share (%)")) +
+  scale_color_manual(name = "tech", values = color.mapping) +
+  scale_linetype_manual(name = "model", values = linetype.map) +
   theme(legend.title = element_text(size=25),legend.text = element_text(size=25))+
-  coord_cartesian(ylim = c(0,60))+
+  coord_cartesian(ylim = c(0,60)) +
   theme(legend.text = element_text(size=20), strip.text = element_text(size = 20))+
   theme(legend.position = "bottom") +
   theme(legend.title=element_blank())+
@@ -137,13 +137,13 @@ if (save_png == 1){
 for (tech_plot in c("CCGT", "Wind Onshore", "Solar")){
 swlatex(sw, paste0("\\subsection{Generation share ", tech_plot, " over iterations - contour plot}"))
 
-plot.remind.genshare <- out.remind.genshare %>% 
+plot.tech.remind.genshare <- out.remind.genshare %>% 
   mutate(model = "REMIND") %>% 
   filter(period %in% model.periods.till2100) %>% 
   filter(tech == tech_plot)
 
 p<- ggplot() +
-  geom_contour_filled(aes(iteration, period, z = genshare), breaks = c(seq(0, 70, 1)), show.legend = TRUE, plot.remind.genshare)+
+  geom_contour_filled(aes(iteration, period, z = genshare), breaks = c(seq(0, 70, 1)), show.legend = TRUE, plot.tech.remind.genshare)+
   ggtitle(paste0("Generation share (REMIND) ", tech_plot, " ($/MWh)") )+
   xlab("Iteration") + ylab("Period")+
   scale_y_continuous(breaks = seq(2020,2100,10)) +
@@ -218,28 +218,6 @@ swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/Diff_elec_price_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
 }
-##################################################################################################
-
-swlatex(sw, paste0("\\subsection{Absolute electricity price difference over iterations}"))
-
-abs.diff.price <- diff.price %>% 
-  mutate(value = abs(value)) 
-
-p <-ggplot() +
-  geom_line(data = abs.diff.price, aes(x = iteration, y = value,), size = 1.2, alpha = 0.5) +
-  theme(axis.text=element_text(size=20), axis.title=element_text(size= 20,face="bold")) +
-  xlab("iteration") + ylab(paste0("Difference of electricity price (REMIND-DIETER)\n($/MWh)"))  +
-  theme(legend.title = element_text(size=25),legend.text = element_text(size=25)) +
-  theme(legend.text = element_text(size=20), strip.text = element_text(size = 20)) +
-  # coord_cartesian(ylim = c(-10,10)) +
-  theme(legend.position = "bottom") +
-  guides(color = guide_legend(nrow = 2, byrow = TRUE))+
-  facet_wrap(~period, nrow = 3)
-
-swfigure(sw,print,p,sw_option="width=20, height=12")
-if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/Abs_diff_elec_price_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
-}
 
 ##################################################################################################
 
@@ -274,28 +252,6 @@ swfigure(sw,print,p,sw_option="width=20, height=12")
 if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/Diff_RMrollmean_elec_price_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
 }
-##################################################################################################
-
-swlatex(sw, paste0("\\subsection{Absolute electricity price difference over iterations (with rolling mean REMIND price over 3 periods)}"))
-
-abs.diff.price.rollmean <- diff.price.rollmean %>% 
-  mutate(value = abs(value))
-
-p <-ggplot() +
-  geom_line(data = abs.diff.price.rollmean, aes(x = iteration, y = value,), size = 1.2, alpha = 0.5) +
-  theme(axis.text=element_text(size=20), axis.title=element_text(size= 20,face="bold")) +
-  xlab("iteration") + ylab(paste0("Absolute difference of electricity price (REMIND-DIETER) (2020-2100) \n($/MWh)"))  +
-  theme(legend.title = element_text(size=25),legend.text = element_text(size=25)) +
-  theme(legend.text = element_text(size=20), strip.text = element_text(size = 20)) +
-  theme(legend.position = "bottom") +
-  guides(color = guide_legend(nrow = 2, byrow = TRUE))+
-  facet_wrap(~period, nrow = 3)
-
-swfigure(sw,print,p,sw_option="width=20, height=12")
-if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/Abs_diff_RMrollmean_elec_price_convergence_iteration.png"),  p,  width = 24, height =12, units = "in", dpi = 120)
-}
-
 
 ##################################################################################################
 
@@ -349,7 +305,7 @@ if (save_png == 1){
 swlatex(sw, paste0("\\subsection{Electricity price difference (with rolling mean REMIND price over 3 periods) - surface plot}"))
 
 p<- ggplot() +
-  geom_contour_filled(aes(iteration, period, z = value), breaks = c(seq(-80, 100, 5)), show.legend = TRUE, diff.price.rollmean)+
+  geom_contour_filled(aes(iteration, period, z = value), breaks = c(seq(-80, 200, 5)), show.legend = TRUE, diff.price.rollmean)+
   ggtitle("Electricity price difference (REMIND-DIETER) (with rolling mean REMIND price over 3 periods) ($/MWh)- convergence surface") +
   xlab("Iteration") + ylab("Period") +
   scale_y_continuous(breaks = seq(2020,2100,10)) +
@@ -362,41 +318,6 @@ if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/Diff_RMrollmean_elec_price_convergence_iteration_surface.png"),  p,  width = 14, height =7, units = "in", dpi = 120)
 }
 
-##################################################################################################
-
-swlatex(sw, paste0("\\subsection{Abs. electricity price difference - surface plot}"))
-
-p<- ggplot() +
-  geom_contour_filled(aes(iteration, period, z = value), breaks = c(seq(-80, 150, 5)), show.legend = TRUE, abs.diff.price)+
-  ggtitle("Abs. electricity price difference (REMIND-DIETER) ($/MWh)- convergence surface") +
-  xlab("Iteration") + ylab("Period") +
-  scale_y_continuous(breaks = seq(2020,2100,10)) +
-  theme(axis.text = element_text(size = 12),
-        title = element_text(size = 12,face="bold"),
-        panel.border= element_rect(size=2,color="black",fill=NA))
-
-swfigure(sw,print,p,sw_option="width=20, height=12")
-if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/Abs_diff_elec_price_convergence_iteration_surface.png"),  p,  width = 14, height =7, units = "in", dpi = 120)
-}
-
-##################################################################################################
-
-swlatex(sw, paste0("\\subsection{Abs electricity price difference (with rolling mean REMIND price over 3 periods) - surface plot}"))
-
-p<- ggplot() +
-  geom_contour_filled(aes(iteration, period, z = value), breaks = c(seq(-80, 200, 5)), show.legend = TRUE, abs.diff.price.rollmean)+
-  ggtitle("Abs. electricity price difference (with rolling mean REMIND price over 3 periods) ($/MWh) - convergence surface") +
-  xlab("Iteration") + ylab("Period") +
-  scale_y_continuous(breaks = seq(2020,2100,10)) +
-  theme(axis.text = element_text(size = 12),
-        title = element_text(size = 12,face="bold"),
-        panel.border= element_rect(size=2,color="black",fill=NA))
-
-swfigure(sw,print,p,sw_option="width=20, height=12")
-if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/Abs_diff_RMrollmean_elec_price_convergence_iteration_surface.png"),  p,  width = 14, height =7, units = "in", dpi = 120)
-}
 
 ##################################################################################################
 
@@ -414,13 +335,9 @@ diff.price.avg.yr.movingavg <- diff.price.avg.yr %>%
   mutate( value = frollmean(value, 3, align = "left", fill = NA)) %>% 
   mutate(variable = "Moving average")
 
-# diff.price.laiter <- diff.price %>% 
-#   # filter(period >2030) %>% 
-#   filter(iteration == max(iteration)) %>% 
-#   dplyr::summarise( value = mean(value), .groups = "keep" ) 
 
-ymax = max(diff.price$value) * 1.1
-ymin = min(diff.price$value) * 1.1
+ymax = max(diff.price.avg.yr$value) * 1.1
+ymin = min(diff.price.avg.yr$value) * 1.1
 
 p <-ggplot() +
   # geom_line(data = diff.price%>% filter(period >2030) %>% mutate(period = as.factor(period)) , aes(x = iteration, y = value, color = period), size = 0.6, alpha = 0.2) +

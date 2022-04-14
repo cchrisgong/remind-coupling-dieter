@@ -252,8 +252,49 @@ swfigure(sw,print,p)
 if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/Markup_time_lastiter.png"),  p,  width = 8, height =6, units = "in", dpi = 120)
 }
+
 ########################################################################################################
 swlatex(sw, paste0("\\subsection{Market value time series (a few iterations)}"))
+
+if (h2switch == "off"){
+  out.remind.mv <- out.remind.mv %>% 
+    filter(!tech %in% remind.sector.coupling.mapping)
+}
+
+p <- ggplot() + 
+  geom_line(data=out.remind.mv %>% filter(iteration %in% c(5,20,maxiter-1), period <2100), aes(x=period, y=value, color = tech)) +
+  theme(legend.position = "bottom") +
+  scale_color_manual(name = "Technology", values = color.mapping) +
+  xlab("Time") + 
+  ggtitle(paste0("REMIND: ", reg))+
+  ylab(paste0("Market Value (moving average) (USD/MWh)"))+
+  facet_wrap(~iteration, nrow = 3,labeller = label_both)
+
+swfigure(sw,print,p)
+
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/DIETER/MarketValue_time_iters.png"),  p,  width = 8, height =12, units = "in", dpi = 120)
+}
+
+########################################################################################################
+swlatex(sw, paste0("\\subsection{Market value time series (last iteration)}"))
+
+p <- ggplot() + 
+  geom_line(data=out.remind.mv %>% filter(iteration %in% c(maxiter-1), period <2100), aes(x=period, y=value, color = tech)) +
+  theme(legend.position = "bottom") +
+  scale_color_manual(name = "Technology", values = color.mapping) +
+  xlab("Time") + 
+  ggtitle(paste0("REMIND: ", reg))+
+  ylab(paste0("Market Value (USD/MWh)"))
+
+swfigure(sw,print,p)
+
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/DIETER/MarketValue_time_lastiter.png"),  p,  width = 8, height =6, units = "in", dpi = 120)
+}
+
+########################################################################################################
+swlatex(sw, paste0("\\subsection{Market value time series - rolling average (a few iterations)}"))
 
 plot.remind.mv <- out.remind.mv %>% 
   dplyr::group_by(tech,iteration) %>%
@@ -277,11 +318,11 @@ p <- ggplot() +
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/MarketValue_time_iters.png"),  p,  width = 8, height =12, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/MarketValue_rollmean_time_iters.png"),  p,  width = 8, height =12, units = "in", dpi = 120)
 }
 
 ########################################################################################################
-swlatex(sw, paste0("\\subsection{Market value time series (last iteration)}"))
+swlatex(sw, paste0("\\subsection{Market value time series - rolling average (last iteration)}"))
 
 p <- ggplot() + 
   geom_line(data=plot.remind.mv %>% filter(iteration %in% c(maxiter-1), period <2100), aes(x=period, y=value, color = tech)) +
@@ -294,7 +335,7 @@ p <- ggplot() +
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/MarketValue_time_lastiter.png"),  p,  width = 8, height =6, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/MarketValue_rollmean_time_lastiter.png"),  p,  width = 8, height =6, units = "in", dpi = 120)
 }
 
 ########################################################################################################

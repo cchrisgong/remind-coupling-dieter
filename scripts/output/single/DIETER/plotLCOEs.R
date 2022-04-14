@@ -267,16 +267,6 @@ df.mrkup.plot <- remind.mrkup.non0gen %>%
   filter(iteration == iter_toplot-1) %>% 
   select(-iteration) %>% 
   mutate(cost = "Markup subsidy/tax")
-
-# df.lcoe.te.plot <- df.lcoe.teAgg 
-# %>% 
-  # full_join(df.mrkup.plot)
-
-# df.lcoe.teAgg.wAdj <- list(df.lcoe.teAgg, adjcost_marg) %>%
-#   reduce(full_join) %>% 
-#   filter(period %in% model.periods.till2100) %>% 
-#   mutate(cost = factor(cost, levels=rev(unique(c(dieter.variable.mapping,"Curtailment Cost")))))
-
   
 df.total.lcoe.teAgg <- df.lcoe.teAgg %>% 
   dplyr::group_by(period, tech) %>%
@@ -489,7 +479,7 @@ df.lcoe.teAgg.wAdj <- list(df.lcoe.teAgg, adjcost_marg) %>%
   reduce(full_join) %>% 
   filter(period %in% model.periods.till2100) %>% 
   filter(!tech %in% c("VRE grid", "Electrolyzers")) %>% 
-  mutate(cost = factor(cost, levels=rev(unique(c(dieter.variable.mapping,"Curtailment Cost")))))
+  mutate(cost = factor(cost, levels=rev(unique(c(dieter.variable.mapping,"CCS Cost","Curtailment Cost")))))
 
 
 # marginal adj cost for the system in DIETER  
@@ -1057,6 +1047,54 @@ swfigure(sw,print,p.sysLCOE_compare)
 if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/sys_avgLCOE_price_compare_line.png"), p.sysLCOE_compare, width = 14, height =9, units = "in", dpi = 120)
 }
+
+sysLCOE_avg_DT_tech_lastIter <- dieter.telcoe_avg %>% 
+  select(iteration,period,tech,variable,value) %>% 
+  filter(!tech %in% c("VRE grid", "Electrolyzers")) %>% 
+  left_join(genshare1) %>% 
+  mutate(value = value * genshare) %>% 
+  select(iteration,period,tech,variable,value) %>% 
+  full_join(gridcost_p) %>%
+  replace(is.na(.), 0) %>% 
+  dplyr::group_by(iteration,period,tech) %>%
+  dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
+  dplyr::ungroup(iteration,period,tech) %>% 
+  filter(iteration == maxiter -1) %>% 
+  select(-iteration) %>% 
+  mutate(model = "DIETER")
+
+sysLCOE_marg_RM_tech <- df.total.lcoe.teAgg %>% 
+  left_join(prod_aggShare_RM) %>% 
+  mutate(value = totalLCOE * aggshare) %>% 
+  select(-totalLCOE,-aggshare) %>% 
+  mutate(model = "REMIND")
+
+adjcost_marg_tech <- adjcost_marg %>% 
+  select(-cost)
+
+sys_avgLCOE_compare_tech <- list(sysLCOE_avg_DT_tech_lastIter, sysLCOE_marg_RM_tech) %>%
+  reduce(full_join) %>% 
+  mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping.cost.order)))) %>% 
+  mutate(period = as.numeric(period)) 
+
+p.sysLCOE_compare <- ggplot() + 
+  geom_col( data = sys_avgLCOE_compare_tech, 
+            aes(period, value, fill=tech)) +
+  scale_y_continuous("LCOE and power price\n(USD2015/MWh)") +
+  scale_x_continuous(breaks = seq(2010,2100,10)) +
+  coord_cartesian(ylim = c(ymin,ymax))+
+  scale_fill_manual(values = color.mapping) +
+  guides(fill=guide_legend(nrow=5,byrow=TRUE), color=guide_legend(nrow=5,byrow=TRUE))+
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
+  theme(axis.text=element_text(size=15), axis.title=element_text(size= 18, face="bold"),strip.text = element_text(size=13)) +
+  facet_wrap(~model, scales = "free_y")
+
+swfigure(sw,print,p.sysLCOE_compare)
+
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/DIETER/sys_avgLCOE_tech_price_compare_line.png"), p.sysLCOE_compare, width = 14, height =9, units = "in", dpi = 120)
+}
+
 
 for (iter in c(start_i,start_i+1,maxiter-1)){
   

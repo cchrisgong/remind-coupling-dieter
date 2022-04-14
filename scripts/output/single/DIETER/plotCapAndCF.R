@@ -3,6 +3,7 @@ cat("Plot capacities \n")
 # Data preparation (REMIND) -----------------------------------------------
 out.remind.capacity <- NULL
 out.remind.demand <- NULL
+
 if (length(dieter.files) != 0) {
   for (i in 2:(length(remind.files))){
     

@@ -105,11 +105,18 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   remind.sector.coupling.mapping.exclude <- c(tdels = "Stationary Electricity",
                                               tdelt = "Transport Electricity")
 
-  remind.tech.mapping <- c(remind.nonvre.mapping.whyd, remind.vre.mapping, remind.sector.coupling.mapping)
+  remind.tech.mapping <- c(remind.nonvre.mapping.whyd, remind.vre.mapping)
+  remind.tech.mapping.narrow <- remind.tech.mapping
   
   ## only report electrolyers in demand side tech
-  remind.tech.mapping.narrow <- c(remind.nonvre.mapping.whyd, remind.vre.mapping, remind.sector.coupling.mapping.narrow)
-  
+  if (h2switch == "on"){
+    remind.tech.mapping <- c(remind.tech.mapping,
+                             remind.sector.coupling.mapping, 
+                                    NULL)
+    remind.tech.mapping.narrow <- c(remind.tech.mapping,
+                                    remind.sector.coupling.mapping.narrow, 
+                                    NULL)
+  }  
   
   ############### DIETER #########################
   table_ordered_name = c("Coal", "CCGT", "Solar", "Wind Onshore", "Wind Offshore", "Biomass", "OCGT", "Hydro", "Nuclear","Electrolyzers")
@@ -408,6 +415,16 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                            vregrid = "VRE grid",
                            NULL)
   
+  dieter.tech.mapping.cost.order <- c(coal = "Coal",
+                           OCGT_eff = "OCGT",
+                           CCGT = "CCGT",
+                           bio = "Biomass",
+                           ror = "Hydro",
+                           Wind_on = "Wind Onshore",
+                           Wind_off = "Wind Offshore",
+                           Solar = "Solar",
+                           nuc = "Nuclear",
+                           NULL)
   
   dieter.tech.mapping.hrly <- c(coal = "Coal",
                                 nuc = "Nuclear",
@@ -613,7 +630,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
 # Figures for GMD paper ---------------------------------------------------
   
-  source(file.path(dieter.scripts.folder, "plotPaperFigures.R"), local = TRUE)
+  # source(file.path(dieter.scripts.folder, "plotPaperFigures.R"), local = TRUE)
   
   # Close LaTeX PDF ---------------------------------------------------------
 
