@@ -3,7 +3,7 @@
 cat("Plot REMIND RLDC \n")
 
 # ordered by their capacity factor
-year_toplot_list <- c(2020,2025,2030,2035,2040,2045,2050,2055,2060,2070)
+year_toplot_list <- c(2020,2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090,2100)
 
 for(year_toplot in year_toplot_list){
 

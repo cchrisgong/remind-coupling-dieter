@@ -80,12 +80,12 @@ mv.agg <- out.remind.mv %>%
     
 if (h2switch == "off"){
   mv.agg <- mv.agg %>% 
-    filter(!tech %in% remind.sector.coupling.mapping)
+    filter(!tech %in% names(remind.sector.coupling.mapping))
 }
 
 if (h2switch == "on"){
   mv.agg <- mv.agg %>% 
-    filter(!tech %in% remind.sector.coupling.mapping.exclude)
+    filter(!tech %in% names(remind.sector.coupling.mapping.exclude))
 }
 
 df.markup.sys <- out.remind.sys.mrkup %>% 
