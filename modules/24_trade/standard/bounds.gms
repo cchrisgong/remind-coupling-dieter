@@ -103,9 +103,6 @@ loop( regi$regi_group("EUR_regi",regi),
 			vm_Xport.up(ttot,regi,peFos) = 1.5 * pm_IO_trade(ttot,regi,peFos,"Xport");
 			vm_Mport.lo(ttot,regi,peFos) = 0.5 * pm_IO_trade(ttot,regi,peFos,"Mport");
 			vm_Mport.up(ttot,regi,peFos) = 1.5 * pm_IO_trade(ttot,regi,peFos,"Mport");
-
-* vm_Mport.lo(ttot,"DEU",peFos) = 1e-6;
-* vm_Mport.up(ttot,"DEU",peFos) = 1e10;
 		);
 	);
 );
