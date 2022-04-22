@@ -52,8 +52,10 @@ p21_taxrevFlex0(ttot,regi)   =  sum(en2en(enty,enty2,te)$(teFlexTax(te)),
 
 p21_taxrevMrkup0(t,regi) = sum(en2en(enty,enty2,te)$(teDTCoupSupp(te)),
                                         -vm_Mrkup.l(t,regi,te) *
-                                        (vm_prodSe.l(t,regi,enty,enty2,te)- v32_storloss.l(t,regi,te))
+                                        (vm_prodSe.l(t,regi,enty,enty2,te) - v32_storloss.l(t,regi,te))
+*                                        (vm_prodSe.l(t,regi,enty,enty2,te))
                                         );
+
 display "vm_Mrkup", vm_Mrkup.l;
 Display "reference in presolve", p21_taxrevMrkup0;
 

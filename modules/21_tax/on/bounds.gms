@@ -15,10 +15,6 @@ vm_Mrkup.fx(t,regi,te)$(teDTCoupSupp(te) AND regNoDTCoup(regi)) = 0;
 vm_Mrkup.fx(t,regi,te)$(teDTCoupSupp(te) AND regDTCoup(regi) AND not tDT32(t)) = 0;
 *v21_taxrevMrkup.fx(t,all_regi)$(regDTCoup(regi) AND not tDT32(t)) = 0;
 
-
-* vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regNoDTCoup(regi)) = 0;
-* vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi) AND not tDT32(t)) = 0;
-
 *** CG dislay:
 sm21_tmp = iteration.val;
 display "vm_Mrkup", vm_Mrkup.l;
