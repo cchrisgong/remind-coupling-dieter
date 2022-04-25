@@ -95,7 +95,7 @@ secAxisScale = 1
 
 p<-ggplot() +
   geom_line(data = RM.SEprice, aes(x = iteration, y = value, color = tech), linetype = "dashed", size = 1, alpha = 0.8) +
-  geom_line(data = out.remind.capfac, aes(x = iter, y = value, color = tech), size = 1, alpha = 0.5) +
+  geom_line(data = out.remind.capfac, aes(x = iteration, y = value, color = tech), size = 1, alpha = 0.5) +
   scale_y_continuous(sec.axis = sec_axis(~./secAxisScale, name = paste0("CF", "(%)")))+
  scale_color_manual(name = "tech", values = color.mapping.seel.line) +
   theme(axis.text=element_text(), axis.title=element_text()) +

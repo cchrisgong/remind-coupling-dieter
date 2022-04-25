@@ -31,7 +31,7 @@ if (length(dieter.files) != 0) {
       mutate(value = (value - h2dem) * resfrac * 8760 * 1e3) 
     
     it <- as.numeric(str_extract(remind.files[i], "[0-9]+"))
-    remind.data$iter <- it
+    remind.data$iteration <- it
     remind.data$model <- "REMIND"
     out.remind.demand <- rbind(out.remind.demand, remind.data)
   }
@@ -53,7 +53,7 @@ if (length(dieter.files) != 0) {
       mutate(tech = factor(tech, levels=rev(unique(remind.tech.mapping.narrow))))
     
     it <- as.numeric(str_extract(remind.files[i], "[0-9]+"))
-    data.capacity$iter <- it
+    data.capacity$iteration <- it
     data.capacity$model <- "REMIND"
     
     out.remind.capacity <- rbind(out.remind.capacity, data.capacity)
@@ -77,7 +77,7 @@ if (length(dieter.files) != 0) {
       revalue.levels(tech = dieter.tech.mapping) %>%
       mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping))))
     
-    data.real.capfac$iter <- it
+    data.real.capfac$iteration <- it
     data.real.capfac$model <- "REMIND"
     
     out.remind.capfac <- rbind(out.remind.capfac, data.real.capfac)
@@ -91,7 +91,7 @@ if (length(dieter.files) != 0) {
       revalue.levels(tech = dieter.tech.mapping) %>%
       mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))) 
     
-    dieter.data$iter <- it
+    dieter.data$iteration <- it
     dieter.data$model <- "DIETER"
     
     out.dieter.data <- rbind(out.dieter.data, dieter.data)
@@ -101,7 +101,7 @@ if (length(dieter.files) != 0) {
   out.dieter.capacity <- out.dieter.data %>%
     filter(variable == "capacity") %>%
     mutate(value = value/1e3) %>% #MW->GW
-    select(period, tech, value, iter)
+    select(period, tech, value, iteration)
   
   out.dieter.capfac <- NULL
   for (i in 1:(length(dieter.files))){
@@ -114,7 +114,7 @@ if (length(dieter.files) != 0) {
       revalue.levels(tech = dieter.tech.mapping) %>%
       mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping))))
     
-    data.real.capfac$iter <- it
+    data.real.capfac$iteration <- it
     data.real.capfac$model <- "DIETER"
     out.dieter.capfac <- rbind(out.dieter.capfac,data.real.capfac)
   }
@@ -143,31 +143,31 @@ for(year_toplot in model.periods){
   secAxisScale1 = max(plot.remind.capacity$value) / 100
   #get max value
   df.maxval<- plot.remind.capacity %>% 
-    dplyr::group_by(period, rlf, iter, model) %>%
+    dplyr::group_by(period, rlf, iteration, model) %>%
     dplyr::summarise( value = sum(value) , .groups = 'keep' ) %>% 
-    dplyr::ungroup(period, rlf, iter, model) 
+    dplyr::ungroup(period, rlf, iteration, model) 
   
   ymax = max(df.maxval$value) * 1.1
   
 swlatex(sw, paste0("\\subsection{Capacities in ", year_toplot, "}"))
   
   p1 <- ggplot() +
-    geom_area(data = plot.remind.capacity, aes(x = iter, y = value, fill = tech), size = 1.2, alpha = 0.5) +
+    geom_area(data = plot.remind.capacity, aes(x = iteration, y = value, fill = tech), size = 1.2, alpha = 0.5) +
     scale_y_continuous(sec.axis = sec_axis(~./secAxisScale1, name = "CF (%)"))+
     scale_fill_manual(name = "Technology", values = color.mapping.cap) +
     xlab("iteration") + ylab(paste0("capacity", "(GW)")) +
     ggtitle(paste0("REMIND: ", reg, " ", year_toplot))+
-    coord_cartesian(xlim = c(0, max(plot.remind.capacity$iter)+1),ylim = c(0, ymax)) +
+    coord_cartesian(xlim = c(0, max(plot.remind.capacity$iteration)+1),ylim = c(0, ymax)) +
     theme(legend.title = element_blank()) 
   
   if (length(dieter.files) != 0) {
     p1 <- p1 + 
-      geom_line(data = plot.remind.demand, aes(x = iter, y = value, color = tech), size = 1.2, alpha = 2,linetype="dotted") 
+      geom_line(data = plot.remind.demand, aes(x = iteration, y = value, color = tech), size = 1.2, alpha = 2,linetype="dotted") 
   }
   
   if ((CAPwith_CF != 0) & (length(dieter.files) != 0)) {
     p1 <- p1 + 
-      geom_line(data = plot.remind.capfac, aes(x = iter, y = value*secAxisScale1, color = tech), size = 1.2, alpha = 1)  +
+      geom_line(data = plot.remind.capfac, aes(x = iteration, y = value*secAxisScale1, color = tech), size = 1.2, alpha = 1)  +
       scale_color_manual(name = "Technology", values = color.mapping.capfac.line) 
   }
   
@@ -185,12 +185,12 @@ swlatex(sw, paste0("\\subsection{Capacities in ", year_toplot, "}"))
   secAxisScale2 = max(plot.dieter.capacity$value) / 100
   
     p2<-ggplot() +
-      geom_area(data = plot.dieter.capacity, aes(x = iter, y = value, fill = tech), size = 1.2, alpha = 0.5) +
-      geom_line(data = plot.remind.demand, aes(x = iter, y = value, color = tech), size = 1.2, alpha = 2, linetype="dotted") +
+      geom_area(data = plot.dieter.capacity, aes(x = iteration, y = value, fill = tech), size = 1.2, alpha = 0.5) +
+      geom_line(data = plot.remind.demand, aes(x = iteration, y = value, color = tech), size = 1.2, alpha = 2, linetype="dotted") +
       scale_y_continuous(sec.axis = sec_axis(~./secAxisScale2, name = paste0("CF", "(%)")))+
       scale_fill_manual(name = "Technology", values = color.mapping.cap) +
       xlab("iteration") + ylab(paste0("Capacity (GW)")) +
-      coord_cartesian(xlim = c(0, max(plot.dieter.capacity$iter)),ylim = c(0, ymax))+
+      coord_cartesian(xlim = c(0, max(plot.dieter.capacity$iteration)),ylim = c(0, ymax))+
       ggtitle(paste0("DIETER: ", reg, " ", year_toplot)) +
       theme(legend.title = element_blank()) 
   }
@@ -198,7 +198,7 @@ swlatex(sw, paste0("\\subsection{Capacities in ", year_toplot, "}"))
   grid.newpage()
   
   if ((CAPwith_CF != 0) & (length(dieter.files) != 0)) {
-    p2 <- p2 + geom_line(data = plot.dieter.capfac, aes(x = iter, y = value*secAxisScale2, color = tech), size = 1.2, alpha = 1)+
+    p2 <- p2 + geom_line(data = plot.dieter.capfac, aes(x = iteration, y = value*secAxisScale2, color = tech), size = 1.2, alpha = 1)+
       scale_color_manual(name = "Technology", values = color.mapping.capfac.line) }
   
   if ((CAPwith_CF == 0) & (length(dieter.files) != 0)) {
@@ -231,13 +231,13 @@ swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")
       filter(period %in% model.periods.till2100) %>% 
       mutate(period = as.numeric(as.character(period)) + 1) %>% 
       mutate(model = "DIETER") %>% 
-      filter(iter == maxiter-1) 
+      filter(iteration == maxiter-1) 
     
     plot.remind.capacity2 <- out.remind.capacity %>% 
       filter(period %in% model.periods.till2100) %>% 
       mutate(period = as.numeric(as.character(period)) - 1) %>% 
       mutate(model = "REMIND") %>% 
-      filter(iter == maxiter-1)
+      filter(iteration == maxiter-1)
     
       p<-ggplot() +
         geom_bar(data = plot.dieter.capacity2, aes(x=period, y=value, fill=tech, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
@@ -261,7 +261,7 @@ swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")
 swlatex(sw, "\\subsection{Capacities over time (last iteration)}")
 
 plot.remind.capacity <- out.remind.capacity %>% 
-  filter(iter == max(out.remind.capacity$iter))
+  filter(iteration == max(out.remind.capacity$iteration))
 
 p1<-ggplot() +
   geom_area(data = plot.remind.capacity%>% filter(period %in% model.periods.till2100) , aes(x = period, y = value, fill = tech), size = 1.2, alpha = 0.5) +
@@ -274,7 +274,7 @@ p1<-ggplot() +
 
 if (length(dieter.files) != 0) {
 plot.dieter.capacity <- out.dieter.capacity %>%
-  filter(iter == max(out.dieter.capacity$iter))
+  filter(iteration == max(out.dieter.capacity$iteration))
 
 p2<-ggplot() +
     geom_area(data = plot.dieter.capacity%>% filter(period %in% model.periods.till2100), aes(x = as.numeric(period), y = value, fill = tech), size = 1.2, alpha = 0.5) +
@@ -316,8 +316,8 @@ for(year_toplot in model.periods){
   swlatex(sw, paste0("\\subsection{Capacity factors in ", year_toplot, "}"))
   
   p <- ggplot() + 
-    geom_line(data=plot.remind, aes(x=iter, y=value, color=variable, linetype = model)) + 
-    geom_line(data=plot.dieter, aes(x=iter, y=value, color=variable, linetype = model)) +
+    geom_line(data=plot.remind, aes(x=iteration, y=value, color=variable, linetype = model)) + 
+    geom_line(data=plot.dieter, aes(x=iteration, y=value, color=variable, linetype = model)) +
     scale_color_manual(name = "variable", values = color.mapping.cf)+
     theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=7)) +
     xlab("Iteration") + 
@@ -359,24 +359,24 @@ if (save_png == 1){
 if (length(dieter.files) != 0) {
 for (i in c(start_i+1,start_i+5,start_i+10,maxiter-1)){
   # i = 27
-  plot.remind.snap <- out.remind.capacity %>% 
-    filter(iter == i) %>% 
-    filter(period <2110)%>%
-    mutate(period = as.numeric(period))%>% 
+  plot.remind.cap.snap <- out.remind.capacity %>% 
+    filter(iteration == i) %>% 
+    filter(period <2110) %>%
+    mutate(period = as.numeric(period)) %>% 
     dplyr::rename(remind_cap = value)
   
-  plot.dieter.snap <- out.dieter.capacity %>%
-    filter(iter == i) %>%
-    filter(period <2110)%>%
+  plot.dieter.cap.snap <- out.dieter.capacity %>%
+    filter(iteration == i) %>%
+    filter(period <2110) %>%
     mutate(period = as.numeric(period)) %>%
     dplyr::rename(dieter_cap = value)
   
-  plot.diff <- list(plot.remind.snap, plot.dieter.snap) %>%
+  plot.cap.diff <- list(plot.remind.cap.snap, plot.dieter.cap.snap) %>%
     reduce(full_join) %>%
     mutate(delta_cap = remind_cap - dieter_cap) 
   
   p <-ggplot() +
-    geom_bar(data = plot.diff , aes(x = period, y = delta_cap, fill = tech, label = delta_cap),  alpha = 0.5, stat = "identity") +
+    geom_bar(data = plot.cap.diff , aes(x = period, y = delta_cap, fill = tech, label = delta_cap),  alpha = 0.5, stat = "identity") +
     geom_label(size = 3, position = position_stack(vjust = 0.5)) +
     scale_fill_manual(name = "Technology", values = color.mapping)+
     theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +

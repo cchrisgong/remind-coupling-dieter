@@ -2,7 +2,7 @@
 
 cat("Plot generation \n")
 
-out.remind <- NULL
+out.remind.generation <- NULL
 remind.generation.withCurt <- NULL
 
 for (i in 1:length(remind.files)) {
@@ -14,14 +14,14 @@ for (i in 1:length(remind.files)) {
     filter(all_regi == reg) %>%
     filter(entySe == "seel") %>%
     filter(all_te %in% names(remind.vre.mapping)) %>%
-    select(period = ttot, all_te, value) %>%
-    revalue.levels(all_te = remind.vre.mapping) %>% 
+    select(period = ttot, tech=all_te, value) %>%
+    revalue.levels(tech = remind.vre.mapping) %>% 
     mutate(value = value * sm_TWa_2_MWh / 1e6) %>%
-    dplyr::group_by(period, all_te) %>%
+    dplyr::group_by(period, tech) %>%
     dplyr::summarise(value = sum(value) , .groups = 'keep') %>%
-    dplyr::ungroup(period, all_te) %>%
+    dplyr::ungroup(period, tech) %>%
     mutate(iteration = i-1)%>%
-    mutate(all_te = factor(all_te, levels = rev(unique(remind.tech.mapping))))
+    mutate(tech = factor(tech, levels = rev(unique(remind.tech.mapping))))
   
   # for non-VRE
   vmprodSe <- file.path(outputdir, remind.files[i]) %>%
@@ -30,16 +30,16 @@ for (i in 1:length(remind.files)) {
     filter(all_regi == reg) %>%
     filter(all_enty.1 == "seel") %>%
     filter(all_te %in% names(remind.nonvre.mapping.whyd)) %>%
-    select(period = tall, all_te, value) %>%
-    revalue.levels(all_te = remind.nonvre.mapping.whyd) %>%
+    select(period = tall, tech=all_te, value) %>%
+    revalue.levels(tech = remind.nonvre.mapping.whyd) %>%
     mutate(value = value * sm_TWa_2_MWh / 1e6) %>%
-    dplyr::group_by(period, all_te) %>%
+    dplyr::group_by(period, tech) %>%
     dplyr::summarise(value = sum(value) , .groups = 'keep') %>%
-    dplyr::ungroup(period, all_te) %>%
+    dplyr::ungroup(period, tech) %>%
     mutate(iteration = i-1)%>%
-    mutate(all_te = factor(all_te, levels = rev(unique(remind.tech.mapping))))
+    mutate(tech = factor(tech, levels = rev(unique(remind.tech.mapping))))
   
-  out.remind <- rbind(out.remind, vmUsableSeTe,vmprodSe)
+  out.remind.generation <- rbind(out.remind.generation, vmUsableSeTe,vmprodSe)
   
   generation.withCurt<- file.path(outputdir, remind.files[i]) %>%
     read.gdx("vm_prodSe", factors = FALSE, squeeze = FALSE) %>%
@@ -47,13 +47,13 @@ for (i in 1:length(remind.files)) {
     filter(all_regi == reg) %>%
     filter(all_te %in% names(remind.tech.mapping)) %>%
     filter(all_enty.1 == "seel")  %>%
-    select(period = tall, value,all_te) %>%
-    revalue.levels(all_te = remind.tech.mapping) %>%
-    dplyr::group_by(period, all_te) %>%
+    select(period = tall, value, tech=all_te) %>%
+    revalue.levels(tech = remind.tech.mapping) %>%
+    dplyr::group_by(period, tech) %>%
     dplyr::summarise( value = sum(value) , .groups = 'keep' ) %>%
-    dplyr::ungroup(period, all_te) %>%
+    dplyr::ungroup(period, tech) %>%
     mutate(value = value * sm_TWa_2_MWh/1e6) %>%
-    mutate(all_te = factor(all_te, levels=rev(unique(remind.tech.mapping)))) %>%
+    mutate(tech = factor(tech, levels=rev(unique(remind.tech.mapping)))) %>%
     mutate(iteration = i-1)
 
   remind.generation.withCurt <- rbind(remind.generation.withCurt,generation.withCurt)
@@ -80,20 +80,20 @@ for (i in 2:length(remind.files)) {
     filter(ttot %in% model.periods) %>%
     filter(all_regi == reg) %>%
     mutate(value = value * sm_TWa_2_MWh / 1e6) %>%
-    mutate(all_te="seel") %>% 
-    select(all_te,period = ttot, value) %>% 
+    mutate(tech="seel") %>% 
+    select(tech, period = ttot, value) %>% 
     full_join(h2consum) %>% 
     replace(is.na(.), 0) %>% 
     mutate(value = value -h2dem) %>% 
     select(-h2dem)
   
   h2consum2 <- h2consum %>% 
-    mutate(all_te="elh2") %>% 
-    select(period, all_te,value=h2dem)
+    mutate(tech="elh2") %>% 
+    select(period, tech,value=h2dem)
   
   consumption.data <- list(h2consum2, totalConsum) %>%
     reduce(full_join) %>%
-    revalue.levels(all_te = remind.tech.mapping) %>%
+    revalue.levels(tech = remind.tech.mapping) %>%
     mutate(iteration = i-1) 
   
   remind.consumption <- rbind(remind.consumption, consumption.data)
@@ -101,26 +101,26 @@ for (i in 2:length(remind.files)) {
 }
 
 remind.consumption <- remind.consumption %>%
-  mutate(all_te = fct_relevel(all_te, table_ordered_name_dem))
+  mutate(tech = fct_relevel(tech, table_ordered_name_dem))
 
 generation.withCurt.disp <- remind.generation.withCurt %>% 
-  filter(!all_te %in% c("Solar", "Wind Onshore", "Wind Offshore")) %>% 
+  filter(!tech %in% c("Solar", "Wind Onshore", "Wind Offshore")) %>% 
   dplyr::group_by(period, iteration) %>%
   dplyr::summarise( disp = sum(value) , .groups = 'keep' ) %>%
   dplyr::ungroup(period, iteration)
 
 generation.withCurt.wind <- remind.generation.withCurt %>% 
-  filter(all_te %in% c("Wind Onshore")) %>% 
+  filter(tech %in% c("Wind Onshore")) %>% 
   left_join(generation.withCurt.disp)  %>% 
   mutate(value = value + disp) %>% 
-  select(iteration,period,all_te,value)
+  select(iteration,period,tech,value)
 
 generation.withCurt.vre <- remind.generation.withCurt %>% 
-  filter(all_te %in% c("Solar","Wind Offshore")) %>% 
-  select(iteration,period,all_te,value)%>% 
+  filter(tech %in% c("Solar","Wind Offshore")) %>% 
+  select(iteration,period,tech,value)%>% 
   full_join(generation.withCurt.wind) 
 
-generation.withCurt.vre$tech <- "total generation w/ curtailment"   
+generation.withCurt.vre$variable <- "total generation w/ curtailment"   
 
 remind.generation.withCurt <- generation.withCurt.vre
 
@@ -135,15 +135,15 @@ for (i in 1:length(dieter.files)) {
     select(
       period = X..1,
       regi = X..2,
-      all_te = X..3,
+      tech = X..3,
       variable = X..4,
       value
     ) %>%
     filter(variable %in% c("total_generation", "usable_generation", "total_consumption")) %>%
     mutate(value = value / 1e6) %>%
-    filter(all_te %in% names(dieter.tech.mapping)) %>%
-    revalue.levels(all_te = dieter.tech.mapping) %>%
-    mutate(all_te = factor(all_te, levels = rev(unique(dieter.tech.mapping))))  %>%
+    filter(tech %in% names(dieter.tech.mapping)) %>%
+    revalue.levels(tech = dieter.tech.mapping) %>%
+    mutate(tech = factor(tech, levels = rev(unique(dieter.tech.mapping))))  %>%
     mutate(iteration = it) %>%
     mutate(period = as.numeric(period))
   
@@ -152,40 +152,38 @@ for (i in 1:length(dieter.files)) {
 
 dieter.gen.wCurt <- out.dieter %>%
   filter(variable == "total_generation") %>%
-  select(period, iteration, all_te, value)
+  select(period, iteration, tech, value)
 
 dieter.consumption <- out.dieter %>%
   filter(variable == "total_consumption") %>%
-  select(period, iteration, all_te, value) %>% 
-  mutate(all_te = fct_relevel(all_te, table_ordered_name_dem))
+  select(period, iteration, tech, value) %>% 
+  mutate(tech = fct_relevel(tech, table_ordered_name_dem))
 
 dieter.gen.wCurt.sum <- out.dieter %>%
   filter(variable == "total_generation") %>%
-  select(period, iteration, all_te, value) %>%
+  select(period, iteration, tech, value) %>%
   dplyr::group_by(period, iteration) %>%
   dplyr::summarise(value = sum(value) , .groups = 'keep') %>%
   dplyr::ungroup(period, iteration)
 
-dieter.gen.wCurt$tech <- "total generation w/ curtailment"
-
 dieter.gen.wCurt.disp <- dieter.gen.wCurt %>% 
-  filter(!all_te %in% c("Solar", "Wind Onshore", "Wind Offshore")) %>% 
+  filter(!tech %in% c("Solar", "Wind Onshore", "Wind Offshore")) %>% 
   dplyr::group_by(period, iteration) %>%
   dplyr::summarise( disp = sum(value) , .groups = 'keep' ) %>%
   dplyr::ungroup(period, iteration)
 
 dieter.gen.wCurt.wind <- dieter.gen.wCurt %>% 
-  filter(all_te %in% c("Wind Onshore")) %>% 
+  filter(tech %in% c("Wind Onshore")) %>% 
   left_join(dieter.gen.wCurt.disp) %>% 
   mutate(value = value +disp) %>% 
-  select(iteration,period,all_te,value)
+  select(iteration,period,tech,value)
 
 dieter.gen.wCurt.vre <- dieter.gen.wCurt %>% 
-  filter(all_te %in% c("Wind Offshore","Solar")) %>% 
-  select(iteration,period,all_te,value)%>% 
+  filter(tech %in% c("Wind Offshore","Solar")) %>% 
+  select(iteration,period,tech,value)%>% 
   full_join(dieter.gen.wCurt.wind) 
 
-dieter.gen.wCurt.vre$tech <- "total generation w/ curtailment"  
+dieter.gen.wCurt.vre$variable <- "total generation w/ curtailment"  
 
 dieter.gen.wCurt <- dieter.gen.wCurt.vre
 # Plotting ----------------------------------------------------------------
@@ -194,7 +192,7 @@ swlatex(sw, paste0("\\section{Generation}"))
 
 for (year_toplot in model.periods) {
     
-  plot.remind <- out.remind %>%
+  plot.remind <- out.remind.generation %>%
     filter(period == year_toplot)
   
   plot.remind.generation.withCurt <- remind.generation.withCurt %>%
@@ -223,14 +221,14 @@ for (year_toplot in model.periods) {
   p1 <- ggplot() +
     geom_area(
       data = plot.remind,
-      aes(x = iteration, y = value, fill = all_te),
+      aes(x = iteration, y = value, fill = tech),
       size = 1.2,
       alpha = 0.5,
       stat = "identity"
     ) +
     geom_area(
       data = plot.remind.generation.withCurt,
-      aes(x = iteration, y = value, color = all_te),
+      aes(x = iteration, y = value, color = tech),
       size = 1,
       alpha = 0,
       linetype = "dotted"
@@ -247,7 +245,7 @@ for (year_toplot in model.periods) {
     p1 <- p1 +
       geom_area(
         data = plot.remind.consumption ,
-        aes(x = iteration, y = -value, fill = all_te),
+        aes(x = iteration, y = -value, fill = tech),
         size = 1.2,
         alpha = 0.5,
         stat = "identity"
@@ -258,13 +256,13 @@ for (year_toplot in model.periods) {
     p2 <- ggplot() +
       geom_area(
         data = plot.dieter.usableGen,
-        aes(x = iteration, y = value, fill = all_te),
+        aes(x = iteration, y = value, fill = tech),
         size = 1.2,
         alpha = 0.5
       ) +
       geom_area(
         data = plot.dieter.gen.wCurt,
-        aes(x = iteration, y = value, color = all_te),
+        aes(x = iteration, y = value, color = tech),
         size = 1,
         alpha = 0,
         linetype = "dotted"
@@ -284,7 +282,7 @@ for (year_toplot in model.periods) {
       aes(
         x = iteration,
         y = -value,
-        fill = all_te
+        fill = tech
       ),
       size = 1.2,
       alpha = 0.5,
@@ -312,7 +310,7 @@ for (year_toplot in model.periods) {
 swlatex(sw, "\\subsection{Generation over time (last iteration)}")
 
 plot.remind <-
-  out.remind  %>% filter(iteration == max(out.remind$iteration))
+  out.remind.generation  %>% filter(iteration == max(out.remind.generation$iteration))
 
 plot.remind.generation.withCurt <- remind.generation.withCurt %>%
   filter(iteration == max(remind.generation.withCurt$iteration))
@@ -334,14 +332,14 @@ plot.dieter.consumption <-
 p1 <- ggplot() +
   geom_area(
     data = plot.remind %>% filter(period <2110),
-    aes(x = period, y = value, fill = all_te),
+    aes(x = period, y = value, fill = tech),
     size = 1.2,
     alpha = 0.5,
     stat = "identity"
   ) +
   geom_area(
     data = plot.remind.generation.withCurt%>% filter(period <2110),
-    aes(x = period, y = value, color = all_te),
+    aes(x = period, y = value, color = tech),
     size = 1,
     alpha = 0,
     linetype = "dotted"
@@ -366,7 +364,7 @@ if (length(dieter.files) != 0) {
       aes(
         x = as.numeric(period),
         y = value,
-        fill = all_te
+        fill = tech
       ),
       size = 1.2,
       alpha = 0.5
@@ -376,7 +374,7 @@ if (length(dieter.files) != 0) {
       aes(
         x = as.numeric(period),
         y = value,
-        color = all_te
+        color = tech
       ),
       size = 1,
       alpha = 0,
@@ -413,14 +411,14 @@ swlatex(sw, "\\subsection{Generation and consumption over time (last iteration)}
 p1 <- ggplot() +
   geom_area(
     data = plot.remind %>% filter(period <2110),
-    aes(x = period, y = value, fill = all_te),
+    aes(x = period, y = value, fill = tech),
     size = 1.2,
     alpha = 0.5,
     stat = "identity"
   ) +
   geom_area(
     data = plot.remind.generation.withCurt%>% filter(period <2110),
-    aes(x = period, y = value, color = all_te),
+    aes(x = period, y = value, color = tech),
     size = 1,
     alpha = 0,
     linetype = "dotted"
@@ -444,7 +442,7 @@ if (length(dieter.files) != 0) {
       aes(
         x = as.numeric(period),
         y = value,
-        fill = all_te
+        fill = tech
       ),
       size = 1.2,
       alpha = 0.5
@@ -454,7 +452,7 @@ if (length(dieter.files) != 0) {
       aes(
         x = as.numeric(period),
         y = value,
-        color = all_te
+        color = tech
       ),
       size = 1,
       alpha = 0,
@@ -478,7 +476,7 @@ p1 <- p1 + geom_area(
   aes(
     x = as.numeric(period),
     y = value,
-    fill = all_te
+    fill = tech
   ),
   size = 1.2,
   alpha = 0.5
@@ -487,7 +485,7 @@ p1 <- p1 + geom_area(
   
 p2 <- p2+  geom_area(
     data = plot.remind.consumption%>% filter(period <2110)%>% mutate(value = -value),
-    aes(x = period, y = value, fill = all_te),
+    aes(x = period, y = value, fill = tech),
     size = 1.2,
     alpha = 0.5,
     stat = "identity"
@@ -522,8 +520,8 @@ if (length(dieter.files) != 0) {
     filter(iteration == maxiter-1)
   
   p<-ggplot() +
-    geom_bar(data = plot.dieter.gen2, aes(x=period, y=value, fill=all_te, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
-    geom_bar(data = plot.remind.gen2, aes(x=period, y=value, fill=all_te, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
+    geom_bar(data = plot.dieter.gen2, aes(x=period, y=value, fill=tech, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
+    geom_bar(data = plot.remind.gen2, aes(x=period, y=value, fill=tech, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
     scale_fill_manual(name = "Technology", values = color.mapping) +
     scale_linetype_manual(name = "model", values = linetype.map) +
     guides(linetype = guide_legend(override.aes = list(fill = NA, col = "black"))) +
@@ -541,25 +539,25 @@ if (length(dieter.files) != 0) {
 if (length(dieter.files) != 0) {
   for (i in c(start_i+1,start_i+5,start_i+10,maxiter-1)){
    # i = 27
-    plot.remind.snap <- out.remind %>% 
+    plot.remind.gen.snap <- out.remind.generation %>% 
     filter(iteration == i) %>% 
     filter(period <2110)%>%
     mutate(period = as.numeric(period))%>% 
     dplyr::rename(remind_gen = value)
     
-    plot.dieter.snap <- out.dieter %>%
+    plot.dieter.gen.snap <- out.dieter %>%
     filter(iteration == i) %>%
     filter(variable == "usable_generation") %>%
     filter(period <2110)%>%
     mutate(period = as.numeric(period)) %>%
     dplyr::rename(dieter_gen = value)
     
-    plot.diff <- list(plot.remind.snap, plot.dieter.snap) %>%
+    plot.gen.diff <- list(plot.remind.gen.snap, plot.dieter.gen.snap) %>%
       reduce(full_join) %>%
       mutate(delta_gen = remind_gen - dieter_gen) 
   
   p <-ggplot() +
-    geom_bar(data = plot.diff , aes(x = period, y = delta_gen, fill = all_te, label = delta_gen),  alpha = 0.5, stat = "identity") +
+    geom_bar(data = plot.gen.diff, aes(x = period, y = delta_gen, fill = tech, label = delta_gen),  alpha = 0.5, stat = "identity") +
     geom_label(size = 3, position = position_stack(vjust = 0.5)) +
     scale_fill_manual(name = "Technology", values = color.mapping)+
     theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
@@ -583,14 +581,14 @@ if (length(dieter.files) != 0) {
   
   for (i in c(start_i,start_i+1,start_i+2,start_i+3,start_i+5,start_i+10,maxiter-2)){
     
-    plot.remind.i0 <- out.remind %>% 
+    plot.remind.i0 <- out.remind.generation %>% 
       filter(iteration == 0+i) %>% 
       filter(period <2110) %>%
       select(-iteration) %>% 
       mutate(period = as.numeric(period)) %>% 
       dplyr::rename(remind_gen_0 = value)
     
-    plot.remind.i1 <- out.remind %>% 
+    plot.remind.i1 <- out.remind.generation %>% 
       filter(iteration == 1+i) %>% 
       filter(period <2110) %>%
       select(-iteration) %>% 
@@ -602,7 +600,7 @@ if (length(dieter.files) != 0) {
       mutate(delta_gen = remind_gen_1 - remind_gen_0) 
     
     p1 <-ggplot() +
-      geom_bar(data = plot.remind.iter.diff , aes(x = period, y = delta_gen, fill = all_te),  alpha = 0.5, stat = "identity") +
+      geom_bar(data = plot.remind.iter.diff , aes(x = period, y = delta_gen, fill = tech),  alpha = 0.5, stat = "identity") +
       geom_label(size = 3, position = position_stack(vjust = 0.5)) +
       scale_fill_manual(name = "Technology", values = color.mapping)+
       theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
