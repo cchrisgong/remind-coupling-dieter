@@ -44,9 +44,9 @@ techUpscaledConv32 "tech for which inter-iteration convergence is checked"
 /coal
 ccgt
 windon
-$IFTHEN.WindOff %cm_wind_offshore% == "1"
-windoff
-$ENDIF.WindOff
+* $IFTHEN.WindOff %cm_wind_offshore% == "1"
+* windoff
+* $ENDIF.WindOff
 solar/
 
 DIETERvarname32 "DIETER name" /capfac,ResPeakDem_relFac,value_factor,gen_share,
@@ -62,9 +62,7 @@ REMINDte4DT32(all_te) "REMIND tech for DIETER"
 /
 spv
 wind
-*$IFTHEN.WindOff %cm_wind_offshore% == "1"
 windoff
-*$ENDIF.WindOff
 hydro
 elh2
 coalchp
@@ -113,9 +111,7 @@ REMINDte4DT32(all_te) "REMIND tech for DIETER"
 /
 spv
 wind
-*$IFTHEN.WindOff %cm_wind_offshore% == "1"
 windoff
-*$ENDIF.WindOff
 hydro
 elh2
 ngcc
