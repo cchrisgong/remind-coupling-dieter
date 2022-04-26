@@ -6,10 +6,12 @@
 *** |  Contact: remind@pik-potsdam.de
 *** SOF ./modules/32_power/DTcoup/postsolve.gms
 
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
 * calculate post curtailment "real" VRE capfac
-p32_realCapfacVRE(t,regi,teVRE)$(vm_cap.l(t,regi,teVRE,"1"))
-    = ( sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)) - v32_storloss.l(t,regi,teVRE) )
-    / vm_cap.l(t,regi,teVRE,"1") * 100;
+p32_realCapfacVRE(t,regi,te) = 0;
+p32_realCapfacVRE(t,regi,te)$(teVRE(te) AND vm_cap.l(t,regi,te,"1") AND teDTCoupSupp(te))
+    = ( sum(pe2se(enty,"seel",te), vm_prodSe.l(t,regi,enty,"seel",te)) - v32_storloss.l(t,regi,te) )
+    / vm_cap.l(t,regi,te,"1") * 100;
 
 * "real" VRE capfac for all technologies
 p32_realCapfac(t,regi,te)$(regDTCoup(regi) AND (teDTCoupSupp(te) OR CFcoupDemte32(te)))
@@ -17,12 +19,22 @@ p32_realCapfac(t,regi,te)$(regDTCoup(regi) AND (teDTCoupSupp(te) OR CFcoupDemte3
     vm_capFac.l(t,regi,te)$((teDTCoupSupp(te) OR CFcoupDemte32(te)) AND not teVRE(te)) * 100;
 
 * calculate pre curtailment "theoretical" VRE capfac
-p32_theoCapfacVRE(t,regi,teVRE)$(vm_cap.l(t,regi,teVRE,"1"))
-    = sum(pe2se(enty,"seel",teVRE), vm_prodSe.l(t,regi,enty,"seel",teVRE)) / vm_cap.l(t,regi,teVRE,"1") * 100;
+p32_theoCapfacVRE(t,regi,te) = 0;
+p32_theoCapfacVRE(t,regi,te)$(teVRE(te) AND vm_cap.l(t,regi,te,"1") AND teDTCoupSupp(te))
+    = sum(pe2se(enty,"seel",te), vm_prodSe.l(t,regi,enty,"seel",te)) / vm_cap.l(t,regi,te,"1") * 100;
 
 *** calculation of SE electricity price (for internal use and reporting purposes), excluding 0 cases
 pm_SEPrice(t,regi,entySE)$(abs(qm_budget.m(t,regi)) gt sm_eps AND sameas(entySE,"seel")) =
        q32_balSe.m(t,regi,entySE) / qm_budget.m(t,regi);
+
+p32_peakDemand(t,regi)$(regDTCoup(regi)) =
+    p32_peakDemand_relFac(t,regi) * 8760 * ( v32_usableSeDisp.l(t,regi,"seel")
+$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
+  - vm_demSe.l(t,regi,"seel","seh2","elh2")
+$ENDIF.elh2_coup
+  );
+$ENDIF.DTcoup
+
 
 *** DIETER coupling currently not used in calibration run
 $ifthen.calibrate %CES_parameters% == "load"
@@ -31,11 +43,11 @@ $ifthen.calibrate %CES_parameters% == "load"
 ***************************************************************
 
 *** CG: market value as seen by REMIND
-p32_marketValue(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))
+p32_marketValue(t,regi,te)$(regDTCoup(regi) AND teDTCoupSupp(te))
       = pm_SEPrice(t,regi,"seel")$regDTCoup(regi) + vm_Mrkup.l(t,regi,te)$regDTCoup(regi);
 *** CG: market price seen by sector coupling usage of power (e.g. green H2)
 
-p32_marketPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))
+p32_marketPrice(t,regi,te)$(regDTCoup(regi) AND teFlexTax(te))
       = pm_SEPrice(t,regi,"seel")$regDTCoup(regi) - vm_flexAdj.l(t,regi,te)$regDTCoup(regi);
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
@@ -46,11 +58,13 @@ $ENDIF.DTcoup
 p32_valueFactor(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))
       = p32_marketValue(t,regi,te)$regDTCoup(regi)/(pm_SEPrice(t,regi,"seel")$regDTCoup(regi) + sm_eps);
 
+p32_shadowPrice(t,regi,te) = 0;
 p32_shadowPrice(t,regi,te)$(regDTCoup(regi) AND teDTCoupSupp(te) AND (p32_realCapfac(t,regi,te)))
       = vm_cap.m(t,regi,te,"1") / (p32_realCapfac(t,regi,te) / 1e2);
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-p32_capConShadowPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (abs(q32_peakDemandDT.m(t,regi,"seel")) gt sm_eps) AND (abs(qm_budget.m(t,regi)) gt sm_eps) AND (p32_realCapfac(t,regi,te)))
+p32_capConShadowPrice(t,regi,te) = 0;
+p32_capConShadowPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (abs(qm_budget.m(t,regi)) gt sm_eps) AND (p32_realCapfac(t,regi,te) ge 0.1))
       = q32_peakDemandDT.m(t,regi,"seel") / (qm_budget.m(t,regi)) / (p32_realCapfac(t,regi,te) / 1e2);
 $ENDIF.DTcoup
 
@@ -301,6 +315,18 @@ p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(re
 p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
       = p32_shSeElDisp(t,regi,te)$(COALte32(te))/(sum(te2$(COALte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
 
+p32_cfPrefac(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) =
+ ( 1 + 0.5 * (v32_shSeElDisp.l(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 ) )
+ * 1$(tDT32(t) AND regDTCoup(regi) AND (pm_cf(t,regi,te) ge 0.5) AND CFcoupSuppte32(te))
++
+ ( 1 - 0.5 * (v32_shSeElDisp.l(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 ) )
+ * 1$(tDT32(t) AND regDTCoup(regi) AND (pm_cf(t,regi,te) lt 0.5) AND CFcoupSuppte32(te))
+;
+
+p32_peakDemand(t,regi)$(tDT32(t) AND regDTCoup(regi)) = p32_peakDemand_relFac(t,regi) * 8760
+  * ( v32_usableSeDisp.l(t,regi,"seel") - vm_demSe.l(t,regi,"seel","seh2","elh2") * s32_H2switch)
+;
+
 p32_mrkupUpscaled(t,regi,te) = p32_mrkup(t,regi,te);
 
 *** average mk weighted by generation share
@@ -381,7 +407,7 @@ sm_DTgenShDiff = smax(t,
 ***CG: calculate inter-iteration generation share difference REMIND_upscaled(i)- REMIND_upscaled(i-1)
 p32_iterGenShDiff(t,regi,techUpscaledNames32)$(techUpscaledConv32(techUpscaledNames32) AND p32_REMINDUpscaledShareLaIter(t,regi,techUpscaledNames32)) =
 (p32_REMINDUpscaledShare(t,regi,techUpscaledNames32) - p32_REMINDUpscaledShareLaIter(t,regi,techUpscaledNames32))
-                            / p32_REMINDUpscaledShareLaIter(t,regi,techUpscaledNames32)*1e2;
+                            / p32_REMINDUpscaledShareLaIter(t,regi,techUpscaledNames32) * 1e2;
 
 sm_DTgenShDiffIter = smax(t,
   smax(techUpscaledConv32(techUpscaledNames32),
