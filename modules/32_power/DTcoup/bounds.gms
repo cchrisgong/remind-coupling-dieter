@@ -21,7 +21,7 @@ vm_capFac.fx(t,regi,te) = pm_cf(t,regi,te);
 *** to avoid infeasibilities with vintage biomass capacities
 *** allow bio techs to reduce capacity factor
 if ( cm_bioprod_histlim ge 0,
-        vm_capFac.lo(t,regi_sensscen,teBioPebiolc)$(t.val ge 2030) = 0;
+  vm_capFac.lo(t,regi_sensscen,teBioPebiolc)$(t.val ge 2030) = 0;
 );
 
 sm32_iter = iteration.val;
@@ -46,17 +46,19 @@ if ((cm_DTcoup_eq eq 1),
 		);
 );
 
+*** a more relaxed capfac bound than in DIETER to speed up computation
 $IFTHEN.hasbound not %cm_DTmode% == "none"
 if ((cm_DTcoup_eq eq 1),
 		loop(regi$(regDTCoup(regi)),
 			loop(t$(tDT32(t)),
 				loop(te$(DISPATCHte32(te)),
-          vm_capFac.up(t,regi,te) = 0.8; !! set CF of non nuclear dispatchables to be less than 80% (same as in DIETER)
-*           vm_capFac.up(t,regi,"tnrs") = 0.85; !! set CF of nuc to be less than 85%
-*           vm_capFac.up(t,regi,"fnrs") = 0.85; !! set CF of nuc to be less than 85%
-            vm_capFac.up(t,regi,"tnrs") = 1; !! set CF of nuc to be less than 100% (this is not quite consistent with eqn con2c_maxprodannual_conv_nuc in DIETER)
-            vm_capFac.up(t,regi,"fnrs") = 1; !! set CF of nuc to be less than 100% (this is not quite consistent with eqn con2c_maxprodannual_conv_nuc in DIETER)
-
+*** set CF of nuc to be less than 85% (eqn con2c_maxprodannual_conv_nuc in DIETER bounds to 80%,
+*** but considering the endogenous prefactor, it has to be more than 80%)
+          vm_capFac.up(t,regi,te) = 0.85; !! set CF of non nuclear dispatchables to be less than 80% (same as in DIETER)
+*** set CF of nuc to be less than 100% (this is not quite consistent with eqn con2c_maxprodannual_conv_nuc in DIETER,
+*** but considering the endogenous prefactor, it has to be more than 85%)
+          vm_capFac.up(t,regi,"tnrs") = 1;
+          vm_capFac.up(t,regi,"fnrs") = 1;
 				);
 			);
 		);
@@ -160,7 +162,7 @@ loop(regi$(p32_factorStorage(regi,"csp") < 1),
 );
 
 *** for coupled run, turn off small shares of tech
-v32_shSeEl.fx(t,regi,"csp")$(t.val>2020) = 0;  !! due to above lower bound for VRE
+v32_shSeEl.fx(t,regi,"csp")$(t.val>2020 AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;  !! due to above lower bound for VRE
 vm_capFac.fx(t,regi,"csp")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 vm_capFac.fx(t,regi,"dot")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
 vm_capFac.fx(t,regi,"geohdr")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi))  = 0;
