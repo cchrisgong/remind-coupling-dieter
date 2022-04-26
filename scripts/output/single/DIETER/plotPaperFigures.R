@@ -1,6 +1,6 @@
 # Plots for paper
 
-# library(cowplot)  # Useful for themes and for arranging plots
+library(cowplot)  # Useful for themes and for arranging plots
 # library(ggnewscale)  # Useful for multiple legends (not yet required)
 library(metR)  # Useful for contour_fill
 # library(svglite)
@@ -142,7 +142,7 @@ p.gen.diff <- ggplot() +
   geom_bar(data = plot.gen.relDiff ,
            mapping = aes(x = period, y = delta_gen.rel, fill = tech),
            stat = "identity") + 
-  scale_fill_manual(name = "Technology", values = color.mapping.cap.order) +
+  scale_fill_manual(name = "Technology", values = color.mapping.gen.order) +
   scale_y_continuous(name = "Difference (%)", breaks = seq(-10,10,3)) + 
   xlab("Time") +
   ggtitle("Generation difference (REMIND - DIETER) / total REMIND generation ") +

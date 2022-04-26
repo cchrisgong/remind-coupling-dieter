@@ -630,7 +630,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
 # Figures for GMD paper ---------------------------------------------------
   
-  # source(file.path(dieter.scripts.folder, "plotPaperFigures.R"), local = TRUE)
+   #source(file.path(dieter.scripts.folder, "plotPaperFigures.R"), local = TRUE)
   
   # Close LaTeX PDF ---------------------------------------------------------
 

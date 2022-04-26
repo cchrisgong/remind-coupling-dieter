@@ -72,10 +72,10 @@ mrkup <- out.remind.mrkup %>%
 
 mv.agg <- out.remind.mv %>% 
   mutate(cost = "Market value") %>% 
-  filter(period >2010 & period < 2130) %>% 
+  # filter(period >2010 & period < 2130) %>% 
   filter(iteration == iter_toplot - 1) %>% 
   select(-iteration) %>% 
-  # mutate(value = frollmean(value, 5, align = "center", fill = NA)) %>%
+  # mutate(value = frollmean(value, 3, align = "center", fill = NA)) %>%
   filter(period %in% model.periods.till2100)
     
 if (h2switch == "off"){
@@ -184,7 +184,7 @@ remind.vmcf <- file.path(outputdir, remind.files[iter_toplot]) %>%
 df.lcoe.te.components <- df.lcoe.te.components %>% 
   right_join(remind.vmcf) %>% 
   select(-cf)
-  
+
 if (h2switch == "off"){
   df.lcoe.te.components <- df.lcoe.te.components %>% 
     filter(!tech %in% names(remind.sector.coupling.mapping))
@@ -466,11 +466,21 @@ gridcost <- cost_bkdw_avg_DT %>%
   filter(tech == "VRE grid") %>%
   select(period,variable,value)
 
+dieter.cf <- out.remind.capfac %>% 
+  filter(iteration == iter_toplot-1) %>%
+  select(period,tech,cf=value) %>% 
+  mutate(period = as.numeric(period)) %>% 
+  filter(cf >1e-2)
+
 # REMIND marginal adjustment cost 
 adjcost_marg <- cost_bkdw_marg_4RM %>%
   filter(variable == "Adjustment Cost") %>%
   filter(!tech == "VRE grid") %>%
-  select(period,tech,cost=variable,value)
+  select(period,tech,value) %>% 
+  right_join(dieter.cf) %>% 
+  mutate(cost = "Adjustment Cost") %>%
+  select(-cf) %>% 
+  replace(is.na(.), 0)
 
 df.total.lcoe.teAgg.plot <- df.total.lcoe.teAgg %>%
   full_join( adjcost_marg %>% select(period,tech,adjcost=value)) %>% 
@@ -692,11 +702,11 @@ swlatex(sw, paste0("\\subsection{Technology LCOE - REMIND}"))
 
 # 2020 has very high LCOE for biomass and OCGT, exclude from plotting
 p.teLCOE <- ggplot() +
-  geom_col( data = df.lcoe.teAgg.wAdj %>% filter(period %in% model.periods.till2100)
+  geom_col( data = df.lcoe.teAgg.wAdj %>% filter(period %in% model.periods.till2100, period >2020)
                                       %>% filter(value < 1e4),
             aes(period, value, fill=cost)) +
   geom_line(data = df.telcoe_mv.plot 
-                                    # %>% filter(period >2020)
+                                    %>% filter(period >2020)
                                      %>% filter(value < 1e4),
             aes(period, value, linetype=cost), size=1.2) +
   facet_wrap(~tech, scales = "free_y") +
