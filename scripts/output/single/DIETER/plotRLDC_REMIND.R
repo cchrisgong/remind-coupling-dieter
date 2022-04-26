@@ -12,13 +12,13 @@ for(year_toplot in year_toplot_list){
 plot.remind.cf <- out.remind.capfac %>% 
   filter(tech %in% remind.nonvre.mapping.whyd) %>% 
   filter(period == year_toplot) %>% 
-  filter(iter == maxiter-1)%>% 
+  filter(iteration == maxiter-1)%>% 
   select(tech,cf=value)
 
 plot.cap <- out.remind.capacity  %>% 
   filter(tech %in% remind.nonvre.mapping.whyd)%>% 
   filter(period == year_toplot) %>% 
-  filter(iter == maxiter-1) %>% 
+  filter(iteration == maxiter-1) %>% 
   select(tech,cap=value)
 
 plot.rldc <- plot.cap %>% 
