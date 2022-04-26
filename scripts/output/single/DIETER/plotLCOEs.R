@@ -172,6 +172,19 @@ df.lcoe.te.components <- df.lcoe %>%
 
 df.lcoe.te.components[mapply(is.infinite, df.lcoe.te.components)] <- 0
 
+remind.vmcf <- file.path(outputdir, remind.files[iter_toplot]) %>% 
+  read.gdx("vm_capFac", field = "l", squeeze=F)  %>% 
+  filter(all_regi == reg) %>% 
+  filter(all_te %in% names(remind.tech.mapping)) %>% 
+  select(period = ttot, tech = all_te, cf=value) %>%
+  filter(period %in% model.periods.till2100) %>% 
+  filter(cf >1e-2)
+
+# only pick out the rows where capacity factor is not too small (otherwise huge LCOE)
+df.lcoe.te.components <- df.lcoe.te.components %>% 
+  right_join(remind.vmcf) %>% 
+  select(-cf)
+  
 if (h2switch == "off"){
   df.lcoe.te.components <- df.lcoe.te.components %>% 
     filter(!tech %in% names(remind.sector.coupling.mapping))
@@ -183,6 +196,7 @@ df.lcoe.te.components.test <- df.lcoe.te.components %>%
 #weighted total system (marginal) LCOE (with cost breakdown)
 df.lcoe.sys.components <- list(prod_share, df.lcoe.te.components) %>% 
   reduce(left_join) %>% 
+  right_join(remind.vmcf) %>% 
   replace(is.na(.), 0) %>%
   filter(period %in% model.periods.till2100) %>% 
   select(period,genshare, cost,lcoe) %>% 
@@ -254,6 +268,7 @@ df.price <- df.price0 %>%
 df.lcoe.teAgg <- list(prod_shareType_RM, df.lcoe.te.components) %>% 
   reduce(full_join) %>% 
   mutate(period = as.numeric(period)) %>%
+  right_join(remind.vmcf) %>% 
   replace(is.na(.), 0) %>% 
   mutate(value = share * lcoe) %>% 
   revalue.levels(tech = remind.tech.mapping) %>% 
@@ -677,9 +692,12 @@ swlatex(sw, paste0("\\subsection{Technology LCOE - REMIND}"))
 
 # 2020 has very high LCOE for biomass and OCGT, exclude from plotting
 p.teLCOE <- ggplot() +
-  geom_col( data = df.lcoe.teAgg.wAdj %>% filter(period %in% model.periods.till2100, period >2020),
+  geom_col( data = df.lcoe.teAgg.wAdj %>% filter(period %in% model.periods.till2100)
+                                      %>% filter(value < 1e4),
             aes(period, value, fill=cost)) +
-  geom_line(data = df.telcoe_mv.plot %>% filter(period >2020),
+  geom_line(data = df.telcoe_mv.plot 
+                                    # %>% filter(period >2020)
+                                     %>% filter(value < 1e4),
             aes(period, value, linetype=cost), size=1.2) +
   facet_wrap(~tech, scales = "free_y") +
   scale_y_continuous("LCOE and REMIND Price\n(USD2015/MWh)") +
