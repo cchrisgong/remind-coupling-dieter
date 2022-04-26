@@ -50,6 +50,22 @@ if ( (c_keep_iteration_gdxes eq 1) ,
 );
 logfile.nr = 2;
 
+*** CG: after DIETER is executed, check if they all have optimal status
+Execute_Loadpoint 'results_DIETER' p32_report4RM;
+Execute_Loadpoint 'results_DIETER' p32_reportmk_4RM;
+
+*** check DIETER solver status
+p32_DTstatus(t,regi)$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"el","model_status"));
+display p32_DTstatus;
+
+loop (t$tDT32(t),
+  loop (regi$regDTCoup(regi),
+    if (p32_DTstatus(t,regi) ne 1,
+        abort "one or more DIETER LP have non optimal solver status";
+        );
+  );
+);
+
 v32_shStor.l(t,regi,te) = 0;
 
 $ENDIF.DTcoup
