@@ -98,12 +98,11 @@ for (i in 2:(length(remind.files))){
   
   #### market values
   remind.marketvalue <- file.path(outputdir, remind.files[i]) %>% 
-    # read.gdx("p32_marketValue", squeeze=F)  %>% 
     read.gdx("p32_MVupscaled", squeeze=F) %>% 
     filter(all_regi == reg) %>%
     select(period = ttot, tech = all_te, value) %>%
     revalue.levels(tech = remind.tech.mapping) %>%
-    filter(period %in% model.periods) %>% 
+    filter(period %in% report.periods) %>% 
     mutate(period = as.numeric(period)) %>% 
     dplyr::group_by(period,tech) %>%
     dplyr::summarise( value = mean(value), .groups = "keep" ) %>%
@@ -135,6 +134,12 @@ for (i in 2:(length(remind.files))){
     out.remind.genshare <- rbind(out.remind.genshare, remind.genshare)
 }
 
+if (h2switch == "off"){
+  out.remind.mv <- out.remind.mv %>% 
+    filter(!tech %in% names(remind.sector.coupling.mapping))
+  out.remind.mrkup <- out.remind.mrkup %>% 
+    filter(!tech %in% names(remind.sector.coupling.mapping))
+}
 # DIETER --------------------------------------------------
 
 
@@ -214,12 +219,6 @@ swlatex(sw, paste0("\\section{Market value and markups}"))
 ########################################################################################################
 swlatex(sw, paste0("\\subsection{Markup time series (a few iterations)}"))
 
-if (h2switch == "off"){
-  out.remind.mrkup <- out.remind.mrkup %>% 
-    filter(!tech %in% remind.sector.coupling.mapping)
-}
-
-
 p <- ggplot() + 
   geom_line(data=out.remind.mrkup %>% filter(iteration %in% c(1,2,maxiter-1), period <2100), aes(x=period, y=-value, color = tech)) +
   # theme(legend.position = "bottom") +
@@ -256,11 +255,6 @@ if (save_png == 1){
 ########################################################################################################
 swlatex(sw, paste0("\\subsection{Market value time series (a few iterations)}"))
 
-if (h2switch == "off"){
-  out.remind.mv <- out.remind.mv %>% 
-    filter(!tech %in% remind.sector.coupling.mapping)
-}
-
 p <- ggplot() + 
   geom_line(data=out.remind.mv %>% filter(iteration %in% c(5,20,maxiter-1), period <2100), aes(x=period, y=value, color = tech)) +
   theme(legend.position = "bottom") +
@@ -296,18 +290,13 @@ if (save_png == 1){
 ########################################################################################################
 swlatex(sw, paste0("\\subsection{Market value time series - rolling average (a few iterations)}"))
 
-plot.remind.mv <- out.remind.mv %>% 
+remind.mv.rollmean <- out.remind.mv %>% 
   dplyr::group_by(tech,iteration) %>%
-  mutate( value = frollmean(value, 3, align = "center", fill = NA)) %>% 
+  mutate( value = frollmean(value, 7, align = "center", fill = NA)) %>% 
   dplyr::ungroup(tech,iteration)
 
-if (h2switch == "off"){
-  plot.remind.mv <- plot.remind.mv %>% 
-    filter(!tech %in% remind.sector.coupling.mapping)
-}
-
 p <- ggplot() + 
-  geom_line(data=plot.remind.mv %>% filter(iteration %in% c(5,20,maxiter-1), period <2100), aes(x=period, y=value, color = tech)) +
+  geom_line(data=remind.mv.rollmean %>% filter(iteration %in% c(5,20,maxiter-1), period %in% model.periods.till2100), aes(x=period, y=value, color = tech)) +
   theme(legend.position = "bottom") +
   scale_color_manual(name = "Technology", values = color.mapping) +
   xlab("Time") + 
@@ -325,7 +314,7 @@ if (save_png == 1){
 swlatex(sw, paste0("\\subsection{Market value time series - rolling average (last iteration)}"))
 
 p <- ggplot() + 
-  geom_line(data=plot.remind.mv %>% filter(iteration %in% c(maxiter-1), period <2100), aes(x=period, y=value, color = tech)) +
+  geom_line(data=remind.mv.rollmean %>% filter(iteration %in% c(maxiter-1), period %in% model.periods.till2100), aes(x=period, y=value, color = tech)) +
   theme(legend.position = "bottom") +
   scale_color_manual(name = "Technology", values = color.mapping) +
   xlab("Time") + 
@@ -345,8 +334,7 @@ swlatex(sw, paste0("\\subsection{Market value model comparison - over iteration 
 for (yr in c(2025,2030,2040,2050)){
   
   plot.remind.mv <- out.remind.mv %>% 
-    mutate(var = "REMIND market value ($/MWh)")%>% 
-    filter(!tech %in% remind.sector.coupling.mapping) 
+    mutate(var = "REMIND market value ($/MWh)")
   
   p <- ggplot()+
     geom_line(data = plot.remind.mv %>% filter(period == yr), aes(x = iteration, y = value, color = var), size = 1.2, alpha = 1.5) +
@@ -375,18 +363,21 @@ for (yr in c(2025,2030,2040,2050)){
 swlatex(sw, paste0("\\subsection{Market value model comparison - time series (last iteration)}"))
 
 plot.dieter.mv.woscar <- out.dieter.mv.woscar %>%
-  filter(iteration == maxiter-1, period <2110) %>% 
-  mutate(period = as.numeric(period)) 
+  filter(iteration == maxiter-1, period %in% model.periods.till2100) %>% 
+  mutate(period = as.numeric(period)) %>% 
+  replace(is.na(.), 0) 
 
 plot.dieter.mv.wscar <- out.dieter.mv.wscar %>% 
-  filter(iteration == maxiter-1, period <2110) %>% 
-  mutate(period = as.numeric(period)) 
+  filter(iteration == maxiter-1, period %in% model.periods.till2100) %>% 
+  mutate(period = as.numeric(period)) %>% 
+  replace(is.na(.), 0) 
 
-plot.remind.mv <- plot.remind.mv %>% 
-  filter(iteration == maxiter-1, period <2110)
+plot.remind.mv.laiter <- plot.remind.mv %>% 
+  filter(iteration == maxiter-1, period %in% model.periods.till2100) %>% 
+  replace(is.na(.), 0) 
 
 p <- ggplot()+
-  geom_line(data = plot.remind.mv, 
+  geom_line(data = plot.remind.mv.laiter, 
             aes(x = period , y = value, color = var), size = 1.2, alpha = 1.5) +
   geom_line(data = plot.dieter.mv.wscar,
             aes(x = period , y = value, color = var), size = 1.2, alpha = 0.5) +
@@ -398,7 +389,7 @@ p <- ggplot()+
   ggtitle(paste0("Market value time series - both models: ", reg))+
   theme(legend.title = element_blank()) +
   theme(legend.text = element_text(size=20), strip.text = element_text(size = 20))+
-  coord_cartesian(ylim = c(-40, 250))+
+  coord_cartesian(ylim = c(-40, 300))+
   theme(legend.position = "bottom") +
   theme(aspect.ratio = .6) +
   theme(plot.title = element_text(size = 26, face = "bold"))+

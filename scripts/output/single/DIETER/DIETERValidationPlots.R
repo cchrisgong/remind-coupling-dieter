@@ -295,9 +295,6 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   # cost components
   cost.colors <- c(
-                      # "Additional H2 t&d Cost" = "grey",
-                      # "FE Tax" = "darkseagreen",
-                      "Markup" = "lightblue",
                       # "CO2 Provision Cost" = "grey80",
                       "Curtailment Cost" = "darkblue",
                       "Storage Cost" = "darkorchid",
@@ -310,18 +307,16 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                       "Investment Cost" = "deepskyblue2",
                       "Fuel Cost" = "orange3",
                       "Adjustment Cost" = "darkgoldenrod1",
+                      "Markup" = "lightblue",
                       NULL)
   
   cost.colors.te <- c(cost.colors,
-                      "flexibility subsidy" = "lightblue",
-                      "Markup subsidy/tax" = "lightblue")
+                      "Flexibility subsidy" = "lightblue")
   
-  cost.colors.sys <- c(cost.colors,
-                       "Total Markup" = "lightblue",
-                       NULL)
-  
-  cost.colors.sys.wh2 <- c(cost.colors.sys, 
-                      "flexibility subsidy" = "lightblue")
+  if (h2switch == "on"){
+    cost.colors <- c(cost.colors, 
+                      "Flexibility subsidy" = "mediumpurple3")
+  }
   
   cost.colors.barline <- c(cost.colors.sys.wh2,
                       'DIETER annual average electricity price with scarcity price' = "#00b300",
@@ -607,7 +602,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
 #
 #   # LCOEs -------------------------------------------------------------------
 #
-  # this needs plotMarketValuePrice.R
+  # this needs plotMarketValuePrice.R, plotCapAndCF.R
   source(file.path(dieter.scripts.folder, "plotLCOEs.R"), local=TRUE)
 
   # (Residual) load duration curves -----------------------------------------
@@ -630,7 +625,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
 # Figures for GMD paper ---------------------------------------------------
   
-   #source(file.path(dieter.scripts.folder, "plotPaperFigures.R"), local = TRUE)
+  # source(file.path(dieter.scripts.folder, "plotPaperFigures.R"), local = TRUE)
   
   # Close LaTeX PDF ---------------------------------------------------------
 

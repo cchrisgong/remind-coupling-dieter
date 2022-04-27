@@ -65,7 +65,7 @@ sp.capcon <- file.path(outputdir, remind.files[iter_toplot]) %>%
   mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2)
 
 mrkup <- out.remind.mrkup %>% 
-  mutate(cost = "Markup subsidy/tax") %>% 
+  mutate(cost = "Markup") %>% 
   filter(period %in% model.periods.till2100) %>% 
   filter(iteration == iter_toplot - 1) %>% 
   select(-iteration)
@@ -94,13 +94,13 @@ df.markup.sys <- out.remind.sys.mrkup %>%
   filter(period %in% model.periods.till2100) %>% 
   mutate(tech = "System") %>% 
   mutate(sector = "supply-side") %>%  
-  mutate(cost = "Total Markup")
+  mutate(cost = "Markup")
 
 flexadj <- out.remind.flexadj %>% 
   filter(iteration == iter_toplot -1) %>% 
   select(-iteration) %>% 
   filter(period %in% model.periods.till2100) %>% 
-  mutate(cost = "flexibility subsidy") %>% 
+  mutate(cost = "Flexibility subsidy") %>% 
   filter(tech == "Electrolyzers") %>% 
   mutate(sector = "supply-side") 
 
@@ -281,7 +281,7 @@ df.lcoe.teAgg <- list(prod_shareType_RM, df.lcoe.te.components) %>%
 df.mrkup.plot <- remind.mrkup.non0gen %>% 
   filter(iteration == iter_toplot-1) %>% 
   select(-iteration) %>% 
-  mutate(cost = "Markup subsidy/tax")
+  mutate(cost = "Markup")
   
 df.total.lcoe.teAgg <- df.lcoe.teAgg %>% 
   dplyr::group_by(period, tech) %>%
@@ -701,7 +701,7 @@ if (save_png == 1){
 swlatex(sw, paste0("\\subsection{Technology LCOE - REMIND}"))
 
 # 2020 has very high LCOE for biomass and OCGT, exclude from plotting
-p.teLCOE <- ggplot() +
+p.teLCOE <- ggplot() + 
   geom_col( data = df.lcoe.teAgg.wAdj %>% filter(period %in% model.periods.till2100, period >2020)
                                       %>% filter(value < 1e4),
             aes(period, value, fill=cost)) +
@@ -793,42 +793,35 @@ swlatex(sw, paste0("\\section{System LCOEs}"))
 swlatex(sw, paste0("\\subsection{System LCOE - REMIND - with curtailment cost}"))
 # REMIND marginal LCOE component for the entire power system (marginal in the sense of one additional added unit of generation in the system)
 
-df.lcoe.components <- list(df.lcoe.elh2.components,df.lcoe.sys.components,df.markup.sys, adjcost.sys.marg) %>%
-  reduce(full_join)
+df.lcoe.components <- list(df.lcoe.elh2.components,df.lcoe.sys.components,df.markup.sys, adjcost.sys.marg,flexadj) %>%
+  reduce(full_join) %>% 
+  order.levels(cost = names(cost.colors))
 
 df.lcoe.components.nocurt <- df.lcoe.components %>%
   filter(!cost == "Curtailment Cost")
 
-df.lcoe_minus_tax.plot <- list(df.lcoe.components, df.markup.sys, flexadj, adjcost.sys.marg) %>%
-  reduce(full_join) %>% 
+df.lcoe_minus_tax <- df.lcoe.components %>% 
   dplyr::group_by(period,tech,sector) %>% 
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>%
   dplyr::ungroup(period,tech,sector) %>% 
   mutate(variable = "Total (marginal) LCOE + Markup") 
 
-df.lcoe_minus_tax.plot.nocurt <- list(df.lcoe.components.nocurt, df.markup.sys, adjcost.sys.marg) %>%
-  reduce(full_join) %>%
+df.lcoe_minus_tax.nocurt <- df.lcoe.components.nocurt %>% 
   dplyr::group_by(period,tech,sector) %>%
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>%
   dplyr::ungroup(period,tech,sector) %>%
   mutate(variable = "Total (marginal) LCOE + Markup") 
 
-df.pricelcoe_minus_tax.plot <- list(df.lcoe_minus_tax.plot,df.price) %>%
+df.pricelcoe_minus_tax.plot <- list(df.lcoe_minus_tax,df.price) %>%
   reduce(full_join)
 
-df.pricelcoe_minus_tax.plot.nocurt <- list(df.lcoe_minus_tax.plot.nocurt,df.price) %>%
-  reduce(full_join)
-
-df.lcoe.components.nocurt.plot <- list(df.lcoe.components.nocurt, flexadj) %>%
-  reduce(full_join)
-
-df.lcoe.components.plot <- list(df.lcoe.components, flexadj) %>%
+df.pricelcoe_minus_tax.plot.nocurt <- list(df.lcoe_minus_tax.nocurt,df.price) %>%
   reduce(full_join)
 
 if (h2switch == "off"){
-  df.lcoe.components.plot <- df.lcoe.components.plot %>%
+  df.lcoe.components <- df.lcoe.components %>%
     filter(!tech %in% remind.sector.coupling.mapping)
-  df.lcoe.components.nocurt.plot <- df.lcoe.components.nocurt.plot %>%
+  df.lcoe.components.nocurt <- df.lcoe.components.nocurt %>%
     filter(!tech %in% remind.sector.coupling.mapping)
   df.pricelcoe_minus_tax.plot <- df.pricelcoe_minus_tax.plot %>%
     filter(!tech %in% remind.sector.coupling.mapping)
@@ -837,9 +830,9 @@ if (h2switch == "off"){
 }
 
 if (h2switch == "on"){
-  df.lcoe.components.plot <- df.lcoe.components.plot %>%
+  df.lcoe.components <- df.lcoe.components %>%
     filter(!tech %in% remind.sector.coupling.mapping.exclude)
-  df.lcoe.components.nocurt.plot <- df.lcoe.components.nocurt.plot %>%
+  df.lcoe.components.nocurt <- df.lcoe.components.nocurt %>%
     filter(!tech %in% remind.sector.coupling.mapping.exclude)
   df.pricelcoe_minus_tax.plot <- df.pricelcoe_minus_tax.plot %>%
     filter(!tech %in% remind.sector.coupling.mapping.exclude)
@@ -850,7 +843,7 @@ if (h2switch == "on"){
 df.pricelcoe_minus_tax.plot <- df.pricelcoe_minus_tax.plot %>% 
   filter(period > 2015)
 
-df.lcoe.components.plot <- df.lcoe.components.plot%>% 
+df.lcoe.components.plot <- df.lcoe.components%>% 
   filter(period > 2015)
 
 ymax = max(df.pricelcoe_minus_tax.plot$value) * 1.1
@@ -865,9 +858,9 @@ p.sysLCOE_wmarkup <- ggplot() +
   facet_wrap(~tech~sector, scales = "free_y") +
   scale_y_continuous("LCOE and REMIND Price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
-  scale_fill_manual(values = cost.colors.sys.wh2) +
-  # coord_cartesian(ylim = c(ymin,ymax))+
-  coord_cartesian(ylim = c(ymin,200))+
+  scale_fill_manual(values = cost.colors) +
+  coord_cartesian(ylim = c(ymin,ymax))+
+  # coord_cartesian(ylim = c(ymin,200))+
   theme_bw() +
   ggtitle(paste0("System LCOE for 1 MWh of generated power: ", reg))+
   theme(plot.title = element_text(size = 16, face = "bold"))+
@@ -886,7 +879,7 @@ swlatex(sw, paste0("\\subsection{System LCOE - REMIND - without curtailment cost
 df.pricelcoe_minus_tax.plot.nocurt <- df.pricelcoe_minus_tax.plot.nocurt %>% 
   filter(period > 2020)
 
-df.lcoe.components.nocurt.plot <- df.lcoe.components.nocurt.plot%>% 
+df.lcoe.components.nocurt.plot <- df.lcoe.components.nocurt%>% 
   filter(period > 2020)
 
 ymax = max(df.pricelcoe_minus_tax.plot.nocurt$value) * 1.1
@@ -900,7 +893,7 @@ p.sysLCOE_wmarkup <- ggplot() +
   facet_wrap(~tech~sector, scales = "free_y") +
   scale_y_continuous("LCOE and REMIND Price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
-  scale_fill_manual(values = cost.colors.sys.wh2) +
+  scale_fill_manual(values = cost.colors) +
   coord_cartesian(ylim = c(ymin,ymax))+
   theme_bw() +
   ggtitle(paste0("System LCOE for 1 MWh of usable power: ", reg))+
@@ -997,9 +990,6 @@ elec_prices_DT_wShadPrice_laIter <- elec_prices_DT_wShadPrice %>%
 prices_lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter, prices_RM) %>%
   reduce(full_join)
 
-# prices_lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter) %>%
-#   reduce(full_join)
-
 genshare.dieter <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>% 
   read.gdx("report_tech", squeeze=F) %>% 
   select(model=X..1, period = X..2, variable=X..4, tech=X..5, value) %>%
@@ -1064,7 +1054,7 @@ p.sysLCOE_compare <- ggplot() +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
   scale_color_manual(name = "variable", values = price.colors) +
   coord_cartesian(ylim = c(ymin,ymax))+
-  scale_fill_manual(values = cost.colors.sys) +
+  scale_fill_manual(values = cost.colors) +
   guides(fill=guide_legend(nrow=5,byrow=TRUE), color=guide_legend(nrow=5,byrow=TRUE))+
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
   theme(axis.text=element_text(size=15), axis.title=element_text(size= 18, face="bold"),strip.text = element_text(size=13)) +
@@ -1214,7 +1204,7 @@ p <- ggplot() +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
   scale_color_manual(name = "variable", values = price.colors) +
   coord_cartesian(ylim = c(-5,115))+
-  scale_fill_manual(values = cost.colors.sys) +
+  scale_fill_manual(values = cost.colors) +
   theme_bw() +
   theme( axis.text.x = element_text(angle = 90),
          strip.background = element_blank())

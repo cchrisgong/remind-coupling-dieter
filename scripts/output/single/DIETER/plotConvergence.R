@@ -405,13 +405,12 @@ if (save_png == 1){
 ##################################################################################################
 swlatex(sw, paste0("\\subsection{Market value difference over iterations}"))
 diff.mv <- out.remind.mv %>% 
-  filter(tech == dieter.supply.tech.mapping) %>% 
   filter(period %in% model.periods) %>% 
   select(period,tech,iteration,rm.mv=value) %>% 
   filter(iteration > 0) %>% 
   left_join(out.RMprice) %>% 
   filter(!value == 0) %>% 
-  select(-value,-variable) %>% 
+  select(-value, -variable) %>% 
   filter(!rm.mv == 0) %>% 
   left_join(out.dieter.mv.woscar%>% 
               mutate(period = as.numeric(period)) %>% 

@@ -55,7 +55,7 @@ p <- plot_grid(p.surface,
                ncol = 1,
                rel_heights = c(1, 0.5),
                labels = "auto",
-               label_size = 1.15*font.size,
+               label_size = 1.2*font.size,
                align = "v")
 
 # Save as png
@@ -153,9 +153,9 @@ p.plots <- plot_grid(
   p.gen.doublebar + theme(legend.position = "none"),  # Without legend
   p.gen.diff + theme(legend.position = "none"),  # Without legend
   ncol = 1,
-  rel_heights = c(1, 0.5),
+  rel_heights = c(1, 0.6),
   labels = "auto",
-  label_size = 1.15*font.size,
+  label_size = 1.5*font.size,
   align = "v"
 )
 
@@ -264,9 +264,9 @@ p.plots <- plot_grid(
   p.cap.doublebar + theme(legend.position = "none"),  # Without legend
   p.cap.diff + theme(legend.position = "none"),  # Without legend
   ncol = 1,
-  rel_heights = c(1, 0.5),
+  rel_heights = c(1, 0.6),
   labels = "auto",
-  label_size = 1.15*font.size,
+  label_size = 1.5*font.size,
   align = "v"
 )
 
