@@ -198,6 +198,7 @@ df.lcoe.te.components.test <- df.lcoe.te.components %>%
 df.lcoe.sys.components <- list(prod_share, df.lcoe.te.components) %>% 
   reduce(left_join) %>% 
   right_join(remind.vmcf) %>% 
+  filter(!tech %in% names(remind.sector.coupling.mapping)) %>% 
   replace(is.na(.), 0) %>%
   filter(period %in% model.periods.till2100) %>% 
   select(period,genshare, cost,lcoe) %>% 
@@ -270,6 +271,7 @@ df.lcoe.teAgg <- list(prod_shareType_RM, df.lcoe.te.components) %>%
   reduce(full_join) %>% 
   mutate(period = as.numeric(period)) %>%
   right_join(remind.vmcf) %>% 
+  filter(!tech %in% names(remind.sector.coupling.mapping)) %>% 
   replace(is.na(.), 0) %>% 
   mutate(value = share * lcoe) %>% 
   revalue.levels(tech = remind.tech.mapping) %>% 
