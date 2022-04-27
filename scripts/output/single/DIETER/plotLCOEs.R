@@ -71,13 +71,14 @@ mrkup <- out.remind.mrkup %>%
   select(-iteration)
 
 mv.agg <- out.remind.mv %>% 
-  mutate(cost = "Market value") %>% 
-  # filter(period >2010 & period < 2130) %>% 
-  filter(iteration == iter_toplot - 1) %>% 
-  select(-iteration) %>% 
-  # mutate(value = frollmean(value, 3, align = "center", fill = NA)) %>%
-  filter(period %in% model.periods.till2100)
-    
+    mutate(cost = "Market value") %>% 
+    filter(iteration == iter_toplot - 1) %>% 
+    select(-iteration) %>% 
+    dplyr::group_by(tech) %>%
+    mutate(value = frollmean(value, 3, align = "center", fill = NA)) %>% 
+    dplyr::ungroup(tech) %>% 
+    filter(period %in% model.periods.till2100)
+  
 if (h2switch == "off"){
   mv.agg <- mv.agg %>% 
     filter(!tech %in% names(remind.sector.coupling.mapping))
@@ -322,8 +323,8 @@ sp.capcon.agg <- list(prod_shareType_RM, sp.capcon) %>%
   dplyr::ungroup(period,tech) %>% 
   mutate(period = as.numeric(period)) %>% 
   select(period,tech, sp_capcon=value) %>% 
-  dplyr::group_by(tech) %>% 
   filter(!sp_capcon ==0) %>% 
+  dplyr::group_by(tech) %>% 
   mutate(sp_capcon = frollmean(sp_capcon, 5, align = "center", fill = NA)) %>% 
   dplyr::ungroup(tech) %>% 
   replace(is.na(.), 0) %>% 
@@ -503,9 +504,14 @@ if (h2switch == "off"){
 df.lcoe.teAgg.wAdj <- list(df.lcoe.teAgg, adjcost_marg) %>%
   reduce(full_join) %>% 
   filter(period %in% model.periods.till2100) %>% 
-  filter(!tech %in% c("VRE grid", "Electrolyzers")) %>% 
-  mutate(cost = factor(cost, levels=rev(unique(c(dieter.variable.mapping,"CCS Cost","Curtailment Cost")))))
+  filter(!tech %in% c("VRE grid", remind.sector.coupling.mapping)) %>% 
+  mutate(cost = factor(cost, levels=rev(unique(c(dieter.variable.mapping,"CCS Cost","Markup","Curtailment Cost")))))
 
+df.lcoe.teAgg.wAdjMrk <- list(df.lcoe.teAgg, adjcost_marg,mrkup) %>%
+  reduce(full_join) %>% 
+  filter(period %in% model.periods.till2100) %>% 
+  filter(!tech %in% c("VRE grid", remind.sector.coupling.mapping)) %>% 
+  mutate(cost = factor(cost, levels=rev(unique(c(dieter.variable.mapping,"CCS Cost","Markup","Curtailment Cost")))))
 
 # marginal adj cost for the system in DIETER  
 adjcost.sys.marg <- adjcost_marg %>% 
@@ -702,7 +708,10 @@ swlatex(sw, paste0("\\subsection{Technology LCOE - REMIND}"))
 
 # 2020 has very high LCOE for biomass and OCGT, exclude from plotting
 p.teLCOE <- ggplot() + 
-  geom_col( data = df.lcoe.teAgg.wAdj %>% filter(period %in% model.periods.till2100, period >2020)
+  geom_col( 
+            # data = df.lcoe.teAgg.wAdjMrk 
+            data = df.lcoe.teAgg.wAdj
+                                      %>% filter(period %in% model.periods.till2100, period >2020)
                                       %>% filter(value < 1e4),
             aes(period, value, fill=cost)) +
   geom_line(data = df.telcoe_mv.plot 
@@ -736,7 +745,7 @@ df.lcoe.avg.dieter <- cost_bkdw_avg_DT %>%
 barwidth = 1.5
 
 p.techLCOE_compare<-ggplot() +
-  geom_col(data = df.lcoe.teAgg.wAdj %>% 
+  geom_col(data = df.lcoe.teAgg.wAdjMrk %>% 
              filter(period > 2020)
                , aes(x = period-barwidth/2-0.1, y = value, fill = cost), colour="black", position='stack', size = 1, width = barwidth) +
   geom_col(data = df.lcoe.avg.dieter %>% 
@@ -793,7 +802,7 @@ swlatex(sw, paste0("\\section{System LCOEs}"))
 swlatex(sw, paste0("\\subsection{System LCOE - REMIND - with curtailment cost}"))
 # REMIND marginal LCOE component for the entire power system (marginal in the sense of one additional added unit of generation in the system)
 
-df.lcoe.components <- list(df.lcoe.elh2.components,df.lcoe.sys.components,df.markup.sys, adjcost.sys.marg,flexadj) %>%
+df.lcoe.components <- list(df.lcoe.elh2.components, df.lcoe.sys.components, df.markup.sys, adjcost.sys.marg, flexadj) %>%
   reduce(full_join) %>% 
   order.levels(cost = names(cost.colors))
 

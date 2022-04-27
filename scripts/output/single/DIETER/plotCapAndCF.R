@@ -42,8 +42,8 @@ if (length(dieter.files) != 0) {
       read.gdx("vm_cap", factors = FALSE, squeeze = FALSE) %>% 
       filter(tall %in% model.periods) %>%
       filter(all_regi == reg) %>%
-      filter(all_te %in% names(remind.tech.mapping.narrow)) %>%
       filter(rlf == "1") %>% 
+      filter(all_te %in% names(remind.tech.mapping.narrow)) %>%
       mutate(value = value * 1e3) %>% #TW->GW
       select(period = tall, tech = all_te, rlf, value) %>% 
       revalue.levels(tech = remind.tech.mapping.narrow) %>%

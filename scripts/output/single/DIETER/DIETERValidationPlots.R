@@ -110,12 +110,12 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   ## only report electrolyers in demand side tech
   if (h2switch == "on"){
-    remind.tech.mapping <- c(remind.tech.mapping,
-                             remind.sector.coupling.mapping, 
-                                    NULL)
     remind.tech.mapping.narrow <- c(remind.tech.mapping,
                                     remind.sector.coupling.mapping.narrow, 
                                     NULL)
+    remind.tech.mapping <- c(remind.tech.mapping,
+                             remind.sector.coupling.mapping, 
+                             NULL)
   }  
   
   ############### DIETER #########################
@@ -625,7 +625,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
 # Figures for GMD paper ---------------------------------------------------
   
-  # source(file.path(dieter.scripts.folder, "plotPaperFigures.R"), local = TRUE)
+   #source(file.path(dieter.scripts.folder, "plotPaperFigures.R"), local = TRUE)
   
   # Close LaTeX PDF ---------------------------------------------------------
 
