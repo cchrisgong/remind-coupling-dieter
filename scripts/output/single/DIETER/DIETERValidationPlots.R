@@ -318,11 +318,6 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                       "Flexibility subsidy" = "mediumpurple3")
   }
   
-  cost.colors.barline <- c(cost.colors.sys.wh2,
-                      'DIETER annual average electricity price with scarcity price' = "#00b300",
-                      'DIETER shadow price due to capacity constraint from REMIND' = "mediumpurple3",
-                      "Total Markup" = "lightblue")
-  
   cost.colors.dieter<- c(
                     "Curtailment Cost" = "darkblue",
                     "Storage Cost" = "darkorchid",

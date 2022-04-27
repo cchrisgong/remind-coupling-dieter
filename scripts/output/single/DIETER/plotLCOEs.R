@@ -745,7 +745,7 @@ df.lcoe.avg.dieter <- cost_bkdw_avg_DT %>%
 barwidth = 1.5
 
 p.techLCOE_compare<-ggplot() +
-  geom_col(data = df.lcoe.teAgg.wAdjMrk %>% 
+  geom_col(data = df.lcoe.teAgg.wAdj %>% 
              filter(period > 2020)
                , aes(x = period-barwidth/2-0.1, y = value, fill = cost), colour="black", position='stack', size = 1, width = barwidth) +
   geom_col(data = df.lcoe.avg.dieter %>% 
@@ -1047,7 +1047,8 @@ sysLCOE_marg_RM <- df.lcoe.components %>%
   mutate(model = "REMIND")
 
 sys_avgLCOE_compare <- list(sysLCOE_avg_DT_laIter, sysLCOE_marg_RM, adjcost.sys.marg) %>% 
-  reduce(full_join)  
+  reduce(full_join)%>% 
+  mutate(variable = factor(variable, levels=rev(unique(c(dieter.variable.mapping,"CCS Cost","Markup","Curtailment Cost")))))
 
 ymax = max(prices_lines$value) * 1.1
 ymin = min(sys_avgLCOE_compare$value) * 1.1
