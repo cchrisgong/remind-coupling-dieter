@@ -71,9 +71,9 @@ q32_usableSeDisp(t,regi,entySe)$(regDTCoup(regi) AND sameas(entySe,"seel"))..
 q32_usableSeTeDisp(t,regi,entySe,te)$(regDTCoup(regi) AND sameas(entySe,"seel") AND teDTCoupSupp(te))..
  	v32_usableSeTeDisp(t,regi,entySe,te)
  	=e=
- 	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te)$teDTCoupSupp(te) )
-	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te)$teDTCoupSupp(te) )
- 	- v32_storloss(t,regi,te)$(teDTCoupSupp(te) AND teVRE(te))
+ 	sum(pe2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
+	+ sum(se2se(enty,entySe,te), vm_prodSe(t,regi,enty,entySe,te) )
+ 	- v32_storloss(t,regi,te)
 ;
 
 ***---------------------------------------------------------------------------
@@ -194,7 +194,7 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2020)..
 	* vm_usableSeTe(t,regi,"seel",teVRE) )
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))
-	+ (p32_DIETERCurtRatio(t,regi,teVRE) * vm_usableSeTe(t,regi,"seel",teVRE) )
+	+ ( p32_DIETERCurtRatio(t,regi,teVRE) * v32_usableSeTeDisp(t,regi,"seel",teVRE) )
   * ( 1 + (v32_shSeElDisp(t,regi,teVRE) / 100 - p32_DIETER_shSeEl(t,regi,teVRE) / 100 ) )   !!! this is important to keep for stability
 	* 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 1) AND tDT32(t))
 $ENDIF.DTcoup
@@ -244,7 +244,8 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
 *** hard capacity constraint to peak residual load demand (excluding flexible load such as electrolysers)
 q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) AND (s32_hardcap ne 0) ) ..
-	sum(te$(DISPATCHte32(te) AND (p32_DIETER_techNonScarProd(t,regi,te) eq 1)), sum(rlf, vm_cap(t,regi,te,rlf)))
+*	sum(te$(DISPATCHte32(te) AND (p32_DIETER_techNonScarProd(t,regi,te) eq 1)), sum(rlf, vm_cap(t,regi,te,rlf)))
+  sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=g=
   p32_peakDemand_relFac(t,regi) * 8760 * ( v32_usableSeDisp(t,regi,"seel")
 $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
@@ -305,7 +306,7 @@ q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_D
 	- p32_DIETER_elecprice(t,regi) )
 	 / 1e12 * sm_TWa_2_MWh * 1$(regDTCoup(regi))
 * no prefactor
-* ( (p32_DIETER_MV(t,regi,te)  - p32_DIETER_elecprice(t,regi) ) / 1e12 * sm_TWa_2_MWh ) * 1$( regDTCoup(regi) )
+* ( (p32_DIETER_MV(t,regi,te) - p32_DIETER_elecprice(t,regi) ) / 1e12 * sm_TWa_2_MWh ) * 1$( regDTCoup(regi) )
 ;
 
 $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
@@ -350,17 +351,20 @@ $ENDIF.elh2_coup_off
 ***---------------------------------------------------------------------------
 *** Capacity factor for dispatchable power plants
 ***---------------------------------------------------------------------------
-** CG: prefactor for dispatchable capfac:
-** FU: the higher the "gen_share" (of a dispatachable technology) the lower the average capacity factor
-** (this is not as drastic as for RES market value, so the slope or pre factor should be less than 1).
+* CG: prefactor for dispatchable capfac:
+* FU: it depends on the technology. For peakers (OCGT) CF decreases with increasing share, for base load CF increases.
+* For mid-load technologies such as CCGT it could go in both directions - so a flat/constant pre-factor would be good here.
 q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te) AND (cm_DTcoup_eq ne 0))..
-*q32_capFac(t,regi,te)$( tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te) AND (cm_DTcoup_eq eq 3)).. !! turn off equation
     vm_capFac(t,regi,te) * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te))
     =e=
 			pm_cf(t,regi,te)
+    * ( 1 + 0.5 * (v32_shSeElDisp(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 ) )
+	  * 1$(tDT32(t) AND regDTCoup(regi) AND (pm_cf(t,regi,te) ge 0.5) AND CFcoupSuppte32(te))
+		+ pm_cf(t,regi,te)
     * ( 1 - 0.5 * (v32_shSeElDisp(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 ) )
-	  * 1$(tDT32(t) AND regDTCoup(regi) AND CFcoupSuppte32(te))
+	  * 1$(tDT32(t) AND regDTCoup(regi) AND (pm_cf(t,regi,te) lt 0.5) AND CFcoupSuppte32(te))
 ;
+
 
 $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
 ** CG: if elh2 in-iteration demand share is high, then capfac should be increased, so prefactor should be positive
