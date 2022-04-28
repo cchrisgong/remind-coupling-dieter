@@ -332,7 +332,7 @@ display "Reasons for non-convergence in this iteration (if not yet converged)";
 
 	 loop(convMessage80$(p80_messageShow(convMessage80)),
 	      if(sameas(convMessage80, "infes"),
-          display "#### 1.) Infeasibilities found in at least some regions in the last iteration. Plase check parameter p80_repy for details. ";
+          display "#### 1.) Infeasibilities found in at least some regions in the last iteration. Please check parameter p80_repy for details. ";
 		      display "#### Try a different gdx, or re-run the optimization with cm_nash_mode set to debug in order to debug the infes.";
         );
         if(sameas(convMessage80, "surplus"),
@@ -555,6 +555,25 @@ if ( (c_keep_iteration_gdxes eq 1) ,
       "cp input.gdx fulldata_0.gdx";
 );
 $ENDIF.DTcoup
+
+*** check if any region has failed to solve consecutively for a certain number of times
+if(cm_abortOnConsecFail, !! execute only if consecutive failures switch is non-zero
+    loop(regi,
+        if(((p80_repy(regi,'modelstat') eq 1) and (p80_repy(regi,'solvestat') eq 2))
+        or ((p80_repy(regi,'modelstat') eq 4) and (p80_repy(regi,'solvestat') eq 7)), !! region was solved successfully
+            p80_trackConsecFail(regi) = 0;
+        else
+            p80_trackConsecFail(regi) = p80_trackConsecFail(regi) + 1;
+        );
+
+        if(p80_trackConsecFail(regi) >= cm_abortOnConsecFail,
+            execute_unload "abort.gdx";
+
+            abort "Run was aborted because the maximum number of consecutive failures was reached in at least one region!";
+        );
+    )
+)
+
 
 ***Fade out LT correction terms, they should only be important in the first iterations and might interfere with ST corrections.
 ***p80_etaLT(trade) = p80_etaLT(trade)*0.5;

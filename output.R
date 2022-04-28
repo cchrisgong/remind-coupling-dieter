@@ -138,18 +138,18 @@ choose_mode <- function(title = "Please choose the output mode") {
 }
 
 choose_slurmConfig_priority_standby <- function(title = "Please enter the slurm mode, uses priority if empty") {
-  slurm_options <- c("priority", "short", "standby", "priority --mem=8000", "priority --mem=32000")
+  slurm_options <- c("--qos=priority", "--qos=short", "--qos=standby", "--qos=priority --mem=8000", "--qos=priority --mem=32000", "direct")
   cat("\n\n", title, ":\n\n")
-  cat(paste(seq_along(slurm_options), slurm_options, sep = ": "), sep = "\n")
+  cat(paste(seq_along(slurm_options), gsub("qos=", "", gsub("--", "", slurm_options)), sep = ": "), sep = "\n")
   cat("\nNumber: ")
   identifier <- get_line()
   if (identifier == "") {
     identifier <- 1
   }
   if (!identifier %in% seq(length(slurm_options))) {
-    stop("This slurm mode is invalid. Please choose a valid mode.")
+    return(choose_slurmConfig_priority_standby(title= "This slurm mode is invalid. Please choose a valid mode"))
   }
-  return(paste0("--qos=", slurm_options[as.numeric(identifier)]))
+  return(slurm_options[as.numeric(identifier)])
 }
 
 choose_filename_prefix <- function(modules, title = "") {
@@ -276,7 +276,8 @@ if (comp == TRUE) {
     # if this script is not being sourced by another script but called from the command line via Rscript let the user
     # choose the slurm options
     if (! exists("slurmConfig")) {
-      slurmConfig <- paste0(choose_slurmConfig_priority_standby(), " --nodes=1 --tasks-per-node=1")
+      slurmConfig <- choose_slurmConfig_priority_standby()
+      if (slurmConfig != "direct") slurmConfig <- paste(slurmConfig, "--nodes=1 --tasks-per-node=1")
     }
     if (slurmConfig %in% c("priority", "short", "standby")) {
       slurmConfig <- paste0("--qos=", slurmConfig, " --nodes=1 --tasks-per-node=1")

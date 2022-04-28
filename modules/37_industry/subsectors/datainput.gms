@@ -55,13 +55,18 @@ if (cm_IndCCSscen eq 1,
 *** assume 50 year lifetime for industry energy efficiency capital
 pm_delta_kap(regi,ppfKap_industry_dyn37) = -log(1 / 4) / 50;
 
-*** FIXME: this is temporary data, insert meaningful figures!
-p37_energy_limit("ue_cement")          = 1.8;
-p37_energy_limit("ue_steel_primary")   = 8;
-p37_energy_limit("ue_steel_secondary") = 1.3;
+* Thermodynamic limits on subsector FE demand
+Parameter
+  pm_energy_limit(all_in)   "thermodynamic/technical limits of subsector energy use [GJ/t product]"
+  /
+$ondelim
+$include "./modules/37_industry/subsectors/input/pm_energy_limit.csv";
+$offdelim
+  /
+;
 
-p37_energy_limit(in)
-  = p37_energy_limit(in)   !! GJ/t
+pm_energy_limit(in)
+  = pm_energy_limit(in)   !! GJ/t
   * 1e-3                   !! * TJ/GJ
   / (8760 * 3600)          !! * s/year
   * 1e9;                   !! * t/Gt
@@ -214,9 +219,62 @@ $endIf.CESMkup
 
 display p37_CESMkup;
 
+* Load secondary steel share limits
+Parameter
+  f37_steel_secondary_max_share(tall,all_regi,all_GDPscen)   "maximum share of secondary steel production"
+  /
+$ondelim
+$include "./modules/37_industry/subsectors/input/p37_steel_secondary_max_share.cs4r";
+$offdelim
+  /
+;
 
+p37_steel_secondary_max_share(t,regi)
+  = f37_steel_secondary_max_share(t,regi,"%cm_GDPscen%");
 
+$ifthen.sec_steel_scen NOT "%cm_steel_secondary_max_share_scenario%" == "off"   !! cm_steel_secondary_max_share_scenario
+* Modify secondary steel share limits by scenario assumptions
 
+$ifthen.calibrate "%CES_parameters%" == "calibrate"   !! CES_parameters
+* Abort if scenario limits are to be prescribed during calibration.
+$abort "cm_steel_secondary_max_share_scenario != off is incompatible with calibration"
+$endif.calibrate
+
+* Protect against the prescription of seconday steel shares in historic/fixed
+* time steps.
+if (smax((t,regi)$( t.val le max(cm_startyear, 2020) ),
+      p37_steel_secondary_max_share_scenario(t,regi)),
+  put logfile;
+  put "Error: cm_steel_secondary_max_share_scenario scaling before ",
+      "cm_startyear/2020" /;
+  loop ((t,regi)$(    t.val le max(cm_startyear, 2020)
+                  AND p37_steel_secondary_max_share_scenario(t,regi) ),
+    put p37_steel_secondary_max_share_scenario.tn(t,regi), " = ",
+        p37_steel_secondary_max_share_scenario(t,regi) /;
+  );
+  putclose logfile " " /;
+
+  execute_unload "abort.gdx";
+  abort "Faulty cm_steel_secondary_max_share_scenario scaling. See .log file for details.";
+);
+
+* Modify limits on secondary steel shares.  Linear fade from calibration limits
+* to scenario limits.
+loop ((regi,t2)$( p37_steel_secondary_max_share_scenario(t2,regi) ),
+  loop (t3$( t3.val eq max(cm_startyear, 2020) ),
+    loop (t,
+      sm_tmp = max(0, min(1, (t.val - t3.val) / (t2.val - t3.val)));
+
+      p37_steel_secondary_max_share(t,regi)
+      = (p37_steel_secondary_max_share(t,regi)           * (1 - sm_tmp))
+      + (p37_steel_secondary_max_share_scenario(t2,regi) * sm_tmp      );
+    );
+  );
+);
+
+display "scenario limits for maximum secondary steel share",
+        p37_steel_secondary_max_share;
+$endif.sec_steel_scen
 
 *** EOF ./modules/37_industry/subsectors/datainput.gms
 
