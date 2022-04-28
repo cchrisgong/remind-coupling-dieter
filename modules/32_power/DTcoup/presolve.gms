@@ -89,9 +89,9 @@ $ENDIF.cf_avg
 		      = p32_shSeElDisp(t,regi,te)$(BIOte32(te))/(sum(te2$(BIOte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
 		p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND NonPeakGASte32(te) )
 		      = p32_shSeElDisp(t,regi,te)$(NonPeakGASte32(te))/(sum(te2$(NonPeakGASte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
-		p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi))
+		p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND regDTCoup(regi)AND NUCte32(te) )
 		      = p32_shSeElDisp(t,regi,te)$(NUCte32(te))/(sum(te2$(NUCte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
-		p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
+		p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND regDTCoup(regi)AND COALte32(te) )
 		      = p32_shSeElDisp(t,regi,te)$(COALte32(te))/(sum(te2$(COALte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
 
 *** CG: writing DIETER generation shares to parameters
@@ -194,6 +194,7 @@ Display "one or more DIETER LP have 0 electricity price, if this happens in the 
 p32_DIETER_techNonScarProd(t,regi,te)$(tDT32(t) AND BIOte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"bio","peak_gen_bin"));
 p32_DIETER_techNonScarProd(t,regi,te)$(tDT32(t) AND NonPeakGASte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"CCGT","peak_gen_bin"));
 p32_DIETER_techNonScarProd(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","peak_gen_bin"));
+*p32_DIETER_techNonScarProd(t,regi,te)$(tDT32(t) AND (t le 2035) AND COALte32(te) AND regDTCoup(regi)) = eps;
 p32_DIETER_techNonScarProd(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","peak_gen_bin"));
 p32_DIETER_techNonScarProd(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"OCGT_eff","peak_gen_bin"));
 

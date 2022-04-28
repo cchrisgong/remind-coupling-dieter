@@ -135,16 +135,15 @@ p32_usableSeDisp(t,regi,entySe)$(regDTCoup(regi) AND sameas(entySe,"seel")) =
 	+ sum(se2se(enty,entySe,te), vm_prodSe.l(t,regi,enty,entySe,te)$(teDTCoupSupp(te)) )
 	- sum(te, v32_storloss.l(t,regi,te)$(teDTCoupSupp(te) AND teVRE(te)) )
 ;
-p32_usableSeTeDisp(t,regi,entySe,te)$(regDTCoup(regi) AND sameas(entySe,"seel")) =
- 	sum(pe2se(enty,entySe,te), vm_prodSe.l(t,regi,enty,entySe,te)$teDTCoupSupp(te) )
-	+ sum(se2se(enty,entySe,te), vm_prodSe.l(t,regi,enty,entySe,te)$teDTCoupSupp(te) )
- 	- v32_storloss.l(t,regi,te)$(teDTCoupSupp(te) AND teVRE(te))
-;
+p32_usableSeTeDisp(t,regi,entySe,te)$(regDTCoup(regi) AND sameas(entySe,"seel") AND teDTCoupSupp(te)) =
+ 	sum(pe2se(enty,entySe,te), vm_prodSe.l(t,regi,enty,entySe,te))
+	+ sum(se2se(enty,entySe,te), vm_prodSe.l(t,regi,enty,entySe,te) )
+ 	- v32_storloss.l(t,regi,te);
+
 ***p32_shSeElDisp is needed for downscaling generation shares in presolve.gms
 p32_shSeElDisp(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) =
   p32_usableSeTeDisp(t,regi,"seel",te) / p32_usableSeDisp(t,regi,"seel") *100
 ;
-
 
 ***CG: time-dependent interest rate for DIETER (Marian's formula in core/postsolve)
 p32_r4DT(ttot,regi)$(tDT32s2(ttot) AND regDTCoup(regi))

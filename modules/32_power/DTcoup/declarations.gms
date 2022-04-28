@@ -99,9 +99,8 @@ $ENDIF.DTcoup
     p32_fuelprice_lastx2iter(ttot,all_regi,all_enty)                    "fuel cost of the second to last iteration"
     p32_fuelprice_curriter(ttot,all_regi,all_enty)                      "fuel cost of the current iteration"
     p32_fuelprice_avgiter(ttot,all_regi,all_enty)                       "fuel cost over the three iterations averaged through a low pass filter"
-
-    p32_test1(ttot,all_regi,all_te)
-    p32_test2(ttot,all_regi)
+* p32_test1(ttot,all_regi,all_te)
+* p32_test2(ttot,all_regi)
 ;
 
 scalars

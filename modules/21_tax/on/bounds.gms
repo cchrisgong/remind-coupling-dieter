@@ -13,7 +13,6 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 vm_Mrkup.fx(t,regi,te)$(teDTCoupSupp(te) AND regNoDTCoup(regi)) = 0;
 *** CG: set spv markups to 0 for non-coupled years for coupled regions
 vm_Mrkup.fx(t,regi,te)$(teDTCoupSupp(te) AND regDTCoup(regi) AND not tDT32(t)) = 0;
-*v21_taxrevMrkup.fx(t,all_regi)$(regDTCoup(regi) AND not tDT32(t)) = 0;
 
 *** CG dislay:
 sm21_tmp = iteration.val;

@@ -68,7 +68,7 @@ p32_capConShadowPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (abs(qm_budge
       = q32_peakDemandDT.m(t,regi,"seel") / (qm_budget.m(t,regi)) / (p32_realCapfac(t,regi,te) / 1e2);
 $ENDIF.DTcoup
 
-p32_shSeElDisp(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) = v32_shSeElDisp.l(t,regi,te);
+p32_shSeElDisp(t,regi,te)$(regDTCoup(regi) AND teDTCoupSupp(te)) = v32_shSeElDisp.l(t,regi,te);
 p32_shSeEl(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) = v32_shSeEl.l(t,regi,te);
 
 *** CG: calculate budget from last iteration
@@ -202,13 +202,13 @@ p32_r4DT(ttot,regi)$(tDT32s2(ttot))
   (vm_cons.l(ttot-1,regi)/pm_pop(ttot-1,regi)) )
   ** (1 / ( pm_ttot_val(ttot+1)- pm_ttot_val(ttot-1))) - 1) + pm_prtp(regi);
 
-p32_test1(t,regi,te) =  sum(en2en(enty,enty2,te),
-			vm_demSe.l(t,regi,enty,enty2,te)$(sameas(enty,"seel")))
-;
-
-p32_test2(t,regi) =  sum(en2en(enty,enty2,te),
-			vm_demSe.l(t,regi,enty,enty2,te)$(sameas(enty,"seel")))
-;
+* p32_test1(t,regi,te) =  sum(en2en(enty,enty2,te),
+* 			vm_demSe.l(t,regi,enty,enty2,te)$(sameas(enty,"seel")))
+* ;
+*
+* p32_test2(t,regi) =  sum(en2en(enty,enty2,te),
+* 			vm_demSe.l(t,regi,enty,enty2,te)$(sameas(enty,"seel")))
+* ;
 
 ***CG:
 * since we would like to couple all years to limit distortions, but growth rate after 2100 is weird (2130 has negative growth rate) due to various artefact, we simply set interest rates
@@ -306,13 +306,13 @@ $ENDIF.curt_avg
 p32_cf_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (teDTCoupSupp(te) OR CFcoupDemte32(te))) = vm_capFac.l(t,regi,te);
 
 * upscaling technologies
-p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND BIOte32(te) )
+p32_tech_category_genshare(t,regi,te)$(regDTCoup(regi) AND BIOte32(te) )
       = p32_shSeElDisp(t,regi,te)$(BIOte32(te))/(sum(te2$(BIOte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
-p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND NonPeakGASte32(te) )
+p32_tech_category_genshare(t,regi,te)$(regDTCoup(regi) AND NonPeakGASte32(te) )
       = p32_shSeElDisp(t,regi,te)$(NonPeakGASte32(te))/(sum(te2$(NonPeakGASte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
-p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND NUCte32(te) AND regDTCoup(regi))
+p32_tech_category_genshare(t,regi,te)$(NUCte32(te) AND regDTCoup(regi))
       = p32_shSeElDisp(t,regi,te)$(NUCte32(te))/(sum(te2$(NUCte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
-p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND COALte32(te) AND regDTCoup(regi))
+p32_tech_category_genshare(t,regi,te)$(COALte32(te) AND regDTCoup(regi))
       = p32_shSeElDisp(t,regi,te)$(COALte32(te))/(sum(te2$(COALte32(te2)),p32_shSeElDisp(t,regi,te2)) + sm_eps);
 
 p32_cfPrefac(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) =
@@ -363,37 +363,37 @@ p32_MVupscaled(t,regi,te)$(COALte32(te)) = p32_MVAvgW(t,regi,"coal");
 );
 
 ***CG: calculate model generation share difference DIETER-REMIND
-p32_REMINDUpscaledShare(t,regi,"solar") = p32_shSeElDisp(t,regi,"spv");
-p32_REMINDUpscaledShare(t,regi,"windon") = p32_shSeElDisp(t,regi,"wind");
+p32_REMINDUpscaledShare(t,regi,"solar")$(tDT32(t)) = p32_shSeElDisp(t,regi,"spv");
+p32_REMINDUpscaledShare(t,regi,"windon")$(tDT32(t)) = p32_shSeElDisp(t,regi,"wind");
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
-p32_REMINDUpscaledShare(t,regi,"windoff") = p32_shSeElDisp(t,regi,"windoff");
+p32_REMINDUpscaledShare(t,regi,"windoff")$(tDT32(t)) = p32_shSeElDisp(t,regi,"windoff");
 $ENDIF.WindOff
-p32_REMINDUpscaledShare(t,regi,"hydro") = p32_shSeElDisp(t,regi,"hydro");
-p32_REMINDUpscaledShare(t,regi,"ocgt") = p32_shSeElDisp(t,regi,"ngt");
-p32_REMINDUpscaledShare(t,regi,"biomass") = sum(te$(BIOte32(te)),p32_shSeElDisp(t,regi,te));
-p32_REMINDUpscaledShare(t,regi,"coal") = sum(te$(COALte32(te)),p32_shSeElDisp(t,regi,te));
-p32_REMINDUpscaledShare(t,regi,"ccgt") = sum(te$(NonPeakGASte32(te)),p32_shSeElDisp(t,regi,te));
-p32_REMINDUpscaledShare(t,regi,"nuclear") = sum(te$(NUCte32(te)),p32_shSeElDisp(t,regi,te));
+p32_REMINDUpscaledShare(t,regi,"hydro")$(tDT32(t)) = p32_shSeElDisp(t,regi,"hydro");
+p32_REMINDUpscaledShare(t,regi,"ocgt")$(tDT32(t)) = p32_shSeElDisp(t,regi,"ngt");
+p32_REMINDUpscaledShare(t,regi,"biomass")$(tDT32(t)) = sum(te$(BIOte32(te)),p32_shSeElDisp(t,regi,te));
+p32_REMINDUpscaledShare(t,regi,"coal")$(tDT32(t)) = sum(te$(COALte32(te)),p32_shSeElDisp(t,regi,te));
+p32_REMINDUpscaledShare(t,regi,"ccgt")$(tDT32(t)) = sum(te$(NonPeakGASte32(te)),p32_shSeElDisp(t,regi,te));
+p32_REMINDUpscaledShare(t,regi,"nuclear")$(tDT32(t)) = sum(te$(NUCte32(te)),p32_shSeElDisp(t,regi,te));
 
-p32_modelGenShDiff(t,regi,"solar") =
+p32_modelGenShDiff(t,regi,"solar")$(tDT32(t)) =
   sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"solar","gen_share")) - p32_REMINDUpscaledShare(t,regi,"solar") ;
-p32_modelGenShDiff(t,regi,"windon") =
+p32_modelGenShDiff(t,regi,"windon")$(tDT32(t)) =
   sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","gen_share")) - p32_REMINDUpscaledShare(t,regi,"windon") ;
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
-p32_modelGenShDiff(t,regi,"windoff") =
+p32_modelGenShDiff(t,regi,"windoff")$(tDT32(t)) =
   sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_off","gen_share")) - p32_REMINDUpscaledShare(t,regi,"windoff") ;
 $ENDIF.WindOff
-p32_modelGenShDiff(t,regi,"hydro") =
+p32_modelGenShDiff(t,regi,"hydro")$(tDT32(t)) =
   sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"ror","gen_share")) - p32_REMINDUpscaledShare(t,regi,"hydro") ;
-p32_modelGenShDiff(t,regi,"ocgt") =
+p32_modelGenShDiff(t,regi,"ocgt")$(tDT32(t)) =
   sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"OCGT_eff","gen_share")) - p32_REMINDUpscaledShare(t,regi,"ocgt") ;
-p32_modelGenShDiff(t,regi,"biomass") =
+p32_modelGenShDiff(t,regi,"biomass")$(tDT32(t)) =
   sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"bio","gen_share")) - p32_REMINDUpscaledShare(t,regi,"biomass") ;
-p32_modelGenShDiff(t,regi,"coal") =
+p32_modelGenShDiff(t,regi,"coal")$(tDT32(t)) =
   sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"coal","gen_share")) - p32_REMINDUpscaledShare(t,regi,"coal") ;
-p32_modelGenShDiff(t,regi,"ccgt") =
+p32_modelGenShDiff(t,regi,"ccgt")$(tDT32(t)) =
   sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"ccgt","gen_share")) - p32_REMINDUpscaledShare(t,regi,"ccgt") ;
-p32_modelGenShDiff(t,regi,"nuclear") =
+p32_modelGenShDiff(t,regi,"nuclear")$(tDT32(t)) =
   sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","gen_share")) - p32_REMINDUpscaledShare(t,regi,"nuclear") ;
 
 sm_DTgenShDiff = smax(t,
