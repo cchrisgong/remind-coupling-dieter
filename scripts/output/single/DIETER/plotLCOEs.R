@@ -946,7 +946,7 @@ out.prices_DT <-  rbind(out.prices_DT, prices_DT)
 }
 
 shadow_prices_DT <- out.prices_DT %>% 
-  filter(variable == 'DIETER shadow price due to capacity constraint from REMIND') %>% 
+  filter(variable == 'DIETER shadow price due to capacity constraint from REMIND (with grid)') %>% 
   select(period, shad=value,iteration)
 
 elec_prices_DT <- out.prices_DT %>% 
@@ -958,9 +958,7 @@ elec_prices_DT_wShadPrice <- elec_prices_DT %>%
   mutate(variable = "DIETER annual average electricity price with scarcity price + shadow price")
 
 prices_RM <- df.pricelcoe_minus_tax.plot %>%
-# prices_RM <- df.pricelcoe_minus_tax.plot.nocurt %>%
   filter(tech == "System") %>%
-  # filter(variable %in% c("REMIND Price", "Total (marginal) LCOE + Markup")) %>%
   filter(variable %in% c("REMIND Price")) %>%
   select(period, variable, value)%>%
   mutate(model = "REMIND")
@@ -984,7 +982,6 @@ prices_w2Shad_RM <- prices_wShad_RM %>%
 
 prices_RM.movingavg <- df.price0 %>%
   filter(tech == "System") %>% 
-  # filter(period > 2010) %>% 
   select(period, variable, value)%>%
   mutate(model = "REMIND") %>% 
   mutate(value = frollmean(value, 4, align = "center", fill = NA)) %>% 
@@ -998,7 +995,8 @@ elec_prices_DT_wShadPrice_laIter <- elec_prices_DT_wShadPrice %>%
   filter(iteration == maxiter -1) %>% 
   select(-iteration)
 
-prices_lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter, prices_RM) %>%
+# prices_lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter, prices_RM) %>%
+prices_lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter) %>%
   reduce(full_join)
 
 genshare.dieter <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>% 
@@ -1042,7 +1040,6 @@ sysLCOE_avg_DT_laIter$model <- "DIETER"
 
 
 sysLCOE_marg_RM <- df.lcoe.components %>%
-# sysLCOE_marg_RM <- df.lcoe.components.nocurt %>%
   filter(tech == "System") %>%
   select(!variable) %>%
   select(period, variable= cost, value) %>%

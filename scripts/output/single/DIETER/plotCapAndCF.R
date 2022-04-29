@@ -2,10 +2,12 @@ cat("Plot capacities \n")
 
 # Data preparation (REMIND) -----------------------------------------------
 out.remind.capacity <- NULL
-out.remind.demand <- NULL
+out.remind.peak.demand <- NULL
 
 if (length(dieter.files) != 0) {
   for (i in 2:(length(remind.files))){
+    
+    it <- as.numeric(str_extract(remind.files[i], "[0-9]+"))
     
     peak.demand.relfac <- file.path(outputdir, remind.files[i]) %>%  
       read.gdx("p32_peakDemand_relFac", factor = FALSE) %>% 
@@ -19,7 +21,7 @@ if (length(dieter.files) != 0) {
       filter(all_regi == reg) %>%
       select(period=ttot,h2dem = value) 
     
-    remind.data <- file.path(outputdir, remind.files[i]) %>%  
+    remind.peak.demand <- file.path(outputdir, remind.files[i]) %>%  
       read.gdx("v32_usableSeDisp", field="l", factor = FALSE) %>% 
       filter(ttot %in% model.periods) %>% 
       filter(all_regi == reg) %>%
@@ -28,17 +30,19 @@ if (length(dieter.files) != 0) {
       right_join(peak.demand.relfac) %>% 
       full_join(h2.demand) %>% 
       replace(is.na(.), 0) %>% 
-      mutate(value = (value - h2dem) * resfrac * 8760 * 1e3) 
+      mutate(value = (value - h2dem) * resfrac * 8760 * 1e3) %>% 
+      mutate(iteration = it, model = "REMIND") %>% 
+      mutate(var = "peak hourly residual demand")
     
-    it <- as.numeric(str_extract(remind.files[i], "[0-9]+"))
-    remind.data$iteration <- it
-    remind.data$model <- "REMIND"
-    out.remind.demand <- rbind(out.remind.demand, remind.data)
+    out.remind.peak.demand <- rbind(out.remind.peak.demand, remind.peak.demand)
   }
 }
+
   for (i in 1:(length(remind.files))){
  
-    data.capacity <- file.path(outputdir, remind.files[i]) %>%  
+    it <- as.numeric(str_extract(remind.files[i], "[0-9]+"))
+    
+    remind.capacity <- file.path(outputdir, remind.files[i]) %>%  
       read.gdx("vm_cap", factors = FALSE, squeeze = FALSE) %>% 
       filter(tall %in% model.periods) %>%
       filter(all_regi == reg) %>%
@@ -50,76 +54,71 @@ if (length(dieter.files) != 0) {
       dplyr::group_by(period, tech, rlf) %>%
       dplyr::summarise( value = sum(value) , .groups = 'keep' ) %>% 
       dplyr::ungroup(period, tech, rlf) %>% 
-      mutate(tech = factor(tech, levels=rev(unique(remind.tech.mapping.narrow))))
+      mutate(tech = factor(tech, levels=rev(unique(remind.tech.mapping.narrow))))%>% 
+      mutate(iteration = it, model = "REMIND")
     
-    it <- as.numeric(str_extract(remind.files[i], "[0-9]+"))
-    data.capacity$iteration <- it
-    data.capacity$model <- "REMIND"
-    
-    out.remind.capacity <- rbind(out.remind.capacity, data.capacity)
+    out.remind.capacity <- rbind(out.remind.capacity, remind.capacity)
   }
   
   
 # Data preparation (DIETER) -----------------------------------------------
-out.dieter.data <- NULL
+out.dieter.cap.data <- NULL
 out.remind.capfac <- NULL
+out.dieter.peak.demand <- NULL
+out.dieter.capfac <- NULL
 
 if (length(dieter.files) != 0) {
   
   for (i in 1:length(dieter.files)){
     # i=22
     it <- as.numeric(str_extract(dieter.files[i], "[0-9]+"))
-    data.real.capfac <-
-      file.path(outputdir, dieter.files.report[i]) %>% 
+    data.real.capfac <- file.path(outputdir, dieter.files.report[i]) %>% 
       read.gdx("report_tech", squeeze = F) %>% 
       select(model = X..1, period = X..2, variable = X..4, tech = X..5, value) %>% 
       filter(variable %in% c("REMIND real CapFac (%)")) %>% 
       revalue.levels(tech = dieter.tech.mapping) %>%
-      mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping))))
+      mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping))))%>% 
+      mutate(iteration = it, model = "REMIND")
     
-    data.real.capfac$iteration <- it
-    data.real.capfac$model <- "REMIND"
-    
-    out.remind.capfac <- rbind(out.remind.capfac, data.real.capfac)
-  
-    dieter.data <- file.path(outputdir, dieter.files[i]) %>% 
+    dieter.cap.data <- file.path(outputdir, dieter.files[i]) %>% 
       read.gdx("p32_report4RM", factor = FALSE, squeeze = FALSE) %>%
       select(period = X..1, tech = X..3, variable=X..4, value)  %>%
       filter(period %in% model.periods) %>%
       filter(tech %in% names(dieter.tech.mapping)) %>%
       filter(variable %in% c("capacity")) %>%
       revalue.levels(tech = dieter.tech.mapping) %>%
-      mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))) 
+      mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))) %>% 
+      mutate(iteration = it, model = "DIETER")
     
-    dieter.data$iteration <- it
-    dieter.data$model <- "DIETER"
+    dieter.peak.demand<- file.path(outputdir, dieter.files.report[i]) %>% 
+      read.gdx("report", squeeze = F) %>% 
+      select(model = X..1, period = X..2, variable = X..4, value) %>% 
+      filter(variable %in% c("peak residual demand (GW)"))  %>% 
+      mutate(iteration = it, model = "DIETER")%>% 
+      select(iteration,period, model, value) %>% 
+      mutate(var = "peak hourly residual demand")
     
-    out.dieter.data <- rbind(out.dieter.data, dieter.data)
-}
-  
-  
-  out.dieter.capacity <- out.dieter.data %>%
-    filter(variable == "capacity") %>%
-    mutate(value = value/1e3) %>% #MW->GW
-    select(period, tech, value, iteration)
-  
-  out.dieter.capfac <- NULL
-  for (i in 1:(length(dieter.files))){
-    it <- as.numeric(str_extract(dieter.files[i], "[0-9]+"))
     data.real.capfac <-
       file.path(outputdir, dieter.files.report[i]) %>% 
       read.gdx("report_tech", squeeze = F) %>% 
       select(model = X..1, period = X..2, variable = X..4, tech = X..5, value) %>% 
       filter(variable %in% c("DIETER real avg CapFac (%)")) %>% 
       revalue.levels(tech = dieter.tech.mapping) %>%
-      mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping))))
+      mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping))))%>% 
+      mutate(iteration = it, model = "DIETER")
     
-    data.real.capfac$iteration <- it
-    data.real.capfac$model <- "DIETER"
+    out.remind.capfac <- rbind(out.remind.capfac, data.real.capfac)
+    out.dieter.cap.data <- rbind(out.dieter.cap.data, dieter.cap.data)
+    out.dieter.peak.demand <- rbind(out.dieter.peak.demand, dieter.peak.demand)
     out.dieter.capfac <- rbind(out.dieter.capfac,data.real.capfac)
-  }
+}
   
-  }
+  out.dieter.capacity <- out.dieter.cap.data %>%
+    filter(variable == "capacity") %>%
+    mutate(value = value/1e3) %>% #MW->GW
+    select(period, tech, value, iteration)
+  
+}
 
 # Plotting ----------------------------------------------------------------
 ##################################################################################################
@@ -132,12 +131,14 @@ for(year_toplot in model.periods){
     filter(period == year_toplot)
   
   if (length(dieter.files) != 0) {
-    plot.remind.demand <- out.remind.demand %>% 
+    plot.remind.peak.demand <- out.remind.peak.demand %>% 
       filter(period == year_toplot)
-    plot.remind.demand$tech <- "peak demand"
-
+    
     plot.remind.capfac <- out.remind.capfac %>% 
       filter(period == year_toplot) 
+    
+    plot.dieter.peak.demand <- out.dieter.peak.demand%>% 
+      filter(period == year_toplot)
   }
   
   secAxisScale1 = max(plot.remind.capacity$value) / 100
@@ -162,7 +163,7 @@ swlatex(sw, paste0("\\subsection{Capacities in ", year_toplot, "}"))
   
   if (length(dieter.files) != 0) {
     p1 <- p1 + 
-      geom_line(data = plot.remind.demand, aes(x = iteration, y = value, color = tech), size = 1.2, alpha = 2,linetype="dotted") 
+      geom_line(data = plot.remind.peak.demand, aes(x = iteration, y = value, color = var), size = 1.2, alpha = 2,linetype="dotted") 
   }
   
   if ((CAPwith_CF != 0) & (length(dieter.files) != 0)) {
@@ -173,7 +174,7 @@ swlatex(sw, paste0("\\subsection{Capacities in ", year_toplot, "}"))
   
   if ((CAPwith_CF == 0) & (length(dieter.files) != 0)) {
     p1 <- p1 + 
-      scale_color_manual(name = "Technology", values = color.mapping.cap.line)
+      scale_color_manual(name = "var", values = color.mapping.cap.line)
   }
   
   if (length(dieter.files) != 0) {
@@ -186,7 +187,7 @@ swlatex(sw, paste0("\\subsection{Capacities in ", year_toplot, "}"))
   
     p2<-ggplot() +
       geom_area(data = plot.dieter.capacity, aes(x = iteration, y = value, fill = tech), size = 1.2, alpha = 0.5) +
-      geom_line(data = plot.remind.demand, aes(x = iteration, y = value, color = tech), size = 1.2, alpha = 2, linetype="dotted") +
+      geom_line(data = plot.dieter.peak.demand, aes(x = iteration, y = value, color = var), size = 1.2, alpha = 2, linetype="dotted") +
       scale_y_continuous(sec.axis = sec_axis(~./secAxisScale2, name = paste0("CF", "(%)")))+
       scale_fill_manual(name = "Technology", values = color.mapping.cap) +
       xlab("iteration") + ylab(paste0("Capacity (GW)")) +
@@ -203,7 +204,7 @@ swlatex(sw, paste0("\\subsection{Capacities in ", year_toplot, "}"))
   
   if ((CAPwith_CF == 0) & (length(dieter.files) != 0)) {
     p2 <- p2 + 
-      scale_color_manual(name = "Technology", values = color.mapping.cap.line)
+      scale_color_manual(name = "var", values = color.mapping.cap.line)
   }
   
   

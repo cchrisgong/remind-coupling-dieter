@@ -10,7 +10,7 @@ font.size = 8
 # Plotting style ----------------------------------------------------------
 theme_set(theme_cowplot(font_size = 8))  # Use simply theme and set font size
 
-# Figure 1: Electricity price convergence ---------------------------------
+# Figure 2: Electricity price convergence ---------------------------------
 
 # diff.price.rollmeaaan <-diff.price.rollmean  %>% 
 #   filter(iteration == 36) %>% 
@@ -32,7 +32,10 @@ p.surface <- ggplot() +
   scale_x_continuous(name = "Iteration") + 
   scale_y_continuous(name = "Time",
                      breaks = seq(2020, 2100, 10)) + 
-  ggtitle("Electricity price difference (REMIND - DIETER)")
+  ggtitle("Electricity price difference (REMIND - DIETER)") +
+  theme(axis.text = element_text(size = font.size),
+        axis.title = element_text(size = font.size))+
+  theme(legend.text = element_text(size = font.size))
 
 # Panel 2: Time averaged line plot
 p.line <- ggplot() + 
@@ -41,13 +44,16 @@ p.line <- ggplot() +
             data = diff.price.rollmean.avg.yr,
             mapping = aes(x = iteration,
                           y = value,
-                          color = "Time averaged")) + 
+                          color = "Time-averaged")) + 
   scale_color_manual(name = element_blank(),
-                     values = c("Time averaged" = "black")) +
+                     values = c("Time-averaged" = "black")) +
   scale_x_continuous(name = "Iteration") + 
   scale_y_continuous(name = "$/MWh",
                      limits = c(-1, max(diff.price.avg.yr$value)))+
-  theme_minimal_grid(12)
+  theme_minimal_grid(12) +
+  theme(axis.text = element_text(size = font.size),
+        axis.title = element_text(size =font.size))+
+  theme(legend.text = element_text(size=font.size))
   
 # Arrange both plots
 p <- plot_grid(p.surface,
@@ -72,7 +78,7 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE02.png"),
 #        height = 10,  # Vary height according to how many panels plot has
 #        units = "cm")
 
-# Figure 2: Generation convergence ------------------------------------------
+# Figure 3: Generation convergence ------------------------------------------
 # With manual colour scales, we need to order this vector 
 color.mapping.gen.order <- color.mapping.cap[levels(plot.dieter.gen2$tech)]
 color.mapping.gen.order <- color.mapping.gen.order[!is.na(color.mapping.gen.order)]
@@ -80,12 +86,14 @@ color.mapping.gen.order <- color.mapping.gen.order[!is.na(color.mapping.gen.orde
 # Make additional tibble for capacity sum
 # This way we can draw a border around the entire stacked bar
 plot.dieter.gen2.group <- plot.dieter.gen2 %>% 
-  group_by(period, model) %>% 
-  summarise(sum = sum(value))
+  dplyr::group_by(period,model) %>% 
+  dplyr::summarise( sum = sum(value), .groups = "keep" ) %>% 
+  dplyr::ungroup(period,model)
 
 plot.remind.gen2.group <- plot.remind.gen2 %>% 
-  group_by(period, model) %>% 
-  summarise(sum = sum(value))
+  dplyr::group_by(period,model) %>% 
+  dplyr::summarise( sum = sum(value), .groups = "keep" ) %>% 
+  dplyr::ungroup(period,model)
 
 plot.remind.gen.total <- out.remind.generation %>% 
   filter(iteration == maxiter - 1) %>% 
@@ -182,7 +190,7 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE03.png"),
 #        units = "cm")
 
 
-# Figure 3: Capacity convergence ------------------------------------------
+# Figure 4: Capacity convergence ------------------------------------------
 # With manual colour scales, we need to order this vector 
 color.mapping.cap.order <- color.mapping.cap[levels(plot.dieter.capacity2$tech)]
 color.mapping.cap.order <- color.mapping.cap.order[!is.na(color.mapping.cap.order)]
@@ -190,13 +198,15 @@ color.mapping.cap.order <- color.mapping.cap.order[!is.na(color.mapping.cap.orde
 # Make additional tibble for capacity sum
 # This way we can draw a border around the entire stacked bar
 plot.dieter.capacity2.group <- plot.dieter.capacity2 %>% 
-  group_by(period, model) %>% 
-  summarise(sum = sum(value))
+  dplyr::group_by(period,model) %>% 
+  dplyr::summarise( sum = sum(value), .groups = "keep" ) %>% 
+  dplyr::ungroup(period,model)
+
 
 plot.remind.capacity2.group <- plot.remind.capacity2 %>% 
-  group_by(period, model) %>% 
-  summarise(sum = sum(value))
-
+  dplyr::group_by(period,model) %>% 
+  dplyr::summarise( sum = sum(value), .groups = "keep" ) %>% 
+  dplyr::ungroup(period,model)
 
 p.cap.doublebar <- ggplot() +
   # Stacked bar for DIETER
@@ -291,3 +301,32 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE04.png"),
 #        width = 18,  # Vary width according to how many panels plot has
 #        height = 12,  # Vary height according to how many panels plot has
 #        units = "cm")
+
+# Figure ?: RLDC ------------------------------------------
+# REMIND RLDC
+
+
+p.RM.rldc <-ggplot() +
+  geom_area(data = RLDC.VRE, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1, position = "identity") +
+  geom_area(data = plot.rldc.hr, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1) +
+  coord_cartesian(ylim = c(-80,140),xlim = c(0,8760))+
+  scale_fill_manual(name = "Technology", values = color.mapping.RLDC.basic)+
+  theme(legend.position = "none")+
+  xlab("hour") + ylab("residual load (GW)")+
+  ggtitle(paste0("REMIND ", year_toplot))
+
+# Arrange both plots
+p <- plot_grid(p.RM.rldc,
+               p.DT.rldc,
+               ncol = 2,
+               rel_widths = c(1, 1.2),
+               labels = "auto",
+               label_size = 1.2*font.size,
+               align = "h")
+
+# Save as png
+ggsave(filename = paste0(outputdir, "/DIETER/FIGURE0n.png"),
+       bg = "white",
+       width = 20,  # Vary width according to how many panels plot has
+       height = 12,  # Vary height according to how many panels plot has
+       units = "cm")

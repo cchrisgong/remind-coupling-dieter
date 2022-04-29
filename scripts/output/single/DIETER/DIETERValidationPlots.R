@@ -331,6 +331,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                     "Adjustment Cost" = "darkgoldenrod1",
                     'DIETER annual average electricity price with scarcity price' = "indianred3",
                     'DIETER shadow price due to capacity constraint from REMIND' = "mediumpurple3",
+                    'DIETER shadow price due to capacity constraint from REMIND (with grid)' = "mediumpurple2",
                      NULL)
   
   
@@ -384,8 +385,8 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   report_DT_prices = c(
     'price for total demand - with scarcity price ($/MWh)',
     'price for total demand ($/MWh)',
-    'total system shadow price of capacity bound - avg ($/MWh)',
-    # 'total system shadow price of capacity bound - marg ($/MWh)',
+    'total system shadow price of cap bound w/ grid - avg ($/MWh)',
+    'total system shadow price of cap bound - avg ($/MWh)',
     # 'price for fixed demand ($/MWh)'
     NULL
   )
@@ -433,6 +434,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                                caes = "Compressed_Air_Energy_Storage",
                                NULL)
   
+  
   running_lcoe_components <- c(
     "Grid Cost",
     "Adjustment Cost",
@@ -460,8 +462,9 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     `grid cost ($/MWh)` = "Grid Cost",
     `price for total demand ($/MWh)` = 'DIETER annual average electricity price',
     `price for total demand - with scarcity price ($/MWh)` = 'DIETER annual average electricity price with scarcity price',
-    `total system shadow price of capacity bound - avg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND',
-    `total system shadow price of capacity bound - marg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND',
+    `total system shadow price of cap bound w/ grid - avg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND (with grid)',
+    `total system shadow price of cap bound - avg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND',
+    `total system shadow price of cap bound - marg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND',
     `shadow price of capacity bound from REMIND - marg ($/MWh)` = 'Shadow Price',
     `shadow price of capacity bound from REMIND - avg ($/MWh)` = 'Shadow Price',
     `Total Markup` = 'Total Markup',
@@ -509,7 +512,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                    NULL)
   
   price.colors <- c(
-    "REMIND Price" = "darkblue",
+    # "REMIND Price" = "darkblue",
     "REMIND price moving average" = "darkorchid",
     # "Total (marginal) LCOE + Markup" = "darkorchid",
     # "DIETER annual average electricity price" = "darkcyan",
@@ -524,6 +527,44 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                         "DIETER Market value ($/MWh)",
                         NULL)
   
+  color.mapping.RLDC.basic <- c("CCGT" = "#999959", "Coal" = "#0c0c0c", 
+                                "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
+                                "OCGT" = "#e51900", "Nuclear" = "#ff33ff","Hydro" = "#191999", 
+                                NULL)
+  
+  color.mapping.RLDC.fancy <- c("CCGT" = "#999959", "Coal" = "#0c0c0c", 
+                                "Solar" = "#ffcc00", "Wind" = "#337fff", "Biomass" = "#005900",
+                                "OCGT" = "#e51900", "Nuclear" = "#ff33ff","Hydro" = "#191999", 
+                                # "Wind Onshore" = "#337fff", 
+                                # "Wind Offshore" = "#334cff",
+                                "Electrolyzers" = "#66cccc", "Electricity" = "red", 
+                                "Lithium-ion Battery" ="cyan",
+                                "Pumped Storage Hydro" ="#D55E00",
+                                "Hydrogen Storage" = "#56B4E9",
+                                "Compressed Air Energy Storage" =  "#CC79A7",
+                                NULL)
+  
+  dieter.RLDC.variables <- c( 
+    "generation (GWh)",
+    "curtailment renewable (GWh)",
+    "storage generation (GWh)",
+    "storage loading (GWh)",
+    "consumption (GWh)",
+    NULL)
+  
+  dieter.runningcost.variables = c("fuel cost - divided by eta ($/MWh)","CO2 cost ($/MWh)","O&M var cost ($/MWh)")
+  
+  dieter.dispatch.tech = c("CCGT", "coal","bio", "OCGT_eff", "nuc")
+  dieter.dispatch.tech.whyd = c("CCGT", "coal","bio", "OCGT_eff", "nuc","ror")
+  
+  
+  #price duration curve color
+  color.mapping.PDC <- c("CCGT" = "#999959", 
+                     "Coal" = "#0c0c0c",
+                     "Biomass" = "#005900",
+                     "OCGT" = "#e51900",
+                     "Nuclear" = "#ff33ff",
+                     "Electrolyzers" = "#48D1CC")
   
   sm_TWa_2_MWh <- 8.76E9
 
@@ -608,11 +649,11 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   # (Residual) load duration curves -----------------------------------------
 
-  # source(file.path(dieter.scripts.folder, "plotRLDCs.R"), local=TRUE) # Attention: computationally heavy on standard PC
+  source(file.path(dieter.scripts.folder, "plotRLDC_DIETER.R"), local=TRUE) 
 
   # Price duration curves ---------------------------------------------------
 
-  # source(file.path(dieter.scripts.folder, "plotPriceDurationCurve.R"), local=TRUE)
+  source(file.path(dieter.scripts.folder, "plotPriceDurationCurve.R"), local=TRUE)
 
   # (Inverse) screening curves ----------------------------------------------
 

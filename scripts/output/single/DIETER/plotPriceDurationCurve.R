@@ -1,46 +1,84 @@
-# Data preparation --------------------------------------------------------
+#####################################################
+#plot hourly price duration curve
+dieter.runningcost.variables.PDC = c("fuel cost - divided by eta ($/MWh)","CO2 cost ($/MWh)","O&M var cost ($/MWh)")
 
-cat("Plot price duration curve \n")
+dieter.capture.price.variables.PDC <- c("DIETER Market value ($/MWh)")
 
-# Initialise output files
-out.dieter <- NULL
+dieter.dispatch.tech.PDC = c("CCGT", "coal","bio", "OCGT_eff", "nuc")
+dieter.demand.tech.PDC <- c("elh2")
 
-# Loop over DIETER iterations
-for (i in 1:length(dieter.files.report)){
-  # Read in demand(hour)
-  dieter.report_hours <-
-    file.path(outputdir, dieter.files.report[i]) %>%
-    read.gdx("report_hours", squeeze = F) %>%
-    rename(tall = X..2, var = X..4, hour = X..5) %>%
-    select(!c(X., X..1, X..3)) %>%
-    filter(var == "price") %>%
-    mutate(hour = as.numeric(substring(hour, 2))) %>%
-    group_by(tall) %>%
-    arrange(desc(value),group_by=T) %>%  # Descending order
-    mutate(hour.sorted = seq(1, 8760)) %>%  # Descending hour (sorted)
-    mutate(iteration = dieter.iter.step*i) %>%
-    ungroup()
+year_toplot_list <- c(2020,2025,2030,2035,2040,2045,2050,2055,2060,2070)
+
+for(year_toplot in year_toplot_list){
   
-  out.dieter <- rbind(out.dieter, dieter.report_hours)
-}
-
-# Plotting ----------------------------------------------------------------
-
-swlatex(sw,"\\onecolumn")
-swlatex(sw, paste0("\\section{Price duration curves}"))
-
-for(t.rep in report.periods){
-  plot.dieter <- out.dieter %>% 
-    filter(tall==t.rep)
+  # Data preparation --------------------------------------------------------
+  # year_toplot = 2050
+  price_hr <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
+    read.gdx("report_hours", factors = FALSE, squeeze = FALSE) %>% 
+    select(filename = X., period = X..2, variable = X..4, hour = X..5, value) %>%
+    mutate(hour = as.numeric(str_extract(hour, "[0-9]+"))) %>% 
+    filter(variable == "hourly wholesale price ($/MWh)") %>% 
+    filter(period == year_toplot) %>%
+    select(period, variable, value,hour) %>% 
+    mutate(period = as.numeric(period)) 
   
-  swlatex(sw, paste0("\\subsection{Price duration curve in ", t.rep, " over iterations}"))
+  running_cost <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
+    read.gdx("report_tech", factors = FALSE, squeeze = FALSE) %>% 
+    select(filename = X., model = X..1, period = X..2, variable = X..4, tech = X..5, value) %>%
+    filter(model == "DIETER") %>% 
+    filter(tech %in% dieter.dispatch.tech.PDC) %>% 
+    revalue.levels(tech = dieter.tech.mapping) %>% 
+    mutate(tech = factor(tech, levels = rev(unique(dieter.tech.mapping)))) %>%
+    filter(period == year_toplot) %>% 
+    filter(variable%in% dieter.runningcost.variables.PDC) %>% 
+    select(tech, variable, value) %>% 
+    dplyr::group_by(tech) %>%
+    dplyr::summarise(value = sum(value), .groups = "keep") %>%
+    dplyr::ungroup(tech) 
   
-  p <- ggplot() +
-    geom_line(data = plot.dieter, aes(x = hour.sorted, y = value)) +
-    xlab("Hours (sorted)") + 
-    ylab("Electricity price [$/MWh]") +
-    scale_y_continuous(trans = 'log10') +
-    facet_wrap(~iteration,ncol=4)
+  running_cost$maxT <-8760
   
-  swfigure(sw,print,p,sw_option="width=20, height=10")
+  expanded_running_cost <- data.frame(tech = rep(running_cost$tech, running_cost$maxT),
+                                      value = rep(running_cost$value, running_cost$maxT),
+                                      hour = seq(1,8760))
+  
+  capture_price <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
+    read.gdx("report_tech", factors = FALSE, squeeze = FALSE) %>% 
+    select(filename = X., model = X..1, period = X..2, variable = X..4, tech = X..5, value) %>%
+    filter(model == "DIETER") %>% 
+    filter(tech %in% dieter.demand.tech.PDC) %>% 
+    revalue.levels(tech = dieter.tech.mapping) %>% 
+    mutate(tech = factor(tech, levels = rev(unique(dieter.tech.mapping)))) %>%
+    filter(period == year_toplot) %>% 
+    filter(variable%in% dieter.capture.price.variables.PDC) %>% 
+    select(tech, variable, value)
+  
+  capture_price$maxT <-8760
+  
+  expanded_capture_price <- data.frame(tech = rep(capture_price$tech, capture_price$maxT),
+                                      value = rep(capture_price$value, capture_price$maxT),
+                                      hour = seq(1,8760))
+  
+  price_Hr_plot <- price_hr %>% arrange(desc(value))
+  price_Hr_plot$sorted_x <- seq(1, 8760)
+  max_price <- max(price_Hr_plot$value)
+  
+  cost.plot <- list(expanded_running_cost, expanded_capture_price) %>%
+    reduce(full_join)
+  
+  p<-ggplot() +
+    geom_line(data = price_Hr_plot, aes(x = sorted_x, y = value ), size = 1.2, alpha = 0.8, color = "blue") +
+    geom_line(data = cost.plot, aes(x = hour, y = value, color = tech ), size = 0.8, alpha = 0.5) +
+    coord_cartesian(expand = FALSE, ylim = c(0.1, 200)) +
+    scale_color_manual(name = "running costs ($/MWh)", values = color.mapping.PDC) +
+    theme(axis.text = element_text(size=10), axis.title = element_text(size= 10, face="bold")) +
+    # scale_y_continuous(trans = 'log10')+
+    ggtitle(paste0("DIETER ", year_toplot))+
+    xlab("hour") + ylab("electricity price (with scarcity price) ($/MWh)")
+  
+  swfigure(sw, grid.draw, p)
+  if (save_png == 1){
+    ggsave(filename = paste0(outputdir, "/DIETER/DIETER_PDC_yr=", year_toplot, ".png"),  width = 8, height =8, units = "in", dpi = 120)
+  }
+
 }

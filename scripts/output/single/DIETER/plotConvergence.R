@@ -549,7 +549,7 @@ for (i in 1:length(dieter.files.report)){
       mutate(period = as.numeric(period)) %>% 
       mutate(iteration = iter)%>% 
       select(iteration,period, variable, value) %>% 
-      filter(variable == 'DIETER shadow price due to capacity constraint from REMIND') 
+      filter(variable == 'DIETER shadow price due to capacity constraint from REMIND (with grid)') 
     
   out.shad_prices_DT <-  rbind(out.shad_prices_DT, shad_prices_DT)
 }
