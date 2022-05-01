@@ -518,7 +518,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     # "DIETER annual average electricity price" = "darkcyan",
     "DIETER annual average electricity price with scarcity price" = "#8DB600",
     "DIETER annual average electricity price with scarcity price + shadow price" = "violet",
-    # "REMIND price + shadow price (historical and peak load bound on cap.)" = "#ff0090",
+    "REMIND price + shadow price (historical and peak load bound on cap.)" = "#ff0090",
     # 'DIETER shadow price due to capacity constraint from REMIND' = "DodgerBlue4",
     NULL
   )

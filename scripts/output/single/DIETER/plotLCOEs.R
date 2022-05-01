@@ -307,12 +307,14 @@ df.lcoe_minus_markup.te.plot <- df.lcoe_minus_markup.te %>%
 df.sp.capcon.sys <- list(prod_share, sp.capcon) %>% 
   reduce(full_join) %>% 
   replace(is.na(.), 0) %>% 
+  filter(genshare >1e-6) %>% 
   mutate_all(function(x) ifelse(is.infinite(x), 0, x)) %>% 
   select(period, genshare, value) %>% 
   mutate(value = genshare * value) %>% 
   dplyr::group_by(period) %>%
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
-  dplyr::ungroup(period) 
+  dplyr::ungroup(period) %>% 
+  mutate(value = frollmean(value, 3, align = "center", fill = NA))
 
 sp.capcon.agg <- list(prod_shareType_RM, sp.capcon) %>% 
   reduce(full_join)%>% 
@@ -326,9 +328,9 @@ sp.capcon.agg <- list(prod_shareType_RM, sp.capcon) %>%
   mutate(period = as.numeric(period)) %>% 
   select(period,tech, sp_capcon=value) %>% 
   filter(!sp_capcon ==0) %>% 
-  dplyr::group_by(tech) %>% 
-  mutate(sp_capcon = frollmean(sp_capcon, 5, align = "center", fill = NA)) %>% 
-  dplyr::ungroup(tech) %>% 
+  # dplyr::group_by(tech) %>% 
+  # mutate(sp_capcon = frollmean(sp_capcon, 5, align = "center", fill = NA)) %>% 
+  # dplyr::ungroup(tech) %>% 
   replace(is.na(.), 0) %>% 
   filter(period %in% model.periods.till2100)
 
@@ -344,9 +346,8 @@ df.sp.agg <- list(prod_shareType_RM.broad, sp) %>%
   dplyr::ungroup(period,tech) %>% 
   mutate(period = as.numeric(period)) %>% 
   select(period,tech, sp=value) %>% 
-  dplyr::group_by(tech) %>%
-  mutate(sp = frollmean(sp, 5, align = "center", fill = NA)) %>% 
-  dplyr::ungroup(tech) %>% 
+  right_join(dieter.cf) %>% 
+  select(-cf) %>% 
   replace(is.na(.), 0) %>%  
   filter(period %in% model.periods.till2100) 
 
@@ -362,13 +363,13 @@ mv.plus.sp.agg <- list(sp.capcon.agg, mv.agg, df.sp.agg) %>%
 df.sp.sys <- list(prod_share, sp) %>% 
   reduce(full_join) %>% 
   replace(is.na(.), 0) %>% 
+  filter(genshare >1e-6) %>% 
   mutate_all(function(x) ifelse(is.infinite(x), 0, x)) %>% 
   select(period, genshare, value) %>% 
   mutate(value = genshare * value) %>% 
   dplyr::group_by(period) %>%
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
   dplyr::ungroup(period) 
-
 
 ########################################################################################################
 ########################################################################################################
@@ -963,11 +964,18 @@ prices_RM <- df.pricelcoe_minus_tax.plot %>%
   select(period, variable, value)%>%
   mutate(model = "REMIND")
 
+
+prices_RM.movingavg <- df.price0 %>%
+  filter(tech == "System") %>% 
+  select(period, variable, value)%>%
+  mutate(model = "REMIND") %>% 
+  # mutate(value = frollmean(value, 4, align = "center", fill = NA)) %>% 
+  mutate(variable = "REMIND price moving average")
+
 # REMIND price with capacity shadow price
-prices_wShad_RM <- prices_RM %>%
-  filter(variable %in% c("REMIND Price")) %>% 
+prices_wShad_RM <- prices_RM.movingavg %>%
   select(period,price =value) %>% 
-  full_join(df.sp.sys) %>% 
+  full_join(df.sp.sys)%>% 
   replace(is.na(.), 0) %>% 
   mutate(value = value +price) %>% 
   mutate(variable = "REMIND price + shadow price (historical bound on capacities)")
@@ -980,12 +988,6 @@ prices_w2Shad_RM <- prices_wShad_RM %>%
   mutate(variable = "REMIND price + shadow price (historical and peak load bound on cap.)")%>%
   mutate(model = "REMIND")
 
-prices_RM.movingavg <- df.price0 %>%
-  filter(tech == "System") %>% 
-  select(period, variable, value)%>%
-  mutate(model = "REMIND") %>% 
-  mutate(value = frollmean(value, 4, align = "center", fill = NA)) %>% 
-  mutate(variable = "REMIND price moving average")
 
 elec_prices_DT_laIter <- elec_prices_DT %>% 
   filter(iteration == maxiter -1) %>% 
@@ -1023,7 +1025,7 @@ sysLCOE_avg_DT <- dieter.telcoe_avg %>%
   filter(!tech %in% c("VRE grid", "Electrolyzers")) %>% 
   left_join(genshare1) %>% 
   mutate(value = value * genshare) %>% 
-  select(iteration,period,tech,variable,value) %>% 
+  select(iteration,period,tech,variable, value) %>% 
   full_join(gridcost_p) %>%
   replace(is.na(.), 0) %>% 
   dplyr::group_by(iteration,period,variable) %>%
@@ -1041,13 +1043,14 @@ sysLCOE_avg_DT_laIter$model <- "DIETER"
 
 sysLCOE_marg_RM <- df.lcoe.components %>%
   filter(tech == "System") %>%
+  # filter(!cost ==  "Curtailment Cost") %>% 
   select(!variable) %>%
   select(period, variable= cost, value) %>%
   mutate(model = "REMIND")
 
 sys_avgLCOE_compare <- list(sysLCOE_avg_DT_laIter, sysLCOE_marg_RM, adjcost.sys.marg) %>% 
   reduce(full_join)%>% 
-  mutate(variable = factor(variable, levels=rev(unique(c(dieter.variable.mapping,"CCS Cost","Markup","Curtailment Cost")))))
+  mutate(variable = factor(variable, levels=rev(unique(c("Markup",dieter.variable.mapping,"CCS Cost","Curtailment Cost")))))
 
 ymax = max(prices_lines$value) * 1.1
 ymin = min(sys_avgLCOE_compare$value) * 1.1
@@ -1059,6 +1062,9 @@ p.sysLCOE_compare <- ggplot() +
             aes(period, value, color=variable), alpha = 0.7, size=2) +  
   geom_line(data = prices_RM.movingavg %>% filter(period %in% model.periods.till2100) ,
             aes(period, value, color=variable), alpha = 0.5, size=2) +  
+  geom_line(data = prices_w2Shad_RM %>% filter(period %in% model.periods.till2100) ,
+            aes(period, value, color=variable), alpha = 0.5, size=2) + 
+  
   scale_y_continuous("LCOE and power price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
   scale_color_manual(name = "variable", values = price.colors) +

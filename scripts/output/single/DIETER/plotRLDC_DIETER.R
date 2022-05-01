@@ -62,7 +62,7 @@ for(year_toplot in year_toplot_list){
   
   Wind <- hr_data %>% 
     filter(variable == "generation (GWh)") %>% 
-    filter(tech %in% c("Wind Onshore","Wind Offshore"))%>% 
+    filter(tech %in% c("Wind_Onshore","Wind_Offshore"))%>% 
     select(hour, value, tech) %>% 
     dplyr::group_by(hour) %>%
     dplyr::summarise(value = sum(value), .groups = "keep") %>%
@@ -73,7 +73,7 @@ for(year_toplot in year_toplot_list){
   
   CU_VRE_Wind <- hr_data %>% 
     filter(variable == "curtailment renewable (GWh)") %>% 
-    filter(tech %in% c("Wind Onshore","Wind Offshore"))%>% 
+    filter(tech %in% c("Wind_Onshore","Wind_Offshore"))%>% 
     select(hour, value, tech) %>% 
     dplyr::group_by(hour) %>%
     dplyr::summarise(value = sum(value), .groups = "keep") %>%
@@ -354,7 +354,7 @@ for(year_toplot in year_toplot_list){
     ggtitle(paste0("DIETER ", year_toplot))
   
   if (length(techranking) > 4){
-    p.DT.rldc<-  p.DT.rldc+ 
+    p.DT.rldc<-  p.DT.rldc+
       geom_area(data = RLDC4%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC4, fill = te), size = 1.2, alpha = 1)
   }
   
@@ -368,6 +368,7 @@ for(year_toplot in year_toplot_list){
   geom_area(data = CU_VRE_Solar.plot%>% filter(hour %in% c(seq(1,8760,20),8760)), aes(x = hour, y = Solar.RLDC2, fill = te), size = 1.2, alpha = 1)
 
   swfigure(sw, grid.draw, p)
+  
   if (save_png == 1){
     ggsave(filename = paste0(outputdir, "/DIETER/DIETER_RLDC_yr=", year_toplot, ".png"),  width = 8, height =8, units = "in", dpi = 120)
   }

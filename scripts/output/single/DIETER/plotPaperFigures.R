@@ -182,6 +182,7 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE03.png"),
        width = 22,  # Vary width according to how many panels plot has
        height = 12,  # Vary height according to how many panels plot has
        units = "cm")
+
 # Save as svg
 # ggsave(filename = paste0(outputdir, "/DIETER/FIGURE02.svg"),
 #        bg = "white",
@@ -302,9 +303,66 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE04.png"),
 #        height = 12,  # Vary height according to how many panels plot has
 #        units = "cm")
 
+# ============ 0-profit plots =============================================================================
+p.sysLCOE_RM <- ggplot() + 
+  geom_col( data = sys_avgLCOE_compare %>% filter(model=="REMIND"), 
+            aes(period, value, fill=variable)) +
+  geom_line(data = prices_RM.movingavg %>% filter(period %in% model.periods.till2100) ,
+            aes(period, value, color=variable), alpha = 0.5, size=1.5) +  
+  scale_y_continuous("LCOE and electricity price\n(USD2015/MWh)") +
+  scale_x_continuous(breaks = seq(2010,2100,10)) +
+  scale_color_manual(name = "Price", values = price.colors) +
+  coord_cartesian(ylim = c(ymin,ymax))+
+  scale_fill_manual(name = "Costs", values = cost.colors) +
+  guides(fill=guide_legend(nrow=3,byrow=TRUE), color=guide_legend(nrow=3,byrow=TRUE))+
+  ggtitle("REMIND")+
+  theme(legend.position="bottom", legend.direction="horizontal", legend.text = element_text(size=font.size)) +
+  theme(axis.text=element_text(size=font.size), axis.title=element_text(size=font.size, face="bold"),strip.text = element_text(size=font.size)) 
+
+p.sysLCOE_DT <- ggplot() + 
+  geom_col( data = sys_avgLCOE_compare %>% filter(model=="DIETER"), 
+            aes(period, value, fill=variable)) +
+  geom_line(data = prices_lines %>% filter(period %in% model.periods.till2100) ,
+            aes(period, value, color=variable), alpha = 0.7, size=1.5) +  
+  scale_y_continuous("LCOE and electricity price\n(USD2015/MWh)") +
+  scale_x_continuous(breaks = seq(2010,2100,10)) +
+  scale_color_manual(name = "Price", values = price.colors) +
+  coord_cartesian(ylim = c(ymin,ymax))+
+  scale_fill_manual(name = "Costs",values = cost.colors) +
+  guides(fill=guide_legend(nrow=3,byrow=TRUE), color=guide_legend(nrow=3,byrow=TRUE))+
+  ggtitle("DIETER")+
+  theme(legend.position="bottom", legend.direction="horizontal", legend.text = element_text(size=font.size)) +
+  theme(axis.text=element_text(size=font.size), axis.title=element_text(size=font.size, face="bold"),strip.text = element_text(size=font.size)) 
+
+# Arrange both plots
+p.plots <- plot_grid(
+  p.sysLCOE_RM + theme(legend.position = "none"),  # Without legend
+  p.sysLCOE_DT + theme(legend.position = "none"),  # Without legend
+  ncol = 2,
+  rel_heights = c(1, 1),
+  labels = "auto",
+  label_size = 1.5*font.size,
+  align = "v"
+)
+
+p.legend <- get_legend(p.sysLCOE_RM + theme(legend.box.margin = margin(0, 0, 0, 12)))
+
+# Put together plot and legend
+p <- plot_grid(p.plots,
+               p.legend,
+               ncol = 1,
+               rel_heights = c(1, 0.2))
+
+# Save as png
+ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_sysZPC.png"),
+       bg = "white",
+       width = 22,  # Vary width according to how many panels plot has
+       height = 12,  # Vary height according to how many panels plot has
+       units = "cm")
+
+# ============SCENARIO plots =============================================================================
 # Figure ?: RLDC ------------------------------------------
 # REMIND RLDC
-
 
 p.RM.rldc <-ggplot() +
   geom_area(data = RLDC.VRE, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1, position = "identity") +
