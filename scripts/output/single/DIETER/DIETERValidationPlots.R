@@ -48,6 +48,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   model.startyear = max(2020,startyear)
   model.periods <- c(seq(model.startyear, 2060, 5), seq(2070, 2100, 10), seq(2110, 2150, 20))
   model.periods.till2100 <- c(seq(model.startyear, 2060, 5), seq(2070, 2100, 10))
+  model.periods.RLDC <- c(seq(model.startyear, 2045, 5))
   
   report.periods <- c(seq(2005, 2060, 5), seq(2070, 2100, 10), seq(2110, 2150, 20))
 
@@ -294,6 +295,20 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   
   # cost components
+  cost.variables <- c(
+    "Curtailment Cost" = "Curtailment Cost",
+    "Storage Cost" = "Storage Cost",
+    "Grid Cost" = "Grid Cost",
+    "CCS Cost" = "CCS Cost",
+    "CO2 Cost" = "CO2 Tax Cost",
+    "OMV Cost" = "OMV Cost",
+    "OMF Cost" = "OMF Cost",
+    "Investment Cost" = "Investment Cost" ,
+    "Fuel Cost" = "Fuel Cost",
+    # "Adjustment Cost" = "Adjustment Cost",
+    # "Markup" = "Markup",
+    NULL)
+  
   cost.colors <- c(
                       # "CO2 Provision Cost" = "grey80",
                       "Curtailment Cost" = "darkblue",

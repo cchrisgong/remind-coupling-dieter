@@ -2,15 +2,16 @@
 cat("Plot REMIND RLDC \n")
 
 # plot REMIND RLDC ordered by their capacity factor
-
-for(year_toplot in model.periods.till2100){
+year_toplot_list <- model.periods.RLDC
+# year_toplot_list <- model.periods.till2100            
+for(year_toplot in year_toplot_list){
 
 # year_toplot = 2045
-  
+print(year_toplot)
 plot.remind.cf <- out.remind.capfac %>% 
   filter(tech %in% remind.nonvre.mapping.whyd) %>% 
   filter(period == year_toplot) %>% 
-  filter(iteration == maxiter-1)%>% 
+  filter(iteration == maxiter-1) %>% 
   select(tech,cf=value)
 
 plot.cap <- out.remind.capacity  %>% 
@@ -48,7 +49,7 @@ remind.demand <- file.path(outputdir, remind.files[maxiter]) %>%
   
 avg.dem <- remind.demand$value
 
-# baseload as defined by CF > 50%
+# baseload as defined by CF > 33%
 baseload.cap <- plot.remind.cf %>% 
   left_join(plot.cap) %>% 
   filter(cf > 33) %>% 
@@ -56,38 +57,66 @@ baseload.cap <- plot.remind.cf %>%
   dplyr::summarise( cap = sum(cap)) %>% 
   select(value = cap)
 
+# dispatchable 
+disp.cap <- plot.cap %>% 
+  dplyr::summarise( cap = sum(cap)) %>% 
+  select(value = cap)
+
 baseload.dem <- baseload.cap$value
 
 # peak demand as calculated from average demand and baseload demand (GW)
-peak.dem <- avg.dem*2-baseload.dem
-
+peak.dem <- avg.dem * 2 - baseload.dem
+#residual peak demand calculated from peak demand and sum of dispatchable capacities, it should be positive
+# residual <- max(0,peak.dem- disp.cap$value)
+residual = 0
 delta_value = (peak.dem-baseload.dem)/876
 
 plot.remind.peak.demand <- out.remind.peak.demand %>% 
   filter(period == year_toplot) %>% 
-  filter(iteration == maxiter-1) 
+  filter(iteration == maxiter-1) %>% 
+  select(value)
 
-# make a trapezoid out of peak demand and baseload demand, paint it in solar
+# make a trapezoid out of peak demand and baseload demand, paint it in wind color
 total.demand <- plot.remind.peak.demand %>% 
   expand(plot.remind.peak.demand, hour = seq(1,8760,10)) %>% 
-  mutate(value = seq(peak.dem,baseload.dem+delta_value,-delta_value)) %>% 
-  mutate(tech="Solar")
+  mutate(value = seq(peak.dem,baseload.dem + delta_value, -delta_value)) %>% 
+  mutate(tech="Wind")
   
-remind.solar.prod <- file.path(outputdir, remind.files[maxiter]) %>%  
+# get wind production (wind is plotted on the outside)
+remind.wind.prod <- file.path(outputdir, remind.files[maxiter]) %>%  
   read.gdx("v32_usableSeTeDisp", field="l", factor = FALSE) %>% 
   filter(all_regi == reg, entySe == "seel", ttot == year_toplot) %>%
-  filter(all_te %in% c("spv")) %>% 
+  filter(all_te %in% c("wind","windoff")) %>% 
   select(value) %>% 
+  dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
   mutate(value = value * 1e3)
 
-solar.cap <- remind.solar.prod$value
+avg.wind.gen <- remind.wind.prod$value
 
-delta_value2 = (peak.dem-(baseload.dem-2*solar.cap))/876
+# generation without wind (solar and dispatchables), i.e. the area that should be painted in solar
+gen.wowind <- avg.dem - avg.wind.gen
+
+width.solar = gen.wowind*2/(peak.dem-residual)
+
+if (width.solar < 1){
+delta_value2 = (peak.dem-residual)/(round(8760*width.solar))
+
+residual.solar.demand <- plot.remind.peak.demand %>%  
+  expand(plot.remind.peak.demand, hour = seq(1,8760)) %>% 
+  filter(hour <= round(width.solar*8760)) %>% 
+  mutate(value = seq((peak.dem-residual), +delta_value2, -delta_value2)) %>% 
+  mutate(tech="Solar")
+}
+
+if (width.solar > 1){
+
+delta_value2 = (peak.dem-residual-(baseload.dem-2*avg.wind.gen))/876
 
 residual.solar.demand <- plot.remind.peak.demand %>% 
   expand(plot.remind.peak.demand, hour = seq(1,8760,10)) %>% 
-  mutate(value = seq(peak.dem,baseload.dem-2*solar.cap+delta_value2,-delta_value2)) %>% 
-  mutate(tech="Wind")
+  mutate(value = seq(peak.dem-residual,baseload.dem-2*avg.wind.gen+delta_value2,-delta_value2)) %>% 
+  mutate(tech="Solar")
+}
 
 # make a triangle out of total curtailment
 # curtailment in GWa
@@ -128,12 +157,13 @@ residual.solar.demand <- plot.remind.peak.demand %>%
 #   mutate(tech="Solar") %>% 
 #   select(hour,tech,curt=value)
 
-RLDC.VRE <- list(total.demand, residual.solar.demand) %>% 
-    reduce(full_join)
+RLDC.VRE <- list(residual.solar.demand,total.demand) %>% 
+    reduce(full_join) %>% 
+    mutate(tech = factor(tech, levels=rev(c("Solar","Wind"))))
 
 # =================================================================================================
  
-  p<-ggplot() +
+p.RM.rldc <-ggplot() +
     geom_area(data = RLDC.VRE, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1, position = "identity") +
     geom_area(data = plot.rldc.hr, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1) +
     coord_cartesian(ylim = c(-50,210),xlim = c(0,8760))+
@@ -141,8 +171,8 @@ RLDC.VRE <- list(total.demand, residual.solar.demand) %>%
     xlab("hour") + ylab("residual load (GW)")+
     ggtitle(paste0("REMIND ", year_toplot))
   
-  swfigure(sw, grid.draw, p)
+  swfigure(sw, grid.draw, p.RM.rldc)
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/DIETER/REMIND_RLDC_yr=", year_toplot, ".png"),  p,  width = 8, height =8, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/REMIND_RLDC_yr=", year_toplot, ".png"),  p.RM.rldc,  width = 8, height =8, units = "in", dpi = 120)
   }
 }

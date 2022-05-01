@@ -8,7 +8,7 @@ library(metR)  # Useful for contour_fill
 font.size = 8
 
 # Plotting style ----------------------------------------------------------
-theme_set(theme_cowplot(font_size = 8))  # Use simply theme and set font size
+theme_set(theme_cowplot(font_size = 8))  # Use simple theme and set font size
 
 # Figure 2: Electricity price convergence ---------------------------------
 
@@ -363,6 +363,7 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_sysZPC.png"),
 # ============SCENARIO plots =============================================================================
 # Figure ?: RLDC ------------------------------------------
 # REMIND RLDC
+year_toplot = 2045
 
 p.RM.rldc <-ggplot() +
   geom_area(data = RLDC.VRE, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1, position = "identity") +
@@ -388,3 +389,4 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE0n.png"),
        width = 20,  # Vary width according to how many panels plot has
        height = 12,  # Vary height according to how many panels plot has
        units = "cm")
+

@@ -48,12 +48,22 @@ mv <- file.path(outputdir, remind.files[iter_toplot]) %>%
   mutate(cost = "Market value") %>% 
   mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2)
 
+remind.vmcf <- file.path(outputdir, remind.files[iter_toplot]) %>% 
+  read.gdx("vm_capFac", field = "l", squeeze=F)  %>% 
+  filter(all_regi == reg) %>% 
+  filter(all_te %in% names(remind.tech.mapping)) %>% 
+  select(period = ttot, tech = all_te, cf=value) %>%
+  # filter(period %in% model.periods.till2100) %>% 
+  filter(cf >1e-2)
+
 sp <- file.path(outputdir, remind.files[iter_toplot]) %>% 
   read.gdx("p32_shadowPrice", squeeze=F) %>% 
   filter(all_regi == reg) %>%
   filter(all_te %in% names(remind.tech.mapping)) %>% 
   select(period = ttot, tech = all_te, value) %>%
-  # filter(period %in% model.periods.till2100) %>% 
+  right_join(remind.vmcf) %>% 
+  select(-cf) %>% 
+  replace(is.na(.), 0) %>% 
   mutate(value = -value * 1e12 / sm_TWa_2_MWh * 1.2)
 
 sp.capcon <- file.path(outputdir, remind.files[iter_toplot]) %>% 
@@ -61,7 +71,9 @@ sp.capcon <- file.path(outputdir, remind.files[iter_toplot]) %>%
   filter(all_regi == reg) %>%
   filter(all_te %in% names(remind.nonvre.mapping))  %>% 
   select(period = ttot, tech = all_te, value) %>%
-  filter(period %in% model.periods.till2100) %>% 
+  right_join(remind.vmcf) %>% 
+  select(-cf) %>% 
+  replace(is.na(.), 0) %>% 
   mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2)
 
 mrkup <- out.remind.mrkup %>% 
@@ -156,15 +168,31 @@ df.lcoe.ccs <- df.lcoe %>%
   replace(is.na(.), 0) %>% 
   select(period, tech, cost, lcoe=value)
 
-#component (marginal) LCOE per tech
+# #component (marginal) LCOE per tech
+# df.lcoe.te.components <- df.lcoe %>% 
+#   filter(region == reg,
+#          period %in% model.periods, type == "marginal",
+#          tech %in% map.price.tech$tech, sector %in% plot.sector) %>% 
+#   filter(! cost == c("Total LCOE")) %>% 
+#   filter(period %in% model.periods.till2100) %>% 
+#   filter(tech %in% names(remind.tech.mapping)) %>% 
+#   filter( output %in% c("seel","seh2")) %>% 
+#   replace(is.na(.), 0) %>% 
+#   select(period, tech, cost, lcoe=value) %>% 
+#   full_join(df.lcoe.grid) %>% 
+#   full_join(df.lcoe.ccs) %>% 
+#   mutate(period = as.numeric(period))
+
+#component (average) LCOE per tech
 df.lcoe.te.components <- df.lcoe %>% 
   filter(region == reg,
-         period %in% model.periods, type == "marginal",
+         period %in% model.periods, type == "average",
          tech %in% map.price.tech$tech, sector %in% plot.sector) %>% 
   filter(! cost == c("Total LCOE")) %>% 
   filter(period %in% model.periods.till2100) %>% 
   filter(tech %in% names(remind.tech.mapping)) %>% 
   filter( output %in% c("seel","seh2")) %>% 
+  revalue.levels(cost = cost.variables) %>%
   replace(is.na(.), 0) %>% 
   select(period, tech, cost, lcoe=value) %>% 
   full_join(df.lcoe.grid) %>% 
@@ -172,14 +200,6 @@ df.lcoe.te.components <- df.lcoe %>%
   mutate(period = as.numeric(period))
 
 df.lcoe.te.components[mapply(is.infinite, df.lcoe.te.components)] <- 0
-
-remind.vmcf <- file.path(outputdir, remind.files[iter_toplot]) %>% 
-  read.gdx("vm_capFac", field = "l", squeeze=F)  %>% 
-  filter(all_regi == reg) %>% 
-  filter(all_te %in% names(remind.tech.mapping)) %>% 
-  select(period = ttot, tech = all_te, cf=value) %>%
-  filter(period %in% model.periods.till2100) %>% 
-  filter(cf >1e-2)
 
 # only pick out the rows where capacity factor is not too small (otherwise huge LCOE)
 df.lcoe.te.components <- df.lcoe.te.components %>% 
@@ -197,7 +217,7 @@ df.lcoe.te.components.test <- df.lcoe.te.components %>%
 #weighted total system (marginal) LCOE (with cost breakdown)
 df.lcoe.sys.components <- list(prod_share, df.lcoe.te.components) %>% 
   reduce(left_join) %>% 
-  right_join(remind.vmcf) %>% 
+  right_join(remind.vmcf %>% filter(period %in% model.periods.till2100)) %>% 
   filter(!tech %in% names(remind.sector.coupling.mapping)) %>% 
   replace(is.na(.), 0) %>%
   filter(period %in% model.periods.till2100) %>% 
@@ -269,8 +289,7 @@ df.price <- df.price0 %>%
 
 df.lcoe.teAgg <- list(prod_shareType_RM, df.lcoe.te.components) %>% 
   reduce(full_join) %>% 
-  mutate(period = as.numeric(period)) %>%
-  right_join(remind.vmcf) %>% 
+  right_join(remind.vmcf %>% filter(period %in% model.periods.till2100)) %>% 
   filter(!tech %in% names(remind.sector.coupling.mapping)) %>% 
   replace(is.na(.), 0) %>% 
   mutate(value = share * lcoe) %>% 
@@ -278,8 +297,7 @@ df.lcoe.teAgg <- list(prod_shareType_RM, df.lcoe.te.components) %>%
   dplyr::group_by(period,tech,cost) %>%
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
   dplyr::ungroup(period,tech,cost) %>% 
-  mutate(period = as.numeric(period)) %>% 
-  filter(period %in% model.periods.till2100)
+  mutate(period = as.numeric(period)) 
 
 df.mrkup.plot <- remind.mrkup.non0gen %>% 
   filter(iteration == iter_toplot-1) %>% 
@@ -313,8 +331,9 @@ df.sp.capcon.sys <- list(prod_share, sp.capcon) %>%
   mutate(value = genshare * value) %>% 
   dplyr::group_by(period) %>%
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
-  dplyr::ungroup(period) %>% 
-  mutate(value = frollmean(value, 3, align = "center", fill = NA))
+  dplyr::ungroup(period)
+# %>% 
+  # mutate(value = frollmean(value, 3, align = "center", fill = NA))
 
 sp.capcon.agg <- list(prod_shareType_RM, sp.capcon) %>% 
   reduce(full_join)%>% 
@@ -346,9 +365,6 @@ df.sp.agg <- list(prod_shareType_RM.broad, sp) %>%
   dplyr::ungroup(period,tech) %>% 
   mutate(period = as.numeric(period)) %>% 
   select(period,tech, sp=value) %>% 
-  right_join(dieter.cf) %>% 
-  select(-cf) %>% 
-  replace(is.na(.), 0) %>%  
   filter(period %in% model.periods.till2100) 
 
 #market value + capacity constraint shadow price
@@ -805,7 +821,8 @@ swlatex(sw, paste0("\\section{System LCOEs}"))
 swlatex(sw, paste0("\\subsection{System LCOE - REMIND - with curtailment cost}"))
 # REMIND marginal LCOE component for the entire power system (marginal in the sense of one additional added unit of generation in the system)
 
-df.lcoe.components <- list(df.lcoe.elh2.components, df.lcoe.sys.components, df.markup.sys, adjcost.sys.marg, flexadj) %>%
+# df.lcoe.components <- list(df.lcoe.elh2.components, df.lcoe.sys.components, df.markup.sys, adjcost.sys.marg, flexadj) %>%
+df.lcoe.components <- list(df.lcoe.elh2.components, df.lcoe.sys.components, adjcost.sys.marg, flexadj) %>%
   reduce(full_join) %>% 
   order.levels(cost = names(cost.colors))
 
@@ -969,7 +986,7 @@ prices_RM.movingavg <- df.price0 %>%
   filter(tech == "System") %>% 
   select(period, variable, value)%>%
   mutate(model = "REMIND") %>% 
-  # mutate(value = frollmean(value, 4, align = "center", fill = NA)) %>% 
+  mutate(value = frollmean(value, 4, align = "center", fill = NA)) %>%
   mutate(variable = "REMIND price moving average")
 
 # REMIND price with capacity shadow price
@@ -1062,9 +1079,6 @@ p.sysLCOE_compare <- ggplot() +
             aes(period, value, color=variable), alpha = 0.7, size=2) +  
   geom_line(data = prices_RM.movingavg %>% filter(period %in% model.periods.till2100) ,
             aes(period, value, color=variable), alpha = 0.5, size=2) +  
-  geom_line(data = prices_w2Shad_RM %>% filter(period %in% model.periods.till2100) ,
-            aes(period, value, color=variable), alpha = 0.5, size=2) + 
-  
   scale_y_continuous("LCOE and power price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
   scale_color_manual(name = "variable", values = price.colors) +
@@ -1079,6 +1093,15 @@ swfigure(sw,print,p.sysLCOE_compare)
 
 if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/sys_avgLCOE_price_compare_line.png"), p.sysLCOE_compare, width = 14, height =9, units = "in", dpi = 120)
+}
+
+
+p.sysLCOE_compare2 <-p.sysLCOE_compare+
+  geom_line(data = prices_w2Shad_RM %>% filter(period %in% model.periods.till2100) ,
+            aes(period, value, color=variable), alpha = 0.5, size=2)
+swfigure(sw,print,p.sysLCOE_compare2)
+if (save_png == 1){
+  ggsave(filename = paste0(outputdir, "/DIETER/sys_avgLCOE_wShadPrice_compare_line.png"), p.sysLCOE_compare2, width = 14, height =9, units = "in", dpi = 120)
 }
 
 sysLCOE_avg_DT_tech_lastIter <- dieter.telcoe_avg %>% 

@@ -7,7 +7,8 @@ dieter.capture.price.variables.PDC <- c("DIETER Market value ($/MWh)")
 dieter.dispatch.tech.PDC = c("CCGT", "coal","bio", "OCGT_eff", "nuc")
 dieter.demand.tech.PDC <- c("elh2")
 
-year_toplot_list <- c(2020,2025,2030,2035,2040,2045,2050,2055,2060,2070)
+# year_toplot_list <- c(2020,2025,2030,2035,2040,2045,2050,2055,2060,2070)
+year_toplot_list <- model.periods.RLDC
 
 for(year_toplot in year_toplot_list){
   
@@ -63,8 +64,15 @@ for(year_toplot in year_toplot_list){
   price_Hr_plot$sorted_x <- seq(1, 8760)
   max_price <- max(price_Hr_plot$value)
   
+  if (h2switch == "on"){
   cost.plot <- list(expanded_running_cost, expanded_capture_price) %>%
     reduce(full_join)
+  }
+  
+  if (h2switch == "off"){
+    cost.plot <- list(expanded_running_cost) %>%
+      reduce(full_join)
+  }
   
   p<-ggplot() +
     geom_line(data = price_Hr_plot, aes(x = sorted_x, y = value ), size = 1.2, alpha = 0.8, color = "blue") +

@@ -2,11 +2,11 @@
 
 #####################################################
 #plot load duration curve of residual loads once production is being accounted for for various tech., one by one, ordered by their capacity factor
-year_toplot_list <- c(2020,2025,2030,2035,2040,2045,2050,2055,2060,2070,2080,2090)
-
+year_toplot_list <- model.periods.RLDC
+# year_toplot_list <- model.periods.till2100            
 for(year_toplot in year_toplot_list){
 
-  # year_toplot = 2045
+  # year_toplot = 2060
   hr_data <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
     read.gdx("report_tech_hours", factors = FALSE, squeeze = FALSE) %>% 
     # select(model = X., period = X..1, variable = X..3, tech = X..4, hour = X..5, value) %>%
@@ -30,35 +30,7 @@ for(year_toplot in year_toplot_list){
     mutate(hour = as.numeric(hour)) %>% 
     select(load, hour)  %>%
     mutate(hour.sorted = seq(1, 8760)) %>% 
-    mutate(te = "Solar")
-  
-  PV <- hr_data %>% 
-    filter(variable == "generation (GWh)") %>% 
-    filter(tech == "Solar") %>% 
-    select(hour, value) %>%  
-    mutate(value = value)%>% 
-    dplyr::rename(solgen = value) %>% 
-    complete(hour = 1:8760, fill = list(solgen = 0)) 
-  
-  CU_VRE_Solar <- hr_data %>% 
-    filter(variable == "curtailment renewable (GWh)") %>% 
-    filter(tech == "Solar")%>% 
-    select(hour, value) %>% 
-    dplyr::rename(curt_s = value) %>% 
-    complete(hour = 1:8760, fill = list(curt_s = 0)) 
-  
-  RLDC_all = list(LDC, PV, CU_VRE_Solar) %>% 
-    reduce(full_join) %>% 
-    replace(is.na(.), 0) %>% 
-    mutate(Solar.RLDC = load - solgen - curt_s)
-  
-  RLDC.Solar <- RLDC_all %>% arrange(desc(Solar.RLDC)) %>% 
-    select(Solar.RLDC)%>%
-    mutate(hour.sorted = seq(1, 8760)) %>% 
     mutate(te = "Wind")
-  
-  #=================================================================================================
-  #=================================================================================================
   
   Wind <- hr_data %>% 
     filter(variable == "generation (GWh)") %>% 
@@ -82,13 +54,42 @@ for(year_toplot in year_toplot_list){
     dplyr::rename(curt_w = value) %>% 
     complete(hour = 1:8760, fill = list(curt_w = 0)) 
   
-  RLDC_all = list(RLDC_all,Wind,CU_VRE_Wind) %>% 
+  PV <- hr_data %>% 
+    filter(variable == "generation (GWh)") %>% 
+    filter(tech == "Solar") %>% 
+    select(hour, value) %>%  
+    mutate(value = value)%>% 
+    dplyr::rename(solgen = value) %>% 
+    complete(hour = 1:8760, fill = list(solgen = 0)) 
+  
+  CU_VRE_Solar <- hr_data %>% 
+    filter(variable == "curtailment renewable (GWh)") %>% 
+    filter(tech == "Solar")%>% 
+    select(hour, value) %>% 
+    dplyr::rename(curt_s = value) %>% 
+    complete(hour = 1:8760, fill = list(curt_s = 0)) 
+  
+  #=================================================================================================
+  #=================================================================================================
+  
+  
+  RLDC_all = list(LDC,Wind,CU_VRE_Wind) %>% 
     reduce(full_join) %>% 
     replace(is.na(.), 0) %>% 
-    mutate(Wind.RLDC = Solar.RLDC - windgen - curt_w)
+    mutate(Wind.RLDC = load - windgen - curt_w)
   
   RLDC.Wind <- RLDC_all %>% arrange(desc(Wind.RLDC)) %>% 
     select(Wind.RLDC) %>%
+    mutate(hour.sorted = seq(1, 8760)) %>% 
+    mutate(te = "Solar")
+  
+  RLDC_all <- list(RLDC_all, PV, CU_VRE_Solar) %>% 
+    reduce(full_join) %>% 
+    replace(is.na(.), 0) %>% 
+    mutate(Solar.RLDC = Wind.RLDC - solgen - curt_s)
+  
+  RLDC.Solar <- RLDC_all %>% arrange(desc(Solar.RLDC)) %>% 
+    select(Solar.RLDC)%>%
     mutate(hour.sorted = seq(1, 8760)) %>% 
     mutate(te = "Lithium-ion Battery")
   
@@ -122,7 +123,7 @@ for(year_toplot in year_toplot_list){
   RLDC_all <- list(RLDC_all, Battery_Out, Battery_In) %>% 
     reduce(full_join) %>% 
     replace(is.na(.), 0) %>% 
-    mutate(Batt.RLDC = Wind.RLDC - battgen + battcharge) 
+    mutate(Batt.RLDC = Solar.RLDC - battgen + battcharge) 
   
   RLDC.Batt <- RLDC_all %>% arrange(desc(Batt.RLDC)) %>%
     select(Batt.RLDC) %>% 
@@ -237,7 +238,7 @@ for(year_toplot in year_toplot_list){
     mutate_all(function(RLDC1) ifelse(RLDC1 <0, 0, RLDC1)) 
     
   #=================================================================================================
-  
+  if (length(techranking) > 2){
   hr_disp_gen2<- hr_data %>% 
     filter(variable == "generation (GWh)") %>% 
     filter(tech == techranking[[2]])%>% 
@@ -255,8 +256,9 @@ for(year_toplot in year_toplot_list){
     mutate(hour.sorted = seq(1, 8760)) %>% 
     mutate(te = techranking[[3]]) %>% 
     mutate_all(function(RLDC2) ifelse(RLDC2 <0, 0, RLDC2))
-  
+  }
   #=================================================================================================
+  if (length(techranking) > 3){
   hr_disp_gen3<- hr_data %>% 
     filter(variable == "generation (GWh)") %>% 
     filter(tech == techranking[[3]])%>% 
@@ -274,6 +276,7 @@ for(year_toplot in year_toplot_list){
     mutate(hour.sorted = seq(1, 8760)) %>% 
     mutate(te = techranking[[4]])%>% 
     mutate_all(function(RLDC3) ifelse(RLDC3 <0, 0, RLDC3))
+  }
   #=================================================================================================
   if (length(techranking) > 4){
   hr_disp_gen4<- hr_data %>% 
@@ -315,62 +318,69 @@ for(year_toplot in year_toplot_list){
     mutate_all(function(RLDC5) ifelse(RLDC5 <0, 0, RLDC5))
   }
   
-  CU_VRE_Wind.plot <- list(CU_VRE_Solar, CU_VRE_Wind) %>% 
+  ### plot negative curtailment
+  CU_VRE_Solar.plot <- list(CU_VRE_Solar, CU_VRE_Wind) %>% 
     reduce(full_join) %>% 
-    mutate(curt_w = -(curt_w + curt_s)) %>% 
-    select(-curt_s) %>% 
-    arrange(desc(curt_w)) %>% 
-    mutate(hour= seq(1, 8760)) %>% 
-    mutate(te = "Wind" )
-  
-  RLDC.Solar2 = list(LDC, PV, CU_VRE_Solar,Battery_In,LDC_h2) %>% 
-    reduce(full_join) %>% 
-    replace(is.na(.), 0) %>% 
-    mutate(Solar.RLDC2 = load - solgen - curt_s + battcharge + h2) %>% 
+    mutate(Solar.RLDC2 = -(curt_w + curt_s)) %>% 
+    select(-curt_s, -curt_w) %>% 
     arrange(desc(Solar.RLDC2)) %>% 
     mutate(hour= seq(1, 8760)) %>% 
-    select(Solar.RLDC2,hour) %>% 
-    filter(Solar.RLDC2 <0) %>% 
-    complete(hour = 1:8760, fill = list(Solar.RLDC2 = 0)) %>% 
-    mutate(te = "Solar")
+    mutate(te = "Solar" )
   
-  CU_VRE_Solar.plot <- RLDC.Solar2
-   
+  CU_VRE_Wind.plot = list(LDC, Wind, CU_VRE_Wind,Battery_In,LDC_h2) %>% 
+    reduce(full_join) %>% 
+    replace(is.na(.), 0) %>% 
+    mutate(Wind.RLDC2 = load-windgen- curt_w + battcharge + h2) %>%
+    # mutate(Wind.RLDC2 = - curt_w + battcharge + h2) %>%
+    arrange(desc(Wind.RLDC2)) %>% 
+    mutate(hour= seq(1, 8760)) %>% 
+    select(Wind.RLDC2,hour) %>% 
+    filter(Wind.RLDC2 <0) %>% 
+    complete(hour = 1:8760, fill = list(Wind.RLDC2 = 0)) %>% 
+    mutate(te = "Wind")
+  
   # =================================================================================================
   
   p.DT.rldc<-ggplot() +
     geom_area(data = LDC0 %>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = load, fill = te), size = 1.2, alpha = 1) +
-    geom_area(data = RLDC.Solar%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = Solar.RLDC, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC.Wind%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = Wind.RLDC, fill = te), size = 1.2, alpha = 1) +
+    geom_area(data = RLDC.Solar%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = Solar.RLDC, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC.Batt%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = Batt.RLDC, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC.H2%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = H2.RLDC, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC1%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC1, fill = te), size = 1.2, alpha = 1) +
-    geom_area(data = RLDC2%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC2, fill = te), size = 1.2, alpha = 1) +
-    geom_area(data = RLDC3%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC3, fill = te), size = 1.2, alpha = 1) +
-    geom_area(data = RLDC4%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC4, fill = te), size = 1.2, alpha = 1) +
     coord_cartesian(ylim = c(-80,140))+
     scale_fill_manual(name = "Technology", values = color.mapping.RLDC.basic)+
     xlab("hour") + ylab("residual load (GW)")+
     ggtitle(paste0("DIETER ", year_toplot))
+
+  if (length(techranking) > 2){
+    p.DT.rldc <- p.DT.rldc+
+      geom_area(data = RLDC2%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC2, fill = te), size = 1.2, alpha = 1) 
+  }
+  
+  if (length(techranking) > 3){
+    p.DT.rldc <- p.DT.rldc+
+    geom_area(data = RLDC3%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC3, fill = te), size = 1.2, alpha = 1) 
+  }
   
   if (length(techranking) > 4){
     p.DT.rldc<-  p.DT.rldc+
       geom_area(data = RLDC4%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC4, fill = te), size = 1.2, alpha = 1)
   }
-  
+
   if (length(techranking) > 5){
-    p.DT.rldc <- p.DT.rldc + 
+    p.DT.rldc <- p.DT.rldc +
       geom_area(data = RLDC5%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC5, fill = te), size = 1.2, alpha = 1)
   }
   
   p.DT.rldc <- p.DT.rldc +
-    geom_area(data = CU_VRE_Wind.plot%>% filter(hour %in% c(seq(1,8760,20),8760)), aes(x = hour, y = curt_w, fill = te), size = 1.2, alpha = 1)+
-  geom_area(data = CU_VRE_Solar.plot%>% filter(hour %in% c(seq(1,8760,20),8760)), aes(x = hour, y = Solar.RLDC2, fill = te), size = 1.2, alpha = 1)
+    geom_area(data = CU_VRE_Solar.plot%>% filter(hour %in% c(seq(1,8760,20),8760)), aes(x = hour, y = Solar.RLDC2, fill = te), size = 1.2, alpha = 1)  +
+    geom_area(data = CU_VRE_Wind.plot%>% filter(hour %in% c(seq(1,8760,20),8760)), aes(x = hour, y = Wind.RLDC2, fill = te), size = 1.2, alpha = 1)
 
-  swfigure(sw, grid.draw, p)
+  swfigure(sw, grid.draw, p.DT.rldc)
   
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/DIETER/DIETER_RLDC_yr=", year_toplot, ".png"),  width = 8, height =8, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/DIETER_RLDC_yr=", year_toplot, ".png"), p.DT.rldc, width = 8, height =8, units = "in", dpi = 120)
   }
 
 }
