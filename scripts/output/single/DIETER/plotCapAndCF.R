@@ -72,7 +72,7 @@ if (length(dieter.files) != 0) {
   for (i in 1:length(dieter.files)){
     # i=22
     it <- as.numeric(str_extract(dieter.files[i], "[0-9]+"))
-    data.real.capfac <- file.path(outputdir, dieter.files.report[i]) %>% 
+    remind.real.capfac <- file.path(outputdir, dieter.files.report[i]) %>% 
       read.gdx("report_tech", squeeze = F) %>% 
       select(model = X..1, period = X..2, variable = X..4, tech = X..5, value) %>% 
       filter(variable %in% c("REMIND real CapFac (%)")) %>% 
@@ -98,7 +98,7 @@ if (length(dieter.files) != 0) {
       select(iteration,period, model, value) %>% 
       mutate(var = "peak hourly residual demand")
     
-    data.real.capfac <-
+    dieter.real.capfac <-
       file.path(outputdir, dieter.files.report[i]) %>% 
       read.gdx("report_tech", squeeze = F) %>% 
       select(model = X..1, period = X..2, variable = X..4, tech = X..5, value) %>% 
@@ -107,10 +107,10 @@ if (length(dieter.files) != 0) {
       mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping))))%>% 
       mutate(iteration = it, model = "DIETER")
     
-    out.remind.capfac <- rbind(out.remind.capfac, data.real.capfac)
+    out.remind.capfac <- rbind(out.remind.capfac,remind.real.capfac)
     out.dieter.cap.data <- rbind(out.dieter.cap.data, dieter.cap.data)
     out.dieter.peak.demand <- rbind(out.dieter.peak.demand, dieter.peak.demand)
-    out.dieter.capfac <- rbind(out.dieter.capfac,data.real.capfac)
+    out.dieter.capfac <- rbind(out.dieter.capfac,dieter.real.capfac)
 }
   
   out.dieter.capacity <- out.dieter.cap.data %>%

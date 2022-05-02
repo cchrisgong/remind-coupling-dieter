@@ -301,6 +301,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     "Grid Cost" = "Grid Cost",
     "CCS Cost" = "CCS Cost",
     "CO2 Cost" = "CO2 Tax Cost",
+    "CO2 Tax Cost" = "CO2 Tax Cost",
     "OMV Cost" = "OMV Cost",
     "OMF Cost" = "OMF Cost",
     "Investment Cost" = "Investment Cost" ,
@@ -324,6 +325,19 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                       "Adjustment Cost" = "darkgoldenrod1",
                       "Markup" = "lightblue",
                       NULL)
+  
+  cost.colors.nomarkup <- c(
+    "Curtailment Cost" = "darkblue",
+    "Storage Cost" = "darkorchid",
+    "Grid Cost" = "darkolivegreen3",
+    "CCS Cost" = "violet",
+    "CO2 Tax Cost" = "indianred",
+    "OMV Cost" = "cyan",
+    "OMF Cost" = "darkcyan",
+    "Investment Cost" = "deepskyblue2",
+    "Fuel Cost" = "orange3",
+    "Adjustment Cost" = "darkgoldenrod1",
+    NULL)
   
   cost.colors.te <- c(cost.colors,
                       "Flexibility subsidy" = "lightblue")
@@ -464,7 +478,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   # label mapping for plots
   dieter.variable.mapping <- c( 
     `DIETER Market value ($/MWh)` = 'Market Value',
-    `DIETER Market value with scarcity price ($/MWh)` = 'Market Value with scarcity price', 
+    `DIETER Market value with scarcity price ($/MWh)` = 'Market value with scarcity price', 
     `O&M var cost ($/MWh)` = "OMV Cost",
     `O&M fixed cost - avg ($/MWh)` = "OMF Cost",
     `annualized investment cost - avg ($/MWh)` = "Investment Cost",
@@ -495,20 +509,37 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   
   # color mapping
-  cost.colors_DT <- c(
+  cost.colors_DT.bar <- c(
     # "Curtailment Cost" = "darkblue",
     "Storage Cost" = "darkorchid",
     "Grid Cost" = "darkolivegreen3",
-    "CO2 Provision Cost" = "red",
+    # "CO2 Provision Cost" = "red",
     "CO2 Tax Cost" = "indianred",
     "OMV Cost" = "cyan",
     "OMF Cost" = "darkcyan",
     "Investment Cost" = "deepskyblue2",
     "Fuel Cost" = "orange3",
     # "Market Value" = "violet",
-    "Market Value with scarcity price" = "violet",
+    "Market value with scarcity price" = "violet",
     "Adjustment Cost" = "orange2",
     "Shadow Price" = "lightblue")
+  
+  cost.colors_DT.line <- c(
+    # "Curtailment Cost" = "darkblue",
+    "Storage Cost" = "darkorchid",
+    "Grid Cost" = "darkolivegreen3",
+    # "CO2 Provision Cost" = "red",
+    "CO2 Tax Cost" = "indianred",
+    "OMV Cost" = "cyan",
+    "OMF Cost" = "darkcyan",
+    "Investment Cost" = "deepskyblue2",
+    "Fuel Cost" = "orange3",
+    # "Market Value" = "violet",
+    # "Market value with scarcity price" = "violet",
+    "Adjustment Cost" = "orange2",
+    # "Shadow Price" = "lightblue",
+    NULL
+  )
   
   cost.colors_DT_running <- c(
     "Grid Cost" = "darkolivegreen3",
@@ -523,7 +554,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   label.price <- c("Market Value", 
                    "Shadow Price", 
-                   "Market Value with scarcity price",
+                   "Market value with scarcity price",
                    NULL)
   
   price.colors <- c(
@@ -676,7 +707,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
 # Figures for GMD paper ---------------------------------------------------
   
-   #source(file.path(dieter.scripts.folder, "plotPaperFigures.R"), local = TRUE)
+  # source(file.path(dieter.scripts.folder, "plotPaperFigures.R"), local = TRUE)
   
   # Close LaTeX PDF ---------------------------------------------------------
 
