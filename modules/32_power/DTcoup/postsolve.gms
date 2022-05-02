@@ -404,10 +404,12 @@ sm_DTgenShDiff = smax(t,
     )
     );
 
-***CG: calculate inter-iteration generation share difference REMIND_upscaled(i)- REMIND_upscaled(i-1)
-p32_iterGenShDiff(t,regi,techUpscaledNames32)$(techUpscaledConv32(techUpscaledNames32) AND p32_REMINDUpscaledShareLaIter(t,regi,techUpscaledNames32)) =
+***CG: calculate inter-iteration generation share difference REMIND_upscaled(i)- REMIND_upscaled(i-1) (only for shares larger than 1%)
+p32_iterGenShDiff(t,regi,techUpscaledNames32)$(techUpscaledConv32(techUpscaledNames32) AND p32_REMINDUpscaledShareLaIter(t,regi,techUpscaledNames32) ge 1) =
 (p32_REMINDUpscaledShare(t,regi,techUpscaledNames32) - p32_REMINDUpscaledShareLaIter(t,regi,techUpscaledNames32))
                             / p32_REMINDUpscaledShareLaIter(t,regi,techUpscaledNames32) * 1e2;
+*** for small generation shares, just set it to 0
+p32_iterGenShDiff(t,regi,techUpscaledNames32)$(techUpscaledConv32(techUpscaledNames32) AND p32_REMINDUpscaledShareLaIter(t,regi,techUpscaledNames32) lt 1) = 0;
 
 sm_DTgenShDiffIter = smax(t,
   smax(techUpscaledConv32(techUpscaledNames32),

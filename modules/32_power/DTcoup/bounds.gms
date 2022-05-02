@@ -173,7 +173,7 @@ vm_capFac.fx(t,regi,"windoff")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(r
 vm_prodSe.fx(t,regi,"pewin","seel","windoff")$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi)) = 0;
 $ENDIF.WindOff
 
-v32_storloss.fx(t,regi,te)$(tDT32(t) AND (cm_DTcoup_eq eq 1) AND regDTCoup(regi) and (teDTCoupSupp(te) and not teVRE(te))) = 0;
+v32_storloss.fx(t,regi,te)$((cm_DTcoup_eq eq 1) AND regDTCoup(regi) and (teDTCoupSupp(te) and not teVRE(te))) = 0;
 
 *** all flexible subsidies are set to 0 for non-coupled regions in DTcoup realization (regardless of whether cm_DTcoup is on, or elh2_coup is on)
 *** This is because in calibration cm_flex_tax is turned off, and only in policy runs they are turned on
