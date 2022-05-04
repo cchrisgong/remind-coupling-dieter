@@ -169,8 +169,8 @@ f21_taxCO2eqHist("2020",regi)$(regi_group("EUR_regi",regi)) =  20;
 $ENDIF.policy_Cprice
 
 $IFTHEN.high_flatCprice %carbonprice% == "none"
-f21_taxCO2eqHist("2020",regi)$(regi_group("EUR_regi",regi) AND (cm_DTcoup_flatco2 gt 100)) = 70;
-f21_taxCO2eqHist("2020",regi)$(regi_group("EUR_regi",regi) AND (cm_DTcoup_flatco2 gt 70)) = 50;
+f21_taxCO2eqHist("2020",regi)$(regi_group("EUR_regi",regi) AND (cm_DTcoup_flatco2 ge 70)) = 70;
+f21_taxCO2eqHist("2020",regi)$(regi_group("EUR_regi",regi) AND (cm_DTcoup_flatco2 gt 100)) = 100;
 $ENDIF.high_flatCprice
 
 $IFTHEN.DTmode %cm_DTmode% == "none"
