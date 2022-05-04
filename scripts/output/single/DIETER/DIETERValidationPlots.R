@@ -311,32 +311,25 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     NULL)
   
   cost.colors <- c(
-                      # "CO2 Provision Cost" = "grey80",
                       "Curtailment Cost" = "darkblue",
                       "Storage Cost" = "darkorchid",
                       "Grid Cost" = "darkolivegreen3",
-                      "CCS Cost" = "violet",
-                      # "Second Fuel Cost" = "violet",
                       "CO2 Tax Cost" = "indianred",
                       "OMV Cost" = "cyan",
                       "OMF Cost" = "darkcyan",
                       "Investment Cost" = "deepskyblue2",
                       "Fuel Cost" = "orange3",
                       "Adjustment Cost" = "darkgoldenrod1",
-                      "Markup" = "lightblue",
                       NULL)
   
-  cost.colors.nomarkup <- c(
-    "Curtailment Cost" = "darkblue",
-    "Storage Cost" = "darkorchid",
-    "Grid Cost" = "darkolivegreen3",
+  cost.colors.policy <- c(
+    cost.colors,
     "CCS Cost" = "violet",
-    "CO2 Tax Cost" = "indianred",
-    "OMV Cost" = "cyan",
-    "OMF Cost" = "darkcyan",
-    "Investment Cost" = "deepskyblue2",
-    "Fuel Cost" = "orange3",
-    "Adjustment Cost" = "darkgoldenrod1",
+    NULL)
+  
+  cost.colors.wmarkup <- c(
+    cost.colors,
+    "Markup" = "lightblue",
     NULL)
   
   cost.colors.te <- c(cost.colors,
@@ -560,11 +553,11 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   price.colors <- c(
     # "REMIND Price" = "darkblue",
     "REMIND price moving average" = "darkorchid",
+    "REMIND price + shadow price (historical and peak load bound on cap.)" = "#ff0090",
     # "Total (marginal) LCOE + Markup" = "darkorchid",
     # "DIETER annual average electricity price" = "darkcyan",
     "DIETER annual average electricity price with scarcity price" = "#8DB600",
     "DIETER annual average electricity price with scarcity price + shadow price" = "violet",
-    "REMIND price + shadow price (historical and peak load bound on cap.)" = "#ff0090",
     # 'DIETER shadow price due to capacity constraint from REMIND' = "DodgerBlue4",
     NULL
   )

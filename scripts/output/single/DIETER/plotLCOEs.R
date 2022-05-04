@@ -67,17 +67,21 @@ sp <- file.path(outputdir, remind.files[iter_toplot]) %>%
   mutate(value = -value * 1e12 / sm_TWa_2_MWh * 1.2)
 
 sp.capcon <- file.path(outputdir, remind.files[iter_toplot]) %>% 
-  read.gdx("p32_capConShadowPrice", squeeze=F)  %>% 
+  read.gdx("p32_capConShadowPrice", squeeze=F) %>% 
   filter(all_regi == reg) %>%
   filter(all_te %in% names(remind.nonvre.mapping))  %>% 
   select(period = ttot, tech = all_te, value) %>% 
-  right_join(remind.vmcf) %>% 
-  select(-cf) %>% 
+  right_join(remind.vmcf) %>%
+  select(-cf) %>%
   replace(is.na(.), 0) %>% 
-  mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2) %>% 
+  mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2) %>%
+  dplyr::group_by(tech) %>%
+  complete(period = report.periods, fill = list(load = 0)) %>% 
+  dplyr::ungroup(tech) %>% 
+  replace(is.na(.), 0)  %>% 
   dplyr::group_by(tech) %>%
   mutate(value = frollmean(value, 3, align = "center", fill = NA)) %>%
-  dplyr::ungroup(tech) 
+  dplyr::ungroup(tech)
 
 mrkup <- out.remind.mrkup %>% 
   mutate(cost = "Markup") %>% 
@@ -143,15 +147,7 @@ prod_shareType_RM <- prod_shareType_RM.broad %>%
   filter(period %in% model.periods.till2100) 
 
 #####################################################################################################
-#REMIND marginal LCOE component for each tech (marginal in the sense of one additional added unit of generation of each tech)
-df.lcoe.te.total <- df.lcoe %>% 
-  filter(region == reg,
-         period %in% model.periods, type == "marginal",
-         tech %in% map.price.tech$tech, sector %in% plot.sector) %>% 
-  filter( cost == c("Total LCOE")) %>% 
-  filter( output == "seel") %>% 
-  select(period, tech, value) %>% 
-  dplyr::rename( totalLCOE = value )
+
 
 df.lcoe.grid <- df.lcoe %>% 
   filter(region == reg,
@@ -172,7 +168,7 @@ df.lcoe.ccs <- df.lcoe %>%
   select(period, tech, cost, lcoe=value)
 
 ############################### plot REMIND marginal or average LCOE ########################
-remind.cost.type = c("marginal","average")
+remind.cost.type = c("average","marginal")
 
 for (cost.type in remind.cost.type){
   # cost.type = "marginal"
@@ -201,6 +197,15 @@ if (cost.type == "average"){
     mutate(lcoe = lcoe/1.2)
   }
 
+#REMIND total LCOE 
+# df.lcoe.te.total <- df.lcoe %>% 
+#   filter(region == reg,
+#          period %in% model.periods, type == cost.type,
+#          tech %in% map.price.tech$tech, sector %in% plot.sector) %>% 
+#   filter( cost == c("Total LCOE")) %>% 
+#   filter( output == "seel") %>% 
+#   select(period, tech, value) %>% 
+#   dplyr::rename( totalLCOE = value )
 
 df.lcoe.te.components[mapply(is.infinite, df.lcoe.te.components)] <- 0
 
@@ -217,7 +222,7 @@ if (h2switch == "off"){
 df.lcoe.te.components.test <- df.lcoe.te.components %>% 
  filter(tech == "tnrs")
 
-#weighted total system (marginal) LCOE (with cost breakdown)
+#weighted total system (marginal or average) LCOE (with cost breakdown)
 df.lcoe.sys.components <- list(prod_share, df.lcoe.te.components) %>% 
   reduce(left_join) %>% 
   right_join(remind.vmcf %>% filter(period %in% model.periods.till2100)) %>% 
@@ -234,25 +239,25 @@ df.lcoe.sys.components <- list(prod_share, df.lcoe.te.components) %>%
   mutate(sector = "supply-side") %>%  
   mutate(variable = "Total LCOE")
 
-#weighted total system (marginal) LCOE (no cost breakdown)
-df.lcoe.sys <- list(prod_share, df.lcoe.te.total) %>% 
-  reduce(full_join)  %>% 
-  replace(is.na(.), 0) %>% 
-  mutate_all(function(x) ifelse(is.infinite(x), 0, x)) %>% 
-  select(period,genshare, totalLCOE) %>% 
-  mutate(sysLCOE = genshare * totalLCOE) %>% 
-  select(period,value = sysLCOE) %>% 
-  dplyr::group_by(period) %>%
-  dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
-  dplyr::ungroup(period) %>% 
-  mutate(tech = "System") %>% 
-  mutate(sector = "supply-side") %>%  
-  mutate(variable = "Total LCOE")
+#weighted total system LCOE (no cost breakdown)
+# df.lcoe.sys <- list(prod_share, df.lcoe.te.total) %>% 
+#   reduce(full_join)  %>% 
+#   replace(is.na(.), 0) %>% 
+#   mutate_all(function(x) ifelse(is.infinite(x), 0, x)) %>% 
+#   select(period,genshare, totalLCOE) %>% 
+#   mutate(sysLCOE = genshare * totalLCOE) %>% 
+#   select(period,value = sysLCOE) %>% 
+#   dplyr::group_by(period) %>%
+#   dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
+#   dplyr::ungroup(period) %>% 
+#   mutate(tech = "System") %>% 
+#   mutate(sector = "supply-side") %>%  
+#   mutate(variable = "Total LCOE")
 
 ### electrolyzers LCOE
 df.lcoe.elh2.components <- df.lcoe %>% 
   filter(region == reg, 
-         period %in% model.periods, type == "marginal",
+         period %in% model.periods, type == cost.type,
          tech %in% plot.tech, sector %in% plot.sector,
          value != 0) %>% 
   filter( ! cost %in% c("Total LCOE")) %>% 
@@ -264,14 +269,14 @@ df.lcoe.elh2.components <- df.lcoe %>%
 # filter for total LCOE
 df.lcoe.elh2.total <- df.lcoe %>% 
   filter(region == reg,
-         period %in% model.periods, type == "marginal",
+         period %in% model.periods, type == cost.type,
          tech %in% plot.tech, sector %in% plot.sector) %>% 
   filter( cost == c("Total LCOE")) %>%
   select(-unit, -cost) %>% 
   order.levels(tech = plot.tech) %>% 
   revalue.levels(tech = tech.label) %>% 
-  mutate(variable = "Total (marginal) LCOE") %>% 
-  mutate(cost = "Total (marginal) LCOE") %>% 
+  mutate(variable = paste0("Total (",cost.type,") LCOE")) %>% 
+  mutate(cost = paste0("Total (",cost.type,") LCOE")) %>% 
   select(period, tech, variable, cost, sector,value)
 
 # prepare REMIND prices for plot, calculate 15-year moving average and convert to USD2015/MWh, join with total LCOE for lineplot
@@ -317,7 +322,7 @@ df.total.lcoe.teAgg <- df.lcoe.teAgg %>%
 df.lcoe_minus_markup.te <- df.total.lcoe.teAgg %>%
                   full_join(df.mrkup.plot) %>% 
                   mutate(totalLCOE = totalLCOE + value) %>%
-                  mutate(cost = "Total (marginal) LCOE + Markup")
+                  mutate(cost = paste0("Total (",cost.type,") LCOE + Markup"))
 
 df.lcoe_minus_markup.te.plot <- df.lcoe_minus_markup.te %>% 
   select(-value) %>% 
@@ -335,8 +340,6 @@ df.sp.capcon.sys <- list(prod_share, sp.capcon) %>%
   dplyr::group_by(period) %>%
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
   dplyr::ungroup(period)
-# %>% 
-  # mutate(value = frollmean(value, 3, align = "center", fill = NA))
 
 sp.capcon.agg <- list(prod_shareType_RM, sp.capcon) %>% 
   reduce(full_join)%>% 
@@ -431,12 +434,12 @@ cost_bkdw_avg_4RM <- file.path(outputdir, dieter.files.report[length(dieter.file
   filter(variable %in% reportLCOEcomponents_REMIND_avg) %>%
   filter(period %in% model.periods) %>%
   filter(tech %in% names(dieter.tech.mapping)) %>%
-  filter(model == "REMIND")%>%
+  filter(model == "REMIND") %>%
   revalue.levels(tech = dieter.tech.mapping) %>%
   mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))) %>%
   revalue.levels(variable = dieter.variable.mapping) %>%
   mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>%
-  select(period, tech, variable, value)%>% 
+  select(period, tech, variable, value) %>% 
   mutate(period = as.numeric(period))
 
 if (h2switch == "off"){
@@ -495,8 +498,10 @@ dieter.cf <- out.remind.capfac %>%
   mutate(period = as.numeric(period)) %>% 
   filter(cf >1e-2)
 
+
+if (cost.type == "marginal"){
 # REMIND marginal adjustment cost 
-adjcost_marg <- cost_bkdw_marg_4RM %>%
+adjcost <- cost_bkdw_marg_4RM %>%
   filter(variable == "Adjustment Cost") %>%
   filter(!tech == "VRE grid") %>%
   select(period,tech,value) %>% 
@@ -504,14 +509,26 @@ adjcost_marg <- cost_bkdw_marg_4RM %>%
   mutate(cost = "Adjustment Cost") %>%
   select(-cf) %>% 
   replace(is.na(.), 0)
+}
+
+if (cost.type == "average"){
+  adjcost <- cost_bkdw_avg_DT %>%
+  filter(variable == "Adjustment Cost") %>%
+  filter(!tech == "VRE grid") %>%
+  select(period,tech,value) %>% 
+  right_join(dieter.cf) %>% 
+  mutate(cost = "Adjustment Cost") %>%
+  select(-cf) %>% 
+  replace(is.na(.), 0)
+}
 
 df.total.lcoe.teAgg.plot <- df.total.lcoe.teAgg %>%
-  full_join( adjcost_marg %>% select(period,tech,adjcost=value)) %>% 
+  full_join( adjcost %>% select(period,tech,adjcost=value)) %>% 
   replace(is.na(.), 0) %>% 
   mutate(totalLCOE = totalLCOE + adjcost) %>%
   dplyr::rename( value = totalLCOE ) %>% 
   select(-adjcost) %>% 
-  mutate(cost = "Total (marginal) LCOE")
+  mutate(cost = paste0("Total LCOE"))
 
 df.telcoe_mv.plot <- list(df.total.lcoe.teAgg.plot, mv.plus.sp.agg, mv.agg) %>% 
   reduce(full_join) %>% 
@@ -519,24 +536,24 @@ df.telcoe_mv.plot <- list(df.total.lcoe.teAgg.plot, mv.plus.sp.agg, mv.agg) %>%
   filter(period %in% model.periods.till2100)
 
 if (h2switch == "off"){
-  adjcost_marg <- adjcost_marg %>%
+  adjcost <- adjcost %>%
     filter(!tech %in% c(remind.sector.coupling.mapping))
 }
 
-df.lcoe.teAgg.wAdj <- list(df.lcoe.teAgg, adjcost_marg) %>%
+df.lcoe.teAgg.wAdj <- list(df.lcoe.teAgg, adjcost) %>%
   reduce(full_join) %>% 
   filter(period %in% model.periods.till2100) %>% 
   filter(!tech %in% c("VRE grid", remind.sector.coupling.mapping)) %>% 
   mutate(cost = factor(cost, levels=rev(unique(c(dieter.variable.mapping,"CCS Cost","Storage Cost","Markup","Curtailment Cost")))))
 
-df.lcoe.teAgg.wAdjMrk <- list(df.lcoe.teAgg, adjcost_marg,mrkup) %>%
+df.lcoe.teAgg.wAdjMrk <- list(df.lcoe.teAgg, adjcost,mrkup) %>%
   reduce(full_join) %>% 
   filter(period %in% model.periods.till2100) %>% 
   filter(!tech %in% c("VRE grid", remind.sector.coupling.mapping)) %>% 
   mutate(cost = factor(cost, levels=rev(unique(c(dieter.variable.mapping,"CCS Cost","Storage Cost","Markup","Curtailment Cost")))))
 
-# marginal adj cost for the system in DIETER  
-adjcost.sys.marg <- adjcost_marg %>% 
+# adj cost 
+adjcost.sys <- adjcost %>% 
   filter(!tech %in% c(remind.sector.coupling.mapping)) %>% 
   select(period,tech,value) %>% 
   left_join(prod_aggShare_RM) %>% 
@@ -572,7 +589,9 @@ for (iter in c(start_i,start_i+1,maxiter-1)){
   
 # 2020 has very high LCOE due to shadow price for biomass and OCGT, exclude from plotting
 p <- ggplot() +
-  geom_bar(data = dieter.teloceprice_avg %>% filter(iteration == iter), aes(x = period, y = value,  fill = variable), stat = 'identity', size = 1.2, alpha = 0.5) +
+  geom_bar(data = dieter.teloceprice_avg %>% 
+                  filter(iteration == iter)
+                  , aes(x = period, y = value,  fill = variable), stat = 'identity', size = 1.2, alpha = 0.5) +
   theme(axis.text=element_text(size = 20), axis.title=element_text(size = 20, face="bold"), strip.text = element_text(size = 20)) +
   theme(legend.text = element_text(size=20), strip.text = element_text(size = 20))+
   xlab("year") + ylab(paste0("LCOE and value of DIETER generating technology ($/MWh)")) +
@@ -641,41 +660,53 @@ plot.dieter.price.total <- list(plot.dieter.price.wscar, plot.dieter.price) %>%
   filter(variable !="Shadow Price")
 
 # 2020 has very high LCOE due to shadow price for biomass and OCGT, exclude from plotting
-p <- ggplot() +
-  geom_bar(data = plot.dieter.telcoe_avg %>% filter(period >2020), aes(x = period, y = value, fill = variable), stat='identity', size = 1.2, alpha = 0.5)+
-  geom_line(data = plot.dieter.price.total%>% filter(period >2020), aes(period, value, linetype=variable), size=1.2) +
+p.teLCOE_avg.DIETER <- ggplot() +
+  geom_bar(data = plot.dieter.telcoe_avg %>% 
+             filter(period >2020) %>% 
+             filter(!value ==0) %>% 
+             mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))), aes(x = period, y = value, fill = variable), stat='identity', size = 1.2, alpha = 0.5)+
+  geom_line(data = plot.dieter.price.total%>% 
+              filter(period >2020)%>% 
+              filter(!value ==0) %>% 
+              mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))), aes(period, value, linetype=variable), size=1.2) +
   labs(linetype = "") +
-  # labs(fill = "") +
+  theme_bw()+
+  # labs(fill = "") + 
+  guides(linetype=guide_legend(nrow=2,byrow=TRUE),fill=guide_legend(nrow=2,byrow=TRUE)) +
+  xlab("Period") + ylab(paste0("DIETER LCOE and prices (2015$/MWh)")) +
+  scale_x_continuous(breaks = seq(2020,2100,20)) +
+  coord_cartesian(xlim = c(2020,2100))+
+  scale_fill_manual(values = cost.colors_DT.line) +
   theme(axis.text=element_text(size=20), axis.title=element_text(size=20, face="bold"), strip.text = element_text(size = 20)) +
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=17)) +
-  guides(fill=guide_legend(nrow=2,byrow=TRUE), linetype=guide_legend(nrow=2,byrow=TRUE)) +
-  xlab("Period") + ylab(paste0("DIETER LCOE and prices (2015$/MWh)")) +
-  scale_fill_manual(values = cost.colors_DT.line) +
   facet_wrap(~tech, nrow = 3, scales = "free") 
 
-swfigure(sw,print,p)
+swfigure(sw,print,p.teLCOE_avg.DIETER)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_avg_DIETER_line.png"),  p,  width = 16, height =10, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_avg_DIETER_line.png"),  p.teLCOE_avg.DIETER,  width = 16, height =10, units = "in", dpi = 120)
 }
 
 # 2020 has very high LCOE due to shadow price for biomass and OCGT, exclude from plotting
 p <- ggplot() +
-  geom_bar(data = plot.dieter.telcoe_avg , aes(x = period, y = value, fill = variable), stat='identity', size = 1.2, alpha = 0.5)+
-  geom_line(data = plot.dieter.price.total, aes(period, value, linetype=variable), size=1.2) +
+  geom_bar(data = plot.dieter.telcoe_avg %>% filter(!value ==0) , aes(x = period, y = value, fill = variable), stat='identity', size = 1.2, alpha = 0.5)+
+  geom_line(data = plot.dieter.price.total%>% filter(!value ==0), aes(period, value, linetype=variable), size=1.2) +
   labs(linetype = "") +
+  theme_bw()+
   # labs(fill = "") +
   theme(axis.text=element_text(size=20), axis.title=element_text(size=20, face="bold"), strip.text = element_text(size = 20)) +
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=17)) +
   guides(fill=guide_legend(nrow=2,byrow=TRUE), linetype=guide_legend(nrow=2,byrow=TRUE)) +
   xlab("year") + ylab(paste0("LCOE ($/MWh)"))  +
+  scale_x_continuous(breaks = seq(2020,2100,20)) +
+  coord_cartesian(xlim = c(2020,2100))+
   scale_fill_manual(values = cost.colors_DT.line) +
   facet_wrap(~tech, nrow = 3, scales = "free")
 
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_avg_DIETER_line_w2020.png"),  p,  width = 20, height =10, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_avg_DIETER_line_w2020.png"),  p,  width = 16, height =10, units = "in", dpi = 120)
 }
 
 ################## DIETER marginal LCOE plot ########################
@@ -692,20 +723,21 @@ dieter.teloceprice_marg <- list(dieter.price, dieter.telcoe_marg) %>%
 
 # 2020 has very high LCOE due to shadow price for biomass and OCGT, exclude from plotting
 p <- ggplot() +
-  geom_bar(data = dieter.teloceprice_marg %>% filter(period >2020) , aes(x = period, y = value,  fill = variable), stat='identity', size = 1.2, alpha = 0.5) +
+  geom_bar(data = dieter.teloceprice_marg %>% filter(period >2020) %>% filter(!value ==0), aes(x = period, y = value,  fill = variable), stat='identity', size = 1.2, alpha = 0.5) +
   labs(linetype = "") +
   # labs(fill = "") +
   theme(axis.text=element_text(size=20), axis.title=element_text(size=20, face="bold"), strip.text = element_text(size = 20)) +
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=17)) +
   guides(fill=guide_legend(nrow=2,byrow=TRUE), linetype=guide_legend(nrow=2,byrow=TRUE)) +
   xlab("year") + ylab(paste0("LCOE ($/MWh)")) +
+  coord_cartesian(xlim = c(2020,2100))+
   scale_fill_manual(values = cost.colors_DT.bar) +
   facet_wrap(~tech, nrow = 3, scales = "free")
 
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_marg_DIETER_bar.png"),  p,  width = 20, height =10, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_marg_DIETER_bar.png"),  p,  width = 16, height =10, units = "in", dpi = 120)
 }
 
 plot.dieter.telcoe_marg <- dieter.telcoe_marg %>%
@@ -713,55 +745,60 @@ plot.dieter.telcoe_marg <- dieter.telcoe_marg %>%
   filter(period %in% model.periods.till2100)
 # 2020 has very high LCOE due to shadow price for biomass and OCGT, exclude from plotting
 p <- ggplot() +
-  geom_bar(data = plot.dieter.telcoe_marg %>% filter(period >2020) , aes(x = period, y = value,  fill = variable), stat='identity', size = 1.2, alpha = 0.5)+
-  geom_line(data = plot.dieter.price.total %>% filter(period >2020), aes(period, value, linetype=variable), size=1.2) +
+  geom_bar(data = plot.dieter.telcoe_marg %>% filter(period >2020) %>% filter(!value ==0), aes(x = period, y = value,  fill = variable), stat='identity', size = 1.2, alpha = 0.5)+
+  geom_line(data = plot.dieter.price.total %>% filter(period >2020)%>% filter(!value ==0), aes(period, value, linetype=variable), size=1.2) +
   labs(linetype = "") +
   # labs(fill = "") +
   theme(axis.text=element_text(size=20), axis.title=element_text(size=20, face="bold"), strip.text = element_text(size = 20)) +
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=17)) +
   guides(fill=guide_legend(nrow=2,byrow=TRUE), linetype=guide_legend(nrow=2,byrow=TRUE)) +
   xlab("year") + ylab(paste0("LCOE ($/MWh)"))  +
+  coord_cartesian(xlim = c(2020,2100))+
   scale_fill_manual(values = cost.colors_DT.line) +
   facet_wrap(~tech, nrow = 3, scales = "free")
 
 swfigure(sw,print,p)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_marg_DIETER_line.png"),  p,  width = 20, height =10, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_marg_DIETER_line.png"),  p,  width = 16, height =10, units = "in", dpi = 120)
 }
 
 ########################################################################################################
 swlatex(sw, paste0("\\subsection{Technology LCOE - REMIND}"))
 
 # 2020 has very high LCOE for biomass and OCGT, exclude from plotting
-p.teLCOE <- ggplot() + 
+p.teLCOE.REMIND <- ggplot() + 
   geom_col( 
             # data = df.lcoe.teAgg.wAdjMrk 
-            data = df.lcoe.teAgg.wAdj
-                                      %>% filter(period %in% model.periods.till2100, period >2020)
-                                      %>% filter(value < 1e4),
-            aes(period, value, fill=cost)) +
-  geom_line(data = df.telcoe_mv.plot 
-                                    %>% filter(period >2020)
-                                     %>% filter(value < 1e4),
+            data = df.lcoe.teAgg.wAdj %>% 
+                    filter(period %in% model.periods.till2100, period >2020) %>% 
+                    filter(value < 1e4) %>% 
+              mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))),
+            aes(period, value, fill=cost), stat='identity', size = 1.2, alpha = 0.5) +
+  geom_line(data = df.telcoe_mv.plot %>% 
+                    filter(period >2020) %>% 
+                    filter(value < 1e4) %>% 
+              mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))),
             aes(period, value, linetype=cost), size=1.2) +
-  facet_wrap(~tech, scales = "free_y") +
-  scale_y_continuous("LCOE and REMIND Price\n(USD2015/MWh)") +
-  scale_x_continuous(breaks = seq(2020,2100,10)) +
+  labs(linetype = "") +
+  theme_bw()+
+  guides(fill=guide_legend(nrow=2,byrow=TRUE), linetype=guide_legend(nrow=2,byrow=TRUE)) +
+  xlab("Period") + ylab(paste0("REMIND LCOE and prices (2015$/MWh)")) +
+  scale_x_continuous(breaks = seq(2020,2100,20)) +
+  coord_cartesian(xlim = c(2020,2100))+
   scale_fill_manual(values = cost.colors) +
-  # coord_cartesian(ylim = c(ymin,ymax)) +
-  theme_bw() +
-  theme( axis.text.x = element_text(angle = 90),
-         strip.background = element_blank())
+  theme(axis.text=element_text(size=20), axis.title=element_text(size=20, face="bold"), strip.text = element_text(size = 20)) +
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=15)) +
+  facet_wrap(~tech, nrow = 3, scales = "free") 
 
-swfigure(sw,print,p.teLCOE)
+swfigure(sw,print,p.teLCOE.REMIND)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_",plot.tag,"REMIND.png"),  p.teLCOE,  width = 17, height =7, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_",plot.tag,"REMIND.png"),  p.teLCOE.REMIND,  width = 16, height =10, units = "in", dpi = 120)
 }
 
 ########################################################################################################
-swlatex(sw, paste0("\\subsection{Technology LCOE (DIETER average LCOE, REMIND marginal LCOE) - Comparison}"))
+swlatex(sw, paste0("\\subsection{Technology LCOE (DIETER average LCOE, REMIND ", cost.type, " LCOE) - Comparison}"))
 
 df.lcoe.avg.dieter <- cost_bkdw_avg_DT %>% 
   filter(!variable %in% label.price) %>% 
@@ -794,8 +831,9 @@ swfigure(sw,print,p.techLCOE_compare)
 if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_",plot.tag,"RM_avgDT_compare.png"),  p.techLCOE_compare,  width = 25, height =15, units = "in", dpi = 120)
 }
+
 ########################################################################################################
-swlatex(sw, paste0("\\subsection{Technology LCOE (DIETER marginal LCOE, REMIND marginal LCOE) - Comparison}"))
+swlatex(sw, paste0("\\subsection{Technology LCOE (DIETER marginal LCOE, REMIND ", cost.type, " LCOE) - Comparison}"))
 df.lcoe.marg.dieter <- cost_bkdw_marg_DT %>% 
   filter(!variable %in% label.price) %>% 
   mutate(period = as.numeric(period))
@@ -830,13 +868,13 @@ if (save_png == 1){
 swlatex(sw, paste0("\\section{System LCOEs}"))
 ########################################################################################################
 
-swlatex(sw, paste0("\\subsection{System LCOE - REMIND - with curtailment cost}"))
+swlatex(sw, paste0("\\subsection{System ", cost.type, " LCOE REMIND - with curtailment cost}"))
 # REMIND marginal LCOE component for the entire power system (marginal in the sense of one additional added unit of generation in the system)
 
-# df.lcoe.components <- list(df.lcoe.elh2.components, df.lcoe.sys.components, df.markup.sys, adjcost.sys.marg, flexadj) %>%
-df.lcoe.components <- list(df.lcoe.elh2.components, df.lcoe.sys.components, adjcost.sys.marg, flexadj) %>%
+# df.lcoe.components <- list(df.lcoe.elh2.components, df.lcoe.sys.components, df.markup.sys, adjcost.sys, flexadj) %>%
+df.lcoe.components <- list(df.lcoe.elh2.components, df.lcoe.sys.components, adjcost.sys, flexadj) %>%
   reduce(full_join) %>% 
-  order.levels(cost = names(cost.colors))
+  order.levels(cost = names(cost.colors.wmarkup))
 
 df.lcoe.components.nocurt <- df.lcoe.components %>%
   filter(!cost == "Curtailment Cost")
@@ -845,13 +883,13 @@ df.lcoe_minus_tax <- df.lcoe.components %>%
   dplyr::group_by(period,tech,sector) %>% 
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>%
   dplyr::ungroup(period,tech,sector) %>% 
-  mutate(variable = "Total (marginal) LCOE + Markup") 
+  mutate(variable = "Total LCOE + Markup") 
 
 df.lcoe_minus_tax.nocurt <- df.lcoe.components.nocurt %>% 
   dplyr::group_by(period,tech,sector) %>%
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>%
   dplyr::ungroup(period,tech,sector) %>%
-  mutate(variable = "Total (marginal) LCOE + Markup") 
+  mutate(variable = "Total LCOE + Markup") 
 
 df.pricelcoe_minus_tax.plot <- list(df.lcoe_minus_tax,df.price) %>%
   reduce(full_join)
@@ -899,7 +937,7 @@ p.sysLCOE_wmarkup <- ggplot() +
   facet_wrap(~tech~sector, scales = "free_y") +
   scale_y_continuous("LCOE and REMIND Price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
-  scale_fill_manual(values = cost.colors) +
+  scale_fill_manual(values = cost.colors.wmarkup) +
   coord_cartesian(ylim = c(ymin,ymax))+
   # coord_cartesian(ylim = c(ymin,200))+
   theme_bw() +
@@ -934,7 +972,7 @@ p.sysLCOE_wmarkup <- ggplot() +
   facet_wrap(~tech~sector, scales = "free_y") +
   scale_y_continuous("LCOE and REMIND Price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
-  scale_fill_manual(values = cost.colors) +
+  scale_fill_manual(values = cost.colors.wmarkup) +
   coord_cartesian(ylim = c(ymin,ymax))+
   theme_bw() +
   ggtitle(paste0("System LCOE for 1 MWh of usable power: ", reg))+
@@ -951,7 +989,7 @@ if (save_png == 1){
 }
 
 ########################################################################################################
-swlatex(sw, paste0("\\subsection{Marginal and average DIETER system LCOE vs. marginal REMIND system LCOE}"))
+swlatex(sw, paste0("\\subsection{Marginal and average DIETER system LCOE vs. ", cost.type, " REMIND system LCOE}"))
 # DIETER's marginal and average system LCOE and price, compared with REMIND side-by-side
 
 out.prices_DT <- NULL
@@ -998,7 +1036,7 @@ prices_RM.movingavg <- df.price0 %>%
   filter(tech == "System") %>% 
   select(period, variable, value)%>%
   mutate(model = "REMIND") %>% 
-  mutate(value = frollmean(value, 4, align = "center", fill = NA)) %>%
+  mutate(value = frollmean(value, 3, align = "left", fill = NA)) %>%
   mutate(variable = "REMIND price moving average")
 
 # REMIND price with capacity shadow price
@@ -1026,8 +1064,7 @@ elec_prices_DT_wShadPrice_laIter <- elec_prices_DT_wShadPrice %>%
   filter(iteration == maxiter -1) %>% 
   select(-iteration)
 
-# prices_lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter, prices_RM) %>%
-prices_lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter) %>%
+DT.prices.lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter) %>%
   reduce(full_join)
 
 genshare.dieter <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>% 
@@ -1049,7 +1086,7 @@ genshare1 <- genshare.dieter %>%
 gridcost_p <- gridcost %>% 
   filter(variable == "Shadow Cost")
 
-sysLCOE_avg_DT <- dieter.telcoe_avg %>% 
+sysLCOE.avg.DT <- dieter.telcoe_avg %>% 
   select(iteration,period,tech,variable,value) %>% 
   filter(!tech %in% c("VRE grid", "Electrolyzers")) %>% 
   left_join(genshare1) %>% 
@@ -1063,12 +1100,11 @@ sysLCOE_avg_DT <- dieter.telcoe_avg %>%
   mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>% 
   mutate(period = as.numeric(period)) 
 
-sysLCOE_avg_DT_laIter <- sysLCOE_avg_DT %>% 
+sysLCOE.avg.DT_laIter <- sysLCOE.avg.DT %>% 
   filter(iteration == maxiter -1)
   
-sysLCOE_avg_DT_laIter$type <- "Average"
-sysLCOE_avg_DT_laIter$model <- "DIETER"
-
+sysLCOE.avg.DT_laIter$type <- "Average"
+sysLCOE.avg.DT_laIter$model <- "DIETER"
 
 sysLCOE_RM <- df.lcoe.components %>%
   filter(tech == "System") %>%
@@ -1077,25 +1113,25 @@ sysLCOE_RM <- df.lcoe.components %>%
   select(period, variable= cost, value) %>%
   mutate(model = "REMIND")
 
-sys_avgLCOE_compare <- list(sysLCOE_avg_DT_laIter, sysLCOE_RM, adjcost.sys.marg) %>% 
+sys_avgLCOE_compare <- list(sysLCOE.avg.DT_laIter, sysLCOE_RM, adjcost.sys) %>% 
   reduce(full_join)%>% 
   mutate(variable = factor(variable, levels=rev(unique(c("Markup",dieter.variable.mapping,"CCS Cost","Curtailment Cost")))))
 
-ymax = max(prices_lines$value) * 1.1
+ymax = max(DT.prices.lines$value) * 1.1
 ymin = min(sys_avgLCOE_compare$value) * 1.1
 
 p.sysLCOE_compare <- ggplot() + 
   geom_col( data = sys_avgLCOE_compare, 
             aes(period, value, fill=variable)) +
-  geom_line(data = prices_lines %>% filter(period %in% model.periods.till2100) ,
+  geom_line(data = DT.prices.lines %>% filter(period %in% model.periods.till2100) ,
             aes(period, value, color=variable), alpha = 0.7, size=2) +  
   geom_line(data = prices_RM.movingavg %>% filter(period %in% model.periods.till2100) ,
             aes(period, value, color=variable), alpha = 0.5, size=2) +  
-  scale_y_continuous("LCOE and power price\n(USD2015/MWh)") +
+  scale_y_continuous("LCOE and electricity price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
   scale_color_manual(name = "variable", values = price.colors) +
   coord_cartesian(ylim = c(ymin,ymax))+
-  scale_fill_manual(values = cost.colors.nomarkup) +
+  scale_fill_manual(values = cost.colors) +
   guides(fill=guide_legend(nrow=5,byrow=TRUE), color=guide_legend(nrow=5,byrow=TRUE))+
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
   theme(axis.text=element_text(size=15), axis.title=element_text(size= 18, face="bold"),strip.text = element_text(size=13)) +
@@ -1116,7 +1152,7 @@ if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/sys_avgDT_",plot.tag,"RM_LCOE_wShadPrice_compare_line.png"), p.sysLCOE_compare2, width = 14, height =9, units = "in", dpi = 120)
 }
 
-sysLCOE_avg_DT_tech_lastIter <- dieter.telcoe_avg %>% 
+sysLCOE.avg.DT_tech_lastIter <- dieter.telcoe_avg %>% 
   select(iteration,period,tech,variable,value) %>% 
   filter(!tech %in% c("VRE grid", "Electrolyzers")) %>% 
   left_join(genshare1) %>% 
@@ -1137,10 +1173,10 @@ sysLCOE_RM_tech <- df.total.lcoe.teAgg %>%
   select(-totalLCOE,-aggshare) %>% 
   mutate(model = "REMIND")
 
-adjcost_marg_tech <- adjcost_marg %>% 
+adjcost_tech <- adjcost %>% 
   select(-cost)
 
-sys_avgLCOE_compare_tech <- list(sysLCOE_avg_DT_tech_lastIter, sysLCOE_RM_tech) %>%
+sys_avgLCOE_compare_tech <- list(sysLCOE.avg.DT_tech_lastIter, sysLCOE_RM_tech) %>%
   reduce(full_join) %>% 
   mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping.cost.order)))) %>% 
   mutate(period = as.numeric(period)) 
@@ -1148,7 +1184,7 @@ sys_avgLCOE_compare_tech <- list(sysLCOE_avg_DT_tech_lastIter, sysLCOE_RM_tech) 
 p.sysLCOE_compare <- ggplot() + 
   geom_col( data = sys_avgLCOE_compare_tech, 
             aes(period, value, fill=tech)) +
-  scale_y_continuous("LCOE and power price\n(USD2015/MWh)") +
+  scale_y_continuous("LCOE and electricity price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
   coord_cartesian(ylim = c(ymin,ymax))+
   scale_fill_manual(values = color.mapping) +
@@ -1170,12 +1206,12 @@ for (iter in c(start_i,start_i+1,maxiter-1)){
     filter(!variable == 'DIETER annual average electricity price') %>%
     mutate(value = -value)
   
-  DIETER_bar_avg_i <- list(out.prices_DT_bar, sysLCOE_avg_DT) %>%
+  DIETER.bar.avg_i <- list(out.prices_DT_bar, sysLCOE.avg.DT) %>%
     reduce(full_join) %>% 
     filter(iteration == iter)
 
   p.sysLCOEprice_DIETER <- ggplot() + 
-    geom_col( data = DIETER_bar_avg_i %>% filter(period %in% model.periods.till2100, period < 2090) ,
+    geom_col( data = DIETER.bar.avg_i %>% filter(period %in% model.periods.till2100, period < 2090) ,
               aes(period, value, fill=variable)) +
     scale_y_continuous("LCOE and DIETER Price\n(USD2015/MWh)") +
     scale_x_continuous(breaks = seq(2010,2100,10)) +
@@ -1194,12 +1230,12 @@ for (iter in c(start_i,start_i+1,maxiter-1)){
 
 }
 
-  DIETER_bar_avg <- list(out.prices_DT_bar, sysLCOE_avg_DT) %>%
+  DIETER.bar.avg <- list(out.prices_DT_bar, sysLCOE.avg.DT) %>%
     reduce(full_join)  %>% 
     filter(iteration %in% c(start_i+1,maxiter-1))
   
   p.sysLCOEprice_DIETER_iters <- ggplot() + 
-    geom_col( data = DIETER_bar_avg %>% filter(period %in% model.periods.till2100, period < 2090) ,
+    geom_col( data = DIETER.bar.avg %>% filter(period %in% model.periods.till2100, period < 2090) ,
               aes(period, value, fill=variable)) +
     scale_y_continuous("LCOE and DIETER Price\n(USD2015/MWh)") +
     scale_x_continuous(breaks = seq(2010,2100,10)) +
@@ -1221,7 +1257,7 @@ for (iter in c(start_i,start_i+1,maxiter-1)){
   
   # DIETER system marginal LCOE
 
-sysLCOE_marg_DT <- dieter.telcoe_marg %>%
+sysLCOE.marg.DT <- dieter.telcoe_marg %>%
   select(period,tech,variable,value) %>%
   filter(!tech %in% c("VRE grid", "Electrolyzers")) %>%
   left_join(genshare1) %>%
@@ -1235,26 +1271,26 @@ sysLCOE_marg_DT <- dieter.telcoe_marg %>%
   mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>%
   mutate(period = as.numeric(period))
 
-sysLCOE_marg_DT$type <- "Marginal"
-sysLCOE_marg_DT$model <- "DIETER"
+sysLCOE.marg.DT$type <- "Marginal"
+sysLCOE.marg.DT$model <- "DIETER"
 
-sys_margLCOE_compare <- list(sysLCOE_marg_DT, sysLCOE_RM) %>%
+sys_margLCOE_compare <- list(sysLCOE.marg.DT, sysLCOE_RM) %>%
   reduce(full_join)
 
-ymax = max(prices_lines$value) * 1.1
+ymax = max(DT.prices.lines$value) * 1.1
 ymin = min(sys_avgLCOE_compare$value) * 1.1
 
 p <- ggplot() +
   geom_col( data = sys_margLCOE_compare,
             aes(period, value, fill=variable)) +
-  geom_line(data = prices_lines %>% filter(period %in% model.periods.till2100) ,
+  geom_line(data = DT.prices.lines %>% filter(period %in% model.periods.till2100) ,
             aes(period, value, color=variable), size=1.2) +
   facet_wrap(~model, scales = "free_y") +
   scale_y_continuous("LCOE and DIETER Price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
   scale_color_manual(name = "variable", values = price.colors) +
   coord_cartesian(ylim = c(-5,115))+
-  scale_fill_manual(values = cost.colors) +
+  scale_fill_manual(values = cost.colors.wmarkup) +
   theme_bw() +
   theme( axis.text.x = element_text(angle = 90),
          strip.background = element_blank())

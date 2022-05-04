@@ -12,11 +12,35 @@ theme_set(theme_cowplot(font_size = 8))  # Use simple theme and set font size
 
 # Figure 2: Electricity price convergence ---------------------------------
 
-# diff.price.rollmeaaan <-diff.price.rollmean  %>% 
-#   filter(iteration == 36) %>% 
+# calculate shadow price in remind due to capacity constraint - no, not needed since markup should add up to zero at convergence,
+# and these shadow prices are not part of the markup
+
+# diff.price.rollmean <- out.RMprice %>% 
+#   select(-variable) %>% 
+#   dplyr::group_by(iteration) %>%
+#   mutate(value = frollmean(value, 3, align = "left", fill = NA)) %>%
+#   dplyr::ungroup(iteration) %>% 
+#   replace(is.na(.), 0) %>% 
+#   select(iteration,period,price=value) %>%
+#   full_join(out.remind.sys.sp.capcon %>% select(iteration,period,sp.capcon=value) %>% filter(sp.capcon <20) ) %>% 
+#   replace(is.na(.), 0) %>% 
+#   filter(period %in% model.periods) %>% 
+#   filter(!price == 0) %>% 
+#   mutate(rmprice=price+sp.capcon) %>% 
+#   select(period,iteration,rmprice) %>% 
+#   left_join(out.DTprice) %>% 
+#   filter(period %in% model.periods.till2100) %>% 
+#   select(period,iteration,rmprice, value) %>% 
+#   mutate(value = rmprice - value) %>% 
+#   select(-rmprice)%>% 
+#   filter(iteration > start_i-1)
+# 
+# diff.price.rollmean.avg.yr <- diff.price.rollmean %>% 
+#   # filter(period > 2030) %>% 
 #   dplyr::group_by(iteration) %>%
 #   dplyr::summarise( value = mean(value), .groups = "keep" ) %>% 
-#   dplyr::ungroup(iteration) 
+#   dplyr::ungroup(iteration) %>% 
+#   mutate(variable = "Difference of electricity price (REMIND rolling avg)")
 
 # Panel 1: Surface plot
 p.surface <- ggplot() +
@@ -49,7 +73,7 @@ p.line <- ggplot() +
                      values = c("Time-averaged" = "black")) +
   scale_x_continuous(name = "Iteration") + 
   scale_y_continuous(name = "$/MWh",
-                     limits = c(-1, max(diff.price.avg.yr$value)))+
+                     limits = c(-1, max(diff.price.rollmean.avg.yr$value)))+
   theme_minimal_grid(12) +
   theme(axis.text = element_text(size = font.size),
         axis.title = element_text(size =font.size))+
@@ -303,18 +327,20 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE04.png"),
 #        height = 12,  # Vary height according to how many panels plot has
 #        units = "cm")
 
-# ============ 0-profit plots =============================================================================
+# ============ 0-profit plots - system =============================================================================
 p.sysLCOE_RM <- ggplot() + 
   geom_col( data = sys_avgLCOE_compare %>% filter(model=="REMIND"), 
             aes(period, value, fill=variable)) +
   geom_line(data = prices_RM.movingavg %>% filter(period %in% model.periods.till2100) ,
             aes(period, value, color=variable), alpha = 0.5, size=1.5) +  
+  geom_line(data = prices_w2Shad_RM %>% filter(period %in% model.periods.till2100) ,
+            aes(period, value, color=variable), alpha = 0.5, size=1.5)+
   scale_y_continuous("LCOE and electricity price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
   scale_color_manual(name = "Price", values = price.colors) +
   coord_cartesian(ylim = c(ymin,ymax))+
   scale_fill_manual(name = "Costs", values = cost.colors) +
-  guides(fill=guide_legend(nrow=3,byrow=TRUE), color=guide_legend(nrow=3,byrow=TRUE))+
+  guides(fill=guide_legend(nrow=4,byrow=TRUE), color=guide_legend(nrow=4,byrow=TRUE))+
   ggtitle("REMIND")+
   theme(legend.position="bottom", legend.direction="horizontal", legend.text = element_text(size=font.size)) +
   theme(axis.text=element_text(size=font.size), axis.title=element_text(size=font.size, face="bold"),strip.text = element_text(size=font.size)) 
@@ -322,14 +348,14 @@ p.sysLCOE_RM <- ggplot() +
 p.sysLCOE_DT <- ggplot() + 
   geom_col( data = sys_avgLCOE_compare %>% filter(model=="DIETER"), 
             aes(period, value, fill=variable)) +
-  geom_line(data = prices_lines %>% filter(period %in% model.periods.till2100) ,
+  geom_line(data = DT.prices.lines %>% filter(period %in% model.periods.till2100) ,
             aes(period, value, color=variable), alpha = 0.7, size=1.5) +  
   scale_y_continuous("LCOE and electricity price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
   scale_color_manual(name = "Price", values = price.colors) +
   coord_cartesian(ylim = c(ymin,ymax))+
   scale_fill_manual(name = "Costs",values = cost.colors) +
-  guides(fill=guide_legend(nrow=3,byrow=TRUE), color=guide_legend(nrow=3,byrow=TRUE))+
+  guides(fill=guide_legend(nrow=4,byrow=TRUE), color=guide_legend(nrow=4,byrow=TRUE))+
   ggtitle("DIETER")+
   theme(legend.position="bottom", legend.direction="horizontal", legend.text = element_text(size=font.size)) +
   theme(axis.text=element_text(size=font.size), axis.title=element_text(size=font.size, face="bold"),strip.text = element_text(size=font.size)) 
@@ -357,12 +383,40 @@ p <- plot_grid(p.plots,
 ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_sysZPC.png"),
        bg = "white",
        width = 22,  # Vary width according to how many panels plot has
-       height = 12,  # Vary height according to how many panels plot has
+       height = 14,  # Vary height according to how many panels plot has
+       units = "cm")
+
+# ============ 0-profit plots - tech =============================================================================
+# Arrange both plots
+p.plots <- plot_grid(
+  p.teLCOE_avg.DIETER + theme(legend.position = "none"),  # Without legend
+  p.teLCOE.REMIND + theme(legend.position = "none"),  # Without legend
+  ncol = 1,
+  rel_heights = c(1, 1),
+  labels = "auto",
+  label_size = 3*font.size,
+  align = "v"
+)
+
+p.legend <- get_legend(p.teLCOE.REMIND + theme(legend.box.margin = margin(0, 0, 0, 12)))
+
+# Put together plot and legend
+p <- plot_grid(p.plots,
+               p.legend,
+               ncol = 1,
+               rel_heights = c(1, 0.05))
+
+# Save as png
+ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_techZPC.png"),
+       bg = "white",
+       width = 37,  # Vary width according to how many panels plot has
+       height = 38,  # Vary height according to how many panels plot has
        units = "cm")
 
 # ============SCENARIO plots =============================================================================
+# Figure ?: Long-term development ------------------------------------------
+
 # Figure ?: RLDC ------------------------------------------
-# REMIND RLDC
 year_toplot = 2045
 
 p.RM.rldc <-ggplot() +

@@ -34,21 +34,25 @@ out.remind.flexadj <- NULL
 out.remind.mv <- NULL
 out.remind.genshare <-NULL
 out.remind.sys.mrkup <-NULL
+out.remind.sys.sp.capcon <- NULL
 
 for (i in 2:(length(remind.files))){
-  
+  # i = 20
   # load generation share
   remind.genshare <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("v32_shSeElDisp", squeeze = F)  %>% 
     filter(all_regi == reg) %>% 
     filter(all_te %in% names(remind.tech.mapping)) %>% 
-    revalue.levels(all_te = remind.tech.mapping) %>%
-    dplyr::group_by(ttot, all_te) %>%
-    dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
-    dplyr::ungroup(ttot, all_te) %>% 
     select(period=ttot, tech=all_te, genshare = value) %>% 
     mutate(period = as.numeric(period)) %>% 
     mutate(iteration = i-1)
+  
+  remind.genshare.agg <- remind.genshare %>% 
+    revalue.levels(tech = remind.tech.mapping) %>% 
+    dplyr::group_by(iteration,period, tech) %>%
+    dplyr::summarise( genshare = sum(genshare), .groups = "keep" ) %>% 
+    dplyr::ungroup(iteration,period, tech) %>% 
+    mutate(period = as.numeric(period))
 
   ### markups  
   # supply side: mean value is okay, since in remind model it is already upscaled 
@@ -69,13 +73,13 @@ for (i in 2:(length(remind.files))){
   
   # only report those tech for which there are generations
   remind.mrkup.non0gen <- remind.mrkup %>% 
-    left_join(remind.genshare) %>% 
+    left_join(remind.genshare.agg) %>% 
     replace(is.na(.), 0) %>% 
     filter(!genshare ==0) %>% 
     select(-genshare)
   
   remind.sys.mrkup <- remind.mrkup %>% 
-    left_join(remind.genshare) %>% 
+    left_join(remind.genshare.agg) %>% 
     mutate(value = value * genshare/1e2) %>% 
     dplyr::group_by(period) %>%
     dplyr::summarise( value = sum(value), .groups = "keep" ) %>%
@@ -95,6 +99,33 @@ for (i in 2:(length(remind.files))){
     dplyr::ungroup(period,tech) %>%
     mutate(value = -value * 1e12 / sm_TWa_2_MWh * 1.2) %>% # flexadj already divides by budget in the model
     mutate(iteration = i-1)
+  
+  # calculate shadow price in remind due to capacity constraint
+  remind.sp.capcon <- file.path(outputdir, remind.files[i]) %>% 
+    read.gdx("p32_capConShadowPrice", squeeze=F) %>% 
+    filter(all_regi == reg) %>%
+    filter(all_te %in% names(remind.nonvre.mapping))  %>% 
+    select(period = ttot, tech = all_te, value) %>% 
+    mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2) %>%
+    dplyr::group_by(tech) %>%
+    complete(period = report.periods, fill = list(load = 0)) %>% 
+    dplyr::ungroup(tech) %>% 
+    replace(is.na(.), 0)  %>% 
+    dplyr::group_by(tech) %>%
+    mutate(value = frollmean(value, 3, align = "center", fill = NA)) %>%
+    dplyr::ungroup(tech)%>% 
+    mutate(iteration = i-1)
+  
+  remind.sys.sp.capcon <- list(remind.genshare, remind.sp.capcon) %>% 
+    reduce(full_join) %>% 
+    replace(is.na(.), 0) %>% 
+    filter(genshare > 1e-6)  %>% 
+    mutate_all(function(x) ifelse(is.infinite(x), 0, x)) %>% 
+    select(iteration,period, genshare, value) %>% 
+    mutate(value = genshare * value/1e2) %>% 
+    dplyr::group_by(iteration,period) %>%
+    dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
+    dplyr::ungroup(iteration,period)
   
   #### market values
   remind.marketvalue <- file.path(outputdir, remind.files[i]) %>% 
@@ -130,6 +161,7 @@ for (i in 2:(length(remind.files))){
     out.remind.mrkup <- rbind(out.remind.mrkup, remind.mrkup.non0gen, remind.flexadj)
     out.remind.sys.mrkup <- rbind(out.remind.sys.mrkup, remind.sys.mrkup)
     out.remind.flexadj <- rbind(out.remind.flexadj, remind.flexadj)
+    out.remind.sys.sp.capcon <- rbind(out.remind.sys.sp.capcon, remind.sys.sp.capcon)
     out.remind.mv <- rbind(out.remind.mv, remind.marketvalue.non0gen, remind.marketprice)
     out.remind.genshare <- rbind(out.remind.genshare, remind.genshare)
 }
