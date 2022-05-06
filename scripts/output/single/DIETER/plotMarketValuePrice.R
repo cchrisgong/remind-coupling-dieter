@@ -143,7 +143,7 @@ for (i in 2:(length(remind.files))){
 
   # only report those tech for which there are generations
   remind.marketvalue.non0gen <- remind.marketvalue %>% 
-    left_join(remind.genshare) %>% 
+    left_join(remind.genshare.agg) %>% 
     replace(is.na(.), 0) %>% 
     filter(!genshare ==0) %>% 
     select(-genshare)
@@ -163,7 +163,7 @@ for (i in 2:(length(remind.files))){
     out.remind.flexadj <- rbind(out.remind.flexadj, remind.flexadj)
     out.remind.sys.sp.capcon <- rbind(out.remind.sys.sp.capcon, remind.sys.sp.capcon)
     out.remind.mv <- rbind(out.remind.mv, remind.marketvalue.non0gen, remind.marketprice)
-    out.remind.genshare <- rbind(out.remind.genshare, remind.genshare)
+    out.remind.genshare <- rbind(out.remind.genshare, remind.genshare.agg)
 }
 
 if (h2switch == "off"){
