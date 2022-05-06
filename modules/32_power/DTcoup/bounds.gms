@@ -51,7 +51,7 @@ $IFTHEN.hasbound not %cm_DTmode% == "none"
 if ((cm_DTcoup_eq eq 1),
 		loop(regi$(regDTCoup(regi)),
 			loop(t$(tDT32(t)),
-				loop(te$(DISPATCHte32(te)),
+				loop(te$(CFcoupSuppte32(te)),
 *** set CF of nuc to be less than 85% (eqn con2c_maxprodannual_conv_nuc in DIETER bounds to 80%,
 *** but considering the endogenous prefactor, it has to be more than 80%)
           vm_capFac.up(t,regi,te) = 0.85; !! set CF of non nuclear dispatchables to be less than 80% (same as in DIETER)
