@@ -406,7 +406,7 @@ swlatex(sw, paste0("\\subsection{Technology LCOE - DIETER}"))
 out.cost_bkdw_avg <- NULL
 
 for (i in c(2,3,length(dieter.files.report))){
-  
+  # i = length(dieter.files.report)
   iter = as.numeric(str_extract(dieter.files.report[i], "[0-9]+"))
   
 cost_bkdw_avg <- file.path(outputdir, dieter.files.report[i]) %>%
@@ -585,8 +585,7 @@ dieter.teloceprice_avg <- list(dieter.price, dieter.telcoe_avg) %>%
   mutate(period = as.numeric(period))%>%
   filter(!tech %in% c("VRE grid",dieter.demand.tech.mapping))
 
-for (iter in c(start_i,start_i+1,maxiter-1)){
-  
+for (iter in c(start_i,start_i+1,maxiter)){
 # 2020 has very high LCOE due to shadow price for biomass and OCGT, exclude from plotting
 p <- ggplot() +
   geom_bar(data = dieter.teloceprice_avg %>% 
@@ -629,7 +628,7 @@ plot.dieter.telcoe_avg <- dieter.telcoe_avg %>%
   mutate(period = as.numeric(period)) %>%
   filter(period %in% model.periods.till2100) %>%
   filter(!tech %in% c("VRE grid",dieter.demand.tech.mapping))%>% 
-  filter(iteration == maxiter-1)%>% 
+  filter(iteration == maxiter)%>% 
   select(-iteration)
 # 
 plot.dieter.price0 <- dieter.price %>%
@@ -637,7 +636,7 @@ plot.dieter.price0 <- dieter.price %>%
   mutate(period = as.numeric(period)) %>%
   filter(period %in% model.periods.till2100) %>%
   filter(!tech == "VRE grid") %>% 
-  filter(iteration == maxiter-1) %>% 
+  filter(iteration == maxiter) %>% 
   select(-iteration)
 
 # fill non existing values with 0s by spreading then gathering
@@ -1200,7 +1199,7 @@ if (save_png == 1){
 }
 
 
-for (iter in c(start_i,start_i+1,maxiter-1)){
+for (iter in c(start_i,start_i+1,maxiter)){
   
   out.prices_DT_bar <- out.prices_DT %>% 
     filter(!variable == 'DIETER annual average electricity price') %>%
@@ -1232,7 +1231,7 @@ for (iter in c(start_i,start_i+1,maxiter-1)){
 
   DIETER.bar.avg <- list(out.prices_DT_bar, sysLCOE.avg.DT) %>%
     reduce(full_join)  %>% 
-    filter(iteration %in% c(start_i+1,maxiter-1))
+    filter(iteration %in% c(start_i+1,maxiter))
   
   p.sysLCOEprice_DIETER_iters <- ggplot() + 
     geom_col( data = DIETER.bar.avg %>% filter(period %in% model.periods.till2100, period < 2090) ,
@@ -1308,13 +1307,13 @@ dieter.telcoe_avg_ffr <- dieter.telcoe_avg %>%
     filter(variable %in% running_lcoe_components) %>% 
     filter(tech %in% conventionals) %>% 
     mutate(tech = factor(tech, ordered=TRUE))%>% 
-    filter(iteration == maxiter-1)%>% 
+    filter(iteration == maxiter)%>% 
     select(-iteration)
 
 dieter.telcoe_avg_vre <- dieter.telcoe_avg %>% 
     filter(tech %in% renewables) %>% 
     mutate(tech = factor(tech, ordered=TRUE))%>% 
-    filter(iteration == maxiter-1)%>% 
+    filter(iteration == maxiter)%>% 
     select(-iteration)
 
 dieter.telcoe_marg_ffr <- dieter.telcoe_marg %>% 

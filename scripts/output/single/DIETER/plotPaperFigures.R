@@ -333,8 +333,8 @@ p.sysLCOE_RM <- ggplot() +
             aes(period, value, fill=variable)) +
   geom_line(data = prices_RM.movingavg %>% filter(period %in% model.periods.till2100) ,
             aes(period, value, color=variable), alpha = 0.5, size=1.5) +  
-  geom_line(data = prices_w2Shad_RM %>% filter(period %in% model.periods.till2100) ,
-            aes(period, value, color=variable), alpha = 0.5, size=1.5)+
+  # geom_line(data = prices_w2Shad_RM %>% filter(period %in% model.periods.till2100) ,
+            # aes(period, value, color=variable), alpha = 0.5, size=1.5)+
   scale_y_continuous("LCOE and electricity price\n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
   scale_color_manual(name = "Price", values = price.colors) +

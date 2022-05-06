@@ -510,8 +510,9 @@ if (length(dieter.files) != 0) {
   plot.dieter.gen2 <- plot.dieter%>% 
     filter(period %in% model.periods.till2100) %>% 
     mutate(period = as.numeric(as.character(period)) + 1) %>% 
-    mutate(model = "DIETER") %>% 
-    filter(iteration == maxiter-1) 
+    mutate(model = "DIETER")
+  # %>% 
+    # filter(iteration == maxiter-1) 
   
   plot.remind.gen2 <- plot.remind %>% 
     filter(period %in% model.periods.till2100) %>% 
