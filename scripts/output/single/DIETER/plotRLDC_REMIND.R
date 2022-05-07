@@ -2,8 +2,15 @@
 cat("Plot REMIND RLDC \n")
 
 # plot REMIND RLDC ordered by their capacity factor
-year_toplot_list <- model.periods.RLDC
-# year_toplot_list <- model.periods.till2100            
+
+if (h2switch == "off"){
+  year_toplot_list <- model.periods.RLDC
+}
+
+if (h2switch == "on"){
+  year_toplot_list <- model.periods.till2070
+}
+
 for(year_toplot in year_toplot_list){
 
 # year_toplot = 2045

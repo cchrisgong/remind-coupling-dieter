@@ -1,42 +1,29 @@
 cat("Plot capacities \n")
 
 # Data preparation (REMIND) -----------------------------------------------
-out.remind.capacity <- NULL
-out.remind.peak.demand <- NULL
+
 
 if (length(dieter.files) != 0) {
+  
+  out.remind.peak.demand <- NULL
   for (i in 2:(length(remind.files))){
     
     it <- as.numeric(str_extract(remind.files[i], "[0-9]+"))
     
-    peak.demand.relfac <- file.path(outputdir, remind.files[i]) %>%  
-      read.gdx("p32_peakDemand_relFac", factor = FALSE) %>% 
-      filter(ttot %in% model.periods) %>% 
-      filter(all_regi == reg) %>%
-      select(period=ttot,resfrac = value) 
-    
-    h2.demand <- file.path(outputdir, remind.files[i]) %>%  
-      read.gdx("p32_seh2elh2Dem", factor = FALSE) %>% 
-      filter(ttot %in% model.periods) %>% 
-      filter(all_regi == reg) %>%
-      select(period=ttot,h2dem = value) 
-    
     remind.peak.demand <- file.path(outputdir, remind.files[i]) %>%  
-      read.gdx("v32_usableSeDisp", field="l", factor = FALSE) %>% 
+      read.gdx("p32_peakDemand", factor = FALSE) %>% 
       filter(ttot %in% model.periods) %>% 
       filter(all_regi == reg) %>%
-      filter(entySe == "seel") %>%
       select(period=ttot,value) %>% 
-      right_join(peak.demand.relfac) %>% 
-      full_join(h2.demand) %>% 
-      replace(is.na(.), 0) %>% 
-      mutate(value = (value - h2dem) * resfrac * 8760 * 1e3) %>% 
+      mutate(value = value * 1e3) %>% 
       mutate(iteration = it, model = "REMIND") %>% 
       mutate(var = "peak hourly residual demand")
     
     out.remind.peak.demand <- rbind(out.remind.peak.demand, remind.peak.demand)
   }
 }
+
+out.remind.capacity <- NULL
 
   for (i in 1:(length(remind.files))){
  
@@ -125,6 +112,8 @@ if (length(dieter.files) != 0) {
 swlatex(sw, paste0("\\section{Capacities}"))
 
 for(year_toplot in model.periods){
+  # year_toplot = 2035
+  
   if(year_toplot >= 2020){
     
   plot.remind.capacity <- out.remind.capacity %>% 
@@ -222,7 +211,8 @@ swlatex(sw, paste0("\\subsection{Capacities in ", year_toplot, "}"))
     ggsave(filename = paste0(outputdir, "/DIETER/CAP_", year_toplot, ".png"),  p,  width = 12, height =6, units = "in", dpi = 120) }
   }
 }
-}
+
+  }
 
 ##################################################################################################
 swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")

@@ -2,8 +2,16 @@
 
 #####################################################
 #plot load duration curve of residual loads once production is being accounted for for various tech., one by one, ordered by their capacity factor
-year_toplot_list <- model.periods.RLDC
-# year_toplot_list <- model.periods.till2100            
+
+if (h2switch == "off"){
+  year_toplot_list <- model.periods.RLDC
+}
+
+if (h2switch == "on"){
+  year_toplot_list <- model.periods.till2070
+}
+
+# 
 for(year_toplot in year_toplot_list){
 
   # year_toplot = 2060
@@ -348,11 +356,19 @@ for(year_toplot in year_toplot_list){
     geom_area(data = RLDC.Batt%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = Batt.RLDC, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC.H2%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = H2.RLDC, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC1%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC1, fill = te), size = 1.2, alpha = 1) +
-    coord_cartesian(ylim = c(-80,140))+
-    scale_fill_manual(name = "Technology", values = color.mapping.RLDC.basic)+
     xlab("hour") + ylab("residual load (GW)")+
     ggtitle(paste0("DIETER ", year_toplot))
 
+  
+  if (h2switch == "off"){
+    p.DT.rldc <- p.DT.rldc + scale_fill_manual(name = "Technology", values = color.mapping.RLDC.basic)+
+      coord_cartesian(ylim = c(-80,140))
+  }
+  
+  if (h2switch == "on"){
+    p.DT.rldc <- p.DT.rldc + scale_fill_manual(name = "Technology", values = color.mapping.RLDC.fancy) + coord_cartesian(ylim = c(-140,140))
+  }
+  
   if (length(techranking) > 2){
     p.DT.rldc <- p.DT.rldc+
       geom_area(data = RLDC2%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC2, fill = te), size = 1.2, alpha = 1) 

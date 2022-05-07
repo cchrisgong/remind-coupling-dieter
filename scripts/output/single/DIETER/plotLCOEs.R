@@ -100,12 +100,12 @@ mv.agg <- out.remind.mv %>%
   
 if (h2switch == "off"){
   mv.agg <- mv.agg %>% 
-    filter(!tech %in% names(remind.sector.coupling.mapping))
+    filter(!tech %in% remind.sector.coupling.mapping)
 }
 
 if (h2switch == "on"){
   mv.agg <- mv.agg %>% 
-    filter(!tech %in% names(remind.sector.coupling.mapping.exclude))
+    filter(!tech %in% remind.sector.coupling.mapping.exclude)
 }
 
 df.markup.sys <- out.remind.sys.mrkup %>% 
@@ -170,8 +170,8 @@ df.lcoe.ccs <- df.lcoe %>%
 ############################### plot REMIND marginal or average LCOE ########################
 remind.cost.type = c("average","marginal")
 
-for (cost.type in remind.cost.type){
-  # cost.type = "marginal"
+# for (cost.type in remind.cost.type){
+  cost.type = "marginal"
 
   #component LCOE per tech
   if (cost.type == "average"){plot.tag = "avg"}
@@ -261,10 +261,11 @@ df.lcoe.elh2.components <- df.lcoe %>%
          tech %in% plot.tech, sector %in% plot.sector,
          value != 0) %>% 
   filter( ! cost %in% c("Total LCOE")) %>% 
+  right_join(remind.vmcf %>% filter(period %in% model.periods.till2100) %>% filter(tech == "elh2")) %>% 
   order.levels(tech = plot.tech, cost = names(cost.colors.te)) %>% 
   revalue.levels(tech = tech.label) %>% 
   select(period, tech, cost, sector,value) %>% 
-  mutate(period = as.numeric(period))
+  mutate(period = as.numeric(period)) 
 
 # filter for total LCOE
 df.lcoe.elh2.total <- df.lcoe %>% 
@@ -812,7 +813,7 @@ p.techLCOE_compare<-ggplot() +
              filter(period > 2020)
                , aes(x = period-barwidth/2-0.1, y = value, fill = cost), colour="black", position='stack', size = 1, width = barwidth) +
   geom_col(data = df.lcoe.avg.dieter %>% 
-             filter(!tech == "VRE grid", period > 2020, iteration == maxiter -1), aes(x = period+barwidth/2+0.1, y = value, fill = variable), colour="black", position='stack', size = 1,
+             filter(!tech == "VRE grid", period > 2020, iteration == maxiter), aes(x = period+barwidth/2+0.1, y = value, fill = variable), colour="black", position='stack', size = 1,
            width = barwidth) +
   scale_alpha_discrete(range = c(0.4,1)) +
   theme(axis.text=element_text(size=20), axis.title=element_text(size= 20, face="bold"),strip.text = element_text(size=25),plot.title = element_text(size = 30, face = "bold")) +
@@ -1056,11 +1057,11 @@ prices_w2Shad_RM <- prices_wShad_RM %>%
 
 
 elec_prices_DT_laIter <- elec_prices_DT %>% 
-  filter(iteration == maxiter -1) %>% 
+  filter(iteration == maxiter) %>% 
   select(-iteration)
 
 elec_prices_DT_wShadPrice_laIter <- elec_prices_DT_wShadPrice %>% 
-  filter(iteration == maxiter -1) %>% 
+  filter(iteration == maxiter) %>% 
   select(-iteration)
 
 DT.prices.lines <- list(elec_prices_DT_wShadPrice_laIter, elec_prices_DT_laIter) %>%
@@ -1100,7 +1101,7 @@ sysLCOE.avg.DT <- dieter.telcoe_avg %>%
   mutate(period = as.numeric(period)) 
 
 sysLCOE.avg.DT_laIter <- sysLCOE.avg.DT %>% 
-  filter(iteration == maxiter -1)
+  filter(iteration == maxiter)
   
 sysLCOE.avg.DT_laIter$type <- "Average"
 sysLCOE.avg.DT_laIter$model <- "DIETER"
@@ -1138,6 +1139,7 @@ p.sysLCOE_compare <- ggplot() +
 
 swfigure(sw,print,p.sysLCOE_compare)
 
+
 if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/sys_avgDT_",plot.tag,"RM_LCOE_price_compare_line.png"), p.sysLCOE_compare, width = 14, height =9, units = "in", dpi = 120)
 }
@@ -1162,7 +1164,7 @@ sysLCOE.avg.DT_tech_lastIter <- dieter.telcoe_avg %>%
   dplyr::group_by(iteration,period,tech) %>%
   dplyr::summarise( value = sum(value), .groups = "keep" ) %>% 
   dplyr::ungroup(iteration,period,tech) %>% 
-  filter(iteration == maxiter -1) %>% 
+  filter(iteration == maxiter) %>% 
   select(-iteration) %>% 
   mutate(model = "DIETER")
 
@@ -1339,4 +1341,4 @@ if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/teLCOE_avg_ffrunningVRE_compare.png"),  p.techLCOE_compare,  width = 30, height =18, units = "in", dpi = 120)
 }
 
-}
+# }

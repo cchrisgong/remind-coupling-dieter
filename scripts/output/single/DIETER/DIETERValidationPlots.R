@@ -26,7 +26,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   remind.files <- list.files(outputdir, pattern = "fulldata_[0-9]+\\.gdx") %>%
     str_sort(numeric = TRUE)
   cat(paste0("REMIND files: ", length(remind.files), "\n"))
-  maxiter = length(remind.files)
+  maxiter =  as.numeric(str_extract(remind.files[length(remind.files)], "[0-9]+"))
   
   dieter.files <- list.files(outputdir, pattern = "results_DIETER_i[0-9]+\\.gdx") %>%
     str_sort(numeric = TRUE)
@@ -48,6 +48,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   model.startyear = max(2020,startyear)
   model.periods <- c(seq(model.startyear, 2060, 5), seq(2070, 2100, 10), seq(2110, 2150, 20))
   model.periods.till2100 <- c(seq(model.startyear, 2060, 5), seq(2070, 2100, 10))
+  model.periods.till2070 <- c(seq(model.startyear, 2060, 5), 2070)
   model.periods.RLDC <- c(seq(model.startyear, 2045, 5))
   
   report.periods <- c(seq(2005, 2060, 5), seq(2070, 2100, 10), seq(2110, 2150, 20))
@@ -450,7 +451,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                                 Solar = "Solar",
                                 elh2 = "Electrolyzers",
                                 el = "Electricity",
-                               lith = "Lithium_ion_Battery",
+                               lith = "Lithium-ion Battery",
                                PSH = "Pumped_Storage_Hydro",
                                hydrogen = "Hydrogen_Storage",
                                caes = "Compressed_Air_Energy_Storage",
