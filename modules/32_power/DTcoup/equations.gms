@@ -244,10 +244,14 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
 *** hard capacity constraint to peak residual load demand (excluding flexible load such as electrolysers)
 q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) AND (s32_hardcap ne 0) ) ..
+*** only pass those technologies which were producing in the scarcity hour in the last iteration DIETER, depracated, as the results is better without this
 *	sum(te$(DISPATCHte32(te) AND (p32_DIETER_techNonScarProd(t,regi,te) eq 1)), sum(rlf, vm_cap(t,regi,te,rlf)))
   sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=g=
-  p32_peakDemand_relFac(t,regi) * 8760 * ( v32_usableSeDisp(t,regi,"seel")
+  p32_peakDemand_relFac(t,regi)
+	* ( 1 - cm_peakPreFac * (v32_shSeElDisp(t,regi,"wind") / 100
+	- p32_DIETER_shSeEl(t,regi,"wind") / 100 ) * s32_DTstor ) !!! prefactor depending only on wind share (since scarce hour is always at night), only turned on for storage coupled run
+	* 8760 * ( v32_usableSeDisp(t,regi,"seel")
 $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
   - vm_demSe(t,regi,"seel","seh2","elh2")
 $ENDIF.elh2_coup

@@ -82,6 +82,7 @@ $IFTHEN.WindOff %cm_wind_offshore% == "1"
 storwindoff
 $ENDIF.WindOff
 storcsp
+h2turb
 tnrs
 fnrs
 gridwind
@@ -128,6 +129,7 @@ $IFTHEN.WindOff %cm_wind_offshore% == "1"
 storwindoff
 $ENDIF.WindOff
 storcsp
+h2turb
 tnrs
 fnrs
 gridwind

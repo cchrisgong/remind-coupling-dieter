@@ -27,12 +27,12 @@ p32_theoCapfacVRE(t,regi,te)$(teVRE(te) AND vm_cap.l(t,regi,te,"1") AND teDTCoup
 pm_SEPrice(t,regi,entySE)$(abs(qm_budget.m(t,regi)) gt sm_eps AND sameas(entySE,"seel")) =
        q32_balSe.m(t,regi,entySE) / qm_budget.m(t,regi);
 
-p32_peakDemand(t,regi)$(regDTCoup(regi)) =
-    p32_peakDemand_relFac(t,regi) * 8760 * ( v32_usableSeDisp.l(t,regi,"seel")
-$IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
-  - vm_demSe.l(t,regi,"seel","seh2","elh2")
-$ENDIF.elh2_coup
-  );
+p32_peakDemand(t,regi)$(tDT32(t) AND regDTCoup(regi)) = p32_peakDemand_relFac(t,regi) * 
+	( 1 - cm_peakPreFac * (v32_shSeElDisp.l(t,regi,"wind") / 100  - p32_DIETER_shSeEl(t,regi,"wind") / 100 ) * s32_DTstor ) 
+	* 8760  * ( v32_usableSeDisp.l(t,regi,"seel") - vm_demSe.l(t,regi,"seel","seh2","elh2") * s32_H2switch)
+;
+
+
 $ENDIF.DTcoup
 
 
@@ -63,7 +63,7 @@ p32_shadowPrice(t,regi,te)$(regDTCoup(regi) AND teDTCoupSupp(te) AND (p32_realCa
       = vm_cap.m(t,regi,te,"1") / (p32_realCapfac(t,regi,te) / 1e2);
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-p32_capConShadowPrice(t,regi,te) = 0;
+*p32_capConShadowPrice(t,regi,te) = 0;
 p32_capConShadowPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (abs(qm_budget.m(t,regi)) gt sm_eps) AND (p32_realCapfac(t,regi,te) ge 0.1))
       = q32_peakDemandDT.m(t,regi,"seel") / (qm_budget.m(t,regi)) / (p32_realCapfac(t,regi,te) / 1e2);
 $ENDIF.DTcoup
@@ -221,7 +221,7 @@ p32_CO2price4DT(t,regi)$(tDT32(t) AND regDTCoup(regi)) = pm_priceCO2(t,regi)/sm_
 $ENDIF.policy_Cprice
 
 * REMIND data for DIETER
-    execute_unload "RMdata_4DT.gdx", tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,
+    execute_unload "RMdata_4DT.gdx",t,tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,
     s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,!! switches: H2 switch, mode switch, dispatch iterational switches,
     s32_windoff,s32_scarPrice, s32_adjCost, s32_margVRE, s32_noER, s32_DTstor,!! switches: offshore switch, scarcity price switch, adjustment cost coupling switch, marginal VRE investment cost coupling switch, storage
     COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32, STOte32,    !! tech sets: REMIND technology definition
@@ -323,9 +323,6 @@ p32_cfPrefac(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) =
  * 1$(tDT32(t) AND regDTCoup(regi) AND (pm_cf(t,regi,te) lt 0.5) AND CFcoupSuppte32(te))
 ;
 
-p32_peakDemand(t,regi)$(tDT32(t) AND regDTCoup(regi)) = p32_peakDemand_relFac(t,regi) * 8760
-  * ( v32_usableSeDisp.l(t,regi,"seel") - vm_demSe.l(t,regi,"seel","seh2","elh2") * s32_H2switch)
-;
 
 p32_mrkupUpscaled(t,regi,te) = p32_mrkup(t,regi,te);
 
