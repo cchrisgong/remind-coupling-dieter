@@ -21,7 +21,7 @@ $offtext
                  storspv    storwind       storcsp  storwindoff
 inco0             240000      170000           200       120000
 mix0                0.00        0.00          0.00         0.00
-eta                 0.86        0.80          0.70         0.52
+eta                 0.86        0.80          0.40         0.52
 omf                0.005       0.006          0.01         0.01
 lifetime              25          80            25           30
 incolearn         160000       30000           150        60000
