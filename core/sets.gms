@@ -2251,6 +2251,7 @@ char            "characteristics of technologies"
   elh2VREcapRatio    "ratio of elh2VRE capacity to storage technology capacity"
   h2turbVREcapRatio  "ratio of h2turbVRE capacity to storage technology capacity"
   batteryVREcapRatio  "ratio of battery capacity to storage technology capacity"
+  e2p             "E/P ratio for storage"
 /
 
 ***-----------------------------------------------------------------------------
