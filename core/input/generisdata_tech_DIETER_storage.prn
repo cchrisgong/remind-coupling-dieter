@@ -1,7 +1,7 @@
 *** SOF ./core/input/generisdata_tech_DIETER_storage.prn
 $ontext
 IMPORTANT: all costs are now given in $2015! As long as the model runs in $2005, the values need to be converted in datainput.gms
-inco0       Initial investment costs given in $(2015)/MWh(energy capacity, power capacity is given separately by E/P ratio)
+inco0       Initial investment costs given in $(2015)/MWh (energy capacity, power capacity is given separately by E/P ratio)
 mix0        Fraction of output that is produced by this technology in 2005. This value can be overwritten in the calibration process; also, it often does not add up to 1.
 eta         Conversion efficieny, i.e. energy output divided by energy input (for all but nuclear plants, there it is TW energy output over MT Uranium input)
 omf         Fixed operation and maintenace costs given as a fraction of investment costs
@@ -10,6 +10,8 @@ lifetime    given in years
 incolearn   Difference from inco0 to floor investment costs, given in $(2015)/MWh(output)
 ccap0       Cumulated capacity in 2005 given in TW
 learn       Learning rate given in percent cost reduction per doubling of cumulated capacity
+e2p         E/P ratio for storage technologies (hours)
+
 ** Mapping of storage technology:
 storspv <-> "storage lithium battery under DIETER coupling"
 storwind <-> "storage pumped hydropower storage under DIETER coupling"
@@ -20,9 +22,10 @@ $offtext
 inco0             240000      170000           200       120000
 mix0                0.00        0.00          0.00         0.00
 eta                 0.86        0.80          0.70         0.52
-omf                0.005       0.006         0.013         0.01
-lifetime              25          30            25           25
+omf                0.005       0.006          0.01         0.01
+lifetime              25          80            25           30
 incolearn         160000       30000           150        60000
 ccap0            0.00005     0.00005       0.00005       0.0005
 learn               0.20        0.05          0.15         0.07
+e2p                    4          16          6600           16
 *** EOF ./core/input/generisdata_tech_DIETER_storage.prn    
