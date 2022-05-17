@@ -25,6 +25,8 @@ all_te
 elh2
 el
 vregrid
+hydrogen
+lith
 /
 
 techUpscaledNames32 "Upscaled names for checking convergence"
@@ -48,8 +50,8 @@ windon
 solar/
 
 DIETERvarname32 "DIETER name" /capfac,ResPeakDem_relFac,value_factor,gen_share,
-market_value,market_price,elec_price, elec_price_wscar,curt_share,curt_ratio,
-dem_share,usable_generation,model_status,peak_gen_bin/
+market_value,market_price,elec_price, elec_price_wscar,curt_share,curt_ratio,storloss_ratio,
+dem_share,usable_generation,model_status,peak_gen_bin,sto_P_capacity,sto_E_capacity/
 
 $ifthen.chp %cm_DT_CHP_coup% == "on"
 COALte32(all_te) "coal to seel tech in REMIND" /igcc,igccc,pc,pcc,pco,coalchp/
@@ -82,7 +84,6 @@ $IFTHEN.WindOff %cm_wind_offshore% == "1"
 storwindoff
 $ENDIF.WindOff
 storcsp
-h2turb
 tnrs
 fnrs
 gridwind
@@ -129,7 +130,6 @@ $IFTHEN.WindOff %cm_wind_offshore% == "1"
 storwindoff
 $ENDIF.WindOff
 storcsp
-h2turb
 tnrs
 fnrs
 gridwind
@@ -140,3 +140,4 @@ $endif.chpoff
 NUCte32(all_te) "nuclear to seel tech in REMIND" /tnrs,fnrs/
 CFcoupDemte32(all_te) "demand-side technologies in REMIND which have prefactors to capacity factor" /elh2/
 Aggte32 "aggregated technologies" /Bio,coal,CCGT,nuc/
+VREte32(all_te) "VRE to seel tech in REMIND" /spv,wind, windoff,hydro/
