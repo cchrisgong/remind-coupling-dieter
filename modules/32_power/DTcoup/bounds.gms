@@ -203,15 +203,29 @@ v32_shStor.up(t,regi,teVRE) = 100;
 v32_shStor.lo(t,regi,teVRE) = 0;
 
 *** this turns off storage for coupled region, no need to put any additional switches on the storage equations
-$IFTHEN.noStor %cm_DTstor% == "none"
+$IFTHEN.DTstoroff %cm_DTstor% == "off"
 v32_shStor.fx(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
-$ENDIF.noStor
+$ENDIF.DTstoroff
 
 
-*** Fix capacity for seh2 -> seel for coupled region for now (no H2 as grid storage)
-vm_cap.fx(t,regi,"h2turbVRE","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
+*** Fix capacity for seh2 -> seel to DIETER's output value, CF is fixed above
+*** (doesn't work right now, can consider moving this copy and paste to post-processing)
+$IFTHEN.DTstor %cm_DTstor% == "on"
+if( (sm32_iter ge sm32_DTiter),
+*vm_cap.fx(t,regi,"h2turbVRE","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = p32_capDTStor(t,regi,"h2turbVRE");
+*vm_cap.fx(t,regi,"storcsp","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = p32_capDTStor(t,regi,"storcsp");
+*vm_cap.fx(t,regi,"storspv","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = p32_capDTStor(t,regi,"storspv");
+);
+$ENDIF.DTstor
 
-*** turn off H2 turbine
+*** turn off h2turbVRE production (since in the coupled run that is taken account in
+*** storloss by tech storcsp in terms of loss of energy through storage, storage
+*** production is implicit inside VRE prodSe)
+***
+*vm_cap.fx(t,regi,"h2turbVRE","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
+vm_capFac.fx(t,regi,"h2turbVRE")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
+
+*** turn off the other h2turb (this is only in RLDC realization)
 vm_cap.fx(t,regi,"h2turb","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
 vm_capFac.fx(t,regi,"h2turb")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
 

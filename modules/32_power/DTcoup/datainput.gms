@@ -96,8 +96,8 @@ p32_PriceDurSlope(regi,"elh2") = cm_PriceDurSlope_elh2;
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 p32_minVF_spv = 0.1;
 sm32_iter = 0;  !!initialize REMIND iteration scalar
-*sm32_DTiter = 1; !!the iteration of REMIND when DIETER is first coupled
 
+p32_capDTStor(t,regi,te) = 0;
 *** initiating parameters for first iteration of DIETER based on input.gdx
 ** loading variable directly without .l
 
@@ -257,13 +257,17 @@ $IFTHEN.DTwER %cm_DTnoER% == "off"
 s32_noER = 0;
 $ENDIF.DTwER
 
-*** CG: whether to turn on and couple storage
+*** CG: whether to turn on and couple storage.
+* in DIETER: switch off storage in iteration 0, because capital cost due to learning
+* is only calculated after 1st iteration (need to turn on the new input cost in
+* core/input/generisdata_tech_DIETER_storage.prn, for calibration for the first
+* iteration DIETER to use storage)
+$IFTHEN.DTstoroff %cm_DTstor% == "on"
+s32_DTstor = 0;
+$ENDIF.DTstoroff
 $IFTHEN.DTstor %cm_DTstor% == "on"
 s32_DTstor = 1;
 $ENDIF.DTstor
-$IFTHEN.DTstoroff %cm_DTstor% == "off"
-s32_DTstor = 0;
-$ENDIF.DTstoroff
 
 p32_fuelprice_lastiter(t,regi,entyPe)$(regDTCoup(regi)) = p32_fuelprice_curriter(t,regi,entyPe);
 p32_cf_last_iter(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te)) = pm_cf(t,regi,te);
@@ -283,7 +287,7 @@ p32_iterGenShDiff(t,regi,techUpscaledNames32)$(techUpscaledConv32(techUpscaledNa
 execute_unload "RMdata_4DT.gdx",t,tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,
     s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,!! switches: H2 switch, mode switch, dispatch iterational switches,
     s32_windoff,s32_scarPrice, s32_adjCost, s32_margVRE, s32_noER, s32_DTstor,!! switches: offshore switch, scarcity price switch, adjustment cost coupling switch, marginal VRE investment cost coupling switch, storage
-    COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32, STOte32,     !! tech sets: REMIND technology definition
+    COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,STOte32,VREte32,     !! tech sets: REMIND technology definition
     vm_cap, vm_deltaCap, vm_capDistr, v32_storloss,vm_capEarlyReti,vm_prodSe,vm_usableSeTe, !! quantities: capacity, generation, curtailment,
     p32_realCapfacVRE,vm_capFac,pm_cf,pm_dataren,!! CF
     p32_usableSeDisp,p32_seh2elh2Dem, !! total demand

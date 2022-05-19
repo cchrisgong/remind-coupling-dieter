@@ -27,9 +27,9 @@ p32_theoCapfacVRE(t,regi,te)$(teVRE(te) AND vm_cap.l(t,regi,te,"1") AND teDTCoup
 pm_SEPrice(t,regi,entySE)$(abs(qm_budget.m(t,regi)) gt sm_eps AND sameas(entySE,"seel")) =
        q32_balSe.m(t,regi,entySE) / qm_budget.m(t,regi);
 
-p32_peakDemand(t,regi)$(tDT32(t) AND regDTCoup(regi)) = p32_peakDemand_relFac(t,regi) * 
-	( 1 - cm_peakPreFac * (v32_shSeElDisp.l(t,regi,"wind") / 100  - p32_DIETER_shSeEl(t,regi,"wind") / 100 ) * s32_DTstor ) 
-	* 8760  * ( v32_usableSeDisp.l(t,regi,"seel") - vm_demSe.l(t,regi,"seel","seh2","elh2") * s32_H2switch)
+p32_peakDemand(t,regi)$(tDT32(t) AND regDTCoup(regi)) = p32_peakDemand_relFac(t,regi)
+  * ( 1 - cm_peakPreFac * (v32_shSeElDisp.l(t,regi,"wind") / 100	- p32_DIETER_shSeEl(t,regi,"wind") / 100 ) * s32_DTstor )
+  * 8760 * ( v32_usableSeDisp.l(t,regi,"seel") - vm_demSe.l(t,regi,"seel","seh2","elh2") * s32_H2switch)
 ;
 
 
@@ -63,9 +63,12 @@ p32_shadowPrice(t,regi,te)$(regDTCoup(regi) AND teDTCoupSupp(te) AND (p32_realCa
       = vm_cap.m(t,regi,te,"1") / (p32_realCapfac(t,regi,te) / 1e2);
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-*p32_capConShadowPrice(t,regi,te) = 0;
-p32_capConShadowPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (abs(qm_budget.m(t,regi)) gt sm_eps) AND (p32_realCapfac(t,regi,te) ge 0.1))
+*** if current iteration budget = 0, skip (so it automatically takes last iteration value)
+p32_capConShadowPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (abs(qm_budget.m(t,regi)) gt sm_eps) AND (p32_realCapfac(t,regi,te)))
       = q32_peakDemandDT.m(t,regi,"seel") / (qm_budget.m(t,regi)) / (p32_realCapfac(t,regi,te) / 1e2);
+*** take out the artificially huge shadow price due to low capfac (<0.1%)
+p32_capConShadowPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (p32_realCapfac(t,regi,te) lt 0.1)) = 0;
+
 $ENDIF.DTcoup
 
 p32_shSeElDisp(t,regi,te)$(regDTCoup(regi) AND teDTCoupSupp(te)) = v32_shSeElDisp.l(t,regi,te);
@@ -109,8 +112,8 @@ p32_nonSEPE2SE(t,regi,enty2)$(sameas(enty2,"seel")) = p32_coupledProd(t,regi,ent
 p32_extrEnergyUsage(t,regi,enty2)$(sameas(enty2,"seel")) =
  sum(pe2rlf(enty3,rlf2), (pm_fuExtrOwnCons(regi, enty2, enty3) * vm_fuExtr.l(t,regi,enty3,rlf2))$(pm_fuExtrOwnCons(regi, enty2, enty3) gt 0))$(t.val > 2005) !! do not use in 2005 because this demand is not contained in 05_initialCap
 ;
-*** CG: total curtailment
-p32_seelCurt(t,regi) = sum(teVRE, v32_storloss.l(t,regi,teVRE) );
+*** CG: total production loss through storage or curtailment
+p32_seelLoss(t,regi) = sum(teVRE, v32_storloss.l(t,regi,teVRE) );
 
 *** total demand: excluding fuel extraction power usage for simplicity (and excluding curtailment)
 p32_seelTotDem(t,regi,enty2)$(sameas(enty2,"seel")) =
@@ -152,6 +155,15 @@ p32_seh2elh2Dem(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"
 $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
 p32_shSeElDem(t,regi,te)$(regDTCoup(regi)) = v32_shSeElDem.l(t,regi,te);
 $ENDIF.elh2_coup
+
+p32_storLoss(t,regi,teVRE)$(regDTCoup(regi)) =
+  p32_DIETERStorlossRatio(t,regi) * v32_usableSeDisp.l(t,regi,"seel") * s32_DTstor
+  * p32_DIETERCurtRatio(t,regi,teVRE)/(sum(te$(teVRE(te)),p32_DIETERCurtRatio(t,regi,teVRE))+sm_eps)
+  * ( 1 + (v32_shSeElDisp.l(t,regi,teVRE) / 100 - p32_DIETER_shSeEl(t,regi,teVRE) / 100 ) );
+
+p32_curtLoss(t,regi,teVRE)$(regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,teVRE) * v32_usableSeTeDisp.l(t,regi,"seel",teVRE)
+  * ( 1 + (v32_shSeElDisp.l(t,regi,teVRE) / 100 - p32_DIETER_shSeEl(t,regi,teVRE) / 100 ) );
+
 
 **** CG: DIETER coupling
 *###################################################################
@@ -215,6 +227,8 @@ p32_r4DT(ttot,regi)$(tDT32s2(ttot))
 * after 2100 to 5%, this only sets 2110, 2130, 2150 three years
 p32_r4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
 
+
+
 $IFTHEN.policy_Cprice not %carbonprice% == "none"
 *** CG: updating CO2 price from REMIND to DIETER
 p32_CO2price4DT(t,regi)$(tDT32(t) AND regDTCoup(regi)) = pm_priceCO2(t,regi)/sm_C_2_CO2;
@@ -224,7 +238,7 @@ $ENDIF.policy_Cprice
     execute_unload "RMdata_4DT.gdx",t,tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,
     s32_H2switch,s32_DTcoupModeswitch,cm_DT_dispatch_i1,cm_DT_dispatch_i2,!! switches: H2 switch, mode switch, dispatch iterational switches,
     s32_windoff,s32_scarPrice, s32_adjCost, s32_margVRE, s32_noER, s32_DTstor,!! switches: offshore switch, scarcity price switch, adjustment cost coupling switch, marginal VRE investment cost coupling switch, storage
-    COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32, STOte32,    !! tech sets: REMIND technology definition
+    COALte32,NonPeakGASte32,BIOte32,NUCte32,REMINDte4DT32,STOte32,VREte32,   !! tech sets: REMIND technology definition
     vm_cap, vm_deltaCap, vm_capDistr, v32_storloss,vm_capEarlyReti,vm_prodSe,vm_usableSeTe, !! quantities: capacity, generation, curtailment,
     p32_realCapfacVRE,vm_capFac,pm_cf, pm_dataren, !! CF
     p32_usableSeDisp,p32_seh2elh2Dem, !! total demand
@@ -415,6 +429,11 @@ sm_DTgenShDiffIter = smax(t,
       )
     )
     );
+
+*** check to make sure the last iteration does not have zero budget(prices)
+
+sm_budgetMin = smin(t$tDT32(t), smin(regi,abs( qm_budget.m(t,regi)) ) );
+
 
 $ENDIF.DTcoup
 

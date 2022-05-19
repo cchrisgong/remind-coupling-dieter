@@ -79,7 +79,7 @@ q32_usableSeTeDisp(t,regi,entySe,te)$(regDTCoup(regi) AND sameas(entySe,"seel") 
 ***---------------------------------------------------------------------------
 *** Definition of capacity constraints for storage:
 ***---------------------------------------------------------------------------
-q32_limitCapTeStor(t,regi,teStor)$( (t.val ge 2015) AND ((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi))) ..
+q32_limitCapTeStor(t,regi,teStor)$((t.val ge 2015) AND ( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi)))..
 ** above logic: apply equation when >= 2015 for non coupled region; or for coupled region when switch is off, or for coupled region when switch is on outside coupled years
     ( 0.5$( cm_VRE_supply_assumptions eq 1 )
     + 1$( cm_VRE_supply_assumptions ne 1 )
@@ -87,12 +87,14 @@ q32_limitCapTeStor(t,regi,teStor)$( (t.val ge 2015) AND ((regDTCoup(regi) AND (c
   * sum(VRE2teStor(teVRE,teStor), v32_storloss(t,regi,teVRE))
   * pm_eta_conv(t,regi,teStor)
   / (1 - pm_eta_conv(t,regi,teStor))
+	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))
   =l=
   sum(te2rlf(teStor,rlf),
     vm_capFac(t,regi,teStor)
   * pm_dataren(regi,"nur",rlf,teStor)
   * vm_cap(t,regi,teStor,rlf)
   )
+	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))
 ;
 
 
@@ -103,17 +105,21 @@ q32_limitCapTeStor(t,regi,teStor)$( (t.val ge 2015) AND ((regDTCoup(regi) AND (c
 
 
 *** build additional electrolysis capacities with stored VRE electricity
-q32_elh2VREcapfromTestor(t,regi)..
+q32_elh2VREcapfromTestor(t,regi)$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))..
   vm_cap(t,regi,"elh2","1")
+	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))
   =g=
   sum(te$testor(te), p32_storageCap(te,"elh2VREcapratio") * vm_cap(t,regi,te,"1") )
+	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))
 ;
 
 *** build additional h2 to seel capacities to use stored hydrogen
-q32_h2turbVREcapfromTestor(t,regi)..
+q32_h2turbVREcapfromTestor(t,regi)$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))..
   vm_cap(t,regi,"h2turbVRE","1")
+	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))
   =e=
   sum(te$testor(te), p32_storageCap(te,"h2turbVREcapratio") * vm_cap(t,regi,te,"1") )
+	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))
 ;
 
 ***---------------------------------------------------------------------------
@@ -175,8 +181,9 @@ $ENDIF.DTcoup
 ***---------------------------------------------------------------------------
 *** Calculation of necessary storage electricity production:
 ***---------------------------------------------------------------------------
-q32_shStor(t,regi,teVRE)$( (t.val ge 2020) AND ((regDTCoup(regi) AND (cm_DTcoup_eq eq 0)) OR regNoDTCoup(regi)) )..
+q32_shStor(t,regi,teVRE)$((t.val ge 2020) AND (( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi)))..
 	v32_shStor(t,regi,teVRE)
+	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))
 	=g=
 	(p32_factorStorage(regi,teVRE) * 100
 	* (
@@ -184,8 +191,11 @@ q32_shStor(t,regi,teVRE)$( (t.val ge 2020) AND ((regDTCoup(regi) AND (cm_DTcoup_
 		- (1.e-10 ** p32_storexp(regi,teVRE) )      !! offset correction
 		- 0.07                                      !! first 7% of VRE share bring no negative effects
 	) )
+	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))
 ;
 
+
+** note pm_eta_conv in DIETER coupling is treated as round-trip efficiency, not single-strip efficiency, unlike here in uncoupled version
 q32_storloss(t,regi,teVRE)$(t.val ge 2020)..
 	v32_storloss(t,regi,teVRE)
 	=e=
@@ -194,7 +204,10 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2020)..
 	* vm_usableSeTe(t,regi,"seel",teVRE) )
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))
-	+ ( p32_DIETERCurtRatio(t,regi,teVRE) * v32_usableSeTeDisp(t,regi,"seel",teVRE) )
+	+ ( p32_DIETERCurtRatio(t,regi,teVRE) * v32_usableSeTeDisp(t,regi,"seel",teVRE)
+ + p32_DIETERStorlossRatio(t,regi) * v32_usableSeDisp(t,regi,"seel") * s32_DTstor
+  * p32_DIETERCurtRatio(t,regi,teVRE)/(sum(te$(teVRE(te)),p32_DIETERCurtRatio(t,regi,teVRE)) + sm_eps)
+		)
   * ( 1 + (v32_shSeElDisp(t,regi,teVRE) / 100 - p32_DIETER_shSeEl(t,regi,teVRE) / 100 ) )   !!! this is important to keep for stability
 	* 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 1) AND tDT32(t))
 $ENDIF.DTcoup
@@ -249,15 +262,14 @@ q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq 
   sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
 	=g=
   p32_peakDemand_relFac(t,regi)
-	* ( 1 - cm_peakPreFac * (v32_shSeElDisp(t,regi,"wind") / 100
-	- p32_DIETER_shSeEl(t,regi,"wind") / 100 ) * s32_DTstor ) !!! prefactor depending only on wind share (since scarce hour is always at night), only turned on for storage coupled run
+   * ( 1 - cm_peakPreFac * (v32_shSeElDisp(t,regi,"wind") / 100
+   - p32_DIETER_shSeEl(t,regi,"wind") / 100 ) * s32_DTstor ) !!! prefactor depending only on wind share (since scarce hour is always at night), only turned on for storage coupled run
 	* 8760 * ( v32_usableSeDisp(t,regi,"seel")
 $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
   - vm_demSe(t,regi,"seel","seh2","elh2")
 $ENDIF.elh2_coup
   )
 ;
-
 
 $IFTHEN.softcap %cm_DTcapcon% == "soft"
 ** CG: implementing a softer capacity bound, with a flat capacity subsidy, once the sum of dispatchable capacity exceeds

@@ -72,11 +72,23 @@ pm_cf(t,regi,"ngt")$(tDT32(t) AND regDTCoup(regi))
 pm_cf(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND NUCte32(te) )
 			= 0.5 * ( p32_cf_last_iter(t,regi,te)$(NUCte32(te))
 			+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"nuc","capfac")) );
+
 $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
 pm_cf(t,regi,"elh2")$(tDT32(t) AND regDTCoup(regi))
       = 0.5 * ( p32_cf_last_iter(t,regi,"elh2")
 			+ sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"elh2","capfac")) );
 $ENDIF.elh2_coup
+
+*** only h2turbVRE is used in IntC, so it is also used here, and not h2turb
+** In IntC the H2 storage separates the store-in (i.e via electrolyers "elh2")
+** and store-out (i.e. via H2 turbine) by se2se mapping, due to this
+** h2turbVRE is a dummy tech, with almost zero capex, its main purpose is to
+** give the right prodSe via capfac given the capacities.
+** So since uncoupled REMIND do not make investment decisions on h2 turbine
+** (i.e. it is parametrised), in the coupled version we decide to let DIETER
+** (and only DIETER do endogenous investment on it as a storage technology,
+** similar to batteries)
+
 );
 $ENDIF.cf_avg
 
@@ -205,6 +217,8 @@ $IFTHEN.WindOff %cm_wind_offshore% == "1"
 p32_DIETERCurtRatio(t,regi,"windoff")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_off","curt_ratio"));
 $ENDIF.WindOff
 
+p32_DIETERStorlossRatio(t,regi) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"el","storloss_ratio"));
+
 $IFTHEN.curt_avg %cm_DTcurt_avg% == "on"
 * with curt_ratio averaging
 p32_DIETERCurtRatioCurrIter(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"spv");
@@ -226,6 +240,16 @@ $ENDIF.curt_avg
 
 p32_REMINDUpscaledShareLaIter(t,regi,techUpscaledNames32) = p32_REMINDUpscaledShare(t,regi,techUpscaledNames32);
 
+$IFTHEN.DTstor %cm_DTstor% == "on"
+*** transfer capacity of the H2 turbine from DIETER to REMIND (MW to TW)
+*p32_capDTStor(t,regi,"h2turbVRE") = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"hydrogen","sto_P_capacity"))/1e6;
+p32_capDTStor(t,regi,"storcsp") = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"hydrogen","sto_P_capacity"))/1e6;
+p32_capDTStor(t,regi,"storspv") = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"lith","sto_P_capacity"))/1e6;
+$ENDIF.DTstor
+
+p32_curtVREshare(t,regi,teVRE) = p32_DIETERCurtRatio(t,regi,teVRE)/(sum(te$(teVRE(te)),p32_DIETERCurtRatio(t,regi,teVRE))+sm_eps);
+
+display "chris p32_curtVREshare", p32_curtVREshare;
 );
 
 

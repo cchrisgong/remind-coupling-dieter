@@ -22,14 +22,12 @@ parameters
     p32_seelUsableProd(ttot,all_regi,all_enty)          "total usable secondary electricity production (no co-production included, but including not dispatched tech)"
     p32_seh2elh2Dem(ttot,all_regi,all_enty)             "total green H2 demand"
     p32_seh2elh2DemCurrIter(ttot,all_regi,all_enty)     "total green H2 demand current iteration"
-*    p32_seh2elh2DemAvg(ttot,all_regi,all_enty)          "total green H2 demand averaged over 2 iterations"
     p32_seh2elh2DemLaIter(ttot,all_regi,all_enty)       "total green H2 demand from last iteration"
     p32_extrEnergyUsage(ttot,all_regi,all_enty)         "Energy used in extraction"
 
     p32_shSeEl(ttot,all_regi,all_te)                    "generation share of the last iteration"
     p32_shSeElDisp(ttot,all_regi,all_te)                "generation share (dispatched, no co-production) of the last iteration"
     p32_usableSeDisp(ttot,all_regi,entySe)              "solved value for usable se that are dispatched by DIETER, i.e. excluding co-production"
-*    p32_usableSeDispAvg(ttot,all_regi,entySe)       "usable se that are dispatched by DIETER, i.e. excluding co-production averaged over 2 iterations"
     p32_usableSeDispLaIter(ttot,all_regi,entySe)        "last iteration value for usable se that are dispatched by DIETER, i.e. excluding co-production"
     p32_usableSeDispCurrIter(ttot,all_regi,entySe)      "last iteration value for usable se that are dispatched by DIETER, i.e. excluding co-production, current iteration"
     p32_usableSeTeDisp(ttot,all_regi,entySe,all_te)     "last iteration value for calculate usable se produced by one technology that are dispatched by DIETER, i.e. excluding co-production"
@@ -40,7 +38,9 @@ parameters
     p32_prod4dtFE(ttot,all_regi,all_enty)               "power used in transporting and distributing FE"
     p32_prod4CCS(ttot,all_regi,all_enty)                "power consumption for CCS"
     p32_totProd(ttot,all_regi,all_enty)                 "total seel production (both coupled and uncoupled production)"
-    p32_seelCurt(ttot,all_regi)                         "total curtailment"
+    p32_seelLoss(ttot,all_regi)                         "total production loss through storage or curtailment"
+    p32_storLoss(ttot,all_regi,all_te)                  "production loss through storage per tech"
+    p32_curtLoss(ttot,all_regi,all_te)                  "production loss through curtailment"
     p32_shSeElDem(ttot,all_regi,all_te)	                "share of electricity demand in % [%] in last iter REMIND"
     p32_shSeElDemDIETER(ttot,all_regi,all_te)	          "share of electricity demand in % [%] in last iter DIETER - only as a share of dispatched tech generation"
     p32_realCapfacVRE(ttot,all_regi,all_te)             "post curtailment - real VRE capfac"
@@ -55,7 +55,6 @@ parameters
     p32_capConShadowPrice(ttot,all_regi,all_te)         "capacity shadow price seen by REMIND from peak demand constraint from DIETER (per energy unit)"
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-*   p32_capStor_DIET(tall,all_regi)       "storage cap from DIETER"
     p32_minVF_spv                         "value factor of solar at 100% VRE shares"
 
     p32_report4RM(gdxfile32,ttot,all_regi,DIETERte32,DIETERvarname32)    "load report from DIETER"
@@ -88,7 +87,8 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
     p32_REMINDUpscaledShareLaIter(ttot,all_regi,techUpscaledNames32)  "REMIND generation share for upscaled technology groups - last iteration"
     p32_modelGenShDiff(ttot,all_regi,techUpscaledNames32)  "generation share difference for upscaled technology groups - between two models"
     p32_iterGenShDiff(ttot,all_regi,techUpscaledNames32)  "generation share difference for upscaled technology groups - between iterations of REMIND"
-
+    p32_capDTStor(ttot,all_regi,all_te)                      "storage capacity from DIETER"
+    p32_DIETERStorlossRatio(ttot,all_regi)                  "storage loss due to limited efficiency from DIETER"
 $ENDIF.DTcoup
 
     p32_DIETERCurtRatio(ttot,all_regi,all_te)              "ratio of curtailed energy to usable energy for VRE from DIETER"
@@ -101,6 +101,7 @@ $ENDIF.DTcoup
     p32_fuelprice_avgiter(ttot,all_regi,all_enty)                       "fuel cost over the three iterations averaged through a low pass filter"
 * p32_test1(ttot,all_regi,all_te)
 * p32_test2(ttot,all_regi)
+    p32_curtVREshare(ttot,all_regi,all_te)                 "single VRE curtailment as a share of total VRE curtailment"
 ;
 
 scalars
@@ -119,6 +120,7 @@ scalars
     s32_DTstor              "switch for DIETER storage coupling"
     sm_DTgenShDiff          "convergence criteria for DIETER coupled run - between coupled models"
     sm_DTgenShDiffIter      "convergence criteria for DIETER coupled run - between consecutive iterations"
+    sm_budgetMin             "convergence criteria for DIETER coupled run - marginal prices have to be non-zero"
 ;
 
 positive variables
@@ -133,6 +135,7 @@ positive variables
     v32_capDecayEnd(ttot,all_regi)                 "the end decay point of the logit function for required dispatchable capacity as a function of electricity demand"
     v32_flexPriceShare(tall,all_regi,all_te)       "share of average electricity price that flexible technologies see [share: 0...1]"
     v32_flexPriceShareMin(tall,all_regi,all_te)    "possible minimum of share of average electricity price that flexible technologies see [share: 0...1]"
+
 
 equations
     q32_balSe(ttot,all_regi,all_enty)		   "balance equation for electricity secondary energy"

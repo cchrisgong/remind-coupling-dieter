@@ -297,7 +297,7 @@ if (sm_globalBudget_dev gt 1.01 OR sm_globalBudget_dev lt 0.99,
 );
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
-*** check DIETER coupling target, must be within 6% of target value
+*** check DIETER coupling convergence criteria, must be within target value (between models, and between REMIND iterations)
 $IFTHEN.hasbound not %cm_DTmode% == "none"
 if (sm_DTgenShDiff gt cm_DTcoup_tol,
   s80_bool = 0;
@@ -310,6 +310,12 @@ if (sm_DTgenShDiffIter gt cm_DTcoup_tol_i,
   p80_messageShow("target") = YES;
 );
 
+*** check DIETER coupling convergence criteria, must have non-zero prices
+if (sm_budgetMin lt sm_eps,
+  s80_bool = 0;
+  p80_messageShow("target") = YES;
+
+);
 $ENDIF.DTcoup
 
 
