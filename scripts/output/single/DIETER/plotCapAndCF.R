@@ -72,11 +72,25 @@ if (length(dieter.files) != 0) {
       select(period = X..1, tech = X..3, variable=X..4, value)  %>%
       filter(period %in% model.periods) %>%
       filter(tech %in% names(dieter.tech.mapping)) %>%
+      filter(!tech %in% names(dieter.storage.mapping)) %>% 
       filter(variable %in% c("capacity")) %>%
       revalue.levels(tech = dieter.tech.mapping) %>%
       mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))) %>% 
       mutate(iteration = it, model = "DIETER")
     
+    dieter.sto.cap.data <- file.path(outputdir, dieter.files[i]) %>% 
+      read.gdx("p32_report4RM", factor = FALSE, squeeze = FALSE) %>%
+      select(period = X..1, tech = X..3, variable=X..4, value) %>%
+      filter(period %in% model.periods) %>%
+      filter(tech %in% names(dieter.storage.mapping)) %>% 
+      filter(variable %in% c("sto_P_capacity")) %>%
+      revalue.levels(tech = dieter.storage.mapping) %>%
+      mutate(tech = factor(tech, levels=rev(unique(dieter.storage.mapping)))) %>% 
+      mutate(iteration = it, model = "DIETER", variable = "capacity") 
+    
+    dieter.cap.data <- list(dieter.cap.data, dieter.sto.cap.data) %>%
+      reduce(full_join)
+      
     dieter.peak.demand<- file.path(outputdir, dieter.files.report[i]) %>% 
       read.gdx("report", squeeze = F) %>% 
       select(model = X..1, period = X..2, variable = X..4, value) %>% 
@@ -102,8 +116,11 @@ if (length(dieter.files) != 0) {
   
   out.dieter.capacity <- out.dieter.cap.data %>%
     filter(variable == "capacity") %>%
-    mutate(value = value/1e3) %>% #MW->GW
-    select(period, tech, value, iteration)
+    mutate(value = value / 1e3) %>% # MW -> GW
+    select(period, tech, value, iteration) %>% 
+    dplyr::group_by(period,tech) %>%
+    complete(iteration = iteration.list, fill = list(value = 0)) %>%
+    dplyr::ungroup(period,tech)
   
 }
 
@@ -348,7 +365,7 @@ if (save_png == 1){
 }
 
 if (length(dieter.files) != 0) {
-for (i in c(start_i+1,start_i+5,start_i+10,maxiter-1)){
+for (i in c(start_i + 1, start_i + 5, start_i + 10,maxiter - 1)){
   # i = 27
   plot.remind.cap.snap <- out.remind.capacity %>% 
     filter(iteration == i) %>% 
@@ -364,7 +381,8 @@ for (i in c(start_i+1,start_i+5,start_i+10,maxiter-1)){
   
   plot.cap.diff <- list(plot.remind.cap.snap, plot.dieter.cap.snap) %>%
     reduce(full_join) %>%
-    mutate(delta_cap = remind_cap - dieter_cap) 
+    mutate(delta_cap = remind_cap - dieter_cap) %>% 
+    filter(!tech %in% remind.storage.mapping.narrow)
   
   p <-ggplot() +
     geom_bar(data = plot.cap.diff , aes(x = period, y = delta_cap, fill = tech, label = delta_cap),  alpha = 0.5, stat = "identity") +
@@ -374,7 +392,7 @@ for (i in c(start_i+1,start_i+5,start_i+10,maxiter-1)){
     xlab("period") + ylab("Capacity (GW)") +
     ggtitle("Capacity difference REMIND - DIETER")+
     theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank()) +
-    theme(aspect.ratio = .5) 
+    theme(aspect.ratio = .5)
   
   swfigure(sw, grid.draw, p)
   if (save_png == 1){

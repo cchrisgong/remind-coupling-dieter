@@ -37,7 +37,9 @@ out.remind.sys.mrkup <-NULL
 out.remind.sys.sp.capcon <- NULL
 
 for (i in 2:(length(remind.files))){
-  # i = 20
+  # i = 7
+  # print(i)
+  
   # load generation share
   remind.genshare <- file.path(outputdir, remind.files[i]) %>% 
     read.gdx("v32_shSeElDisp", squeeze = F)  %>% 
@@ -102,14 +104,14 @@ for (i in 2:(length(remind.files))){
   
   # calculate shadow price in remind due to capacity constraint
   remind.sp.capcon <- file.path(outputdir, remind.files[i]) %>% 
-    read.gdx("p32_capConShadowPrice", squeeze=F) %>% 
+    read.gdx("p32_capConShadowPrice", factors = FALSE,squeeze=F) %>% 
     filter(all_regi == reg) %>%
     filter(all_te %in% names(remind.nonvre.mapping))  %>% 
     select(period = ttot, tech = all_te, value) %>% 
     mutate(value = value * 1e12 / sm_TWa_2_MWh * 1.2) %>%
     dplyr::group_by(tech) %>%
-    complete(period = report.periods, fill = list(load = 0)) %>% 
-    dplyr::ungroup(tech) %>% 
+    complete(period = report.periods, fill = list(load = 0)) %>%
+    dplyr::ungroup(tech) %>%
     replace(is.na(.), 0)  %>% 
     dplyr::group_by(tech) %>%
     mutate(value = frollmean(value, 3, align = "center", fill = NA)) %>%

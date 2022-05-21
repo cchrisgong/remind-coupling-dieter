@@ -14,7 +14,7 @@ if (h2switch == "on"){
 # 
 for(year_toplot in year_toplot_list){
 
-  # year_toplot = 2060
+  # year_toplot = 2090
   hr_data <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
     read.gdx("report_tech_hours", factors = FALSE, squeeze = FALSE) %>% 
     # select(model = X., period = X..1, variable = X..3, tech = X..4, hour = X..5, value) %>%
@@ -102,7 +102,7 @@ for(year_toplot in year_toplot_list){
     mutate(te = "Lithium-ion Battery")
   
   #=================================================================================================
-  Battery_Out <- hr_data %>% 
+  Battery_Out_Lith <- hr_data %>% 
     filter(variable == "storage generation (GWh)") %>% 
     filter(tech %in% c("Lithium-ion Battery")) %>% 
     select(hour, value, tech) %>% 
@@ -110,14 +110,10 @@ for(year_toplot in year_toplot_list){
     dplyr::summarise(value = sum(value), .groups = "keep") %>%
     dplyr::ungroup(hour) %>% 
     select(hour, value) %>% 
-    dplyr::rename(battgen = value) %>% 
-    complete(hour = 1:8760, fill = list(battgen = 0)) 
+    dplyr::rename(battgen.li = value) %>% 
+    complete(hour = 1:8760, fill = list(battgen.li = 0)) 
   
-  RLDC_checkpeak = list(LDC, PV, Wind, Battery_Out) %>%
-    reduce(full_join) %>%
-    mutate(residueLoad = load - solgen - windgen - battgen)
-  
-  Battery_In <- hr_data %>% 
+  Battery_In_Lith <- hr_data %>% 
     filter(variable == "storage loading (GWh)") %>% 
     filter(tech %in% c("Lithium-ion Battery")) %>% 
     select(hour, value, tech) %>% 
@@ -125,16 +121,54 @@ for(year_toplot in year_toplot_list){
     dplyr::summarise(value = sum(value), .groups = "keep") %>%
     dplyr::ungroup(hour) %>% 
     select(hour, value) %>% 
-    dplyr::rename(battcharge = value)%>% 
-    complete(hour = 1:8760, fill = list(battcharge = 0)) 
+    dplyr::rename(battcharge.li = value)%>% 
+    complete(hour = 1:8760, fill = list(battcharge.li = 0)) 
 
-  RLDC_all <- list(RLDC_all, Battery_Out, Battery_In) %>% 
+  RLDC_all <- list(RLDC_all, Battery_Out_Lith, Battery_In_Lith) %>% 
     reduce(full_join) %>% 
     replace(is.na(.), 0) %>% 
-    mutate(Batt.RLDC = Solar.RLDC - battgen + battcharge) 
+    mutate(Batt.Li.RLDC = Solar.RLDC - battgen.li + battcharge.li) 
   
-  RLDC.Batt <- RLDC_all %>% arrange(desc(Batt.RLDC)) %>%
-    select(Batt.RLDC) %>% 
+  RLDC.Batt_Li <- RLDC_all %>% arrange(desc(Batt.Li.RLDC)) %>%
+    select(Batt.Li.RLDC) %>% 
+    mutate(hour.sorted = seq(1, 8760)) %>% 
+    mutate(te = "Hydrogen Storage")
+  
+  #=================================================================================================
+  Battery_Out_H2 <- hr_data %>% 
+    filter(variable == "storage generation (GWh)") %>% 
+    filter(tech %in% c("Hydrogen Storage")) %>% 
+    select(hour, value, tech) %>% 
+    dplyr::group_by(hour) %>%
+    dplyr::summarise(value = sum(value), .groups = "keep") %>%
+    dplyr::ungroup(hour) %>% 
+    select(hour, value) %>% 
+    dplyr::rename(battgen.h2 = value) %>% 
+    complete(hour = 1:8760, fill = list(battgen.h2 = 0)) 
+  
+  Battery_In_H2 <- hr_data %>% 
+    filter(variable == "storage loading (GWh)") %>% 
+    filter(tech %in% c("Hydrogen Storage")) %>% 
+    select(hour, value, tech) %>% 
+    dplyr::group_by(hour) %>%
+    dplyr::summarise(value = sum(value), .groups = "keep") %>%
+    dplyr::ungroup(hour) %>% 
+    select(hour, value) %>% 
+    dplyr::rename(battcharge.h2 = value)%>% 
+    complete(hour = 1:8760, fill = list(battcharge.h2 = 0)) 
+  
+  RLDC_checkpeak = list(LDC, PV, Wind, Battery_Out_Lith, Battery_Out_H2) %>%
+    reduce(full_join) %>%
+    mutate(residueLoad = load - solgen - windgen - battgen.li - battgen.h2)
+  
+  
+  RLDC_all <- list(RLDC_all, Battery_Out_H2, Battery_In_H2) %>% 
+    reduce(full_join) %>% 
+    replace(is.na(.), 0) %>% 
+    mutate(Batt.H2.RLDC = Batt.Li.RLDC - battgen.h2 + battcharge.h2) 
+  
+  RLDC.Batt_H2 <- RLDC_all %>% arrange(desc(Batt.H2.RLDC)) %>%
+    select(Batt.H2.RLDC) %>% 
     mutate(hour.sorted = seq(1, 8760)) %>% 
     mutate(te = "Electrolyzers")
   #=================================================================================================
@@ -188,7 +222,7 @@ for(year_toplot in year_toplot_list){
   RLDC_all <- list(RLDC_all, LDC_h2) %>% 
     reduce(full_join) %>% 
     replace(is.na(.), 0) %>% 
-    mutate(H2.RLDC = Batt.RLDC - h2) 
+    mutate(H2.RLDC = Batt.H2.RLDC - h2) 
   
   RLDC.H2 <- RLDC_all %>% arrange(desc(H2.RLDC)) %>%
     select(H2.RLDC) %>% 
@@ -237,7 +271,7 @@ for(year_toplot in year_toplot_list){
   RLDC_all = list(RLDC_all, hr_disp_gen1) %>% 
     reduce(full_join) %>% 
     replace(is.na(.), 0)%>%
-    mutate(RLDC1 = Batt.RLDC - gen1)
+    mutate(RLDC1 = H2.RLDC - gen1)
   
   RLDC1 <- RLDC_all %>% arrange(desc(RLDC1)) %>%
     select(RLDC1) %>% 
@@ -335,10 +369,10 @@ for(year_toplot in year_toplot_list){
     mutate(hour= seq(1, 8760)) %>% 
     mutate(te = "Solar" )
   
-  CU_VRE_Wind.plot = list(LDC, Wind, CU_VRE_Wind,Battery_In,LDC_h2) %>% 
+  CU_VRE_Wind.plot = list(LDC, Wind, CU_VRE_Wind,Battery_In_Lith,Battery_In_H2,LDC_h2) %>% 
     reduce(full_join) %>% 
     replace(is.na(.), 0) %>% 
-    mutate(Wind.RLDC2 = load-windgen- curt_w + battcharge + h2) %>%
+    mutate(Wind.RLDC2 = load - windgen - curt_w + battcharge.li + battcharge.h2 + h2) %>%
     # mutate(Wind.RLDC2 = - curt_w + battcharge + h2) %>%
     arrange(desc(Wind.RLDC2)) %>% 
     mutate(hour= seq(1, 8760)) %>% 
@@ -353,7 +387,8 @@ for(year_toplot in year_toplot_list){
     geom_area(data = LDC0 %>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = load, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC.Wind%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = Wind.RLDC, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC.Solar%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = Solar.RLDC, fill = te), size = 1.2, alpha = 1) +
-    geom_area(data = RLDC.Batt%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = Batt.RLDC, fill = te), size = 1.2, alpha = 1) +
+    geom_area(data = RLDC.Batt_Li%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = Batt.Li.RLDC, fill = te), size = 1.2, alpha = 1) +
+    geom_area(data = RLDC.Batt_H2%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = Batt.H2.RLDC, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC.H2%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = H2.RLDC, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC1%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC1, fill = te), size = 1.2, alpha = 1) +
     xlab("hour") + ylab("residual load (GW)")+
