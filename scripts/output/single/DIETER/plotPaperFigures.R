@@ -444,3 +444,83 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE0n.png"),
        height = 12,  # Vary height according to how many panels plot has
        units = "cm")
 
+# Figure ?: 3-panel coupled vs. uncoupled comparison  ------------------------------------------
+setwd("/home/chengong/remind-coupling-dieter/")
+coupled_outputdir = "./output/hydro1147"
+uncoupStor_outputdir = "./output/hydro987"
+uncoupNoStor_outputdir = "./output/"
+outputdir_lst <- c(coupled_outputdir, uncoupStor_outputdir, coupled_outputdir)
+run_name_lst <- c("Coupled", "Uncoupled with parametrization", "Uncoupled without parametrization")
+x_positions <- c(-1.5,0,1.5)
+
+df.capacity <- NULL
+for (i in c(1:length(outputdir_lst))){
+  
+  outputdir = outputdir_lst[[i]]
+  print(outputdir)
+  
+  run_name = run_name_lst[[i]]
+  # outputdir = coupled_outputdir
+  
+remind.files <- list.files(outputdir, pattern = "fulldata_[0-9]+\\.gdx") %>%
+  str_sort(numeric = TRUE)
+
+remind.capacity <- file.path(outputdir, remind.files[length(remind.files)]) %>%  
+    read.gdx("vm_cap", factors = FALSE, squeeze = FALSE) %>% 
+    filter(tall %in% model.periods) %>%
+    filter(all_regi == reg) %>%
+    filter(rlf == "1") %>% 
+    filter(all_te %in% names(remind.tech.mapping.narrow)) %>%
+    mutate(value = value * 1e3) %>% #TW->GW
+    select(period = tall, tech = all_te, rlf, value) %>% 
+    revalue.levels(tech = remind.tech.mapping.narrow) %>%
+    dplyr::group_by(period, tech, rlf) %>%
+    dplyr::summarise( value = sum(value) , .groups = 'keep' ) %>% 
+    dplyr::ungroup(period, tech, rlf) %>% 
+    mutate(tech = factor(tech, levels=rev(unique(remind.tech.mapping.narrow))))%>% 
+    filter(period %in% model.periods.till2100) %>% 
+    mutate(period = as.numeric(as.character(period)) + x_positions[[i]]) %>% 
+    mutate(runname = run_name)
+  
+df.capacity <- rbind(df.capacity, remind.capacity)
+}
+
+  p0<-ggplot() +
+    geom_bar(data = df.capacity, aes(x=period, y=value, fill=tech, linetype=runname), colour = "black", stat="identity",position="stack", width=1.5) + 
+    scale_fill_manual(name = "Technology", values = color.mapping.cap) +
+    # scale_linetype_manual(name = runname, values = linetype.map) +
+    guides(linetype = guide_legend(override.aes = list(fill = NA
+                                                       , col = "black"))) +
+    xlab("period") + ylab(paste0("Capacity (GW)")) +
+    ggtitle(paste0(reg)) +
+    theme(legend.title = element_blank()) 
+  
+  swfigure(sw,print,p)
+  if (save_png == 1){
+    ggsave(filename = paste0(coupled_outputdir, "/DIETER/Figure_uncoupA.png"),  p0,  width = 10, height = 4.5, units = "in", dpi = 120)
+  }
+  
+
+  plot.remind.gen2 <- plot.remind %>% 
+    filter(period %in% model.periods.till2100) %>% 
+    mutate(period = as.numeric(as.character(period)) - 1) %>% 
+    mutate(model = "REMIND") %>% 
+    filter(iteration == maxiter)
+  
+  p<-ggplot() +
+    geom_bar(data = plot.dieter.gen2, aes(x=period, y=value, fill=tech, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
+    geom_bar(data = plot.remind.gen2, aes(x=period, y=value, fill=tech, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
+    scale_fill_manual(name = "Technology", values = color.mapping) +
+    scale_linetype_manual(name = "model", values = linetype.map) +
+    guides(linetype = guide_legend(override.aes = list(fill = NA, col = "black"))) +
+    xlab("period") + ylab(paste0("Generation (TWh)")) +
+    ggtitle(paste0(reg)) +
+    theme(legend.title = element_blank()) 
+  
+  swfigure(sw,print,p)
+  if (save_png == 1){
+    ggsave(filename = paste0(coupled_outputdir, "/DIETER/Figure_uncoupB.png"),  p,  width = 9, height = 6, units = "in", dpi = 120)
+  }
+  
+
+

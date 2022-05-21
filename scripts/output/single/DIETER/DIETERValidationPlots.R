@@ -55,6 +55,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
 
   ## load the number of iteration when coupling starts
   start_i = as.numeric(str_extract(dieter.files[2], "[0-9]+"))
+  iteration.list = seq(start_i, str_extract(dieter.files[length(dieter.files)], "[0-9]+"),1)
   
   # load coupled region
   DTcoupreg <- file.path(outputdir, remind.files[2]) %>%  
@@ -63,6 +64,8 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   # load switches
   h2switch <- cfg$gms$cm_DT_elh2_coup
+  storswitch <- cfg$gms$cm_DTstor
+  
   
   ## define technologies
   ############### REMIND #########################
@@ -107,18 +110,33 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   remind.sector.coupling.mapping.exclude <- c(tdels = "Stationary Electricity",
                                               tdelt = "Transport Electricity")
 
+  remind.storage.mapping.narrow <- c(storspv = "Lithium-ion Battery",
+                                     storcsp = "H2 turbine")
+  
   remind.tech.mapping <- c(remind.nonvre.mapping.whyd, remind.vre.mapping)
   remind.tech.mapping.narrow <- remind.tech.mapping
   
   ## only report electrolyers in demand side tech
   if (h2switch == "on"){
-    remind.tech.mapping.narrow <- c(remind.tech.mapping,
+    remind.tech.mapping.narrow <- c(remind.tech.mapping.narrow,
                                     remind.sector.coupling.mapping.narrow, 
                                     NULL)
+    
     remind.tech.mapping <- c(remind.tech.mapping,
                              remind.sector.coupling.mapping, 
                              NULL)
   }  
+  
+  
+  if (storswitch == "on"){
+    remind.tech.mapping.narrow <- c(remind.tech.mapping.narrow,
+                                    remind.storage.mapping.narrow,
+                                    NULL)
+    
+    remind.tech.mapping <- c(remind.tech.mapping, 
+                             remind.storage.mapping.narrow, 
+                             NULL)
+  }
   
   ############### DIETER #########################
   table_ordered_name = c("Coal", "CCGT", "Solar", "Wind Onshore", "Wind Offshore", "Biomass", "OCGT", "Hydro", "Nuclear","Electrolyzers")
@@ -147,8 +165,6 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                             CCGT = "CCGT",
                             bio = "Biomass",
                             NULL)
-  
-  # dieter.tech.mapping <- c(dieter.supply.tech.mapping, dieter.demand.tech.mapping)
   
   dieter.supply.fuel.mapping <- c("Coal" = "pecoal",
                                   "OCGT" = "pegas",
@@ -259,6 +275,13 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                        NULL)
   }
   
+  if (storswitch == "on"){
+    color.mapping.cap <- c(color.mapping.cap,
+                           "Lithium-ion Battery" = "cyan", 
+                           "H2 turbine" = "#56B4E9",
+                           NULL)
+  }
+  
   color.mapping_vre <- c("Solar" = "#ffcc00", "Wind Onshore" = "#337fff", "Wind Offshore" = "#334cff")
   
   color.mapping.cap.line <- c("peak hourly residual demand" = "#0c0c0c")
@@ -354,7 +377,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                     "Adjustment Cost" = "darkgoldenrod1",
                     'DIETER annual average electricity price with scarcity price' = "indianred3",
                     'DIETER shadow price due to capacity constraint from REMIND' = "mediumpurple3",
-                    'DIETER shadow price due to capacity constraint from REMIND (with grid)' = "mediumpurple2",
+                    # 'DIETER shadow price due to capacity constraint from REMIND (with grid)' = "mediumpurple2",
                      NULL)
   
   
@@ -427,7 +450,13 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                            el = "Electricity",
                            `all Tech` = "All Tech",
                            vregrid = "VRE grid",
+                           lith = "Lithium-ion Battery",
+                           hydrogen = "H2 turbine",
                            NULL)
+  
+  dieter.storage.mapping <- c( lith = "Lithium-ion Battery",
+                               hydrogen = "H2 turbine",
+                               NULL)
   
   dieter.tech.mapping.cost.order <- c(coal = "Coal",
                            OCGT_eff = "OCGT",
@@ -453,7 +482,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                                 el = "Electricity",
                                lith = "Lithium-ion Battery",
                                PSH = "Pumped_Storage_Hydro",
-                               hydrogen = "Hydrogen_Storage",
+                               hydrogen = "Hydrogen Storage",
                                caes = "Compressed_Air_Energy_Storage",
                                NULL)
   
@@ -485,7 +514,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     `grid cost ($/MWh)` = "Grid Cost",
     `price for total demand ($/MWh)` = 'DIETER annual average electricity price',
     `price for total demand - with scarcity price ($/MWh)` = 'DIETER annual average electricity price with scarcity price',
-    `total system shadow price of cap bound w/ grid - avg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND (with grid)',
+    # `total system shadow price of cap bound w/ grid - avg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND (with grid)',
     `total system shadow price of cap bound - avg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND',
     `total system shadow price of cap bound - marg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND',
     `shadow price of capacity bound from REMIND - marg ($/MWh)` = 'Shadow Price',

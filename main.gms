@@ -330,7 +330,7 @@ parameters
   cm_DTcoup_tol               "DIETER coupled run generation share difference between coupled model convergence tolerance (percentage)"
   cm_DTcoup_tol_i             "DIETER coupled run generation share difference (over iteration) model self-convergence tolerance (percentage) "
   cm_DTcoup_sIter             "starting iteration of DIETER coupling"
-
+  cm_DTuncoupStoOff           "turn off storage and curtailment in uncoupled run"
   cm_flex_tax                 "switch for enabling flexibility tax"
   cm_H2targets                "switches on capacity targets for electrolysis in NDC techpol following national Hydrogen Strategies"
   cm_PriceDurSlope_elh2       "slope of price duration curve of electrolysis"
@@ -361,7 +361,6 @@ parameters
   cm_CESMkup_build               "switch for setting markup cost to CES nodes in buildings" 
   c_BaselineAgriEmiRed     "switch to lower agricultural base line emissions as fraction of standard assumption, a value of 0.25 will lower emissions by a fourth"
   cm_deuCDRmax                 "switch to limit maximum annual CDR amount in Germany in MtCO2 per y"
->>>>>>> develop
 ;
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -617,6 +616,7 @@ cm_DTcoup_flatco2 = 25;           !!def <- 25
 cm_DTcoup_tol = 50;         !!def <- 50
 cm_DTcoup_tol_i = 50;       !!def <- 50
 cm_DTcoup_sIter = 3;              !!def <- 1 
+cm_DTuncoupStoOff = 0;       !! def <- 0
 
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
 $setGlobal cm_nash_mode  parallel      !! def = parallel
