@@ -447,11 +447,11 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE0n.png"),
 # Figure ?: 3-panel coupled vs. uncoupled comparison  ------------------------------------------
 setwd("/home/chengong/remind-coupling-dieter/")
 coupled_outputdir = "./output/hydro1147"
-uncoupStor_outputdir = "./output/hydro987"
+uncoupStor_outputdir = "./output/hydro1152"
 uncoupNoStor_outputdir = "./output/"
 outputdir_lst <- c(coupled_outputdir, uncoupStor_outputdir, coupled_outputdir)
 run_name_lst <- c("Coupled", "Uncoupled with parametrization", "Uncoupled without parametrization")
-x_positions <- c(-1.5,0,1.5)
+x_positions <- c(-1.1,0,1.1)
 
 df.capacity <- NULL
 for (i in c(1:length(outputdir_lst))){
@@ -486,7 +486,7 @@ df.capacity <- rbind(df.capacity, remind.capacity)
 }
 
   p0<-ggplot() +
-    geom_bar(data = df.capacity, aes(x=period, y=value, fill=tech, linetype=runname), colour = "black", stat="identity",position="stack", width=1.5) + 
+    geom_bar(data = df.capacity, aes(x=period, y=value, fill=tech, linetype=runname), colour = "black", stat="identity",position="stack", width=1) + 
     scale_fill_manual(name = "Technology", values = color.mapping.cap) +
     # scale_linetype_manual(name = runname, values = linetype.map) +
     guides(linetype = guide_legend(override.aes = list(fill = NA
@@ -499,19 +499,72 @@ df.capacity <- rbind(df.capacity, remind.capacity)
   if (save_png == 1){
     ggsave(filename = paste0(coupled_outputdir, "/DIETER/Figure_uncoupA.png"),  p0,  width = 10, height = 4.5, units = "in", dpi = 120)
   }
-  
 
-  plot.remind.gen2 <- plot.remind %>% 
-    filter(period %in% model.periods.till2100) %>% 
-    mutate(period = as.numeric(as.character(period)) - 1) %>% 
-    mutate(model = "REMIND") %>% 
-    filter(iteration == maxiter)
+  df.generation <- NULL
+  df.loss <- NULL
+  for (i in c(1:length(outputdir_lst))){
+    
+    outputdir = outputdir_lst[[i]]
+    print(outputdir)
+    run_name = run_name_lst[[i]]
+    # outputdir = coupled_outputdir
+    remind.files <- list.files(outputdir, pattern = "fulldata_[0-9]+\\.gdx") %>%
+      str_sort(numeric = TRUE)
+    
+    # usable energy for VRE (excluding curtailment)
+    vmUsableSeTe <- file.path(outputdir, remind.files[length(remind.files)]) %>%
+      read.gdx("vm_usableSeTe", factors = FALSE, squeeze = FALSE) %>%
+      filter(ttot %in% model.periods.till2100) %>%
+      filter(all_regi == reg) %>%
+      filter(entySe == "seel") %>%
+      filter(all_te %in% names(remind.vre.mapping)) %>%
+      select(period = ttot, tech=all_te, value) %>%
+      revalue.levels(tech = remind.vre.mapping) %>% 
+      mutate(value = value * sm_TWa_2_MWh / 1e6) %>%
+      dplyr::group_by(period, tech) %>%
+      dplyr::summarise(value = sum(value) , .groups = 'keep') %>%
+      dplyr::ungroup(period, tech) %>% 
+      mutate(tech = factor(tech, levels = rev(unique(remind.tech.mapping))))%>% 
+      mutate(period = as.numeric(as.character(period)) + x_positions[[i]]) %>% 
+      mutate(runname = run_name)
+    
+    # for non-VRE
+    vmprodSe <- file.path(outputdir, remind.files[length(remind.files)]) %>%
+      read.gdx("vm_prodSe", factors = FALSE, squeeze = FALSE) %>%
+      filter(tall %in% model.periods.till2100) %>%
+      filter(all_regi == reg) %>%
+      filter(all_enty.1 == "seel") %>%
+      filter(all_te %in% names(remind.nonvre.mapping.whyd)) %>%
+      select(period = tall, tech=all_te, value) %>%
+      revalue.levels(tech = remind.nonvre.mapping.whyd) %>%
+      mutate(value = value * sm_TWa_2_MWh / 1e6) %>%
+      dplyr::group_by(period, tech) %>%
+      dplyr::summarise(value = sum(value) , .groups = 'keep') %>%
+      dplyr::ungroup(period, tech) %>% 
+      mutate(tech = factor(tech, levels = rev(unique(remind.tech.mapping))))%>% 
+      mutate(period = as.numeric(as.character(period)) + x_positions[[i]]) %>% 
+      mutate(runname = run_name)
+    
+    loss <- file.path(outputdir, remind.files[length(remind.files)]) %>%
+      read.gdx("v32_storloss", factors = FALSE, squeeze = FALSE) %>% 
+      filter(ttot %in% model.periods.till2100) %>%
+      filter(all_regi == reg) %>%
+      filter(all_te %in% names(remind.vre.mapping)) %>% 
+      select(period = ttot, value, tech=all_te) %>% 
+      revalue.levels(tech = remind.tech.storloss.mapping) %>% 
+      mutate(value = value * sm_TWa_2_MWh/1e6) %>%
+      mutate(tech = factor(tech, levels=rev(unique(remind.tech.storloss.mapping)))) %>% 
+      mutate(period = as.numeric(as.character(period)) + x_positions[[i]]) %>% 
+      mutate(runname = run_name)
+    
+    df.generation <- rbind(df.generation,loss,vmUsableSeTe,vmprodSe)
+  }
+  
   
   p<-ggplot() +
-    geom_bar(data = plot.dieter.gen2, aes(x=period, y=value, fill=tech, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
-    geom_bar(data = plot.remind.gen2, aes(x=period, y=value, fill=tech, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
-    scale_fill_manual(name = "Technology", values = color.mapping) +
-    scale_linetype_manual(name = "model", values = linetype.map) +
+    geom_bar(data = df.generation, aes(x=period, y=value, fill=tech, linetype=runname), colour = "black", stat="identity",position="stack", width=1) +
+    scale_fill_manual(name = "Technology", values = color.mapping.wloss) +
+    # scale_linetype_manual(name = "model", values = linetype.map) + 
     guides(linetype = guide_legend(override.aes = list(fill = NA, col = "black"))) +
     xlab("period") + ylab(paste0("Generation (TWh)")) +
     ggtitle(paste0(reg)) +
@@ -519,7 +572,7 @@ df.capacity <- rbind(df.capacity, remind.capacity)
   
   swfigure(sw,print,p)
   if (save_png == 1){
-    ggsave(filename = paste0(coupled_outputdir, "/DIETER/Figure_uncoupB.png"),  p,  width = 9, height = 6, units = "in", dpi = 120)
+    ggsave(filename = paste0(coupled_outputdir, "/DIETER/Figure_uncoupB.png"),  p,  width = 11, height = 6, units = "in", dpi = 120)
   }
   
 

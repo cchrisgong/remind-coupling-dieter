@@ -138,6 +138,10 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                              NULL)
   }
   
+  remind.tech.storloss.mapping <-  c(wind = "Wind Onshore Curtailment",
+                                     windoff = "Wind Offshore Curtailment",
+                                     spv = "Solar Curtailment")
+  
   ############### DIETER #########################
   table_ordered_name = c("Coal", "CCGT", "Solar", "Wind Onshore", "Wind Offshore", "Biomass", "OCGT", "Hydro", "Nuclear","Electrolyzers")
   
@@ -314,6 +318,12 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                          "DIETER Market value ($/MWh)" = "#005900",
                          "DIETER Market value with scarcity price ($/MWh)" = "#007f00",
                          "REMIND market value ($/MWh)" = "#7F7FFF")
+  
+  color.mapping.wloss <- c(color.mapping, 
+                           "Wind Onshore Curtailment" = "#a8c9ff",
+                           "Solar Curtailment" = "#f7e7a6",
+                           "Wind Offshore Curtailment" = "#919efa",
+                           NULL)
   
   linetype.map <- c('DIETER' = 'dotted', 'REMIND' = 'solid')
   

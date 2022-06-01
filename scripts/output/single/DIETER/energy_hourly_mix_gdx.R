@@ -7,7 +7,7 @@ mydatapath = paste0(mypath, "/", file)
 source("~/remind-coupling-dieter/dataprocessing/DIETER_plots/library_import.R")
 library(readr)
 
-outputdir = "output/hydro985"
+outputdir = "output/hydro1108"
 dir = "/home/chengong/remind-coupling-dieter/"
 mypath =paste0(dir,outputdir)
 mydatapath = paste0(mypath, "/", file)
@@ -62,7 +62,7 @@ demand.color.mapping <- c("Electrolyzers" = "#66cccc", "Electricity" = "red",
 color.mapping <- c(supply.color.mapping, demand.color.mapping)
 
 #####################################################
-year_toplot_list <- c(2020,2030,2045,2050,2070)
+year_toplot_list <- c(2025,2030,2035,2040,2045,2050)
 
 for(season in c("summer", "winter")){
   

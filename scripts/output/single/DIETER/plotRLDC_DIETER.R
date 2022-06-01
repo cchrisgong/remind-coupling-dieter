@@ -12,9 +12,9 @@ if (h2switch == "on"){
 }
 
 # 
-for(year_toplot in year_toplot_list){
+# for(year_toplot in year_toplot_list){
 
-  # year_toplot = 2090
+  year_toplot = 2045
   hr_data <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
     read.gdx("report_tech_hours", factors = FALSE, squeeze = FALSE) %>% 
     # select(model = X., period = X..1, variable = X..3, tech = X..4, hour = X..5, value) %>%
@@ -401,7 +401,7 @@ for(year_toplot in year_toplot_list){
   }
   
   if (h2switch == "on"){
-    p.DT.rldc <- p.DT.rldc + scale_fill_manual(name = "Technology", values = color.mapping.RLDC.fancy) + coord_cartesian(ylim = c(-140,140))
+    p.DT.rldc <- p.DT.rldc + scale_fill_manual(name = "Technology", values = color.mapping.RLDC.fancy) + coord_cartesian(ylim = c(-300,200))
   }
   
   if (length(techranking) > 2){
@@ -434,5 +434,5 @@ for(year_toplot in year_toplot_list){
     ggsave(filename = paste0(outputdir, "/DIETER/DIETER_RLDC_yr=", year_toplot, ".png"), p.DT.rldc, width = 8, height =8, units = "in", dpi = 120)
   }
 
-}
+# }
 
