@@ -170,7 +170,7 @@ if (h2switch == "on"){
   RLDC.Batt_H2 <- RLDC_all %>% arrange(desc(Batt.H2.RLDC)) %>%
     select(Batt.H2.RLDC) %>% 
     mutate(hour.sorted = seq(1, 8760)) %>% 
-    mutate(te = "Electrolyzers")
+    mutate(te = "Flexible electrolyzers (PtG)")
   #=================================================================================================
   #--------------------------------------------------------------
   running_cost <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
@@ -214,7 +214,7 @@ if (h2switch == "on"){
   
   LDC_h2 <- hr_data %>% 
     filter(variable == "consumption (GWh)") %>% 
-    filter(tech == "Electrolyzers") %>% 
+    filter(tech == "Flexible electrolyzers (PtG)") %>% 
     select(hour, value) %>% 
     dplyr::rename(h2 = value) %>% 
     complete(hour = 1:8760, fill = list(h2 = 0)) 

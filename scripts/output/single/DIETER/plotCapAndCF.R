@@ -269,37 +269,66 @@ swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")
 swlatex(sw, "\\subsection{Capacities over time (last iteration)}")
 
 plot.remind.capacity <- out.remind.capacity %>% 
-  filter(iteration == max(out.remind.capacity$iteration))
+  filter(iteration == max(out.remind.capacity$iteration)) %>% 
+  select(period,tech,value) %>% 
+  filter(!tech %in% dieter.storage.mapping)
 
-p1<-ggplot() +
-  geom_area(data = plot.remind.capacity%>% filter(period %in% model.periods.till2100) , aes(x = period, y = value, fill = tech), size = 1.2, alpha = 0.5) +
+plot.dieter.capacity.batt <- plot.dieter.capacity %>%
+  select(period,tech,value) %>%
+  filter(tech %in% dieter.storage.mapping) %>%
+  filter(!tech == "Hydrogen Storage") %>% 
+  mutate(period = as.numeric(period))
+
+plot.dieter.capacity.h2storage1 <- plot.dieter.capacity %>% 
+  select(period,tech,value) %>%
+  filter(tech == "Hydrogen Storage") %>% 
+  mutate(tech = "Electrolyzers for long-term storage") %>% 
+  mutate(period = as.numeric(period))
+
+plot.dieter.capacity.h2storage2 <- plot.dieter.capacity %>% 
+  select(period,tech,value) %>%
+  filter(tech == "Hydrogen Storage") %>% 
+  mutate(tech = "Hydrogen Turbine") %>% 
+  mutate(period = as.numeric(period))
+
+
+plot.remind.capacity.wDIETERstorage <-list(plot.remind.capacity,
+                                           plot.dieter.capacity.batt,
+                                           plot.dieter.capacity.h2storage1,
+                                           plot.dieter.capacity.h2storage2
+                                           ) %>% 
+  reduce(full_join) %>% 
+  mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping))))
+  
+p.cap1<-ggplot() +
+  geom_area(data = plot.remind.capacity.wDIETERstorage%>% filter(period %in% model.periods.till2100) , aes(x = period, y = value, fill = tech), size = 1.2, alpha = 0.5) +
   scale_fill_manual(name = "Technology", values = color.mapping.cap) +
-  theme(legend.position="none")+
-  theme(axis.text=element_text(size=15), axis.title=element_text(size= 20, face="bold"),strip.text = element_text(size=13)) +
+  theme(legend.position="none") +
+  theme(axis.text=element_text(size=10), axis.title=element_text(size= 15, face="bold"),strip.text = element_text(size=13)) +
   xlab("period") + ylab("Capacity (GW)") +
-  ggtitle(paste0("REMIND last iteration: ", reg))+
-  theme(plot.title = element_text(size = 20, face = "bold"))
+  ggtitle(paste0("REMIND last iteration: ", reg)) +
+  theme(plot.title = element_text(size = 15, face = "bold"))
 
 if (length(dieter.files) != 0) {
 plot.dieter.capacity <- out.dieter.capacity %>%
   filter(iteration == max(out.dieter.capacity$iteration))
 
-p2<-ggplot() +
+p.cap2<-ggplot() +
     geom_area(data = plot.dieter.capacity%>% filter(period %in% model.periods.till2100), aes(x = as.numeric(period), y = value, fill = tech), size = 1.2, alpha = 0.5) +
     scale_fill_manual(name = "Technology", values = color.mapping.cap) +
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
-  theme(axis.text=element_text(size=15), axis.title=element_text(size= 20, face="bold"),strip.text = element_text(size=13)) +
+  theme(axis.text=element_text(size=15), axis.title=element_text(size= 15, face="bold"),strip.text = element_text(size=13)) +
     xlab("period") + ylab("Capacity (GW)") +
     ggtitle(paste0("DIETER last iteration: ", reg))+
-  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=20))+
-  theme(plot.title = element_text(size = 20, face = "bold"))
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=10))+
+  theme(plot.title = element_text(size = 15, face = "bold"))
 
 }
 
 grid.newpage()
 if (length(dieter.files) != 0) {
-  p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
-} else { p<-p1 }
+  p <- arrangeGrob(rbind(ggplotGrob(p.cap1), ggplotGrob(p.cap2)))
+} else { p<-p.cap1 }
 
 swfigure(sw,grid.draw,p)
 

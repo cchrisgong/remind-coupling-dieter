@@ -125,7 +125,7 @@ flexadj <- out.remind.flexadj %>%
   select(-iteration) %>% 
   filter(period %in% model.periods.till2100) %>% 
   mutate(cost = "Flexibility subsidy") %>% 
-  filter(tech == "Electrolyzers") %>% 
+  filter(tech == "Flexible electrolyzers (PtG)") %>% 
   mutate(sector = "supply-side") 
 
 # aggregated production share per upscaled technology
@@ -259,7 +259,7 @@ df.lcoe.sys.components <- list(prod_share, df.lcoe.te.components) %>%
 #   mutate(sector = "supply-side") %>%  
 #   mutate(variable = "Total LCOE")
 
-### electrolyzers LCOE
+### Flexible electrolyzers (PtG) LCOE
 df.lcoe.elh2.components <- df.lcoe %>% 
   filter(region == reg, 
          period %in% model.periods, type == cost.type,
@@ -535,9 +535,11 @@ df.total.lcoe.teAgg.plot <- df.total.lcoe.teAgg %>%
   select(-adjcost) %>% 
   mutate(cost = paste0("Total LCOE"))
 
-df.telcoe_mv.plot <- list(df.total.lcoe.teAgg.plot, mv.plus.sp.agg, mv.agg) %>% 
+df.telcoe_mv.plot <- list(
+  # df.total.lcoe.teAgg.plot, 
+  mv.plus.sp.agg, mv.agg) %>% 
   reduce(full_join) %>% 
-  filter(!tech %in% c("VRE grid", "Electrolyzers")) %>% 
+  filter(!tech %in% c("VRE grid", "Flexible electrolyzers (PtG)")) %>% 
   filter(period %in% model.periods.till2100)
 
 if (h2switch == "off"){
@@ -1094,7 +1096,7 @@ genshare1 <- genshare.dieter %>%
 
 sysLCOE.avg.DT <- dieter.telcoe_avg %>% 
   select(iteration,period,tech,variable,value) %>% 
-  filter(!tech %in% c("VRE grid", "Electrolyzers")) %>% 
+  filter(!tech %in% c("VRE grid", "Flexible electrolyzers (PtG)")) %>% 
   left_join(genshare1) %>% 
   mutate(value = value * genshare) %>% 
   select(iteration,period,tech,variable, value) %>% 
@@ -1161,7 +1163,7 @@ if (save_png == 1){
 
 sysLCOE.avg.DT_tech_lastIter <- dieter.telcoe_avg %>% 
   select(iteration,period,tech,variable,value) %>% 
-  filter(!tech %in% c("VRE grid", "Electrolyzers")) %>% 
+  filter(!tech %in% c("VRE grid", "Flexible electrolyzers (PtG)")) %>% 
   left_join(genshare1) %>% 
   mutate(value = value * genshare) %>% 
   select(iteration,period,tech,variable,value) %>% 
@@ -1266,7 +1268,7 @@ for (iter in c(start_i,start_i+1,maxiter)){
 
 sysLCOE.marg.DT <- dieter.telcoe_marg %>%
   select(period,tech,variable,value) %>%
-  filter(!tech %in% c("VRE grid", "Electrolyzers")) %>%
+  filter(!tech %in% c("VRE grid", "Flexible electrolyzers (PtG)")) %>%
   left_join(genshare1) %>%
   mutate(value = value * genshare) %>%
   select(period,tech,variable,value) %>%

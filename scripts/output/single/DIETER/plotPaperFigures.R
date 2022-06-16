@@ -15,33 +15,6 @@ theme_set(theme_cowplot(font_size = 8))  # Use simple theme and set font size
 # calculate shadow price in remind due to capacity constraint - no, not needed since markup should add up to zero at convergence,
 # and these shadow prices are not part of the markup
 
-# diff.price.rollmean <- out.RMprice %>% 
-#   select(-variable) %>% 
-#   dplyr::group_by(iteration) %>%
-#   mutate(value = frollmean(value, 3, align = "left", fill = NA)) %>%
-#   dplyr::ungroup(iteration) %>% 
-#   replace(is.na(.), 0) %>% 
-#   select(iteration,period,price=value) %>%
-#   full_join(out.remind.sys.sp.capcon %>% select(iteration,period,sp.capcon=value) %>% filter(sp.capcon <20) ) %>% 
-#   replace(is.na(.), 0) %>% 
-#   filter(period %in% model.periods) %>% 
-#   filter(!price == 0) %>% 
-#   mutate(rmprice=price+sp.capcon) %>% 
-#   select(period,iteration,rmprice) %>% 
-#   left_join(out.DTprice) %>% 
-#   filter(period %in% model.periods.till2100) %>% 
-#   select(period,iteration,rmprice, value) %>% 
-#   mutate(value = rmprice - value) %>% 
-#   select(-rmprice)%>% 
-#   filter(iteration > start_i-1)
-# 
-# diff.price.rollmean.avg.yr <- diff.price.rollmean %>% 
-#   # filter(period > 2030) %>% 
-#   dplyr::group_by(iteration) %>%
-#   dplyr::summarise( value = mean(value), .groups = "keep" ) %>% 
-#   dplyr::ungroup(iteration) %>% 
-#   mutate(variable = "Difference of electricity price (REMIND rolling avg)")
-
 # Panel 1: Surface plot
 p.surface <- ggplot() +
   # With REMIND rolling mean over three periods
@@ -340,7 +313,7 @@ p.sysLCOE_RM <- ggplot() +
   scale_color_manual(name = "Price", values = price.colors) +
   coord_cartesian(ylim = c(ymin,ymax))+
   scale_fill_manual(name = "Costs", values = cost.colors) +
-  guides(fill=guide_legend(nrow=4,byrow=TRUE), color=guide_legend(nrow=4,byrow=TRUE))+
+  guides(fill=guide_legend(nrow=4, byrow=TRUE), color=guide_legend(nrow=4,byrow=TRUE))+
   ggtitle("REMIND")+
   theme(legend.position="bottom", legend.direction="horizontal", legend.text = element_text(size=font.size)) +
   theme(axis.text=element_text(size=font.size), axis.title=element_text(size=font.size, face="bold"),strip.text = element_text(size=font.size)) 
@@ -438,7 +411,56 @@ p <- plot_grid(p.RM.rldc,
                align = "h")
 
 # Save as png
-ggsave(filename = paste0(outputdir, "/DIETER/FIGURE0n.png"),
+ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_RLDC.png"),
+       bg = "white",
+       width = 20,  # Vary width according to how many panels plot has
+       height = 12,  # Vary height according to how many panels plot has
+       units = "cm")
+
+# ============SCENARIO plots =============================================================================
+# Figure: Long-term development ------------------------------------------
+
+p.cap1<-ggplot() +
+  geom_area(data = plot.remind.capacity.wDIETERstorage%>% filter(period %in% model.periods.till2100) , aes(x = period, y = value, fill = tech), size = 1.2, alpha = 0.5) +
+  scale_fill_manual(name = "Technology", values = color.mapping.cap) +
+  theme(axis.text=element_text(size=12), axis.title=element_text(size= 12, face="bold")) +
+  theme(legend.position="right", legend.direction="vertical", legend.title = element_blank(),legend.text = element_text(size=12))+
+  theme_minimal_grid(12) +
+  xlab("Time") + ylab("Capacity (GW)")
+
+p.genwConsump1 <- ggplot() +
+  geom_area(
+    data = plot.remind.generation %>% filter(period <2110),
+    aes(x = period, y = value, fill = tech),
+    size = 1.2,
+    alpha = 0.5,
+    stat = "identity"
+  ) +
+  geom_area(
+    data = plot.remind.generation.withCurt%>% filter(period <2110),
+    aes(x = period, y = value, color = tech),
+    size = 1,
+    alpha = 0,
+    linetype = "dotted"
+  ) +
+  theme_minimal_grid(12) +
+  scale_fill_manual(name = "Technology", values = color.mapping) +
+  scale_color_manual(name = "Technology", values = color.mapping_vre) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 12, face = "bold")) +
+  xlab("Time") + ylab("Generation (TWh)") +
+  theme(legend.position="none")
+
+# Arrange both plots
+p <- plot_grid(p.genwConsump1,
+               p.cap1,
+               ncol = 2,
+               rel_widths = c(1, 1.5),
+               labels = "auto",
+               align = "h") 
+
+# Save as png
+ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_LONG_GEN.png"),
        bg = "white",
        width = 20,  # Vary width according to how many panels plot has
        height = 12,  # Vary height according to how many panels plot has
@@ -448,10 +470,18 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE0n.png"),
 setwd("/home/chengong/remind-coupling-dieter/")
 coupled_outputdir = "./output/hydro1147"
 uncoupStor_outputdir = "./output/hydro1152"
-uncoupNoStor_outputdir = "./output/"
-outputdir_lst <- c(coupled_outputdir, uncoupStor_outputdir, coupled_outputdir)
+uncoupNoStor_outputdir = "./output/hydro1153"
+baseline_outputdir_lst <- c(coupled_outputdir, uncoupStor_outputdir, uncoupNoStor_outputdir)
+
+# coupled_outputdir = "./output/hydro1147"
+# uncoupStor_outputdir = "./output/hydro1152"
+# uncoupNoStor_outputdir = "./output/hydro1153"
+# policy_outputdir_lst <- c(coupled_outputdir2, uncoupStor_outputdir2, uncoupNoStor_outputdir2)
 run_name_lst <- c("Coupled", "Uncoupled with parametrization", "Uncoupled without parametrization")
 x_positions <- c(-1.1,0,1.1)
+
+outputdir_lst = baseline_outputdir_lst
+# outputdir_lst = policy_outputdir_lst
 
 df.capacity <- NULL
 for (i in c(1:length(outputdir_lst))){
@@ -491,7 +521,7 @@ df.capacity <- rbind(df.capacity, remind.capacity)
     # scale_linetype_manual(name = runname, values = linetype.map) +
     guides(linetype = guide_legend(override.aes = list(fill = NA
                                                        , col = "black"))) +
-    xlab("period") + ylab(paste0("Capacity (GW)")) +
+    xlab("Time") + ylab(paste0("Capacity (GW)")) +
     ggtitle(paste0(reg)) +
     theme(legend.title = element_blank()) 
   
@@ -566,7 +596,7 @@ df.capacity <- rbind(df.capacity, remind.capacity)
     scale_fill_manual(name = "Technology", values = color.mapping.wloss) +
     # scale_linetype_manual(name = "model", values = linetype.map) + 
     guides(linetype = guide_legend(override.aes = list(fill = NA, col = "black"))) +
-    xlab("period") + ylab(paste0("Generation (TWh)")) +
+    xlab("Time") + ylab(paste0("Generation (TWh)")) +
     ggtitle(paste0(reg)) +
     theme(legend.title = element_blank()) 
   

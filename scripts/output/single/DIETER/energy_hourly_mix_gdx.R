@@ -21,7 +21,7 @@ dieter.tech.mapping <- c(coal = "Coal",
                          Wind_on = "Wind Onshore",
                          Wind_off = "Wind Offshore",
                          Solar = "Solar",
-                         elh2 = "Electrolyzers",
+                         elh2 = "Flexible electrolyzers (PtG)",
                          el = "Electricity",
                          `all Tech` = "All Tech",
                          vregrid = "VRE grid",
@@ -56,7 +56,7 @@ supply.color.mapping <- c("Solar" = "#ffcc00",
                            "Hydro" = "#191999", "Nuclear" = "#ff33ff",
                            NULL)
 
-demand.color.mapping <- c("Electrolyzers" = "#66cccc", "Electricity" = "red", 
+demand.color.mapping <- c("Flexible electrolyzers (PtG)" = "#66cccc", "Electricity" = "red", 
                           NULL)
 
 color.mapping <- c(supply.color.mapping, demand.color.mapping)

@@ -192,7 +192,7 @@ swlatex(sw, paste0("\\section{Generation}"))
 
 for (year_toplot in model.periods) {
     
-  plot.remind <- out.remind.generation %>%
+  plot.remind.generation <- out.remind.generation %>%
     filter(period == year_toplot)
   
   plot.remind.generation.withCurt <- remind.generation.withCurt %>%
@@ -220,7 +220,7 @@ for (year_toplot in model.periods) {
   
   p1 <- ggplot() +
     geom_area(
-      data = plot.remind,
+      data = plot.remind.generation,
       aes(x = iteration, y = value, fill = tech),
       size = 1.2,
       alpha = 0.5,
@@ -309,7 +309,7 @@ for (year_toplot in model.periods) {
 #####################################################################################################
 swlatex(sw, "\\subsection{Generation over time (last iteration)}")
 
-plot.remind <-
+plot.remind.generation <-
   out.remind.generation  %>% filter(iteration == max(out.remind.generation$iteration))
 
 plot.remind.generation.withCurt <- remind.generation.withCurt %>%
@@ -318,7 +318,7 @@ plot.remind.generation.withCurt <- remind.generation.withCurt %>%
 plot.remind.consumption <- remind.consumption %>%
   filter(iteration == max(remind.consumption$iteration))
 
-plot.dieter <-
+plot.dieter.generation <-
   out.dieter %>% filter(iteration == max(out.dieter$iteration),
                         variable == "usable_generation")
 
@@ -331,14 +331,14 @@ plot.dieter.consumption <-
 
 p1 <- ggplot() +
   geom_area(
-    data = plot.remind %>% filter(period <2110),
+    data = plot.remind.generation %>% filter(period %in% model.periods.till2100),
     aes(x = period, y = value, fill = tech),
     size = 1.2,
     alpha = 0.5,
     stat = "identity"
   ) +
   geom_area(
-    data = plot.remind.generation.withCurt%>% filter(period <2110),
+    data = plot.remind.generation.withCurt%>% filter(period %in% model.periods.till2100),
     aes(x = period, y = value, color = tech),
     size = 1,
     alpha = 0,
@@ -360,7 +360,7 @@ p1 <- ggplot() +
 if (length(dieter.files) != 0) {
   p2 <- ggplot() +
     geom_area(
-      data = plot.dieter%>% filter(period <2110),
+      data = plot.dieter.generation %>% filter(period %in% model.periods.till2100),
       aes(
         x = as.numeric(period),
         y = value,
@@ -370,7 +370,7 @@ if (length(dieter.files) != 0) {
       alpha = 0.5
     ) +
     geom_area(
-      data = plot.dieter.gen.wCurt%>% filter(period <2110),
+      data = plot.dieter.gen.wCurt%>% filter(period %in% model.periods.till2100),
       aes(
         x = as.numeric(period),
         y = value,
@@ -408,16 +408,16 @@ if (save_png == 1){
 #####################################################################################################
 swlatex(sw, "\\subsection{Generation and consumption over time (last iteration)}")
 
-p1 <- ggplot() +
+p.genwConsump1 <- ggplot() +
   geom_area(
-    data = plot.remind %>% filter(period <2110),
+    data = plot.remind.generation %>% filter(period %in% model.periods.till2100),
     aes(x = period, y = value, fill = tech),
     size = 1.2,
     alpha = 0.5,
     stat = "identity"
   ) +
   geom_area(
-    data = plot.remind.generation.withCurt%>% filter(period <2110),
+    data = plot.remind.generation.withCurt%>% filter(period %in% model.periods.till2100),
     aes(x = period, y = value, color = tech),
     size = 1,
     alpha = 0,
@@ -428,17 +428,18 @@ p1 <- ggplot() +
   theme(axis.text = element_text(size = 10),
         axis.title = element_text(size = 15, face = "bold")) +
   xlab("Year") + ylab("Generation (TWh)") +
-  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
+  theme(legend.position="none")+
   theme(axis.text=element_text(size=15), axis.title=element_text(size= 13, face="bold"),strip.text = element_text(size=13)) +
-  ggtitle(paste0("REMIND: ", reg, " (last iteration)")) +
-  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
+  ggtitle(paste0("REMIND: ", reg, " (last iteration)")) 
+# +
+  # theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
 
 
 
 if (length(dieter.files) != 0) {
-  p2 <- ggplot() +
+  p.genwConsump2 <- ggplot() +
     geom_area(
-      data = plot.dieter%>% filter(period <2110),
+      data = plot.dieter.generation%>% filter(period %in% model.periods.till2100),
       aes(
         x = as.numeric(period),
         y = value,
@@ -448,7 +449,7 @@ if (length(dieter.files) != 0) {
       alpha = 0.5
     ) +
     geom_area(
-      data = plot.dieter.gen.wCurt%>% filter(period <2110),
+      data = plot.dieter.gen.wCurt %>% filter(period %in% model.periods.till2100),
       aes(
         x = as.numeric(period),
         y = value,
@@ -471,8 +472,8 @@ if (length(dieter.files) != 0) {
 }
 
 if (h2switch == "on"){
-p1 <- p1 + geom_area(
-  data = plot.dieter.consumption%>% filter(period <2110) %>% mutate(value = -value),
+  p.genwConsump1 <- p.genwConsump1 + geom_area(
+  data = plot.dieter.consumption%>% filter(period %in% model.periods.till2100) %>% mutate(value = -value),
   aes(
     x = as.numeric(period),
     y = value,
@@ -483,8 +484,8 @@ p1 <- p1 + geom_area(
 )
   
   
-p2 <- p2+  geom_area(
-    data = plot.remind.consumption%>% filter(period <2110)%>% mutate(value = -value),
+  p.genwConsump2 <- p.genwConsump2 +  geom_area(
+    data = plot.remind.consumption%>% filter(period %in% model.periods.till2100)%>% mutate(value = -value),
     aes(x = period, y = value, fill = tech),
     size = 1.2,
     alpha = 0.5,
@@ -494,9 +495,9 @@ p2 <- p2+  geom_area(
   
 grid.newpage()
 if (length(dieter.files) != 0) {
-  p <- arrangeGrob(rbind(ggplotGrob(p1), ggplotGrob(p2)))
+  p <- arrangeGrob(rbind(ggplotGrob(p.genwConsump1), ggplotGrob(p.genwConsump2)))
 } else {
-  p <- p1
+  p <- p.genwConsump1
 }
 
 swfigure(sw, grid.draw, p)
@@ -507,14 +508,14 @@ if (save_png == 1){
 swlatex(sw, "\\subsection{Generation last iteration - double bar plot}")
 
 if (length(dieter.files) != 0) {
-  plot.dieter.gen2 <- plot.dieter%>% 
+  plot.dieter.gen2 <- plot.dieter.generation %>% 
     filter(period %in% model.periods.till2100) %>% 
     mutate(period = as.numeric(as.character(period)) + 1) %>% 
     mutate(model = "DIETER")
   # %>% 
     # filter(iteration == maxiter-1) 
   
-  plot.remind.gen2 <- plot.remind %>% 
+  plot.remind.gen2 <- plot.remind.generation %>% 
     filter(period %in% model.periods.till2100) %>% 
     mutate(period = as.numeric(as.character(period)) - 1) %>% 
     mutate(model = "REMIND") %>% 
@@ -542,14 +543,14 @@ if (length(dieter.files) != 0) {
    # i = 27
     plot.remind.gen.snap <- out.remind.generation %>% 
     filter(iteration == i) %>% 
-    filter(period <2110)%>%
+    filter(period %in% model.periods.till2100)%>%
     mutate(period = as.numeric(period))%>% 
     dplyr::rename(remind_gen = value)
     
     plot.dieter.gen.snap <- out.dieter %>%
     filter(iteration == i) %>%
     filter(variable == "usable_generation") %>%
-    filter(period <2110)%>%
+    filter(period %in% model.periods.till2100)%>%
     mutate(period = as.numeric(period)) %>%
     dplyr::rename(dieter_gen = value)
     
@@ -584,14 +585,14 @@ if (length(dieter.files) != 0) {
     
     plot.remind.i0 <- out.remind.generation %>% 
       filter(iteration == 0+i) %>% 
-      filter(period <2110) %>%
+      filter(period %in% model.periods.till2100) %>%
       select(-iteration) %>% 
       mutate(period = as.numeric(period)) %>% 
       dplyr::rename(remind_gen_0 = value)
     
     plot.remind.i1 <- out.remind.generation %>% 
       filter(iteration == 1+i) %>% 
-      filter(period <2110) %>%
+      filter(period %in% model.periods.till2100) %>%
       select(-iteration) %>% 
       mutate(period = as.numeric(period)) %>% 
       dplyr::rename(remind_gen_1 = value)

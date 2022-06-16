@@ -99,19 +99,19 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                           spv = "Solar")
   
   remind.sector.coupling.mapping <- c(seel = "Electricity",
-                                      elh2 = "Electrolyzers",
+                                      elh2 = "Flexible electrolyzers (PtG)",
                                       tdels = "Stationary Electricity",
                                       tdelt = "Transport Electricity")
  
   remind.grid.mapping <- c(gridwindoff = "VRE Grid")
   
-  remind.sector.coupling.mapping.narrow <- c(elh2 = "Electrolyzers")
+  remind.sector.coupling.mapping.narrow <- c(elh2 = "Flexible electrolyzers (PtG)")
   
   remind.sector.coupling.mapping.exclude <- c(tdels = "Stationary Electricity",
                                               tdelt = "Transport Electricity")
 
   remind.storage.mapping.narrow <- c(storspv = "Lithium-ion Battery",
-                                     storcsp = "H2 turbine")
+                                     storcsp = "H2 storage")
   
   remind.tech.mapping <- c(remind.nonvre.mapping.whyd, remind.vre.mapping)
   remind.tech.mapping.narrow <- remind.tech.mapping
@@ -143,9 +143,9 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                                      spv = "Solar Curtailment")
   
   ############### DIETER #########################
-  table_ordered_name = c("Coal", "CCGT", "Solar", "Wind Onshore", "Wind Offshore", "Biomass", "OCGT", "Hydro", "Nuclear","Electrolyzers")
+  table_ordered_name = c("Coal", "CCGT", "Solar", "Wind Onshore", "Wind Offshore", "Biomass", "OCGT", "Hydro", "Nuclear","Flexible electrolyzers (PtG)")
   
-  table_ordered_name_dem = c("Electrolyzers","Electricity")
+  table_ordered_name_dem = c("Flexible electrolyzers (PtG)","Electricity")
   
   dieter.tech.exclude <- c("OCGT_ineff")
   
@@ -161,7 +161,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                                   NULL)
   
   dieter.demand.tech.mapping <- c(el = "Electricity",
-                                  elh2 = "Electrolyzers")
+                                  elh2 = "Flexible electrolyzers (PtG)")
   
   dieter.nonvre.mapping<- c(coal = "Coal",
                             nuc = "Nuclear",
@@ -176,7 +176,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                                   NULL)
   
   vre.names <- c("Hydro","Wind Onshore","Wind Offshore", "Solar")
-  nonvre.names <- c("Coal", "Nuclear","OCGT","CCGT","Biomass","Electrolyzers")
+  nonvre.names <- c("Coal", "Nuclear","OCGT","CCGT","Biomass","Flexible electrolyzers (PtG)")
   
   dieter.tech = c("CCGT",
                     "Solar",
@@ -250,7 +250,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   tech.label <- c("spv" ="Solar PV", "wind" = "Wind On","wind" = "Wind Off", "csp" = "Solar CSP", "ngt" = "OCGT",
                   "pcc" = "Coal w/ CCS", "ngccc" = "Gas CC w/ CCS", "tnrs" = "Nuclear","bioigcc" = "Biomass","bioigcc" = "Biomass w/ CCS",
                   "igcc" = "Coal", 
-                  "hydro" = "Hydro", "ngcc" = "Gas","pc" = "Coal", "system" = "System", "elh2" = "Electrolyzers")
+                  "hydro" = "Hydro", "ngcc" = "Gas","pc" = "Coal", "system" = "System", "elh2" = "Flexible electrolyzers (PtG)")
   
 ## define color mapping 
   
@@ -263,7 +263,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   if (h2switch == "on"){
     color.mapping <- c(color.mapping,
-                       "Electrolyzers" = "#48D1CC", "Electricity" = "#6495ED",
+                       "Flexible electrolyzers (PtG)" = "#48D1CC", "Electricity" = "#6495ED",
                        NULL)
   }
   
@@ -275,14 +275,14 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   if (h2switch == "on"){
     color.mapping.cap <- c(color.mapping.cap,
-                       "Electrolyzers" = "#48D1CC", 
+                       "Flexible electrolyzers (PtG)" = "#48D1CC", 
                        NULL)
   }
   
   if (storswitch == "on"){
     color.mapping.cap <- c(color.mapping.cap,
                            "Lithium-ion Battery" = "cyan", 
-                           "H2 turbine" = "#56B4E9",
+                           "H2 storage" = "#56B4E9",
                            NULL)
   }
   
@@ -456,16 +456,16 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                            Wind_on = "Wind Onshore",
                            Wind_off = "Wind Offshore",
                            Solar = "Solar",
-                           elh2 = "Electrolyzers",
+                           elh2 = "Flexible electrolyzers (PtG)",
                            el = "Electricity",
                            `all Tech` = "All Tech",
                            vregrid = "VRE grid",
                            lith = "Lithium-ion Battery",
-                           hydrogen = "H2 turbine",
+                           hydrogen = "H2 storage",
                            NULL)
   
   dieter.storage.mapping <- c( lith = "Lithium-ion Battery",
-                               hydrogen = "H2 turbine",
+                               hydrogen = "H2 storage",
                                NULL)
   
   dieter.tech.mapping.cost.order <- c(coal = "Coal",
@@ -488,7 +488,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                                 Wind_on = "Wind_Onshore",
                                 Wind_off = "Wind_Offshore",
                                 Solar = "Solar",
-                                elh2 = "Electrolyzers",
+                                elh2 = "Flexible electrolyzers (PtG)",
                                 el = "Electricity",
                                lith = "Lithium-ion Battery",
                                PSH = "Pumped_Storage_Hydro",
@@ -616,7 +616,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                                 "OCGT" = "#e51900", "Nuclear" = "#ff33ff","Hydro" = "#191999", 
                                 # "Wind Onshore" = "#337fff", 
                                 # "Wind Offshore" = "#334cff",
-                                "Electrolyzers" = "#66cccc", "Electricity" = "red", 
+                                "Flexible electrolyzers (PtG)" = "#66cccc", "Electricity" = "red", 
                                 "Lithium-ion Battery" ="cyan",
                                 "Pumped Storage Hydro" ="#D55E00",
                                 "Hydrogen Storage" = "#56B4E9",
@@ -643,7 +643,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                      "Biomass" = "#005900",
                      "OCGT" = "#e51900",
                      "Nuclear" = "#ff33ff",
-                     "Electrolyzers" = "#48D1CC")
+                     "Flexible electrolyzers (PtG)" = "#48D1CC")
   
   sm_TWa_2_MWh <- 8.76E9
 
