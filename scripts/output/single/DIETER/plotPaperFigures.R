@@ -132,7 +132,6 @@ p.gen.doublebar <- ggplot() +
            width = 1.5) + 
   scale_fill_manual(name = "Technology", values = color.mapping.gen.order) +
   scale_linetype_manual(name = "Model", values = linetype.map[c("REMIND", "DIETER")]) +
-  #guides(linetype = guide_legend(override.aes = list(fill = NA, col = "black"))) +
   xlab("Time") +
   ylab("Generation (TWh)") +
   ggtitle("Generation in REMIND and DIETER") +
@@ -386,36 +385,6 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_techZPC.png"),
        height = 38,  # Vary height according to how many panels plot has
        units = "cm")
 
-# ============SCENARIO plots =============================================================================
-# Figure ?: Long-term development ------------------------------------------
-
-# Figure ?: RLDC ------------------------------------------
-year_toplot = 2045
-
-p.RM.rldc <-ggplot() +
-  geom_area(data = RLDC.VRE, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1, position = "identity") +
-  geom_area(data = plot.rldc.hr, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1) +
-  coord_cartesian(ylim = c(-80,140),xlim = c(0,8760))+
-  scale_fill_manual(name = "Technology", values = color.mapping.RLDC.basic)+
-  theme(legend.position = "none")+
-  xlab("hour") + ylab("residual load (GW)")+
-  ggtitle(paste0("REMIND ", year_toplot))
-
-# Arrange both plots
-p <- plot_grid(p.RM.rldc,
-               p.DT.rldc,
-               ncol = 2,
-               rel_widths = c(1, 1.2),
-               labels = "auto",
-               label_size = 1.2*font.size,
-               align = "h")
-
-# Save as png
-ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_RLDC.png"),
-       bg = "white",
-       width = 20,  # Vary width according to how many panels plot has
-       height = 12,  # Vary height according to how many panels plot has
-       units = "cm")
 
 # ============SCENARIO plots =============================================================================
 # Figure: Long-term development ------------------------------------------
@@ -455,17 +424,203 @@ p.genwConsump1 <- ggplot() +
 p <- plot_grid(p.genwConsump1,
                p.cap1,
                ncol = 2,
-               rel_widths = c(1, 1.5),
+               rel_widths = c(1, 2),
                labels = "auto",
                align = "h") 
-
 # Save as png
-ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_LONG_GEN.png"),
+ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_LONG_GENCAP.png"),
        bg = "white",
        width = 20,  # Vary width according to how many panels plot has
        height = 12,  # Vary height according to how many panels plot has
        units = "cm")
 
+# ============SCENARIO plots =============================================================================
+# Figure ?: RLDC ------------------------------------------
+year_toplot = 2045
+
+p.RM.rldc <-ggplot() +
+  geom_area(data = RLDC.VRE, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1, position = "identity") +
+  geom_area(data = plot.rldc.hr, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1) +
+  coord_cartesian(ylim = c(min(CU_VRE_Solar.plot$Solar.RLDC2) * 1.1,max(LDC0$load) * 1.1 )) +
+  scale_fill_manual(name = "Technology", values = color.mapping.RLDC.basic)+
+  theme(legend.position = "none") +
+  xlab("hour") + ylab("residual load (GW)")+
+  ggtitle(paste0("REMIND ", year_toplot))
+
+# Arrange both plots
+p <- plot_grid(
+               p.RM.rldc,
+               p.DT.rldc,
+               ncol = 2,
+               rel_widths = c(1, 1.6),
+               labels = "auto",
+               label_size = 1.2*font.size,
+               align = "h")
+
+# Save as png
+ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_RLDC.png"),
+       bg = "white",
+       width = 20,  # Vary width according to how many panels plot has
+       height = 12,  # Vary height according to how many panels plot has
+       units = "cm")
+
+##########################################################
+#plot hourly price duration curve
+setwd("/home/chengong/remind-coupling-dieter/")
+base_nostor_outputdir = "./output/hydro1098"
+policy_outputdir = "./output/hydro1186"
+# scen_outputdir_lst <- c(base_nostor_outputdir, policy_outputdir)
+
+dieter.runningcost.variables.PDC = c("fuel cost - divided by eta ($/MWh)","CO2 cost ($/MWh)","O&M var cost ($/MWh)") 
+
+dieter.capture.price.variables.PDC <- c("DIETER Market value ($/MWh)")
+
+dieter.dispatch.tech.PDC = c("CCGT", "coal","bio", "OCGT_eff", "nuc")
+dieter.demand.tech.PDC <- c("elh2")
+
+year_toplot_list <- c(seq(2025, 2045, 5))
+
+for(year_toplot in year_toplot_list){
+  
+# year_toplot = 2030
+
+get_PDC <- function(outputdir){
+  
+  dieter.files.report <- list.files(outputdir, pattern = "report_DIETER_i[0-9]+\\.gdx") %>%
+    str_sort(numeric = TRUE)
+  
+  # Data preparation --------------------------------------------------------
+  price_hr <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
+    read.gdx("report_hours", factors = FALSE, squeeze = FALSE) %>% 
+    select(filename = X., period = X..2, variable = X..4, hour = X..5, value) %>%
+    mutate(hour = as.numeric(str_extract(hour, "[0-9]+"))) %>% 
+    filter(variable == "hourly wholesale price ($/MWh)") %>% 
+    filter(period == year_toplot) %>%
+    select(period, variable, value,hour) %>% 
+    mutate(period = as.numeric(period)) 
+  
+  price_Hr_plot <- price_hr %>% arrange(desc(value))
+  price_Hr_plot$sorted_x <- seq(1, 8760)
+  
+  return(price_Hr_plot)
+}
+
+get_runningcost <- function(outputdir){
+  
+  load(file.path(outputdir, "config.Rdata"))
+  h2switch <- cfg$gms$cm_DT_elh2_coup
+  
+  running_cost <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
+    read.gdx("report_tech", factors = FALSE, squeeze = FALSE) %>% 
+    select(filename = X., model = X..1, period = X..2, variable = X..4, tech = X..5, value) %>%
+    filter(model == "DIETER") %>% 
+    filter(tech %in% dieter.dispatch.tech.PDC) %>% 
+    revalue.levels(tech = dieter.tech.mapping) %>% 
+    mutate(tech = factor(tech, levels = rev(unique(dieter.tech.mapping)))) %>%
+    filter(period == year_toplot) %>% 
+    filter(variable%in% dieter.runningcost.variables.PDC) %>% 
+    select(tech, variable, value) %>% 
+    dplyr::group_by(tech) %>%
+    dplyr::summarise(value = sum(value), .groups = "keep") %>%
+    dplyr::ungroup(tech) 
+  
+  running_cost$maxT <-8760
+  
+  expanded_running_cost <- data.frame(tech = rep(running_cost$tech, running_cost$maxT),
+                                      value = rep(running_cost$value, running_cost$maxT),
+                                      hour = seq(1,8760))
+  
+  capture_price <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
+    read.gdx("report_tech", factors = FALSE, squeeze = FALSE) %>% 
+    select(filename = X., model = X..1, period = X..2, variable = X..4, tech = X..5, value) %>%
+    filter(model == "DIETER") %>% 
+    filter(tech %in% dieter.demand.tech.PDC) %>% 
+    revalue.levels(tech = dieter.tech.mapping) %>% 
+    mutate(tech = factor(tech, levels = rev(unique(dieter.tech.mapping)))) %>%
+    filter(period == year_toplot) %>% 
+    filter(variable%in% dieter.capture.price.variables.PDC) %>% 
+    select(tech, variable, value)
+  
+  capture_price$maxT <-8760
+  
+  expanded_capture_price <- data.frame(tech = rep(capture_price$tech, capture_price$maxT),
+                                       value = rep(capture_price$value, capture_price$maxT),
+                                       hour = seq(1,8760))
+  # max_price <- max(price_Hr_plot$value)
+  
+  if (h2switch == "on"){
+    cost.plot <- list(expanded_running_cost, expanded_capture_price) %>%
+      reduce(full_join)
+  }
+  
+  if (h2switch == "off"){
+    cost.plot <- list(expanded_running_cost) %>%
+      reduce(full_join)
+  }
+  
+  return(cost.plot)
+}
+
+base_price_Hr_plot <- lapply(base_nostor_outputdir, get_PDC)
+pol_price_Hr_plot <- lapply(policy_outputdir, get_PDC)
+
+base_price_Hr_plot <- as.data.frame(base_price_Hr_plot)
+pol_price_Hr_plot <- as.data.frame(pol_price_Hr_plot)
+
+base_cost.plot <- lapply(base_nostor_outputdir, get_runningcost)
+pol_cost.plot <- lapply(policy_outputdir, get_runningcost)
+
+base_cost.plot <- as.data.frame(base_cost.plot)
+pol_cost.plot <- as.data.frame(pol_cost.plot)
+
+color.mapping.PDC <- c("CCGT" = "#999959", 
+                       "Coal" = "#0c0c0c",
+                       "Biomass" = "#005900",
+                       "OCGT" = "#e51900",
+                       "Nuclear" = "#ff33ff",
+                       NULL)
+
+color.mapping.PDC <- c(color.mapping.PDC,
+                         "Flexible electrolyzers (PtG)" = "#48D1CC")
+
+  p.PDC.base <- ggplot() +
+    geom_line(data = base_price_Hr_plot, aes(x = sorted_x, y = value ), size = 1.2, alpha = 1, color = "blue") +
+    geom_line(data = base_cost.plot, aes(x = hour, y = value, color = tech ), size = 0.8, alpha = 0.8) +
+    coord_cartesian(expand = FALSE, ylim = c(0.1, 400)) +
+    scale_color_manual(name = "Running costs ($/MWh)", values = color.mapping.PDC) +
+    theme(axis.text = element_text(size=12), axis.title = element_text(size= 10, face="bold")) +
+    # ggtitle(paste0(year_toplot))+
+    theme(legend.position = "none")+
+    # theme(legend.position="bottom", legend.direction="horizontal")+
+    xlab("Hour") + ylab("Hourly electricity price (with scarcity price) ($/MWh)")
+
+  p.PDC.policy <- ggplot() +
+    geom_line(data = pol_price_Hr_plot, aes(x = sorted_x, y = value ), size = 1.2, alpha = 1, color = "blue") +
+    geom_line(data = pol_cost.plot, aes(x = hour, y = value, color = tech ), size = 0.8, alpha = 0.8) +
+    coord_cartesian(expand = FALSE, ylim = c(0.1, 400)) +
+    scale_color_manual(name = "Running costs ($/MWh)", values = color.mapping.PDC) +
+    theme(axis.text = element_text(size=12), axis.title = element_text(size= 10, face="bold")) +
+    # ggtitle(paste0(year_toplot))+
+    theme(legend.position="right", legend.direction="vertical")+
+    xlab("Hour") + ylab("Hourly electricity price (2045) ($/MWh)")
+  
+# Arrange both plots
+p <- plot_grid(
+  p.PDC.base,
+  p.PDC.policy,
+  ncol = 2,
+  rel_widths = c(1, 1.3),
+  labels = "auto",
+  label_size = 1.2*font.size,
+  align = "h")
+
+# Save as png
+ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_PDC",year_toplot,".png"),
+       bg = "white",
+       width = 20,  # Vary width according to how many panels plot has
+       height = 12,  # Vary height according to how many panels plot has
+       units = "cm")
+}
 # Figure ?: 3-panel coupled vs. uncoupled comparison  ------------------------------------------
 setwd("/home/chengong/remind-coupling-dieter/")
 coupled_outputdir = "./output/hydro1147"

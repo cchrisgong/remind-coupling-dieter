@@ -8,8 +8,18 @@ if (h2switch == "off"){
 }
 
 if (h2switch == "on"){
-  year_toplot_list <- model.periods.till2070
+  # year_toplot_list <- model.periods.till2070
+  year_toplot_list <- model.periods.till2045
 }
+
+remind.genshare.vre <- out.remind.genshare %>% 
+  filter(iteration == maxiter-1) %>% 
+  filter(tech %in% remind.vre.mapping) %>% 
+  select(period,genshare) %>%
+  dplyr::group_by(period) %>%
+  dplyr::summarise( genshare = sum(genshare), .groups = "keep" ) %>% 
+  dplyr::ungroup(period) 
+
 
 for(year_toplot in year_toplot_list){
 
@@ -45,23 +55,46 @@ plot.rldc.hr <- plot.rldc %>%
   mutate(tech = factor(tech, levels=rev(unique(highcfranking))))
 
 #---------------------------
-# average demand is total demand /8760 (REMIND demand is in Twa)
-remind.demand <- file.path(outputdir, remind.files[maxiter]) %>%  
+# hourly average demand is total demand /8760 (REMIND demand is in Twa)
+avg.remind.tot.demand <- file.path(outputdir, remind.files[maxiter]) %>%  
   read.gdx("v32_usableSeDisp", field="l", factor = FALSE) %>% 
   filter(all_regi == reg) %>%
   filter(entySe == "seel") %>%
   select(period=ttot,value) %>% 
   filter(period == year_toplot) %>% 
   mutate(value = value * 1e3)
-  
-avg.dem <- remind.demand$value
 
-# baseload as defined by CF > 33%
+h2consum <- file.path(outputdir, remind.files[maxiter]) %>%
+  read.gdx("vm_demSe", field="l", factors = FALSE,squeeze = FALSE) %>% 
+  filter(all_regi == reg) %>% 
+  filter(all_te == "elh2") %>% 
+  mutate(value = value * 1e3) %>%
+  select(period = ttot, h2dem = value) %>% 
+  filter(period == year_toplot) 
+
+avg.dem <- as.numeric(avg.remind.tot.demand$value) - as.numeric(h2consum$h2dem)
+
+## depending on VRE share
+df.vreShare <- remind.genshare.vre %>% 
+  filter(period == year_toplot)
+
+vreShare <- as.numeric(df.vreShare$genshare)
+
+if (vreShare < 85){
+# baseload as defined by CF > 33% for medium VRE share (<70%)
+  baseload_cf_limit = 33
+}
+
+if (vreShare >= 85){
+  # baseload as defined by CF > 0% for medium VRE share (<70%)
+  baseload_cf_limit = 0
+}
+
 baseload.cap <- plot.remind.cf %>% 
   left_join(plot.cap) %>% 
-  filter(cf > 33) %>% 
-  select(-cf) %>% 
-  dplyr::summarise( cap = sum(cap)) %>% 
+  filter(cf > baseload_cf_limit) %>% 
+  select(- cf) %>% 
+  dplyr::summarise(cap = sum(cap)) %>% 
   select(value = cap)
 
 # dispatchable 
@@ -70,6 +103,12 @@ disp.cap <- plot.cap %>%
   select(value = cap)
 
 baseload.dem <- baseload.cap$value
+
+if (vreShare > 80){
+  # for high VRE share, raise baseload cap to make plot prettier
+  baseload.dem = baseload.dem * 1.3
+}
+
 
 # peak demand as calculated from average demand and baseload demand (GW)
 peak.dem <- avg.dem * 2 - baseload.dem
@@ -106,18 +145,18 @@ gen.wowind <- avg.dem - avg.wind.gen
 width.solar = gen.wowind*2/(peak.dem-residual)
 
 if (width.solar < 1){
-delta_value2 = (peak.dem-residual)/(round(8760*width.solar))
+delta_value2 = (peak.dem - residual) / (round(8760 * width.solar))
 
 residual.solar.demand <- plot.remind.peak.demand %>%  
-  expand(plot.remind.peak.demand, hour = seq(1,8760)) %>% 
-  filter(hour <= round(width.solar*8760)) %>% 
+  expand(plot.remind.peak.demand, hour = seq(1, 8760)) %>% 
+  filter(hour <= round(width.solar * 8760)) %>% 
   mutate(value = seq((peak.dem-residual), +delta_value2, -delta_value2)) %>% 
   mutate(tech="Solar")
 }
 
 if (width.solar > 1){
 
-delta_value2 = (peak.dem-residual-(baseload.dem-2*avg.wind.gen))/876
+delta_value2 = (peak.dem - residual - (baseload.dem - 2 * avg.wind.gen)) / 876
 
 residual.solar.demand <- plot.remind.peak.demand %>% 
   expand(plot.remind.peak.demand, hour = seq(1,8760,10)) %>% 

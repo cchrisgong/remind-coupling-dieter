@@ -7,7 +7,7 @@ mydatapath = paste0(mypath, "/", file)
 source("~/remind-coupling-dieter/dataprocessing/DIETER_plots/library_import.R")
 library(readr)
 
-outputdir = "output/hydro1108"
+outputdir = "output/hydro1180"
 dir = "/home/chengong/remind-coupling-dieter/"
 mypath =paste0(dir,outputdir)
 mydatapath = paste0(mypath, "/", file)
@@ -27,7 +27,7 @@ dieter.tech.mapping <- c(coal = "Coal",
                          vregrid = "VRE grid",
                          lith = "Lithium-ion battery",
                          PSH = "Pumped Storage Hydro",
-                         hydrogen = "Hydrogen Storage",
+                         hydrogen = "Electrolyzers for long-term storage",
                          caes = "Compressed Air Energy Storage",
                          NULL)
 
@@ -48,7 +48,7 @@ supply.color.mapping <- c("Solar" = "#ffcc00",
                           "Wind Offshore" = "#334cff",
                           "Lithium-ion battery" ="cyan",
                           "Pumped Storage Hydro" ="#D55E00",
-                          "Hydrogen Storage" = "#56B4E9",
+                          "Electrolyzers for long-term storage" = "#56B4E9",
                           "Compressed Air Energy Storage" =  "#CC79A7",
                           "Wind" = "#337fff", "OCGT" = "#e51900", 
                           "Biomass" = "#005900",

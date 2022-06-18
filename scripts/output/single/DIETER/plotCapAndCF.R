@@ -254,7 +254,7 @@ swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")
         scale_linetype_manual(name = "model", values = linetype.map) +
         guides(linetype = guide_legend(override.aes = list(fill = NA
                                                            , col = "black"))) +
-        xlab("period") + ylab(paste0("Capacity (GW)")) +
+        xlab("Time") + ylab(paste0("Capacity (GW)")) +
         ggtitle(paste0(reg)) +
         theme(legend.title = element_blank()) 
   
@@ -269,56 +269,56 @@ swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")
 swlatex(sw, "\\subsection{Capacities over time (last iteration)}")
 
 plot.remind.capacity <- out.remind.capacity %>% 
+  filter(period %in% model.periods.till2100) %>% 
   filter(iteration == max(out.remind.capacity$iteration)) %>% 
   select(period,tech,value) %>% 
-  filter(!tech %in% dieter.storage.mapping)
-
-plot.dieter.capacity.batt <- plot.dieter.capacity %>%
-  select(period,tech,value) %>%
-  filter(tech %in% dieter.storage.mapping) %>%
-  filter(!tech == "Hydrogen Storage") %>% 
+  filter(!tech %in% dieter.storage.mapping)%>%
   mutate(period = as.numeric(period))
 
-plot.dieter.capacity.h2storage1 <- plot.dieter.capacity %>% 
-  select(period,tech,value) %>%
-  filter(tech == "Hydrogen Storage") %>% 
-  mutate(tech = "Electrolyzers for long-term storage") %>% 
-  mutate(period = as.numeric(period))
+plot.dieter.capacity.stor <- out.dieter.capacity %>%
+  mutate(period = as.numeric(period))%>%
+  filter(iteration == max(out.remind.capacity$iteration)) %>% 
+  select(period,tech,value) %>% 
+  filter(period %in% model.periods.till2100) %>% 
+  filter(tech %in% dieter.storage.mapping)
 
-plot.dieter.capacity.h2storage2 <- plot.dieter.capacity %>% 
-  select(period,tech,value) %>%
-  filter(tech == "Hydrogen Storage") %>% 
-  mutate(tech = "Hydrogen Turbine") %>% 
-  mutate(period = as.numeric(period))
-
+plot.dieter.capacity.h2stor2 <- plot.dieter.capacity.stor %>% 
+  filter(tech == "Electrolyzers for long-term storage") %>% 
+  mutate(tech = "Hydrogen Turbine")  
 
 plot.remind.capacity.wDIETERstorage <-list(plot.remind.capacity,
-                                           plot.dieter.capacity.batt,
-                                           plot.dieter.capacity.h2storage1,
-                                           plot.dieter.capacity.h2storage2
+                                           plot.dieter.capacity.stor,
+                                           plot.dieter.capacity.h2stor2
                                            ) %>% 
-  reduce(full_join) %>% 
-  mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping))))
+  reduce(full_join) 
+
+plot.remind.capacity.wDIETERstorage <- plot.remind.capacity.wDIETERstorage %>% 
+  mutate(tech = factor(tech, levels=rev(unique(c(dieter.tech.mapping,"Hydrogen Turbine","Electrolyzers for long-term storage")))))
   
 p.cap1<-ggplot() +
-  geom_area(data = plot.remind.capacity.wDIETERstorage%>% filter(period %in% model.periods.till2100) , aes(x = period, y = value, fill = tech), size = 1.2, alpha = 0.5) +
+  geom_area(data = plot.remind.capacity.wDIETERstorage, aes(x = period, y = value, fill = tech), size = 1.2, alpha = 0.5) +
   scale_fill_manual(name = "Technology", values = color.mapping.cap) +
   theme(legend.position="none") +
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 15, face="bold"),strip.text = element_text(size=13)) +
-  xlab("period") + ylab("Capacity (GW)") +
+  xlab("Time") + ylab("Capacity (GW)") +
   ggtitle(paste0("REMIND last iteration: ", reg)) +
   theme(plot.title = element_text(size = 15, face = "bold"))
 
 if (length(dieter.files) != 0) {
+  
 plot.dieter.capacity <- out.dieter.capacity %>%
-  filter(iteration == max(out.dieter.capacity$iteration))
+  mutate(period = as.numeric(period))%>%
+  filter(iteration == max(out.dieter.capacity$iteration)) %>% 
+  select(-iteration) %>% 
+  full_join(plot.dieter.capacity.h2stor2)%>% 
+  mutate(tech = factor(tech, levels=rev(unique(c(dieter.tech.mapping,"Hydrogen Turbine","Electrolyzers for long-term storage")))))
 
 p.cap2<-ggplot() +
     geom_area(data = plot.dieter.capacity%>% filter(period %in% model.periods.till2100), aes(x = as.numeric(period), y = value, fill = tech), size = 1.2, alpha = 0.5) +
     scale_fill_manual(name = "Technology", values = color.mapping.cap) +
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
   theme(axis.text=element_text(size=15), axis.title=element_text(size= 15, face="bold"),strip.text = element_text(size=13)) +
-    xlab("period") + ylab("Capacity (GW)") +
+    xlab("Time") + ylab("Capacity (GW)") +
     ggtitle(paste0("DIETER last iteration: ", reg))+
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=10))+
   theme(plot.title = element_text(size = 15, face = "bold"))
@@ -344,17 +344,17 @@ if (length(dieter.files) != 0) {
 swlatex(sw, paste0("\\section{Capacity factors}"))
 
 for(year_toplot in model.periods){
-  plot.remind <- out.remind.capfac %>% 
+  plot.remind.capfac <- out.remind.capfac %>% 
     filter(period == year_toplot)
   
-  plot.dieter <- out.dieter.capfac %>% 
+  plot.dieter.capfac <- out.dieter.capfac %>% 
     filter(period == year_toplot) 
   
   swlatex(sw, paste0("\\subsection{Capacity factors in ", year_toplot, "}"))
   
   p <- ggplot() + 
-    geom_line(data=plot.remind, aes(x=iteration, y=value, color=variable, linetype = model)) + 
-    geom_line(data=plot.dieter, aes(x=iteration, y=value, color=variable, linetype = model)) +
+    geom_line(data=plot.remind.capfac, aes(x=iteration, y=value, color=variable, linetype = model)) + 
+    geom_line(data=plot.dieter.capfac, aes(x=iteration, y=value, color=variable, linetype = model)) +
     scale_color_manual(name = "variable", values = color.mapping.cf)+
     theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=7)) +
     xlab("Iteration") + 
@@ -418,7 +418,7 @@ for (i in c(start_i + 1, start_i + 5, start_i + 10,maxiter - 1)){
     geom_label(size = 3, position = position_stack(vjust = 0.5)) +
     scale_fill_manual(name = "Technology", values = color.mapping)+
     theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
-    xlab("period") + ylab("Capacity (GW)") +
+    xlab("Time") + ylab("Capacity (GW)") +
     ggtitle("Capacity difference REMIND - DIETER")+
     theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank()) +
     theme(aspect.ratio = .5)
@@ -431,3 +431,4 @@ for (i in c(start_i + 1, start_i + 5, start_i + 10,maxiter - 1)){
 }
 }
 }
+

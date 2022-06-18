@@ -7,7 +7,6 @@ dieter.capture.price.variables.PDC <- c("DIETER Market value ($/MWh)")
 dieter.dispatch.tech.PDC = c("CCGT", "coal","bio", "OCGT_eff", "nuc")
 dieter.demand.tech.PDC <- c("elh2")
 
-# year_toplot_list <- c(2020,2025,2030,2035,2040,2045,2050,2055,2060,2070)
 year_toplot_list <- model.periods.RLDC
 
 for(year_toplot in year_toplot_list){
@@ -74,19 +73,19 @@ for(year_toplot in year_toplot_list){
       reduce(full_join)
   }
   
-  p<-ggplot() +
-    geom_line(data = price_Hr_plot, aes(x = sorted_x, y = value ), size = 1.2, alpha = 0.8, color = "blue") +
-    geom_line(data = cost.plot, aes(x = hour, y = value, color = tech ), size = 0.8, alpha = 0.5) +
+  p.PDC<-ggplot() +
+    geom_line(data = price_Hr_plot, aes(x = sorted_x, y = value ), size = 1.2, alpha = 1, color = "blue") +
+    geom_line(data = cost.plot, aes(x = hour, y = value, color = tech ), size = 0.8, alpha = 0.8) +
     coord_cartesian(expand = FALSE, ylim = c(0.1, 200)) +
-    scale_color_manual(name = "running costs ($/MWh)", values = color.mapping.PDC) +
-    theme(axis.text = element_text(size=10), axis.title = element_text(size= 10, face="bold")) +
-    # scale_y_continuous(trans = 'log10')+
+    scale_color_manual(name = "Running costs ($/MWh)", values = color.mapping.PDC) +
+    theme(axis.text = element_text(size=15), axis.title = element_text(size= 15, face="bold")) +
     ggtitle(paste0("DIETER ", year_toplot))+
+    theme(legend.position="bottom", legend.direction="horizontal")+
     xlab("hour") + ylab("electricity price (with scarcity price) ($/MWh)")
   
-  swfigure(sw, grid.draw, p)
+  swfigure(sw, grid.draw, p.PDC)
   if (save_png == 1){
-    ggsave(filename = paste0(outputdir, "/DIETER/DIETER_PDC_yr=", year_toplot, ".png"),  width = 8, height =8, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir, "/DIETER/DIETER_PDC_yr=", year_toplot, ".png"),  p.PDC,width = 6.5, height =6.5, units = "in", dpi = 120)
   }
 
 }

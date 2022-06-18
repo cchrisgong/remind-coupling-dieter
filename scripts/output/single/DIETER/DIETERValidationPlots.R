@@ -49,6 +49,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   model.periods <- c(seq(model.startyear, 2060, 5), seq(2070, 2100, 10), seq(2110, 2150, 20))
   model.periods.till2100 <- c(seq(model.startyear, 2060, 5), seq(2070, 2100, 10))
   model.periods.till2070 <- c(seq(model.startyear, 2060, 5), 2070)
+  model.periods.till2045 <- c(seq(model.startyear, 2045, 5))
   model.periods.RLDC <- c(seq(model.startyear, 2045, 5))
   
   report.periods <- c(seq(2005, 2060, 5), seq(2070, 2100, 10), seq(2110, 2150, 20))
@@ -65,7 +66,6 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   # load switches
   h2switch <- cfg$gms$cm_DT_elh2_coup
   storswitch <- cfg$gms$cm_DTstor
-  
   
   ## define technologies
   ############### REMIND #########################
@@ -111,7 +111,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                                               tdelt = "Transport Electricity")
 
   remind.storage.mapping.narrow <- c(storspv = "Lithium-ion Battery",
-                                     storcsp = "H2 storage")
+                                     storcsp = "Electrolyzers for long-term storage")
   
   remind.tech.mapping <- c(remind.nonvre.mapping.whyd, remind.vre.mapping)
   remind.tech.mapping.narrow <- remind.tech.mapping
@@ -282,7 +282,8 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   if (storswitch == "on"){
     color.mapping.cap <- c(color.mapping.cap,
                            "Lithium-ion Battery" = "cyan", 
-                           "H2 storage" = "#56B4E9",
+                           "Electrolyzers for long-term storage" = "#56B4E9",
+                           "Hydrogen Turbine" = "#8c56e9",
                            NULL)
   }
   
@@ -461,11 +462,11 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                            `all Tech` = "All Tech",
                            vregrid = "VRE grid",
                            lith = "Lithium-ion Battery",
-                           hydrogen = "H2 storage",
+                           hydrogen = "Electrolyzers for long-term storage",
                            NULL)
   
   dieter.storage.mapping <- c( lith = "Lithium-ion Battery",
-                               hydrogen = "H2 storage",
+                               hydrogen = "Electrolyzers for long-term storage",
                                NULL)
   
   dieter.tech.mapping.cost.order <- c(coal = "Coal",
@@ -491,9 +492,9 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                                 elh2 = "Flexible electrolyzers (PtG)",
                                 el = "Electricity",
                                lith = "Lithium-ion Battery",
-                               PSH = "Pumped_Storage_Hydro",
-                               hydrogen = "Hydrogen Storage",
-                               caes = "Compressed_Air_Energy_Storage",
+                               # PSH = "Pumped_Storage_Hydro",
+                               hydrogen = "Electrolyzers for long-term storage",
+                               # caes = "Compressed_Air_Energy_Storage",
                                NULL)
   
   
@@ -618,9 +619,9 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                                 # "Wind Offshore" = "#334cff",
                                 "Flexible electrolyzers (PtG)" = "#66cccc", "Electricity" = "red", 
                                 "Lithium-ion Battery" ="cyan",
-                                "Pumped Storage Hydro" ="#D55E00",
-                                "Hydrogen Storage" = "#56B4E9",
-                                "Compressed Air Energy Storage" =  "#CC79A7",
+                                # "Pumped Storage Hydro" ="#D55E00",
+                                "Electrolyzers for long-term storage" = "#56B4E9",
+                                # "Compressed Air Energy Storage" =  "#CC79A7",
                                 NULL)
   
   dieter.RLDC.variables <- c( 
@@ -643,7 +644,12 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                      "Biomass" = "#005900",
                      "OCGT" = "#e51900",
                      "Nuclear" = "#ff33ff",
-                     "Flexible electrolyzers (PtG)" = "#48D1CC")
+                     NULL)
+  
+  if (h2switch == "on"){
+    color.mapping.PDC <- c(color.mapping.PDC,
+                           "Flexible electrolyzers (PtG)" = "#48D1CC")
+  }
   
   sm_TWa_2_MWh <- 8.76E9
 

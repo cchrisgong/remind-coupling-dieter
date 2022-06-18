@@ -8,13 +8,14 @@ if (h2switch == "off"){
 }
 
 if (h2switch == "on"){
-  year_toplot_list <- model.periods.till2070
+  # year_toplot_list <- model.periods.till2070
+  year_toplot_list <- model.periods.till2045
 }
 
 # 
 # for(year_toplot in year_toplot_list){
 
-  year_toplot = 2045
+  # year_toplot = 2045
   hr_data <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
     read.gdx("report_tech_hours", factors = FALSE, squeeze = FALSE) %>% 
     # select(model = X., period = X..1, variable = X..3, tech = X..4, hour = X..5, value) %>%
@@ -80,7 +81,6 @@ if (h2switch == "on"){
   #=================================================================================================
   #=================================================================================================
   
-  
   RLDC_all = list(LDC,Wind,CU_VRE_Wind) %>% 
     reduce(full_join) %>% 
     replace(is.na(.), 0) %>% 
@@ -132,12 +132,12 @@ if (h2switch == "on"){
   RLDC.Batt_Li <- RLDC_all %>% arrange(desc(Batt.Li.RLDC)) %>%
     select(Batt.Li.RLDC) %>% 
     mutate(hour.sorted = seq(1, 8760)) %>% 
-    mutate(te = "Hydrogen Storage")
+    mutate(te = "Electrolyzers for long-term storage")
   
   #=================================================================================================
   Battery_Out_H2 <- hr_data %>% 
     filter(variable == "storage generation (GWh)") %>% 
-    filter(tech %in% c("Hydrogen Storage")) %>% 
+    filter(tech %in% c("Electrolyzers for long-term storage")) %>% 
     select(hour, value, tech) %>% 
     dplyr::group_by(hour) %>%
     dplyr::summarise(value = sum(value), .groups = "keep") %>%
@@ -148,7 +148,7 @@ if (h2switch == "on"){
   
   Battery_In_H2 <- hr_data %>% 
     filter(variable == "storage loading (GWh)") %>% 
-    filter(tech %in% c("Hydrogen Storage")) %>% 
+    filter(tech %in% c("Electrolyzers for long-term storage")) %>% 
     select(hour, value, tech) %>% 
     dplyr::group_by(hour) %>%
     dplyr::summarise(value = sum(value), .groups = "keep") %>%
@@ -160,7 +160,6 @@ if (h2switch == "on"){
   RLDC_checkpeak = list(LDC, PV, Wind, Battery_Out_Lith, Battery_Out_H2) %>%
     reduce(full_join) %>%
     mutate(residueLoad = load - solgen - windgen - battgen.li - battgen.h2)
-  
   
   RLDC_all <- list(RLDC_all, Battery_Out_H2, Battery_In_H2) %>% 
     reduce(full_join) %>% 
@@ -230,32 +229,7 @@ if (h2switch == "on"){
     mutate(te = techranking[[1]]) %>%
     mutate_all(function(H2.RLDC) ifelse(H2.RLDC < 0, 0, H2.RLDC))
   
-  #--------------------------------------------------------------
-  # tech_list = c("Batt",techranking)
-  # for (i in 2:length(tech_list)) {
-  #   i = 2
-  #   te <- tech_list[i]
-  #   te_last <- tech_list[i-1]
-  # 
-  #   hr_disp_gen_i <- hr_data %>% 
-  #     filter(variable == "generation (GWh)") %>% 
-  #     filter(tech == techranking[[i]]) %>% 
-  #     select(hour,value) %>% 
-  #     complete(hour = 1:8760, fill = list(value = 0)) %>% 
-  #     select(hour, !!sym(te) := value) 
-  # 
-  #   RLDC_all = list(RLDC_all, hr_disp_gen_i) %>% 
-  #     reduce(full_join) %>% 
-  #     mutate(!!paste0(te, ".RLDC") := !!paste0(te_last, ".RLDC") - !!sym(te)) 
-  #     arrange(desc(!!sym(paste0(te, ".RLDC")))) %>%
-  #     mutate(!!paste0(te, ".hour.sorted") := seq(1, 8760))
-  # 
-  #   dieter.data <- dieter.data %>%
-  #     mutate(!!paste0(var2, ".RLDC") := !!sym(paste0(var1, ".RLDC")) -!!sym(var2)) %>%
-  #     arrange(desc(!!sym(paste0(var2, ".RLDC")))) %>%
-  #     mutate(!!paste0(var2, ".hour.sorted") := seq(1, 8760))
-  #   
-  # }
+
   #=================================================================================================
   #=================================================================================================
   # order dispatchables based on capacity factor
@@ -339,8 +313,8 @@ if (h2switch == "on"){
     mutate(te = techranking[[5]])%>% 
     mutate_all(function(RLDC4) ifelse(RLDC4 <0, 0, RLDC4))
   }
-  if (length(techranking) > 5){
   #=================================================================================================
+  if (length(techranking) > 5){
   hr_disp_gen5 <- hr_data %>% 
     filter(variable == "generation (GWh)") %>% 
     filter(tech == techranking[[5]])%>% 
@@ -397,32 +371,32 @@ if (h2switch == "on"){
   
   if (h2switch == "off"){
     p.DT.rldc <- p.DT.rldc + scale_fill_manual(name = "Technology", values = color.mapping.RLDC.basic)+
-      coord_cartesian(ylim = c(-80,140))
+      coord_cartesian(ylim = c(min(CU_VRE_Solar.plot$Solar.RLDC2)*1.1,max(LDC0$load)*1.1 ))
   }
   
   if (h2switch == "on"){
-    p.DT.rldc <- p.DT.rldc + scale_fill_manual(name = "Technology", values = color.mapping.RLDC.fancy) + coord_cartesian(ylim = c(-300,200))
+    p.DT.rldc <- p.DT.rldc + scale_fill_manual(name = "Technology", values = color.mapping.RLDC.fancy) + coord_cartesian(ylim = c(min(CU_VRE_Solar.plot$Solar.RLDC2)*1.1,max(LDC0$load)*1.1 ))
   }
   
   if (length(techranking) > 2){
     p.DT.rldc <- p.DT.rldc+
-      geom_area(data = RLDC2%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC2, fill = te), size = 1.2, alpha = 1) 
-  }
-  
-  if (length(techranking) > 3){
-    p.DT.rldc <- p.DT.rldc+
-    geom_area(data = RLDC3%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC3, fill = te), size = 1.2, alpha = 1) 
-  }
-  
-  if (length(techranking) > 4){
-    p.DT.rldc<-  p.DT.rldc+
-      geom_area(data = RLDC4%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC4, fill = te), size = 1.2, alpha = 1)
+      geom_area(data = RLDC2%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC2, fill = te), size = 1.2, alpha = 1)
   }
 
-  if (length(techranking) > 5){
-    p.DT.rldc <- p.DT.rldc +
-      geom_area(data = RLDC5%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC5, fill = te), size = 1.2, alpha = 1)
+  if (length(techranking) > 3){
+    p.DT.rldc <- p.DT.rldc+
+    geom_area(data = RLDC3%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC3, fill = te), size = 1.2, alpha = 1)
   }
+
+  # if (length(techranking) > 4){
+  #   p.DT.rldc<-  p.DT.rldc+
+  #     geom_area(data = RLDC4%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC4, fill = te), size = 1.2, alpha = 1)
+  # }
+
+  # if (length(techranking) > 5){
+  #   p.DT.rldc <- p.DT.rldc +
+  #     geom_area(data = RLDC5%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC5, fill = te), size = 1.2, alpha = 1)
+  # }
   
   p.DT.rldc <- p.DT.rldc +
     geom_area(data = CU_VRE_Solar.plot%>% filter(hour %in% c(seq(1,8760,20),8760)), aes(x = hour, y = Solar.RLDC2, fill = te), size = 1.2, alpha = 1)  +
