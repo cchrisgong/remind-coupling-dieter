@@ -163,10 +163,10 @@ $IFTHEN.Base_Cprice %carbonprice% == "none"
 p32_CO2price4DT(t,regi)$((t.val gt 2020) AND regDTCoup(regi)) = cm_DTcoup_flatco2;
 $ENDIF.Base_Cprice
 
-$IFTHEN.Base_Cprice not %carbonprice% == "none"
+$IFTHEN.Policy_Cprice not %carbonprice% == "none"
 *** CG: updating CO2 price from REMIND to DIETER
 p32_CO2price4DT(t,regi)$((t.val gt 2020) AND regDTCoup(regi)) = pm_priceCO2(t,regi)/sm_C_2_CO2;
-$ENDIF.Base_Cprice
+$ENDIF.Policy_Cprice
 
 sm32_DTiter = cm_DTcoup_sIter;
 
@@ -262,7 +262,7 @@ $ENDIF.DTwER
 * is only calculated after 1st iteration (need to turn on the new input cost in
 * core/input/generisdata_tech_DIETER_storage.prn, for calibration for the first
 * iteration DIETER to use storage)
-$IFTHEN.DTstoroff %cm_DTstor% == "on"
+$IFTHEN.DTstoroff %cm_DTstor% == "off"
 s32_DTstor = 0;
 $ENDIF.DTstoroff
 $IFTHEN.DTstor %cm_DTstor% == "on"
@@ -282,6 +282,31 @@ $ENDIF.curt_avg
 
 p32_REMINDUpscaledShare(t,regi,techUpscaledNames32) = 0;
 p32_iterGenShDiff(t,regi,techUpscaledNames32)$(techUpscaledConv32(techUpscaledNames32)) = 0;
+
+*** peak demand prefactor
+$IFTHEN.Base %carbonprice% == "none"
+ p32_peakPreFac(t,regi)$(t.val gt 2060) = 0.5;
+$ENDIF.Base
+
+$IFTHEN.Policy not %carbonprice% == "none"
+
+if(cm_iterative_target_adj eq 5,
+ p32_peakPreFac(t,regi)$(t.val le 2040) = 0.5;
+ p32_peakPreFac(t,regi)$((t.val gt 2040) AND (t.val le 2060)) = 1;
+ p32_peakPreFac(t,regi)$((t.val gt 2060) AND (t.val le 2080)) = 1.5;
+ p32_peakPreFac(t,regi)$((t.val gt 2080) AND (t.val le 2100)) = 1.5;
+ p32_peakPreFac(t,regi)$(t.val ge 2100) = 2;
+);
+
+if(cm_iterative_target_adj eq 9,
+ p32_peakPreFac(t,regi)$(t.val le 2040) = 0.5;
+ p32_peakPreFac(t,regi)$((t.val gt 2040) AND (t.val le 2050)) = 1;
+ p32_peakPreFac(t,regi)$((t.val gt 2050) AND (t.val le 2080)) = 2;
+ p32_peakPreFac(t,regi)$((t.val gt 2080) AND (t.val le 2100)) = 3;
+ p32_peakPreFac(t,regi)$(t.val ge 2100) = 2;
+);
+
+$ENDIF.Policy
 
 * REMIND data for DIETER
 execute_unload "RMdata_4DT.gdx",t,tDT32,regDTCoup,sm32_iter, !! basic info: coupled time and regions, iteration number,

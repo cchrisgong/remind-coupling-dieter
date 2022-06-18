@@ -28,7 +28,8 @@ pm_SEPrice(t,regi,entySE)$(abs(qm_budget.m(t,regi)) gt sm_eps AND sameas(entySE,
        q32_balSe.m(t,regi,entySE) / qm_budget.m(t,regi);
 
 p32_peakDemand(t,regi)$(tDT32(t) AND regDTCoup(regi)) = p32_peakDemand_relFac(t,regi)
-  * ( 1 - cm_peakPreFac * (v32_shSeElDisp.l(t,regi,"wind") / 100	- p32_DIETER_shSeEl(t,regi,"wind") / 100 ) * s32_DTstor )
+  * ( 1 - p32_peakPreFac(t,regi) * ( (v32_shSeElDisp.l(t,regi,"wind") + v32_shSeElDisp.l(t,regi,"windoff")) / 100
+      - (p32_DIETER_shSeEl(t,regi,"wind") + p32_DIETER_shSeEl(t,regi,"windoff")) / 100 ) * s32_DTstor )
   * 8760 * ( v32_usableSeDisp.l(t,regi,"seel") - vm_demSe.l(t,regi,"seel","seh2","elh2") * s32_H2switch)
 ;
 
@@ -58,11 +59,12 @@ $ENDIF.DTcoup
 p32_valueFactor(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te))
       = p32_marketValue(t,regi,te)$regDTCoup(regi)/(pm_SEPrice(t,regi,"seel")$regDTCoup(regi) + sm_eps);
 
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+
 p32_shadowPrice(t,regi,te) = 0;
 p32_shadowPrice(t,regi,te)$(regDTCoup(regi) AND teDTCoupSupp(te) AND (p32_realCapfac(t,regi,te)))
       = vm_cap.m(t,regi,te,"1") / (p32_realCapfac(t,regi,te) / 1e2);
 
-$IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** if current iteration budget = 0, skip (so it automatically takes last iteration value)
 p32_capConShadowPrice(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND (abs(qm_budget.m(t,regi)) gt sm_eps) AND (p32_realCapfac(t,regi,te)))
       = q32_peakDemandDT.m(t,regi,"seel") / (qm_budget.m(t,regi)) / (p32_realCapfac(t,regi,te) / 1e2);
@@ -139,6 +141,7 @@ p32_seelUsableProd(t,regi,entySE)$(sameas(entySE,"seel")) = sum( pe2se(enty,enty
                                                         + sum(se2se(enty,entySE,te), vm_prodSe.l(t,regi,enty,entySE,te) )
                                                       	- sum(teVRE, v32_storloss.l(t,regi,teVRE))
 ;
+
 *** CG: dispatched part of the demand to be passed on to DIETER
 p32_usableSeDisp(t,regi,entySE)$(tDT32(t) AND regDTCoup(regi) AND sameas(entySE,"seel"))
                               = v32_usableSeDisp.l(t,regi,entySE)
@@ -157,8 +160,7 @@ p32_shSeElDem(t,regi,te)$(regDTCoup(regi)) = v32_shSeElDem.l(t,regi,te);
 $ENDIF.elh2_coup
 
 p32_storLoss(t,regi,teVRE)$(regDTCoup(regi)) =
-  p32_DIETERStorlossRatio(t,regi) * v32_usableSeDisp.l(t,regi,"seel") * s32_DTstor
-  * p32_DIETERCurtRatio(t,regi,teVRE)/(sum(te$(teVRE(te)),p32_DIETERCurtRatio(t,regi,teVRE))+sm_eps)
+  p32_DIETERStorlossRatio(t,regi,teVRE) * v32_usableSeDisp.l(t,regi,"seel") * s32_DTstor
   * ( 1 + (v32_shSeElDisp.l(t,regi,teVRE) / 100 - p32_DIETER_shSeEl(t,regi,teVRE) / 100 ) );
 
 p32_curtLoss(t,regi,teVRE)$(regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,teVRE) * v32_usableSeTeDisp.l(t,regi,"seel",teVRE)
@@ -226,8 +228,6 @@ p32_r4DT(ttot,regi)$(tDT32s2(ttot))
 * since we would like to couple all years to limit distortions, but growth rate after 2100 is weird (2130 has negative growth rate) due to various artefact, we simply set interest rates
 * after 2100 to 5%, this only sets 2110, 2130, 2150 three years
 p32_r4DT(ttot,regi)$(ttot.val gt 2100) = 0.05;
-
-
 
 $IFTHEN.policy_Cprice not %carbonprice% == "none"
 *** CG: updating CO2 price from REMIND to DIETER
@@ -336,7 +336,6 @@ p32_cfPrefac(t,regi,te)$(tDT32(t) AND regDTCoup(regi)) =
  ( 1 - 0.5 * (v32_shSeElDisp.l(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 ) )
  * 1$(tDT32(t) AND regDTCoup(regi) AND (pm_cf(t,regi,te) lt 0.5) AND CFcoupSuppte32(te))
 ;
-
 
 p32_mrkupUpscaled(t,regi,te) = p32_mrkup(t,regi,te);
 

@@ -196,7 +196,7 @@ q32_shStor(t,regi,teVRE)$((t.val ge 2020) AND (( regDTCoup(regi) AND ((cm_DTcoup
 
 
 ** note pm_eta_conv in DIETER coupling is treated as round-trip efficiency, not single-strip efficiency, unlike here in uncoupled version
-q32_storloss(t,regi,teVRE)$(t.val ge 2020)..
+q32_storloss(t,regi,teVRE)$((t.val ge 2020) AND (cm_DTuncoupStoOff ne 1))..
 	v32_storloss(t,regi,teVRE)
 	=e=
 	( v32_shStor(t,regi,teVRE) / 93    !! corrects for the 7%-shift in v32_shStor: at 100% the value is correct again
@@ -204,9 +204,8 @@ q32_storloss(t,regi,teVRE)$(t.val ge 2020)..
 	* vm_usableSeTe(t,regi,"seel",teVRE) )
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))
-	+ ( p32_DIETERCurtRatio(t,regi,teVRE) * v32_usableSeTeDisp(t,regi,"seel",teVRE)
- + p32_DIETERStorlossRatio(t,regi) * v32_usableSeDisp(t,regi,"seel") * s32_DTstor
-  * p32_DIETERCurtRatio(t,regi,teVRE)/(sum(te$(teVRE(te)),p32_DIETERCurtRatio(t,regi,teVRE)) + sm_eps)
+	+ ( p32_DIETERCurtRatio(t,regi,teVRE) * v32_usableSeTeDisp(t,regi,"seel", teVRE)
+  + p32_DIETERStorlossRatio(t,regi,teVRE) * v32_usableSeDisp(t,regi,"seel") * s32_DTstor
 		)
   * ( 1 + (v32_shSeElDisp(t,regi,teVRE) / 100 - p32_DIETER_shSeEl(t,regi,teVRE) / 100 ) )   !!! this is important to keep for stability
 	* 1$(regDTCoup(regi) AND (cm_DTcoup_eq eq 1) AND tDT32(t))
@@ -255,15 +254,25 @@ q32_limitSolarWind(t,regi)$( (cm_solwindenergyscen = 2) OR (cm_solwindenergyscen
 ***---------------------------------------------------------------------------
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
-*** hard capacity constraint to peak residual load demand (excluding flexible load such as electrolysers)
+*** hard capacity constraint to peak residual load demand (excluding flexible load such as electrolysers) for dispatchables (optional: both dispatchables and VRE)
+*** option 1: on the left hand side we add up dispatchable capacities AND renewable (+hydro) capacity credit (CC, latter of which are from DIETER, but we need a prefactor to stabilize CC),
+***           in this case the right hand side should be total peak demand, without prefactors - currently deprecated
+*** option 2: on the left hand side we add up dispatchable capacities (no renewable nor hydro), then right hand side should be residual peak demand (excluding hydro+VRE production)
+***						in this case the right hand side should have a prefactor that is linearly dependent on wind shares (hydro share prob not necessary)
+*** right now we are setting on option2, but could explore option 1 in the future
+*** (another option to apply this cap constraint to dispatchables, is only to pick out those that are producing in the peak residual demand hour in DIETER, which are in the set p32_DIETER_techNonScarProd = 1
+*** however, this does not seem necessary at the moment, so it is deprecated)
 q32_peakDemandDT(t,regi,"seel")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) AND (s32_hardcap ne 0) ) ..
 *** only pass those technologies which were producing in the scarcity hour in the last iteration DIETER, depracated, as the results is better without this
 *	sum(te$(DISPATCHte32(te) AND (p32_DIETER_techNonScarProd(t,regi,te) eq 1)), sum(rlf, vm_cap(t,regi,te,rlf)))
   sum(te$(DISPATCHte32(te)), sum(rlf, vm_cap(t,regi,te,rlf)))
+* + sum(te$(VREte32(te)), p32_DIETER_CC(t,regi,te)
+* * ( 1 + 2 * (v32_shSeElDisp(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 ) )
+* * sum(rlf, vm_cap(t,regi,te,rlf)))
 	=g=
   p32_peakDemand_relFac(t,regi)
-   * ( 1 - cm_peakPreFac * (v32_shSeElDisp(t,regi,"wind") / 100
-   - p32_DIETER_shSeEl(t,regi,"wind") / 100 ) * s32_DTstor ) !!! prefactor depending only on wind share (since scarce hour is always at night), only turned on for storage coupled run
+	* ( 1 - p32_peakPreFac(t,regi) * ((v32_shSeElDisp(t,regi,"windoff") + v32_shSeElDisp(t,regi,"wind")) / 100
+	- ( p32_DIETER_shSeEl(t,regi,"windoff") + p32_DIETER_shSeEl(t,regi,"wind")) / 100 ) ) !!! prefactor depending only on wind share (since scarce hour is always at night), only turned on for storage coupled run
 	* 8760 * ( v32_usableSeDisp(t,regi,"seel")
 $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
   - vm_demSe(t,regi,"seel","seh2","elh2")
@@ -296,7 +305,7 @@ q32_capEndStart(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) ).
 q32_priceCap(t,regi)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) )..
   vm_priceCap(t,regi)
   =e=
-	1 * ( -p32_budget(t,regi)) !! 0.1 = 100$/kW * 1e9 / 1e12, this is the capacity subsidy per kW of dispatchable, kW -> TW, USD -> trUSD
+	1 * ( - p32_budget(t,regi)) !! 0.1 = 100$/kW * 1e9 / 1e12, this is the capacity subsidy per kW of dispatchable, kW -> TW, USD -> trUSD
   * ( 1 / ( 1 + ( 3 ** ( (10 / ( v32_capDecayEnd(t,regi) - v32_capDecayEnd(t,regi)/1.1 ))
 		* ( vm_reqCap(t,regi) + 1e-11 - ( v32_capDecayEnd(t,regi) + v32_capDecayEnd(t,regi)/1.1 ) / 2	) ) ) )	)
 		 + ( v32_expSlack(t,regi) * 1e-8 )
@@ -317,33 +326,28 @@ q32_mkup(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teDTCoupSupp(te) AND (cm_D
 	=e=
 * with prefactor, prefactor dependent on the value factor in DIETER
   ( p32_DIETER_MV(t,regi,te) * (
-   1 - p32_prefac(t,regi,te) *	(v32_shSeElDisp(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 )
+   1 - p32_prefac(t,regi,te) *	( v32_shSeElDisp(t,regi,te) / 100 - p32_DIETER_shSeEl(t,regi,te) / 100 )
 	)
 	- p32_DIETER_elecprice(t,regi) )
 	 / 1e12 * sm_TWa_2_MWh * 1$(regDTCoup(regi))
-* no prefactor
-* ( (p32_DIETER_MV(t,regi,te) - p32_DIETER_elecprice(t,regi) ) / 1e12 * sm_TWa_2_MWh ) * 1$( regDTCoup(regi) )
 ;
 
 $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
 *** CG: giving flexible demand side technology, e.g. electrolyzer, a subsidy, non DIETER coupled version is q32_flexAdj below.
 *** on prefactor: beacuse if demand share v32_shSeElDem is low for elh2 compared to last iter p32_shSeElDemDIETER,
-*** to balance out oscillation for elh2, we want flexadj to be high (so MarketPrice elh2 sees has to be low to
+*** to balance out oscillation for elh2, we want flexadj to be high (so Capture Price elh2 sees has to be low to
 *** incentive an increase in demand share)
 q32_flexAdj(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND teFlexTax(te))..
 	vm_flexAdj(t,regi,te)
 	=e=
-*	without prefactor
-* (p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te))	/ 1e12 * sm_TWa_2_MWh
 * with prefactor
 	(( p32_DIETER_elecprice(t,regi) - p32_DIETER_MP(t,regi,te)
-*	 * ( 1 + ( v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
   * ( 1 + 0.7 * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
 *  * ( 1 + p32_prefac(t,regi,te) * (v32_shSeElDem(t,regi,te) / 100 - p32_shSeElDem(t,regi,te) / 100 ) )
 	)
 	/ 1e12 * sm_TWa_2_MWh )
 	* 1$(cm_DTcoup_eq ne 0)
-*** default markup from IntC (see below)
+*** default markup from IntC (also see below)
 	+ (1 - v32_flexPriceShare(t,regi,te)) * pm_SEPrice(t,regi,"seel") * 1$(cm_DTcoup_eq eq 0)
 ;
 $ENDIF.elh2_coup
@@ -464,7 +468,7 @@ $IFTHEN.DTcoup_off %cm_DTcoup% == "off"
 q32_flexPriceShare(t,regi,te)$(teFlex(te))..
   v32_flexPriceShare(t,regi,te)
   =e=
-  1 - (1-v32_flexPriceShareMin(t,regi,te)) * sum(teVRE, v32_shSeEl(t,regi,teVRE))/100
+  1 - (1 - v32_flexPriceShareMin(t,regi,te)) * sum(teVRE, v32_shSeEl(t,regi,teVRE)) / 100
 ;
 
 *** This calculates the flexibility benefit or cost per unit electricity input

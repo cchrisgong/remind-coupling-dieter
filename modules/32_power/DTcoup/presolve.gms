@@ -93,8 +93,15 @@ $ENDIF.elh2_coup
 $ENDIF.cf_avg
 
 *** pass peak demand from DIETER to REMIND as a relative fraction of the total demand
-    p32_peakDemand_relFac(t,regi)$(tDT32(t) AND regDTCoup(regi))
-		      = sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"all_te","ResPeakDem_relFac"));
+   p32_peakDemand_relFac(t,regi)$(tDT32(t) AND regDTCoup(regi))
+             = sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"all_te","ResPeakDem_relFac"));
+
+*** capacity credit for renewables (not stable currently, deprecated)
+*    p32_peakDemand_relFac(t,regi)$(tDT32(t) AND regDTCoup(regi)) = 0.000150990469301833;
+*    		      = sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"all_te","ResPeakDemHrTotDem_relFrac"));
+* p32_DIETER_CC(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","capacity_credit"));
+* p32_DIETER_CC(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","capacity_credit"));
+* p32_DIETER_CC(t,regi,"windoff")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_off","capacity_credit"));
 
 *** dividing each DIETER tech into REMIND tech, using the last iteration REMIND share within DIETER tech category to scale down the generation share
     p32_tech_category_genshare(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND BIOte32(te) )
@@ -217,24 +224,18 @@ $IFTHEN.WindOff %cm_wind_offshore% == "1"
 p32_DIETERCurtRatio(t,regi,"windoff")$(tDT32(t) AND regDTCoup(regi)) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_off","curt_ratio"));
 $ENDIF.WindOff
 
-p32_DIETERStorlossRatio(t,regi) = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"el","storloss_ratio"));
+p32_DIETERStorlossRatio(t,regi,"spv") = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Solar","storloss_ratio"));
+p32_DIETERStorlossRatio(t,regi,"wind") = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_on","storloss_ratio"));
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+p32_DIETERStorlossRatio(t,regi,"windoff") = sum(gdxfile32,p32_report4RM(gdxfile32,t,regi,"Wind_off","storloss_ratio"));
+$ENDIF.WindOff
 
 $IFTHEN.curt_avg %cm_DTcurt_avg% == "on"
 * with curt_ratio averaging
-p32_DIETERCurtRatioCurrIter(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"spv");
-p32_DIETERCurtRatioCurrIter(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"wind");
-$IFTHEN.WindOff %cm_wind_offshore% == "1"
-p32_DIETERCurtRatioCurrIter(t,regi,"windoff")$(tDT32(t) AND regDTCoup(regi)) = p32_DIETERCurtRatio(t,regi,"windoff");
-$ENDIF.WindOff
+p32_DIETERCurtRatioCurrIter(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND VRESWte32(te)) = p32_DIETERCurtRatio(t,regi,te);
 
-p32_DIETERCurtRatio(t,regi,"spv")$(tDT32(t) AND regDTCoup(regi)) =
-      0.5 * (p32_DIETERCurtRatioLaIter(t,regi,"spv") + p32_DIETERCurtRatio(t,regi,"spv"));
-p32_DIETERCurtRatio(t,regi,"wind")$(tDT32(t) AND regDTCoup(regi)) =
-      0.5 * (p32_DIETERCurtRatioLaIter(t,regi,"wind") + p32_DIETERCurtRatio(t,regi,"wind"));
-$IFTHEN.WindOff %cm_wind_offshore% == "1"
-p32_DIETERCurtRatio(t,regi,"windoff")$(tDT32(t) AND regDTCoup(regi)) =
-      0.5 * (p32_DIETERCurtRatioLaIter(t,regi,"windoff") + p32_DIETERCurtRatio(t,regi,"windoff"));
-$ENDIF.WindOff
+p32_DIETERCurtRatio(t,regi,te)$(tDT32(t) AND regDTCoup(regi) AND VRESWte32(te)) =
+      0.5 * (p32_DIETERCurtRatioLaIter(t,regi,te) + p32_DIETERCurtRatio(t,regi,te));
 * ror capfac is harmonized by setting capfac in DIETER to be the same as that in REMIND
 $ENDIF.curt_avg
 
@@ -249,7 +250,15 @@ $ENDIF.DTstor
 
 p32_curtVREshare(t,regi,teVRE) = p32_DIETERCurtRatio(t,regi,teVRE)/(sum(te$(teVRE(te)),p32_DIETERCurtRatio(t,regi,teVRE))+sm_eps);
 
-display "chris p32_curtVREshare", p32_curtVREshare;
+*display "chris p32_curtVREshare", p32_curtVREshare;
+
+** share of storage generation in peak residual demand hour in last iteration DIETER, used for calculating peak demand prefactor p32_peakPreFac
+p32_stor_CC(t,regi)$(tDT32(t) AND regDTCoup(regi))
+           = sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"all_te","stor_cap_credit"));
+*** 4 is a factor found by trial and error. If the storage discharge share of inflexible demand in peak-residual-inflexible-demand hour is 50%, the prefactor is 2.5, which is found
+** to stabilize the run for DEU
+* p32_peakPreFac(t,regi) = p32_stor_CC(t,regi) * 4;
+
 );
 
 

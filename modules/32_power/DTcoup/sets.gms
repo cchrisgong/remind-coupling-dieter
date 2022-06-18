@@ -49,7 +49,7 @@ nuclear
 windon
 solar/
 
-DIETERvarname32 "DIETER name" /capfac,ResPeakDem_relFac,value_factor,gen_share,
+DIETERvarname32 "DIETER name" /capfac,ResPeakDem_relFac,ResPeakDemHrTotDem_relFrac,stor_cap_credit,capacity_credit,value_factor,gen_share,
 market_value,market_price,elec_price, elec_price_wscar,curt_share,curt_ratio,storloss_ratio,
 dem_share,usable_generation,model_status,peak_gen_bin,sto_P_capacity,sto_E_capacity/
 
@@ -140,4 +140,11 @@ $endif.chpoff
 NUCte32(all_te) "nuclear to seel tech in REMIND" /tnrs,fnrs/
 CFcoupDemte32(all_te) "demand-side technologies in REMIND which have prefactors to capacity factor" /elh2/
 Aggte32 "aggregated technologies" /Bio,coal,CCGT,nuc/
-VREte32(all_te) "VRE to seel tech in REMIND" /spv,wind, windoff,hydro/
+VREte32(all_te) "VRE to seel tech in REMIND" /spv,wind,windoff,hydro/
+VRESWte32(all_te) "VRE (solar and wind) to seel tech in REMIND"
+/spv
+wind
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+windoff
+$ENDIF.WindOff
+/
