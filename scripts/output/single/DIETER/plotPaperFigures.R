@@ -76,6 +76,15 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE02.png"),
 #        units = "cm")
 
 # Figure 3: Generation convergence ------------------------------------------
+if (coupMode == "none"){
+  diff_breaks = seq(-30,30,15)
+}
+
+if (coupMode == "validation"){
+  diff_breaks = seq(-10,10,3)
+}
+
+
 # With manual colour scales, we need to order this vector 
 color.mapping.gen.order <- color.mapping.cap[levels(plot.dieter.gen2$tech)]
 color.mapping.gen.order <- color.mapping.gen.order[!is.na(color.mapping.gen.order)]
@@ -147,7 +156,7 @@ p.gen.diff <- ggplot() +
            mapping = aes(x = period, y = delta_gen.rel, fill = tech),
            stat = "identity") + 
   scale_fill_manual(name = "Technology", values = color.mapping.gen.order) +
-  scale_y_continuous(name = "Difference (%)", breaks = seq(-10,10,3)) + 
+  scale_y_continuous(name = "Difference (%)", breaks = seq(-30,30,15)) + 
   xlab("Time") +
   ggtitle("Generation difference (REMIND - DIETER) / total REMIND generation ") +
   theme_minimal_grid(12)
@@ -261,7 +270,7 @@ p.cap.diff <-ggplot() +
            mapping = aes(x = period, y = delta_cap.rel, fill = tech),
            stat = "identity") +
   scale_fill_manual(name = "Technology", values = color.mapping.cap.order) +
-  scale_y_continuous(name = "Difference (%)", breaks = seq(-20,20,5)) + 
+  scale_y_continuous(name = "Difference (%)", breaks = seq(-30,30,15)) + 
   xlab("Time") +
   ggtitle("Capacity difference (REMIND - DIETER) / total REMIND capacity ") +
   theme_minimal_grid(12)
@@ -389,13 +398,13 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_techZPC.png"),
 # ============SCENARIO plots =============================================================================
 # Figure: Long-term development ------------------------------------------
 
-p.cap1<-ggplot() +
+p.cap1 <- ggplot() +
   geom_area(data = plot.remind.capacity.wDIETERstorage%>% filter(period %in% model.periods.till2100) , aes(x = period, y = value, fill = tech), size = 1.2, alpha = 0.5) +
   scale_fill_manual(name = "Technology", values = color.mapping.cap) +
-  theme(axis.text=element_text(size=12), axis.title=element_text(size= 12, face="bold")) +
   theme(legend.position="right", legend.direction="vertical", legend.title = element_blank(),legend.text = element_text(size=12))+
   theme_minimal_grid(12) +
-  xlab("Time") + ylab("Capacity (GW)")
+  xlab("Time") + ylab("Capacity (GW)")+
+  theme(axis.text=element_text(size=12), axis.title=element_text(size= 12, face="bold"))
 
 p.genwConsump1 <- ggplot() +
   geom_area(
@@ -415,8 +424,8 @@ p.genwConsump1 <- ggplot() +
   theme_minimal_grid(12) +
   scale_fill_manual(name = "Technology", values = color.mapping) +
   scale_color_manual(name = "Technology", values = color.mapping_vre) +
-  theme(axis.text = element_text(size = 12),
-        axis.title = element_text(size = 12, face = "bold")) +
+  theme(axis.text = element_text(size = 11),
+        axis.title = element_text(size = 11, face = "bold")) +
   xlab("Time") + ylab("Generation (TWh)") +
   theme(legend.position="none")
 
@@ -444,18 +453,33 @@ p.RM.rldc <-ggplot() +
   coord_cartesian(ylim = c(min(CU_VRE_Solar.plot$Solar.RLDC2) * 1.1,max(LDC0$load) * 1.1 )) +
   scale_fill_manual(name = "Technology", values = color.mapping.RLDC.basic)+
   theme(legend.position = "none") +
-  xlab("hour") + ylab("residual load (GW)")+
+  theme(axis.text=element_text(size=12), axis.title=element_text(size= 12, face="bold"))+
+  xlab("hour") + ylab("Sorted residual load (GW)")+
   ggtitle(paste0("REMIND ", year_toplot))
 
-# Arrange both plots
-p <- plot_grid(
+# Extract legend of doublebar plot for 
+p.legend <- get_legend(p.DT.rldc + theme(legend.box.margin = margin(0, 0, 0, 12)))
+
+
+p.DT.rldc <- p.DT.rldc +
+  theme(legend.position = "none")
+
+  # Arrange both plots
+p.plots <- plot_grid(
                p.RM.rldc,
                p.DT.rldc,
                ncol = 2,
-               rel_widths = c(1, 1.6),
+               rel_widths = c(1, 1),
                labels = "auto",
                label_size = 1.2*font.size,
                align = "h")
+
+
+# Put together plot and legend
+p <- plot_grid(p.plots,
+               p.legend,
+               ncol = 2,
+               rel_widths = c(1, 0.2))
 
 # Save as png
 ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_RLDC.png"),
@@ -588,30 +612,30 @@ color.mapping.PDC <- c(color.mapping.PDC,
     geom_line(data = base_cost.plot, aes(x = hour, y = value, color = tech ), size = 0.8, alpha = 0.8) +
     coord_cartesian(expand = FALSE, ylim = c(0.1, 400)) +
     scale_color_manual(name = "Running costs ($/MWh)", values = color.mapping.PDC) +
-    theme(axis.text = element_text(size=12), axis.title = element_text(size= 10, face="bold")) +
-    # ggtitle(paste0(year_toplot))+
+    theme(axis.text = element_text(size=10), axis.title = element_text(size= 10, face="bold")) +
+    ggtitle(paste0("Baseline ", year_toplot))+
     theme(legend.position = "none")+
     # theme(legend.position="bottom", legend.direction="horizontal")+
-    xlab("Hour") + ylab("Hourly electricity price (with scarcity price) ($/MWh)")
+    xlab("Hour") + ylab("Sorted hourly electricity price ($/MWh)")
 
   p.PDC.policy <- ggplot() +
     geom_line(data = pol_price_Hr_plot, aes(x = sorted_x, y = value ), size = 1.2, alpha = 1, color = "blue") +
     geom_line(data = pol_cost.plot, aes(x = hour, y = value, color = tech ), size = 0.8, alpha = 0.8) +
     coord_cartesian(expand = FALSE, ylim = c(0.1, 400)) +
     scale_color_manual(name = "Running costs ($/MWh)", values = color.mapping.PDC) +
-    theme(axis.text = element_text(size=12), axis.title = element_text(size= 10, face="bold")) +
-    # ggtitle(paste0(year_toplot))+
+    theme(axis.text = element_text(size=10), axis.title = element_text(size= 10, face="bold")) +
+    ggtitle(paste0("Net-zero policy ", year_toplot))+
     theme(legend.position="right", legend.direction="vertical")+
-    xlab("Hour") + ylab("Hourly electricity price (2045) ($/MWh)")
+    xlab("Hour") + ylab("Sorted hourly electricity price ($/MWh)")
   
 # Arrange both plots
 p <- plot_grid(
   p.PDC.base,
   p.PDC.policy,
   ncol = 2,
-  rel_widths = c(1, 1.3),
+  rel_widths = c(1, 1.5),
   labels = "auto",
-  label_size = 1.2*font.size,
+  label_size = 1.4*font.size,
   align = "h")
 
 # Save as png
@@ -622,30 +646,36 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_PDC",year_toplot,".png"),
        units = "cm")
 }
 # Figure ?: 3-panel coupled vs. uncoupled comparison  ------------------------------------------
+# baseline run comparison - 2C
 setwd("/home/chengong/remind-coupling-dieter/")
-coupled_outputdir = "./output/hydro1147"
-uncoupStor_outputdir = "./output/hydro1152"
-uncoupNoStor_outputdir = "./output/hydro1153"
+coupled_outputdir = "./output/hydro1180"
+uncoupStor_outputdir = "./output/hydro1190"
+uncoupNoStor_outputdir = "./output/hydro1193"
 baseline_outputdir_lst <- c(coupled_outputdir, uncoupStor_outputdir, uncoupNoStor_outputdir)
 
-# coupled_outputdir = "./output/hydro1147"
-# uncoupStor_outputdir = "./output/hydro1152"
-# uncoupNoStor_outputdir = "./output/hydro1153"
-# policy_outputdir_lst <- c(coupled_outputdir2, uncoupStor_outputdir2, uncoupNoStor_outputdir2)
-run_name_lst <- c("Coupled", "Uncoupled with parametrization", "Uncoupled without parametrization")
-x_positions <- c(-1.1,0,1.1)
+# policy run comparison - 2C
+coupled_outputdir2 = "./output/hydro1183"
+uncoupStor_outputdir2 = "./output/hydro1191"
+uncoupNoStor_outputdir2 = "./output/hydro1195"
+policy_outputdir_lst <- c(coupled_outputdir2, uncoupStor_outputdir2, uncoupNoStor_outputdir2)
 
-outputdir_lst = baseline_outputdir_lst
-# outputdir_lst = policy_outputdir_lst
+run_name_lst <- c("Coupled with storage", "Uncoupled with storage parametrization", "Uncoupled without storage parametrization")
+x_positions <- c(-1.12,0,1.12)
+
+# outputdir_lst = baseline_outputdir_lst
+# fig_title = "baseline"
+outputdir_lst = policy_outputdir_lst
+fig_title = "policy"
+
+font.size = 8
 
 df.capacity <- NULL
 for (i in c(1:length(outputdir_lst))){
   
   outputdir = outputdir_lst[[i]]
   print(outputdir)
-  
+  outputdir = "./output/hydro1195"
   run_name = run_name_lst[[i]]
-  # outputdir = coupled_outputdir
   
 remind.files <- list.files(outputdir, pattern = "fulldata_[0-9]+\\.gdx") %>%
   str_sort(numeric = TRUE)
@@ -655,14 +685,14 @@ remind.capacity <- file.path(outputdir, remind.files[length(remind.files)]) %>%
     filter(tall %in% model.periods) %>%
     filter(all_regi == reg) %>%
     filter(rlf == "1") %>% 
-    filter(all_te %in% names(remind.tech.mapping.narrow)) %>%
+    filter(all_te %in% names(remind.tech.mapping.narrow.wsto.welh2)) %>%
     mutate(value = value * 1e3) %>% #TW->GW
     select(period = tall, tech = all_te, rlf, value) %>% 
-    revalue.levels(tech = remind.tech.mapping.narrow) %>%
+    revalue.levels(tech = remind.tech.mapping.narrow.wsto.welh2) %>%
     dplyr::group_by(period, tech, rlf) %>%
     dplyr::summarise( value = sum(value) , .groups = 'keep' ) %>% 
     dplyr::ungroup(period, tech, rlf) %>% 
-    mutate(tech = factor(tech, levels=rev(unique(remind.tech.mapping.narrow))))%>% 
+    mutate(tech = factor(tech, levels=rev(unique(remind.tech.mapping.narrow.wsto.welh2))))%>% 
     filter(period %in% model.periods.till2100) %>% 
     mutate(period = as.numeric(as.character(period)) + x_positions[[i]]) %>% 
     mutate(runname = run_name)
@@ -670,19 +700,21 @@ remind.capacity <- file.path(outputdir, remind.files[length(remind.files)]) %>%
 df.capacity <- rbind(df.capacity, remind.capacity)
 }
 
-  p0<-ggplot() +
+  p.cap.compare <-ggplot() +
     geom_bar(data = df.capacity, aes(x=period, y=value, fill=tech, linetype=runname), colour = "black", stat="identity",position="stack", width=1) + 
-    scale_fill_manual(name = "Technology", values = color.mapping.cap) +
-    # scale_linetype_manual(name = runname, values = linetype.map) +
+    scale_fill_manual(name = "Technology", values = color.mapping.cap.wsto.welh2) +
     guides(linetype = guide_legend(override.aes = list(fill = NA
                                                        , col = "black"))) +
     xlab("Time") + ylab(paste0("Capacity (GW)")) +
-    ggtitle(paste0(reg)) +
-    theme(legend.title = element_blank()) 
+    ggtitle(paste0("Comparison of coupled and uncoupled runs for Germany - Baseline")) +
+    theme(legend.title = element_blank()) +
+    theme(legend.position="bottom", legend.direction="horizontal", legend.text = element_text(size=font.size)) +
+    guides(fill=guide_legend(nrow=6,byrow=TRUE), linetype=guide_legend(nrow=6,byrow=TRUE))+
+    theme(axis.text = element_text(size=12), axis.title = element_text(size= 10, face="bold")) +
   
   swfigure(sw,print,p)
   if (save_png == 1){
-    ggsave(filename = paste0(coupled_outputdir, "/DIETER/Figure_uncoupA.png"),  p0,  width = 10, height = 4.5, units = "in", dpi = 120)
+    ggsave(filename = paste0(coupled_outputdir, "/DIETER/Figure_uncoup_", fig_title, "_CAP.png"), p.cap.compare, width = 7, height = 4.5, units = "in", dpi = 120)
   }
 
   df.generation <- NULL
@@ -749,7 +781,6 @@ df.capacity <- rbind(df.capacity, remind.capacity)
   p<-ggplot() +
     geom_bar(data = df.generation, aes(x=period, y=value, fill=tech, linetype=runname), colour = "black", stat="identity",position="stack", width=1) +
     scale_fill_manual(name = "Technology", values = color.mapping.wloss) +
-    # scale_linetype_manual(name = "model", values = linetype.map) + 
     guides(linetype = guide_legend(override.aes = list(fill = NA, col = "black"))) +
     xlab("Time") + ylab(paste0("Generation (TWh)")) +
     ggtitle(paste0(reg)) +
@@ -757,7 +788,7 @@ df.capacity <- rbind(df.capacity, remind.capacity)
   
   swfigure(sw,print,p)
   if (save_png == 1){
-    ggsave(filename = paste0(coupled_outputdir, "/DIETER/Figure_uncoupB.png"),  p,  width = 11, height = 6, units = "in", dpi = 120)
+    ggsave(filename = paste0(coupled_outputdir, "/DIETER/Figure_uncoup_", fig_title, "_GEN.png"),  p,  width = 11, height = 6, units = "in", dpi = 120)
   }
   
 

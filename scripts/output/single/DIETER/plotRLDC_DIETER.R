@@ -365,9 +365,8 @@ if (h2switch == "on"){
     geom_area(data = RLDC.Batt_H2%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = Batt.H2.RLDC, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC.H2%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = H2.RLDC, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC1%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC1, fill = te), size = 1.2, alpha = 1) +
-    xlab("hour") + ylab("residual load (GW)")+
+    xlab("Hour") + ylab("Sorted residual load (GWh)")+
     ggtitle(paste0("DIETER ", year_toplot))
-
   
   if (h2switch == "off"){
     p.DT.rldc <- p.DT.rldc + scale_fill_manual(name = "Technology", values = color.mapping.RLDC.basic)+
@@ -388,19 +387,22 @@ if (h2switch == "on"){
     geom_area(data = RLDC3%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC3, fill = te), size = 1.2, alpha = 1)
   }
 
-  # if (length(techranking) > 4){
-  #   p.DT.rldc<-  p.DT.rldc+
-  #     geom_area(data = RLDC4%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC4, fill = te), size = 1.2, alpha = 1)
-  # }
+  if (length(techranking) > 4){
+    p.DT.rldc<-  p.DT.rldc+
+      geom_area(data = RLDC4%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC4, fill = te), size = 1.2, alpha = 1)
+  }
 
-  # if (length(techranking) > 5){
-  #   p.DT.rldc <- p.DT.rldc +
-  #     geom_area(data = RLDC5%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC5, fill = te), size = 1.2, alpha = 1)
-  # }
+  if (length(techranking) > 5){
+    p.DT.rldc <- p.DT.rldc +
+      geom_area(data = RLDC5%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC5, fill = te), size = 1.2, alpha = 1)
+  }
   
   p.DT.rldc <- p.DT.rldc +
-    geom_area(data = CU_VRE_Solar.plot%>% filter(hour %in% c(seq(1,8760,20),8760)), aes(x = hour, y = Solar.RLDC2, fill = te), size = 1.2, alpha = 1)  +
-    geom_area(data = CU_VRE_Wind.plot%>% filter(hour %in% c(seq(1,8760,20),8760)), aes(x = hour, y = Wind.RLDC2, fill = te), size = 1.2, alpha = 1)
+    geom_area(data = CU_VRE_Solar.plot %>% filter(hour %in% c(seq(1,8760,20),8760)), aes(x = hour, y = Solar.RLDC2, fill = te), size = 1.2, alpha = 1)  +
+    geom_area(data = CU_VRE_Wind.plot %>% filter(hour %in% c(seq(1,8760,20),8760)), aes(x = hour, y = Wind.RLDC2, fill = te), size = 1.2, alpha = 1)
+  
+  p.DT.rldc <- p.DT.rldc + 
+    theme(axis.text=element_text(size=12), axis.title=element_text(size= 12, face="bold"))
 
   swfigure(sw, grid.draw, p.DT.rldc)
   

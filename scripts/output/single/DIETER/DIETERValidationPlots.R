@@ -66,6 +66,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   # load switches
   h2switch <- cfg$gms$cm_DT_elh2_coup
   storswitch <- cfg$gms$cm_DTstor
+  coupMode <- cfg$gms$cm_DTmode
   
   ## define technologies
   ############### REMIND #########################
@@ -137,6 +138,11 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                              remind.storage.mapping.narrow, 
                              NULL)
   }
+  
+  remind.tech.mapping.narrow.wsto.welh2 <- c(remind.tech.mapping.narrow,
+                                            remind.storage.mapping.narrow,
+                                            remind.sector.coupling.mapping.narrow,
+                                            NULL)
   
   remind.tech.storloss.mapping <-  c(wind = "Wind Onshore Curtailment",
                                      windoff = "Wind Offshore Curtailment",
@@ -325,6 +331,13 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                            "Solar Curtailment" = "#f7e7a6",
                            "Wind Offshore Curtailment" = "#919efa",
                            NULL)
+  
+  color.mapping.cap.wsto.welh2 <- c(color.mapping.cap, 
+                                    "Flexible electrolyzers (PtG)" = "#48D1CC", 
+                                    "Lithium-ion Battery" = "cyan", 
+                                    "Electrolyzers for long-term storage" = "#56B4E9",
+                                    "Hydrogen Turbine" = "#8c56e9",
+                                    NULL)
   
   linetype.map <- c('DIETER' = 'dotted', 'REMIND' = 'solid')
   

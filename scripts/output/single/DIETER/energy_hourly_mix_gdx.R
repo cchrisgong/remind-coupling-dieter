@@ -7,7 +7,7 @@ mydatapath = paste0(mypath, "/", file)
 source("~/remind-coupling-dieter/dataprocessing/DIETER_plots/library_import.R")
 library(readr)
 
-outputdir = "output/hydro1180"
+outputdir = "output/hydro1098"
 dir = "/home/chengong/remind-coupling-dieter/"
 mypath =paste0(dir,outputdir)
 mydatapath = paste0(mypath, "/", file)

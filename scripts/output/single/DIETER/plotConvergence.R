@@ -532,41 +532,41 @@ if (save_png == 1){
 ##################################################################################################
 # DIETER shadow price is also an indicator of convergence
 
-out.shad_prices_DT <- NULL
-
-for (i in 1:length(dieter.files.report)){
-  
-  iter = as.numeric(str_extract(dieter.files.report[i], "[0-9]+"))
-  
-  shad_prices_DT <- file.path(outputdir, dieter.files.report[i]) %>% 
-      read.gdx("report", squeeze=F) %>% 
-      select(model = X..1, period = X..2, variable = X..4, value) %>%
-      filter(variable %in% report_DT_prices) %>% 
-      filter(period %in% model.periods) %>% 
-      filter(model == "DIETER")%>% 
-      revalue.levels(variable = dieter.variable.mapping) %>%
-      mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>% 
-      mutate(period = as.numeric(period)) %>% 
-      mutate(iteration = iter)%>% 
-      select(iteration,period, variable, value) %>% 
-      filter(variable == 'DIETER shadow price due to capacity constraint from REMIND (with grid)') 
-    
-  out.shad_prices_DT <-  rbind(out.shad_prices_DT, shad_prices_DT)
-}
-
-p<- ggplot() +
-  geom_contour_filled(aes(iteration, period, z = value), breaks = c(seq(-80, 150, 5)), show.legend = TRUE, out.shad_prices_DT%>% filter(period <2110))+
-  ggtitle("DIETER shadow price due to capacity constraint from REMIND - convergence surface") +
-  xlab("Iteration") + ylab("Period")  +
-  scale_y_continuous(breaks = seq(2020,2100,10))+
-  theme(axis.text = element_text(size = 12),
-        title = element_text(size = 12,face="bold"),
-        panel.border= element_rect(size=2,color="black",fill=NA))
-
-swfigure(sw,print,p,sw_option="width=20, height=12")
-if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/DT_shadprice_convergence_surface.png"),  p,  width = 10, height =5.5, units = "in", dpi = 120)
-}
+# out.shad_prices_DT <- NULL
+# 
+# for (i in 1:length(dieter.files.report)){
+#   
+#   iter = as.numeric(str_extract(dieter.files.report[i], "[0-9]+"))
+#   
+#   shad_prices_DT <- file.path(outputdir, dieter.files.report[i]) %>% 
+#       read.gdx("report", squeeze=F) %>% 
+#       select(model = X..1, period = X..2, variable = X..4, value) %>%
+#       filter(variable %in% report_DT_prices) %>% 
+#       filter(period %in% model.periods) %>% 
+#       filter(model == "DIETER")%>% 
+#       revalue.levels(variable = dieter.variable.mapping) %>%
+#       mutate(variable = factor(variable, levels=rev(unique(dieter.variable.mapping)))) %>% 
+#       mutate(period = as.numeric(period)) %>% 
+#       mutate(iteration = iter)%>% 
+#       select(iteration,period, variable, value) %>% 
+#       filter(variable == 'DIETER shadow price due to capacity constraint from REMIND (with grid)') 
+#     
+#   out.shad_prices_DT <-  rbind(out.shad_prices_DT, shad_prices_DT)
+# }
+# 
+# p<- ggplot() +
+#   geom_contour_filled(aes(iteration, period, z = value), breaks = c(seq(-80, 150, 5)), show.legend = TRUE, out.shad_prices_DT%>% filter(period <2110))+
+#   ggtitle("DIETER shadow price due to capacity constraint from REMIND - convergence surface") +
+#   xlab("Iteration") + ylab("Period")  +
+#   scale_y_continuous(breaks = seq(2020,2100,10))+
+#   theme(axis.text = element_text(size = 12),
+#         title = element_text(size = 12,face="bold"),
+#         panel.border= element_rect(size=2,color="black",fill=NA))
+# 
+# swfigure(sw,print,p,sw_option="width=20, height=12")
+# if (save_png == 1){
+#   ggsave(filename = paste0(outputdir, "/DIETER/DT_shadprice_convergence_surface.png"),  p,  width = 10, height =5.5, units = "in", dpi = 120)
+# }
 
 ##################################################################################################
 swlatex(sw, paste0("\\subsection{Total system markup (REMIND) - difference to last iteration}"))

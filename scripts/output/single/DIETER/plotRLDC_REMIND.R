@@ -214,7 +214,7 @@ p.RM.rldc <-ggplot() +
     geom_area(data = plot.rldc.hr, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1) +
     coord_cartesian(ylim = c(-50,210),xlim = c(0,8760))+
     scale_fill_manual(name = "Technology", values = color.mapping.RLDC.basic)+
-    xlab("hour") + ylab("residual load (GW)")+
+    xlab("Hour") + ylab("Residual load (GWh)")+
     ggtitle(paste0("REMIND ", year_toplot))
   
   swfigure(sw, grid.draw, p.RM.rldc)
