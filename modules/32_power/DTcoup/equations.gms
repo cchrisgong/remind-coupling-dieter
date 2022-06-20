@@ -114,7 +114,7 @@ q32_elh2VREcapfromTestor(t,regi)$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) O
 ;
 
 *** build additional h2 to seel capacities to use stored hydrogen
-q32_h2turbVREcapfromTestor(t,regi)$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))..
+q32_h2turbVREcapfromTestor(t,regi)$(( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) AND (cm_DTuncoupStoOff ne 1)) OR (regNoDTCoup(regi) AND (cm_DTuncoupStoOff ne 1)))..
   vm_cap(t,regi,"h2turbVRE","1")
 	* 1$( ( regDTCoup(regi) AND ((cm_DTcoup_eq eq 0 ) OR ((cm_DTcoup_eq eq 1) AND NOT tDT32(t))) ) OR regNoDTCoup(regi))
   =e=

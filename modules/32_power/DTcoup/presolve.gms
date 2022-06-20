@@ -255,6 +255,7 @@ p32_curtVREshare(t,regi,teVRE) = p32_DIETERCurtRatio(t,regi,teVRE)/(sum(te$(teVR
 ** share of storage generation in peak residual demand hour in last iteration DIETER, used for calculating peak demand prefactor p32_peakPreFac
 p32_stor_CC(t,regi)$(tDT32(t) AND regDTCoup(regi))
            = sum(gdxfile32, p32_report4RM(gdxfile32,t,regi,"all_te","stor_cap_credit"));
+
 *** 4 is a factor found by trial and error. If the storage discharge share of inflexible demand in peak-residual-inflexible-demand hour is 50%, the prefactor is 2.5, which is found
 ** to stabilize the run for DEU
 * p32_peakPreFac(t,regi) = p32_stor_CC(t,regi) * 4;

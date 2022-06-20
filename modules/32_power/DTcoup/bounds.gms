@@ -37,7 +37,7 @@ cm_DTcoup_eq = 1;
 *** such that it can be adjusted depending on share dependent prefactor
 if ((cm_DTcoup_eq eq 1),
 		loop(regi$(regDTCoup(regi)),
-			loop(t$(tDT32(t)),
+			loop(t$(tDT32(t) AND (t.val ge cm_startyear)),
 				loop(te$(CFcoupSuppte32(te)),
 				vm_capFac.lo(t,regi,te)=0;
 				vm_capFac.up(t,regi,te)=INF;  !! must not be capped by one, as some vm_capFac are larger than 1 due to scaling
@@ -50,7 +50,7 @@ if ((cm_DTcoup_eq eq 1),
 $IFTHEN.hasbound not %cm_DTmode% == "none"
 if ((cm_DTcoup_eq eq 1),
 		loop(regi$(regDTCoup(regi)),
-			loop(t$(tDT32(t)),
+			loop(t$(tDT32(t) AND (t.val ge cm_startyear)),
 				loop(te$(CFcoupSuppte32(te)),
 *** set CF of nuc to be less than 85% (eqn con2c_maxprodannual_conv_nuc in DIETER bounds to 80%,
 *** but considering the endogenous prefactor, it has to be more than 80%)
@@ -68,7 +68,7 @@ $ENDIF.hasbound
 $IFTHEN.nobound %cm_DTmode% == "none"
 if ((cm_DTcoup_eq eq 1),
 		loop(regi$(regDTCoup(regi)),
-			loop(t$(tDT32(t)),
+			loop(t$(tDT32(t) AND (t.val ge cm_startyear)),
 				loop(te$(DISPATCHte32(te)),
           vm_capFac.up(t,regi,te) = 1; !! set CF of dispatchables to be less than 100%
 			);
@@ -77,10 +77,11 @@ if ((cm_DTcoup_eq eq 1),
 );
 $ENDIF.nobound
 
+*** electrolyzer capfac
 $IFTHEN.elh2_coup %cm_DT_elh2_coup% == "on"
 if ((cm_DTcoup_eq eq 1),
 		loop(regi$(regDTCoup(regi)),
-			loop(t$(tDT32(t)),
+			loop(t$(tDT32(t) AND (t.val ge cm_startyear)),
 				loop(te$(CFcoupDemte32(te)),
 				vm_capFac.lo(t,regi,te)=0;
 				vm_capFac.up(t,regi,te)=1;   !!capped by 1
@@ -96,7 +97,6 @@ $ENDIF.DTcoup
 *v32_capPriceExponent.up(t,regi)$(regDTCoup(regi)) = 20;
 * vm_capFac.fx(t,regi,te) = pm_cf_linear(t,regi,te);
 *$ENDIF.DTcoup
-
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 *** FS: if flexibility tax on, let capacity factor be endogenuously determined between 0.1 and 1
@@ -181,6 +181,15 @@ v32_storloss.fx(t,regi,te)$((cm_DTcoup_eq eq 1) AND regDTCoup(regi) and (teDTCou
 vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regNoDTCoup(regi)) = 0;
 vm_flexAdj.fx(t,regi,te)$(teFlexTax(te) AND regDTCoup(regi) AND not tDT32(t)) = 0;
 
+***CG: bound storage shares between 0 and 100
+v32_shStor.up(t,regi,teVRE) = 100;
+v32_shStor.lo(t,regi,teVRE) = 0;
+
+*** this turns off the parametrised storage (in uncoupled version of REMIND) for coupled region
+*** should be on regardless whether storage is coupled by cm_DTstor
+v32_shStor.fx(t,regi,teVRE)$((tDT32(t) AND (t.val ge cm_startyear) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) OR (cm_DTuncoupStoOff eq 1)) = 0;
+vm_cap.fx(t,regi,teStor,"1")$(cm_DTuncoupStoOff eq 1) = 0;
+
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
 ** for testing the case when markup coupling is removed
@@ -198,23 +207,9 @@ v32_shSeEl.lo(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 0;
 v32_shSeElDisp.up(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 100;
 v32_shSeElDisp.lo(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 0;
 
-***CG: bound storage shares between 0 and 100
-v32_shStor.up(t,regi,teVRE) = 100;
-v32_shStor.lo(t,regi,teVRE) = 0;
-
-*** this turns off storage for coupled region, no need to put any additional switches on the storage equations
-$IFTHEN.DTstoroff %cm_DTstor% == "off"
-v32_shStor.fx(t,regi,teVRE)$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
-$ENDIF.DTstoroff
-
-
-*** Fix capacity for seh2 -> seel to DIETER's output value, CF is fixed above
-*** (doesn't work right now, can consider moving this copy and paste to post-processing)
 $IFTHEN.DTstor %cm_DTstor% == "on"
 if( (sm32_iter ge sm32_DTiter),
-*vm_cap.fx(t,regi,"h2turbVRE","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = p32_capDTStor(t,regi,"h2turbVRE");
-*vm_cap.fx(t,regi,"storcsp","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = p32_capDTStor(t,regi,"storcsp");
-*vm_cap.fx(t,regi,"storspv","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = p32_capDTStor(t,regi,"storspv");
+vm_cap.fx(t,regi,te,"1")$(tDT32(t) AND (t.val ge cm_startyear) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) AND teStor(te)) = 0;
 );
 $ENDIF.DTstor
 
@@ -222,7 +217,7 @@ $ENDIF.DTstor
 *** storloss by tech storcsp in terms of loss of energy through storage, storage
 *** production is implicit inside VRE prodSe)
 ***
-*vm_cap.fx(t,regi,"h2turbVRE","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
+vm_cap.fx(t,regi,"h2turbVRE","1")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
 vm_capFac.fx(t,regi,"h2turbVRE")$(tDT32(t) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
 
 *** turn off the other h2turb (this is only in RLDC realization)
