@@ -519,7 +519,7 @@ if (length(dieter.files) != 0) {
     filter(period %in% model.periods.till2100) %>% 
     mutate(period = as.numeric(as.character(period)) - 1) %>% 
     mutate(model = "REMIND") %>% 
-    filter(iteration == maxiter)
+    filter(iteration == maxiter-1)
   
   p<-ggplot() +
     geom_bar(data = plot.dieter.gen2, aes(x=period, y=value, fill=tech, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 

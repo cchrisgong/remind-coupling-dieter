@@ -77,11 +77,13 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE02.png"),
 
 # Figure 3: Generation convergence ------------------------------------------
 if (coupMode == "none"){
-  diff_breaks = seq(-30,30,15)
+  diff_breaks_cap = seq(-30,30,15)
+  diff_breaks_gen = seq(-30,30,15)
 }
 
 if (coupMode == "validation"){
-  diff_breaks = seq(-10,10,3)
+  diff_breaks_cap = seq(-15,15,5)
+  diff_breaks_gen = seq(-10,10,3)
 }
 
 
@@ -156,7 +158,7 @@ p.gen.diff <- ggplot() +
            mapping = aes(x = period, y = delta_gen.rel, fill = tech),
            stat = "identity") + 
   scale_fill_manual(name = "Technology", values = color.mapping.gen.order) +
-  scale_y_continuous(name = "Difference (%)", breaks = seq(-30,30,15)) + 
+  scale_y_continuous(name = "Difference (%)", breaks = diff_breaks_gen) + 
   xlab("Time") +
   ggtitle("Generation difference (REMIND - DIETER) / total REMIND generation ") +
   theme_minimal_grid(12)
@@ -270,7 +272,7 @@ p.cap.diff <-ggplot() +
            mapping = aes(x = period, y = delta_cap.rel, fill = tech),
            stat = "identity") +
   scale_fill_manual(name = "Technology", values = color.mapping.cap.order) +
-  scale_y_continuous(name = "Difference (%)", breaks = seq(-30,30,15)) + 
+  scale_y_continuous(name = "Difference (%)", breaks = diff_breaks_cap) + 
   xlab("Time") +
   ggtitle("Capacity difference (REMIND - DIETER) / total REMIND capacity ") +
   theme_minimal_grid(12)
@@ -533,6 +535,9 @@ get_runningcost <- function(outputdir){
   
   load(file.path(outputdir, "config.Rdata"))
   h2switch <- cfg$gms$cm_DT_elh2_coup
+  
+  dieter.files.report <- list.files(outputdir, pattern = "report_DIETER_i[0-9]+\\.gdx") %>%
+    str_sort(numeric = TRUE)
   
   running_cost <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
     read.gdx("report_tech", factors = FALSE, squeeze = FALSE) %>% 
