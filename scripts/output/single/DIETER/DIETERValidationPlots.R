@@ -335,9 +335,9 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   
   color.mapping.cap.wsto.welh2 <- c(color.mapping.cap, 
                                     "Flexible electrolyzers (PtG)" = "#48D1CC", 
-                                    "Lithium-ion Battery" = "cyan", 
+                                    "Lithium-ion battery" = "cyan", 
                                     "Electrolyzers for long-term storage" = "#56B4E9",
-                                    "Hydrogen Turbine" = "#8c56e9",
+                                    "Hydrogen turbine" = "#8c56e9",
                                     NULL)
   
   linetype.map <- c('DIETER' = 'dotted', 'REMIND' = 'solid')

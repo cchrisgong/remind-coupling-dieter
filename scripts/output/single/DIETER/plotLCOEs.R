@@ -1143,7 +1143,8 @@ p.sysLCOE_compare <- ggplot() +
   guides(fill=guide_legend(nrow=5,byrow=TRUE), color=guide_legend(nrow=5,byrow=TRUE))+
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
   theme(axis.text=element_text(size=15), axis.title=element_text(size= 18, face="bold"),strip.text = element_text(size=13)) +
-  facet_wrap(~model, scales = "free_y") 
+  # facet_wrap(~model, scales = "free_y") 
+  facet_wrap(~model) 
 
 swfigure(sw,print,p.sysLCOE_compare)
 
@@ -1199,8 +1200,9 @@ p.sysLCOE_compare <- ggplot() +
   scale_fill_manual(values = color.mapping) +
   guides(fill=guide_legend(nrow=5,byrow=TRUE), color=guide_legend(nrow=5,byrow=TRUE))+
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
-  theme(axis.text=element_text(size=15), axis.title=element_text(size= 18, face="bold"),strip.text = element_text(size=13)) +
-  facet_wrap(~model, scales = "free_y")
+  theme(axis.text=element_text(size=15), axis.title=element_text(size= 18, face="bold"),strip.text = element_text(size=13))  +
+  # facet_wrap(~model, scales = "free_y") 
+  facet_wrap(~model) 
 
 swfigure(sw,print,p.sysLCOE_compare)
 

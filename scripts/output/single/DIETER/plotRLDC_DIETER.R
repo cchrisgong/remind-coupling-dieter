@@ -373,7 +373,7 @@ for(year_toplot in year_toplot_list){
       coord_cartesian(ylim = c(min(CU_VRE_Solar.plot$Solar.RLDC2)*1.1,max(LDC0$load)*1.1 ))
   }
   
-  if (h2switch == "on"){
+  if (h2switch == "on" | storswitch == "on"){
     p.DT.rldc <- p.DT.rldc + scale_fill_manual(name = "Technology", values = color.mapping.RLDC.fancy) + coord_cartesian(ylim = c(min(CU_VRE_Solar.plot$Solar.RLDC2)*1.1,max(LDC0$load)*1.1 ))
   }
   

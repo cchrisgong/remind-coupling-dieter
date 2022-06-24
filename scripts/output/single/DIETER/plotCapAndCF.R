@@ -264,24 +264,28 @@ swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")
       
       plot.remind.capacity.wDIETERstorage <- plot.remind.capacity.wDIETERstorage %>% 
         mutate(tech = factor(tech, levels=rev(unique(c(dieter.tech.mapping,"Hydrogen Turbine","Electrolyzers for long-term storage"))))) %>% 
-        mutate(period = as.numeric(as.character(period)) - 1) %>% 
         mutate(model="REMIND")
       
-      plot.dieter.capacity2 <- out.dieter.capacity %>%
+      plot.remind.capacity.wDIETERstorage2 <- plot.remind.capacity.wDIETERstorage %>% 
+        mutate(period = as.numeric(as.character(period)) - 1) 
+        
+      plot.dieter.capacity <- out.dieter.capacity %>%
         mutate(period = as.numeric(as.character(period))) %>% 
         filter(period %in% model.periods.till2100) %>% 
         filter(iteration == max(out.dieter.capacity$iteration)) %>% 
         select(-iteration) %>% 
         full_join(plot.dieter.capacity.h2stor2)%>% 
         mutate(tech = factor(tech, levels=rev(unique(c(dieter.tech.mapping,"Hydrogen Turbine","Electrolyzers for long-term storage")))))%>% 
-        mutate(model="DIETER") %>% 
+        mutate(model="DIETER") 
+        
+      plot.dieter.capacity2 <- plot.dieter.capacity %>% 
         mutate(period = as.numeric(as.character(period)) + 1) 
       
     }
     
       p<-ggplot() +
         geom_bar(data = plot.dieter.capacity2, aes(x=period, y=value, fill=tech, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
-        geom_bar(data = plot.remind.capacity.wDIETERstorage, aes(x=period, y=value, fill=tech, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
+        geom_bar(data = plot.remind.capacity.wDIETERstorage2, aes(x=period, y=value, fill=tech, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
         scale_fill_manual(name = "Technology", values = color.mapping.cap) +
         scale_linetype_manual(name = "model", values = linetype.map) +
         guides(linetype = guide_legend(override.aes = list(fill = NA
@@ -318,7 +322,7 @@ p.cap1<-ggplot() +
 if (length(dieter.files) != 0) {
 
 p.cap2<-ggplot() +
-    geom_area(data = plot.dieter.capacity%>% filter(period %in% model.periods.till2100), aes(x = as.numeric(period), y = value, fill = tech), size = 1.2, alpha = 0.5) +
+    geom_area(data = plot.dieter.capacity %>% filter(period %in% model.periods.till2100), aes(x = as.numeric(period), y = value, fill = tech), size = 1.2, alpha = 0.5) +
     scale_fill_manual(name = "Technology", values = color.mapping.cap) +
   theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
   theme(axis.text=element_text(size=15), axis.title=element_text(size= 15, face="bold"),strip.text = element_text(size=13)) +
