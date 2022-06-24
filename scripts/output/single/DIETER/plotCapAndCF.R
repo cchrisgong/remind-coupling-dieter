@@ -186,6 +186,7 @@ swlatex(sw, paste0("\\subsection{Capacities in ", year_toplot, "}"))
   if (length(dieter.files) != 0) {
   plot.dieter.capacity <- out.dieter.capacity %>%
     filter(period == year_toplot)
+  
   plot.dieter.capfac <- out.dieter.capfac %>%
       filter(period == year_toplot)
 
@@ -234,22 +235,53 @@ swlatex(sw, paste0("\\subsection{Capacities in ", year_toplot, "}"))
 ##################################################################################################
 swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")
 
-  if (length(dieter.files) != 0) {
-    plot.dieter.capacity2 <- out.dieter.capacity%>% 
+
+    plot.remind.capacity <- out.remind.capacity %>% 
       filter(period %in% model.periods.till2100) %>% 
-      mutate(period = as.numeric(as.character(period)) + 1) %>% 
-      mutate(model = "DIETER") %>% 
-      filter(iteration == maxiter-1) 
+      filter(iteration == max(out.remind.capacity$iteration)) %>% 
+      select(period,tech,value) %>% 
+      filter(!tech %in% dieter.storage.mapping)%>%
+      mutate(period = as.numeric(period)) 
     
-    plot.remind.capacity2 <- out.remind.capacity %>% 
-      filter(period %in% model.periods.till2100) %>% 
-      mutate(period = as.numeric(as.character(period)) - 1) %>% 
-      mutate(model = "REMIND") %>% 
-      filter(iteration == maxiter-1)
+    if ((length(dieter.files) != 0) ) {
+      plot.dieter.capacity.stor <- out.dieter.capacity %>%
+        mutate(period = as.numeric(period))%>%
+        filter(iteration == max(out.remind.capacity$iteration)) %>% 
+        select(period,tech,value) %>% 
+        filter(period %in% model.periods.till2100) %>% 
+        filter(tech %in% dieter.storage.mapping)
+      
+      plot.dieter.capacity.h2stor2 <- plot.dieter.capacity.stor %>% 
+        filter(tech == "Electrolyzers for long-term storage") %>% 
+        mutate(tech = "Hydrogen Turbine")  
+      
+      plot.remind.capacity.wDIETERstorage <-list(plot.remind.capacity,
+                                                 plot.dieter.capacity.stor,
+                                                 plot.dieter.capacity.h2stor2
+      ) %>% 
+        reduce(full_join) 
+      
+      
+      plot.remind.capacity.wDIETERstorage <- plot.remind.capacity.wDIETERstorage %>% 
+        mutate(tech = factor(tech, levels=rev(unique(c(dieter.tech.mapping,"Hydrogen Turbine","Electrolyzers for long-term storage"))))) %>% 
+        mutate(period = as.numeric(as.character(period)) - 1) %>% 
+        mutate(model="REMIND")
+      
+      plot.dieter.capacity2 <- out.dieter.capacity %>%
+        mutate(period = as.numeric(as.character(period))) %>% 
+        filter(period %in% model.periods.till2100) %>% 
+        filter(iteration == max(out.dieter.capacity$iteration)) %>% 
+        select(-iteration) %>% 
+        full_join(plot.dieter.capacity.h2stor2)%>% 
+        mutate(tech = factor(tech, levels=rev(unique(c(dieter.tech.mapping,"Hydrogen Turbine","Electrolyzers for long-term storage")))))%>% 
+        mutate(model="DIETER") %>% 
+        mutate(period = as.numeric(as.character(period)) + 1) 
+      
+    }
     
       p<-ggplot() +
         geom_bar(data = plot.dieter.capacity2, aes(x=period, y=value, fill=tech, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
-        geom_bar(data = plot.remind.capacity2, aes(x=period, y=value, fill=tech, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
+        geom_bar(data = plot.remind.capacity.wDIETERstorage, aes(x=period, y=value, fill=tech, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 
         scale_fill_manual(name = "Technology", values = color.mapping.cap) +
         scale_linetype_manual(name = "model", values = linetype.map) +
         guides(linetype = guide_legend(override.aes = list(fill = NA
@@ -263,37 +295,16 @@ swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")
     ggsave(filename = paste0(outputdir, "/DIETER/CAP_doublebar_time.png"),  p,  width = 10, height = 4.5, units = "in", dpi = 120)
   }
   
-  }
+
 
 ##################################################################################################
 swlatex(sw, "\\subsection{Capacities over time (last iteration)}")
 
-plot.remind.capacity <- out.remind.capacity %>% 
-  filter(period %in% model.periods.till2100) %>% 
-  filter(iteration == max(out.remind.capacity$iteration)) %>% 
-  select(period,tech,value) %>% 
-  filter(!tech %in% dieter.storage.mapping)%>%
-  mutate(period = as.numeric(period))
 
-plot.dieter.capacity.stor <- out.dieter.capacity %>%
-  mutate(period = as.numeric(period))%>%
-  filter(iteration == max(out.remind.capacity$iteration)) %>% 
-  select(period,tech,value) %>% 
-  filter(period %in% model.periods.till2100) %>% 
-  filter(tech %in% dieter.storage.mapping)
 
-plot.dieter.capacity.h2stor2 <- plot.dieter.capacity.stor %>% 
-  filter(tech == "Electrolyzers for long-term storage") %>% 
-  mutate(tech = "Hydrogen Turbine")  
-
-plot.remind.capacity.wDIETERstorage <-list(plot.remind.capacity,
-                                           plot.dieter.capacity.stor,
-                                           plot.dieter.capacity.h2stor2
-                                           ) %>% 
-  reduce(full_join) 
-
-plot.remind.capacity.wDIETERstorage <- plot.remind.capacity.wDIETERstorage %>% 
-  mutate(tech = factor(tech, levels=rev(unique(c(dieter.tech.mapping,"Hydrogen Turbine","Electrolyzers for long-term storage")))))
+if ((length(dieter.files) == 0) ) {
+  plot.remind.capacity.wDIETERstorage<-plot.remind.capacity
+}
   
 p.cap1<-ggplot() +
   geom_area(data = plot.remind.capacity.wDIETERstorage, aes(x = period, y = value, fill = tech), size = 1.2, alpha = 0.5) +
@@ -305,13 +316,6 @@ p.cap1<-ggplot() +
   theme(plot.title = element_text(size = 15, face = "bold"))
 
 if (length(dieter.files) != 0) {
-  
-plot.dieter.capacity <- out.dieter.capacity %>%
-  mutate(period = as.numeric(period))%>%
-  filter(iteration == max(out.dieter.capacity$iteration)) %>% 
-  select(-iteration) %>% 
-  full_join(plot.dieter.capacity.h2stor2)%>% 
-  mutate(tech = factor(tech, levels=rev(unique(c(dieter.tech.mapping,"Hydrogen Turbine","Electrolyzers for long-term storage")))))
 
 p.cap2<-ggplot() +
     geom_area(data = plot.dieter.capacity%>% filter(period %in% model.periods.till2100), aes(x = as.numeric(period), y = value, fill = tech), size = 1.2, alpha = 0.5) +
@@ -406,12 +410,12 @@ for (i in c(start_i + 1, start_i + 5, start_i + 10,maxiter - 1)){
     filter(iteration == i) %>%
     filter(period <2110) %>%
     mutate(period = as.numeric(period)) %>%
-    dplyr::rename(dieter_cap = value)
+    dplyr::rename(dieter_cap = value)%>%
+    filter(!tech %in% dieter.storage.mapping)
   
   plot.cap.diff <- list(plot.remind.cap.snap, plot.dieter.cap.snap) %>%
     reduce(full_join) %>%
-    mutate(delta_cap = remind_cap - dieter_cap) %>% 
-    filter(!tech %in% remind.storage.mapping.narrow)
+    mutate(delta_cap = remind_cap - dieter_cap)
   
   p <-ggplot() +
     geom_bar(data = plot.cap.diff , aes(x = period, y = delta_cap, fill = tech, label = delta_cap),  alpha = 0.5, stat = "identity") +

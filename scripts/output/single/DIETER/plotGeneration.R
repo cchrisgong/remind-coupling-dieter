@@ -142,6 +142,7 @@ for (i in 1:length(dieter.files)) {
     filter(variable %in% c("total_generation", "usable_generation", "total_consumption")) %>%
     mutate(value = value / 1e6) %>%
     filter(tech %in% names(dieter.tech.mapping)) %>%
+    filter(!tech %in% names(dieter.storage.mapping)) %>% 
     revalue.levels(tech = dieter.tech.mapping) %>%
     mutate(tech = factor(tech, levels = rev(unique(dieter.tech.mapping))))  %>%
     mutate(iteration = it) %>%
@@ -512,14 +513,11 @@ if (length(dieter.files) != 0) {
     filter(period %in% model.periods.till2100) %>% 
     mutate(period = as.numeric(as.character(period)) + 1) %>% 
     mutate(model = "DIETER")
-  # %>% 
-    # filter(iteration == maxiter-1) 
   
   plot.remind.gen2 <- plot.remind.generation %>% 
     filter(period %in% model.periods.till2100) %>% 
     mutate(period = as.numeric(as.character(period)) - 1) %>% 
-    mutate(model = "REMIND") %>% 
-    filter(iteration == maxiter-1)
+    mutate(model = "REMIND") 
   
   p<-ggplot() +
     geom_bar(data = plot.dieter.gen2, aes(x=period, y=value, fill=tech, linetype=model), colour = "black", stat="identity",position="stack", width=1.5) + 

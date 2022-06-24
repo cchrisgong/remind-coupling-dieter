@@ -150,6 +150,7 @@ p.gen.doublebar <- ggplot() +
 
 plot.gen.relDiff <- list(plot.remind.gen.snap, plot.dieter.gen.snap, plot.remind.gen.total) %>%
   reduce(full_join) %>%
+  filter(!tech %in% remind.storage.mapping.narrow) %>% 
   mutate(delta_gen = (remind_gen - dieter_gen),
          delta_gen.rel = 100 * (remind_gen - dieter_gen) / remind_gen_total)
 
@@ -160,7 +161,8 @@ p.gen.diff <- ggplot() +
   scale_fill_manual(name = "Technology", values = color.mapping.gen.order) +
   scale_y_continuous(name = "Difference (%)", breaks = diff_breaks_gen) + 
   xlab("Time") +
-  ggtitle("Generation difference (REMIND - DIETER) / total REMIND generation ") +
+  theme(axis.text=element_text(size=10), axis.title=element_text(size= 10,face="bold")) +
+  ggtitle("Generation diff. (REMIND - DIETER) / total REMIND generation ") +
   theme_minimal_grid(12)
 
 # Arrange both plots
@@ -170,7 +172,7 @@ p.plots <- plot_grid(
   ncol = 1,
   rel_heights = c(1, 0.6),
   labels = "auto",
-  label_size = 1.5*font.size,
+  label_size = 1.1*font.size,
   align = "v"
 )
 
@@ -181,7 +183,7 @@ p.legend <- get_legend(p.gen.doublebar + theme(legend.box.margin = margin(0, 0, 
 p <- plot_grid(p.plots,
                p.legend,
                ncol = 2,
-               rel_widths = c(1, 0.2))
+               rel_widths = c(1, 0.4))
 
 # Save as png
 ggsave(filename = paste0(outputdir, "/DIETER/FIGURE03.png"),
@@ -191,7 +193,7 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE03.png"),
        units = "cm")
 
 # Save as svg
-# ggsave(filename = paste0(outputdir, "/DIETER/FIGURE02.svg"),
+# ggsave(filename = paste0(outputdir, "/DIETER/FIGURE03.svg"),
 #        bg = "white",
 #        width = 18,  # Vary width according to how many panels plot has
 #        height = 12,  # Vary height according to how many panels plot has
@@ -210,8 +212,7 @@ plot.dieter.capacity2.group <- plot.dieter.capacity2 %>%
   dplyr::summarise( sum = sum(value), .groups = "keep" ) %>% 
   dplyr::ungroup(period,model)
 
-
-plot.remind.capacity2.group <- plot.remind.capacity2 %>% 
+plot.remind.capacity2.group <- plot.remind.capacity.wDIETERstorage %>% 
   dplyr::group_by(period,model) %>% 
   dplyr::summarise( sum = sum(value), .groups = "keep" ) %>% 
   dplyr::ungroup(period,model)
@@ -232,7 +233,7 @@ p.cap.doublebar <- ggplot() +
            fill = "transparent",
            width = 1.5) + 
   # stacked bar for REMIND
-  geom_bar(data = plot.remind.capacity2,
+  geom_bar(data = plot.remind.capacity.wDIETERstorage,
            mapping = aes(x = period, y = value, fill = tech),
            stat = "identity",
            position = "stack",
@@ -247,7 +248,6 @@ p.cap.doublebar <- ggplot() +
            width = 1.5) + 
   scale_fill_manual(name = "Technology", values = color.mapping.cap.order) +
   scale_linetype_manual(name = "Model", values = linetype.map[c("REMIND", "DIETER")]) +
-  #guides(linetype = guide_legend(override.aes = list(fill = NA, col = "black"))) +
   xlab("Time") +
   ylab("Capacity (GW)") +
   ggtitle("Capacity in REMIND and DIETER") +
@@ -274,7 +274,7 @@ p.cap.diff <-ggplot() +
   scale_fill_manual(name = "Technology", values = color.mapping.cap.order) +
   scale_y_continuous(name = "Difference (%)", breaks = diff_breaks_cap) + 
   xlab("Time") +
-  ggtitle("Capacity difference (REMIND - DIETER) / total REMIND capacity ") +
+  ggtitle("Capacity diff. (REMIND - DIETER) / total REMIND capacity ") +
   theme_minimal_grid(12)
 
 # Arrange both plots
@@ -284,7 +284,7 @@ p.plots <- plot_grid(
   ncol = 1,
   rel_heights = c(1, 0.6),
   labels = "auto",
-  label_size = 1.5*font.size,
+  label_size = 1.1*font.size,
   align = "v"
 )
 
@@ -295,7 +295,7 @@ p.legend <- get_legend(p.cap.doublebar + theme(legend.box.margin = margin(0, 0, 
 p <- plot_grid(p.plots,
                p.legend,
                ncol = 2,
-               rel_widths = c(1, 0.2))
+               rel_widths = c(1, 0.45))
 
 # Save as png
 ggsave(filename = paste0(outputdir, "/DIETER/FIGURE04.png"),
@@ -377,7 +377,7 @@ p.plots <- plot_grid(
   ncol = 1,
   rel_heights = c(1, 1),
   labels = "auto",
-  label_size = 3*font.size,
+  label_size = 1.1*font.size,
   align = "v"
 )
 
@@ -481,7 +481,7 @@ p.plots <- plot_grid(
 p <- plot_grid(p.plots,
                p.legend,
                ncol = 2,
-               rel_widths = c(1, 0.2))
+               rel_widths = c(1, 0.33))
 
 # Save as png
 ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_RLDC.png"),
@@ -651,26 +651,33 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE_PDC",year_toplot,".png"),
        units = "cm")
 }
 # Figure ?: 3-panel coupled vs. uncoupled comparison  ------------------------------------------
-# baseline run comparison - 2C
+# baseline run comparison 
 setwd("/home/chengong/remind-coupling-dieter/")
-coupled_outputdir = "./output/hydro1180"
-uncoupStor_outputdir = "./output/hydro1190"
-uncoupNoStor_outputdir = "./output/hydro1193"
-baseline_outputdir_lst <- c(coupled_outputdir, uncoupStor_outputdir, uncoupNoStor_outputdir)
+# coupledStor_outputdir = "./output/hydro1139"
+# uncoupStor_outputdir = "./output/hydro1190"
+# coupledNoStor_outputdir = "./output/hydro1197"
+# uncoupNoStor_outputdir = "./output/hydro1193"
+coupledStor_outputdir = "./output/hydro1217"
+uncoupStor_outputdir = "./output/hydro1207"
+coupledNoStor_outputdir = "./output/hydro1209"
+uncoupNoStor_outputdir = "./output/hydro1208"
+baseline_outputdir_lst <- c(coupledStor_outputdir, uncoupStor_outputdir, coupledNoStor_outputdir, uncoupNoStor_outputdir)
 
 # policy run comparison - 2C
-coupled_outputdir2 = "./output/hydro1183"
-uncoupStor_outputdir2 = "./output/hydro1191"
-uncoupNoStor_outputdir2 = "./output/hydro1195"
-policy_outputdir_lst <- c(coupled_outputdir2, uncoupStor_outputdir2, uncoupNoStor_outputdir2)
+coupledStor_outputdir2 = "./output/hydro1218"
+uncoupStor_outputdir2 = "./output/hydro1206"
+coupledNoStor_outputdir2 = "./output/hydro1211"
+uncoupNoStor_outputdir2 = "./output/hydro1214"
+policy_outputdir_lst <- c(coupledStor_outputdir2, uncoupStor_outputdir2, coupledNoStor_outputdir2, uncoupNoStor_outputdir2)
 
-run_name_lst <- c("Coupled with storage", "Uncoupled with storage parametrization", "Uncoupled without storage parametrization")
-x_positions <- c(-1.12,0,1.12)
+run_name_lst <- c("Coupled with storage", "Uncoupled with storage parametrization", "Coupled without storage", "Uncoupled without storage parametrization")
+
+x_positions <- c(-2.24, -1.12,0,1.12)
 
 # outputdir_lst = baseline_outputdir_lst
-# fig_title = "baseline"
+# fig_title = "Baseline"
 outputdir_lst = policy_outputdir_lst
-fig_title = "policy"
+fig_title = "Policy"
 
 font.size = 8
 
@@ -679,7 +686,7 @@ for (i in c(1:length(outputdir_lst))){
   
   outputdir = outputdir_lst[[i]]
   print(outputdir)
-  outputdir = "./output/hydro1195"
+  # outputdir = "./output/hydro1217"
   run_name = run_name_lst[[i]]
   
 remind.files <- list.files(outputdir, pattern = "fulldata_[0-9]+\\.gdx") %>%
@@ -705,21 +712,22 @@ remind.capacity <- file.path(outputdir, remind.files[length(remind.files)]) %>%
 df.capacity <- rbind(df.capacity, remind.capacity)
 }
 
+df.capacity <- df.capacity%>% 
+  mutate(runname = factor(runname, levels=rev(unique(run_name_lst)))) 
+
   p.cap.compare <-ggplot() +
     geom_bar(data = df.capacity, aes(x=period, y=value, fill=tech, linetype=runname), colour = "black", stat="identity",position="stack", width=1) + 
     scale_fill_manual(name = "Technology", values = color.mapping.cap.wsto.welh2) +
-    guides(linetype = guide_legend(override.aes = list(fill = NA
-                                                       , col = "black"))) +
     xlab("Time") + ylab(paste0("Capacity (GW)")) +
-    ggtitle(paste0("Comparison of coupled and uncoupled runs for Germany - Baseline")) +
     theme(legend.title = element_blank()) +
-    theme(legend.position="bottom", legend.direction="horizontal", legend.text = element_text(size=font.size)) +
-    guides(fill=guide_legend(nrow=6,byrow=TRUE), linetype=guide_legend(nrow=6,byrow=TRUE))+
-    theme(axis.text = element_text(size=12), axis.title = element_text(size= 10, face="bold")) +
+    scale_linetype_discrete(breaks=run_name_lst)+
+    theme(legend.position="bottom", legend.direction="horizontal", legend.text = element_text(size=8)) +
+    guides(fill=guide_legend(nrow=7,byrow=TRUE), linetype=guide_legend(nrow=4,byrow=TRUE))+
+    theme(axis.text = element_text(size=12), axis.title = element_text(size= 12, face="bold")) +
   
   swfigure(sw,print,p)
   if (save_png == 1){
-    ggsave(filename = paste0(coupled_outputdir, "/DIETER/Figure_uncoup_", fig_title, "_CAP.png"), p.cap.compare, width = 7, height = 4.5, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir_lst[[1]], "/DIETER/Figure_uncoup_", fig_title, "_CAP.png"), p.cap.compare, width = 7, height = 4.5, units = "in", dpi = 120)
   }
 
   df.generation <- NULL
@@ -782,18 +790,22 @@ df.capacity <- rbind(df.capacity, remind.capacity)
     df.generation <- rbind(df.generation,loss,vmUsableSeTe,vmprodSe)
   }
   
+  df.generation <- df.generation%>% 
+    mutate(runname = factor(runname, levels=rev(unique(run_name_lst)))) 
   
   p<-ggplot() +
     geom_bar(data = df.generation, aes(x=period, y=value, fill=tech, linetype=runname), colour = "black", stat="identity",position="stack", width=1) +
     scale_fill_manual(name = "Technology", values = color.mapping.wloss) +
-    guides(linetype = guide_legend(override.aes = list(fill = NA, col = "black"))) +
-    xlab("Time") + ylab(paste0("Generation (TWh)")) +
-    ggtitle(paste0(reg)) +
-    theme(legend.title = element_blank()) 
+    theme(legend.title = element_blank()) +
+    theme(legend.position="bottom", legend.direction="horizontal", legend.text = element_text(size=10)) +
+    guides(fill=guide_legend(nrow=4,byrow=TRUE), linetype=guide_legend(nrow=4,byrow=TRUE))+
+    scale_linetype_discrete(breaks=run_name_lst)+
+    theme(axis.text = element_text(size=12), axis.title = element_text(size= 12, face="bold")) +
+    xlab("Time") + ylab(paste0("Generation (TWh)")) 
   
   swfigure(sw,print,p)
   if (save_png == 1){
-    ggsave(filename = paste0(coupled_outputdir, "/DIETER/Figure_uncoup_", fig_title, "_GEN.png"),  p,  width = 11, height = 6, units = "in", dpi = 120)
+    ggsave(filename = paste0(outputdir_lst[[1]], "/DIETER/Figure_uncoup_", fig_title, "_GEN.png"),  p,  width = 9, height = 5.5, units = "in", dpi = 120)
   }
   
 

@@ -13,7 +13,7 @@ if (h2switch == "on"){
 }
 
 # 
-# for(year_toplot in year_toplot_list){
+for(year_toplot in year_toplot_list){
 
   # year_toplot = 2045
   hr_data <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
@@ -410,5 +410,5 @@ if (h2switch == "on"){
     ggsave(filename = paste0(outputdir, "/DIETER/DIETER_RLDC_yr=", year_toplot, ".png"), p.DT.rldc, width = 8, height =8, units = "in", dpi = 120)
   }
 
-# }
+}
 

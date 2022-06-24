@@ -55,9 +55,10 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   report.periods <- c(seq(2005, 2060, 5), seq(2070, 2100, 10), seq(2110, 2150, 20))
 
   ## load the number of iteration when coupling starts
+  if (length(dieter.files) != 0) {
   start_i = as.numeric(str_extract(dieter.files[2], "[0-9]+"))
   iteration.list = seq(start_i, str_extract(dieter.files[length(dieter.files)], "[0-9]+"),1)
-  
+  }
   # load coupled region
   DTcoupreg <- file.path(outputdir, remind.files[2]) %>%  
     read.gdx("regDTcoup", factor = FALSE) 
@@ -630,7 +631,8 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
                                 "OCGT" = "#e51900", "Nuclear" = "#ff33ff","Hydro" = "#191999", 
                                 # "Wind Onshore" = "#337fff", 
                                 # "Wind Offshore" = "#334cff",
-                                "Flexible electrolyzers (PtG)" = "#66cccc", "Electricity" = "red", 
+                                "Flexible electrolyzers (PtG)" = "#66cccc", 
+                                # "Electricity" = "red", 
                                 "Lithium-ion Battery" ="cyan",
                                 # "Pumped Storage Hydro" ="#D55E00",
                                 "Electrolyzers for long-term storage" = "#56B4E9",
