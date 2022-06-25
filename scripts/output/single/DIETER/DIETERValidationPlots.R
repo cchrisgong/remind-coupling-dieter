@@ -457,7 +457,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     'price for total demand - with scarcity price ($/MWh)',
     'price for total demand ($/MWh)',
     'total system shadow price of cap bound w/ grid - avg ($/MWh)',
-    'total system shadow price of cap bound - avg ($/MWh)',
+    'total system shadow price of capacity bound - avg ($/MWh)',
     # 'price for fixed demand ($/MWh)'
     NULL
   )
@@ -539,9 +539,9 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     `grid cost ($/MWh)` = "Grid Cost",
     `price for total demand ($/MWh)` = 'DIETER annual average electricity price',
     `price for total demand - with scarcity price ($/MWh)` = 'DIETER annual average electricity price with scarcity price',
-    # `total system shadow price of cap bound w/ grid - avg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND (with grid)',
-    `total system shadow price of cap bound - avg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND',
-    `total system shadow price of cap bound - marg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND',
+    `total system shadow price of cap bound w/ grid - avg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND (with grid)',
+    `total system shadow price of capacity bound - avg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND',
+    `total system shadow price of capacity bound - marg ($/MWh)` = 'DIETER shadow price due to capacity constraint from REMIND',
     `shadow price of capacity bound from REMIND - marg ($/MWh)` = 'Shadow Price',
     `shadow price of capacity bound from REMIND - avg ($/MWh)` = 'Shadow Price',
     `Total Markup` = 'Total Markup',
@@ -608,7 +608,7 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
   price.colors <- c(
     # "REMIND Price" = "darkblue",
     "REMIND price moving average" = "darkorchid",
-    "REMIND price + shadow price (historical and peak load bound on cap.)" = "#ff0090",
+    # "REMIND price + shadow price (historical and peak load bound on cap.)" = "#ff0090",
     # "Total (marginal) LCOE + Markup" = "darkorchid",
     # "DIETER annual average electricity price" = "darkcyan",
     "DIETER annual average electricity price with scarcity price" = "#8DB600",
@@ -616,6 +616,10 @@ DIETERValidationPlots <- function(outputdir, dieter.scripts.folder, cfg) {
     # 'DIETER shadow price due to capacity constraint from REMIND' = "DodgerBlue4",
     NULL
   )
+  
+  price.colors.fancy <- c(price.colors,
+                          "REMIND price + shadow price (historical and peak load bound on cap.)" = "#ff0090",
+                          NULL)
   
   dieter.report.mv <- c("DIETER Market value with scarcity price ($/MWh)", 
                         "DIETER Market value ($/MWh)",

@@ -1008,7 +1008,7 @@ for (i in c(2,3,length(dieter.files.report))){
   prices_DT <- file.path(outputdir, dieter.files.report[i]) %>% 
     read.gdx("report", squeeze=F) %>% 
     select(model = X..1, period = X..2, variable = X..4, value) %>%
-    filter(variable %in% report_DT_prices) %>% 
+    filter(variable %in% report_DT_prices)  %>% 
     filter(period %in% model.periods) %>% 
     filter(model == "DIETER")%>% 
     revalue.levels(variable = dieter.variable.mapping) %>%
@@ -1156,7 +1156,9 @@ if (save_png == 1){
 
 p.sysLCOE_compare2 <-p.sysLCOE_compare+
   geom_line(data = prices_w2Shad_RM %>% filter(period %in% model.periods.till2100) ,
-            aes(period, value, color=variable), alpha = 0.5, size=2)
+            aes(period, value, color=variable), alpha = 0.5, size=2)+
+  scale_color_manual(name = "variable", values = price.colors.fancy) 
+
 swfigure(sw,print,p.sysLCOE_compare2)
 if (save_png == 1){
   ggsave(filename = paste0(outputdir, "/DIETER/sys_avgDT_",plot.tag,"RM_LCOE_wShadPrice_compare_line.png"), p.sysLCOE_compare2, width = 14, height =9, units = "in", dpi = 120)

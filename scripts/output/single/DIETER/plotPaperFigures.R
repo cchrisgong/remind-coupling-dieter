@@ -233,7 +233,7 @@ p.cap.doublebar <- ggplot() +
            fill = "transparent",
            width = 1.5) + 
   # stacked bar for REMIND
-  geom_bar(data = plot.remind.capacity.wDIETERstorage,
+  geom_bar(data = plot.remind.capacity.wDIETERstorage2,
            mapping = aes(x = period, y = value, fill = tech),
            stat = "identity",
            position = "stack",
@@ -311,6 +311,8 @@ ggsave(filename = paste0(outputdir, "/DIETER/FIGURE04.png"),
 #        units = "cm")
 
 # ============ 0-profit plots - system =============================================================================
+ymax = max(DT.prices.lines$value) * 1.1
+ymin = min(sys_avgLCOE_compare$value) * 1.1
 p.sysLCOE_RM <- ggplot() + 
   geom_col( data = sys_avgLCOE_compare %>% filter(model=="REMIND"), 
             aes(period, value, fill=variable)) +
@@ -459,7 +461,7 @@ p.RM.rldc <-ggplot() +
   xlab("hour") + ylab("Sorted residual load (GW)")+
   ggtitle(paste0("REMIND ", year_toplot))
 
-# Extract legend of doublebar plot for 
+# Extract legend 
 p.legend <- get_legend(p.DT.rldc + theme(legend.box.margin = margin(0, 0, 0, 12)))
 
 

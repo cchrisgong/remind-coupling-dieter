@@ -186,9 +186,12 @@ v32_shStor.up(t,regi,teVRE) = 100;
 v32_shStor.lo(t,regi,teVRE) = 0;
 
 *** this turns off the parametrised storage (in uncoupled version of REMIND) for coupled region
-*** should be on regardless whether storage is coupled by cm_DTstor
-v32_shStor.fx(t,regi,teVRE)$((tDT32(t) AND (t.val ge cm_startyear) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) OR (cm_DTuncoupStoOff eq 1)) = 0;
-vm_cap.fx(t,regi,teStor,"1")$(cm_DTuncoupStoOff eq 1) = 0;
+*** should be off regardless whether storage is coupled by cm_DTstor
+** if coupled, then only turn off parametrized storage after cm_DTcoup_eq is turned on
+** if uncoupled, then cm_DTuncoupStoOff has to be on, and it is only applied to coupled region (for comparison) and coupled model years
+v32_shStor.fx(t,regi,teVRE)$((tDT32(t) AND (t.val ge cm_startyear) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) OR
+  (tDT32(t) AND (t.val ge cm_startyear) AND regDTCoup(regi) AND cm_DTuncoupStoOff eq 1)) = 0;
+vm_cap.fx(t,regi,teStor,"1")$(tDT32(t) AND (t.val ge cm_startyear) AND regDTCoup(regi) AND (cm_DTuncoupStoOff eq 1)) = 0;
 
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 
@@ -209,7 +212,7 @@ v32_shSeElDisp.lo(t,regi,teDTCoupSupp)$(tDT32(t) AND regDTCoup(regi)) = 0;
 
 $IFTHEN.DTstor %cm_DTstor% == "on"
 if( (sm32_iter ge sm32_DTiter),
-vm_cap.fx(t,regi,te,"1")$(tDT32(t) AND (t.val ge cm_startyear) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0) AND teStor(te)) = 0;
+vm_cap.fx(t,regi,teStor,"1")$(tDT32(t) AND (t.val ge cm_startyear) AND regDTCoup(regi) AND (cm_DTcoup_eq ne 0)) = 0;
 );
 $ENDIF.DTstor
 
