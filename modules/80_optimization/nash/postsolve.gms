@@ -190,6 +190,10 @@ if(s80_fadeoutPriceAnticipStartingPeriod ne 0,
 );
 display s80_fadeoutPriceAnticipStartingPeriod, sm_fadeoutPriceAnticip;
 
+*** Save FE prices in each iteration for easier monitoring
+pm_FEPrice_iter(iteration,t,regi,enty,sector,emiMkt) =
+  pm_FEPrice(t,regi,enty,sector,emiMkt);
+
 
 ***Decide, on whether to end iterating now. if any of the following criteria (contained in the set convMessage80(surplus,infes,nonopt)) is not met, s80_bool is set to 0, and the convergence process is NOT stopped
 ***reset some indicators
@@ -565,8 +569,8 @@ $ENDIF.DTcoup
 *** check if any region has failed to solve consecutively for a certain number of times
 if(cm_abortOnConsecFail, !! execute only if consecutive failures switch is non-zero
     loop(regi,
-        if(((p80_repy(regi,'modelstat') eq 1) and (p80_repy(regi,'solvestat') eq 2))
-        or ((p80_repy(regi,'modelstat') eq 4) and (p80_repy(regi,'solvestat') eq 7)), !! region was solved successfully
+        if(((p80_repy(regi,"solvestat") eq 1) and (p80_repy(regi,"modelstat") eq 2))
+        or ((p80_repy(regi,"solvestat") eq 4) and (p80_repy(regi,"modelstat") eq 7)), !! region was solved successfully
             p80_trackConsecFail(regi) = 0;
         else
             p80_trackConsecFail(regi) = p80_trackConsecFail(regi) + 1;

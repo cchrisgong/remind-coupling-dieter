@@ -246,11 +246,23 @@ fm_dataglob("incolearn","csp")          = 0.7 * fm_dataglob("incolearn","csp");
 
 *JH* Determine CCS injection rates
 *LP* for c_ccsinjecratescen =0 the storing variable vm_co2CCS will be fixed to 0 in bounds.gms, the sm_ccsinjecrate=0 will cause a division by 0 error in the 21_tax module
-sm_ccsinjecrate = 0.005
-if (c_ccsinjecratescen eq 2, sm_ccsinjecrate = sm_ccsinjecrate *   0.50 ); !! Lower estimate
-if (c_ccsinjecratescen eq 3, sm_ccsinjecrate = sm_ccsinjecrate *   1.50 ); !! Upper estimate
-if (c_ccsinjecratescen eq 4, sm_ccsinjecrate = sm_ccsinjecrate * 200    ); !! remove flow constraint for DAC runs
-if (c_ccsinjecratescen eq 5, sm_ccsinjecrate = sm_ccsinjecrate *   0.20 ); !! sustainable estimate
+s_ccsinjecrate = 0.005
+if (c_ccsinjecratescen eq 2, s_ccsinjecrate = s_ccsinjecrate *   0.50 ); !! Lower estimate
+if (c_ccsinjecratescen eq 3, s_ccsinjecrate = s_ccsinjecrate *   1.50 ); !! Upper estimate
+if (c_ccsinjecratescen eq 4, s_ccsinjecrate = s_ccsinjecrate * 200    ); !! remove flow constraint for DAC runs
+if (c_ccsinjecratescen eq 5, s_ccsinjecrate = s_ccsinjecrate *   0.20 ); !! sustainable estimate
+pm_ccsinjecrate(regi) = s_ccsinjecrate;
+
+*** OR: overwrite with regional values of ccs injection rate
+$ifThen.c_ccsinjecrateRegi not "%c_ccsinjecrateRegi%" == "off"
+Parameter p_extRegiccsinjecrateRegi(ext_regi) "Regional CCS injection rate factor. 1/a. (extended regions)" / %c_ccsinjecrateRegi% /;
+loop((ext_regi)$p_extRegiccsinjecrateRegi(ext_regi),
+  pm_ccsinjecrate(regi)$(regi_group(ext_regi,regi)) = p_extRegiccsinjecrateRegi(ext_regi);
+);
+pm_ccsinjecrate(regi) = s_ccsinjecrate;
+;
+$endIf.c_ccsinjecrateRegi
+
 
 $include "./core/input/generisdata_flexibility.prn"
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
@@ -1500,6 +1512,19 @@ $offdelim
 *** use cm_demScen for Industry and Buildings 
 *** cm_GDPscen will be used for Transport (EDGE-T) (see p29_trpdemand)
 pm_fedemand(tall,all_regi,in) = f_fedemand(tall,all_regi,"%cm_demScen%",in);
+
+*** RCP-dependent demands in buildings (climate impact)
+$ifthen.cm_rcp_scen_build NOT "%cm_rcp_scen_build%" == "none"
+Parameter f_fedemand_build(tall,all_regi,all_demScen,all_rcp_scen,all_in) "RCP-dependent final energy demand in buildings"
+/
+$ondelim
+$include "./core/input/f_fedemand_build.cs4r"
+$offdelim
+/;
+
+pm_fedemand(t,regi,cal_ppf_buildings_dyn36) =
+  f_fedemand_build(t,regi,"%cm_demScen%","%cm_rcp_scen_build%",cal_ppf_buildings_dyn36);
+$endif.cm_rcp_scen_build
 
 *** initialize global target deviation scalar
 sm_globalBudget_dev = 1;

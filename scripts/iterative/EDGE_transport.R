@@ -17,7 +17,7 @@ opt = parse_args(opt_parser);
 library(data.table)
 library(gdx)
 library(gdxdt)
-library(edgeTrpLib)
+library(edgeTransport)
 require(devtools)
 library(rmndt)
 library(mrremind)
@@ -222,7 +222,6 @@ EDGE2CESmap <- fread("mapping_CESnodes_EDGE.csv")
 shares_int_dem <- shares_intensity_and_demand(
   logit_shares=shares,
   MJ_km_base=mj_km_data,
-  EDGE2CESmap=EDGE2CESmap,
   REMINDyears=REMINDyears,
   scenario=scenario,
   demand_input = if (opt$reporting) ES_demand_all)
@@ -232,8 +231,7 @@ intensity <- shares_int_dem[["demandI"]] ##in million pkm/EJ
 norm_demand <- shares_int_dem[["demandF_plot_pkm"]] ## totla demand normalized to 1; if opt$reporting, in million km
 
 if (opt$reporting) {
-  saveRDS(vintages[["vintcomp"]], file = datapath("vintcomp.RDS"))
-  saveRDS(vintages[["newcomp"]], file = datapath("newcomp.RDS"))
+  saveRDS(vintages, file = datapath("vintages.RDS"))
   saveRDS(shares, file = datapath("shares.RDS"))
   saveRDS(logit_data$EF_shares, file = datapath("EF_shares.RDS"))
   saveRDS(logit_data$mj_km_data, file = datapath("mj_km_data.RDS"))
@@ -243,7 +241,12 @@ if (opt$reporting) {
           datapath("demandF_plot_pkm.RDS"))
   saveRDS(logit_data$annual_sales, file = datapath("annual_sales.RDS"))
   saveRDS(logit_data$pref_data, file = datapath("pref_output.RDS"))
+  saveRDS(logit_params, file = datapath("logit_params.RDS"))
+  saveRDS(logit_data, file = datapath("logit_data.RDS"))
 
+  ## the following vintages calculation is deprecated and shall not be updated!
+  ## as soon as the new reporting (edgeTransport::reportEDGETransport2) is used,
+  ## this can be deleted.
   vint <- vintages[["vintcomp_startyear"]]
   newd <- vintages[["newcomp"]]
   sharesVS1 <- shares[["VS1_shares"]]
@@ -257,7 +260,6 @@ if (opt$reporting) {
 
   vint <- newd[vint, on=c("region", "subsector_L1", "vehicle_type", "technology", "year", "sector")]
   vint <- vint[!is.na(demNew)]
-  
   vint <- vint[, c("year", "region", "vehicle_type", "technology", "variable", "demNew", "demVintEachYear")]
   vint[, demand_F := demNew + sum(demVintEachYear), by=c("region", "year", "vehicle_type", "technology")]
 
@@ -266,7 +268,7 @@ if (opt$reporting) {
   vint[, full_demand_vkm := demand_F/loadFactor]
   vint[, vintage_demand_vkm := demVintEachYear/loadFactor]
   vint[, c("demand_F", "demVintEachYear", "loadFactor", "demNew") := NULL]
-  
+
   setnames(vint, "variable", "construction_year")
 
   vintfile <- "vintcomp.csv"
