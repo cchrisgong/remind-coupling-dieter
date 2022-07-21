@@ -551,7 +551,6 @@ $IFTHEN.DTcoup %cm_DTcoup% == "on"
 $IFTHEN.noEarlyReti %cm_DTnoER% == "on"
 pm_regiEarlyRetiRate(t,regi,te)$((t.val ge 2020) AND regDTCoup(regi) AND not sameas(te,"tnrs")) = 0;
 $ENDIF.noEarlyReti
-pm_regiEarlyRetiRate(t,regi,te)$((t.val ge 2020) AND regDTCoup(regi) AND sameas(te,"tnrs")) = 0.2;
 $ENDIF.DTcoup
 
 display pm_regiEarlyRetiRate;

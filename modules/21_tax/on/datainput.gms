@@ -184,12 +184,12 @@ Display f21_taxCO2eqHist;
 
 *CG*
 ** flat CO2 price for testing DIETER coupling
-$IFTHEN.DTcoup %cm_DTcoup% == "on"
+*$IFTHEN.DTcoup %cm_DTcoup% == "on"
 $IFTHEN.Base_Cprice %carbonprice% == "none"
 *** CG: updating CO2 price from REMIND to DIETER
 f21_taxCO2eqHist(t,regi)$((t.val gt 2020) AND regDTCoup(regi)) = cm_DTcoup_flatco2;
 $ENDIF.Base_Cprice
-$ENDIF.DTcoup
+*$ENDIF.DTcoup
 
 *CG*
 Display "input data historical co2 price after adding option for DIETER testing";
