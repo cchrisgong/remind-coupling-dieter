@@ -546,29 +546,20 @@ loop((ext_regi,te)$p_techEarlyRetiRate(ext_regi,te),
 $ENDIF.tech_earlyreti
 
 
-
-*SB* Time-dependent early retirement rates in Baseline scenarios
-$ifthen.Base_Cprice %carbonprice% == "none"
-$ifthen.Base_techpol %techpol% == "none"
-*** Allow very little early retirement future periods
-*pm_regiEarlyRetiRate(t,regi,"pc")$(t.val gt 2025) = 0.01;
+*** CG: Allow very little early retirement future periods under coupling and if cm_DTnoER is on
 $IFTHEN.DTcoup %cm_DTcoup% == "on"
 $IFTHEN.noEarlyReti %cm_DTnoER% == "on"
 pm_regiEarlyRetiRate(t,regi,te)$((t.val ge 2020) AND regDTCoup(regi) AND not sameas(te,"tnrs")) = 0;
 $ENDIF.noEarlyReti
 pm_regiEarlyRetiRate(t,regi,te)$((t.val ge 2020) AND regDTCoup(regi) AND sameas(te,"tnrs")) = 0.2;
 $ENDIF.DTcoup
-$endif.Base_techpol
-$endif.Base_Cprice
 
 display pm_regiEarlyRetiRate;
 
 
-*p_earlyreti_lim(ttot,regi,"ngt")$(ttot.val > 2005) = 0;
 ***CG: limit all ngt early reti to 0 a year (since ngt can serve as peaker at high share of VRE)
-*p_earlyreti_lim(ttot,regi,"ngt")$(ttot.val > 2005) = 0 - cm_earlyreti_rate;
-*** limit all tech early reti
-*p_earlyreti_lim(ttot,regi,te)$(ttot.val > 2015 AND teDTCoupSupp(te)) = 0 - cm_earlyreti_rate;
+pm_regiEarlyRetiRate(ttot,regi,"ngt")$(ttot.val > 2005) = 0;
+
 
 ***---------------------------------------------------------------------------
 *RP* calculate omegs and opTimeYr2te
