@@ -125,7 +125,7 @@ flexadj <- out.remind.flexadj %>%
   select(-iteration) %>% 
   filter(period %in% model.periods.till2100) %>% 
   mutate(cost = "Flexibility subsidy") %>% 
-  filter(tech == "Flexible electrolyzers (PtG)") %>% 
+  filter(tech == "Electrolyzers for PtG") %>% 
   mutate(sector = "supply-side") 
 
 # aggregated production share per upscaled technology
@@ -259,7 +259,7 @@ df.lcoe.sys.components <- list(prod_share, df.lcoe.te.components) %>%
 #   mutate(sector = "supply-side") %>%  
 #   mutate(variable = "Total LCOE")
 
-### Flexible electrolyzers (PtG) LCOE
+### Electrolyzers for PtG LCOE
 df.lcoe.elh2.components <- df.lcoe %>% 
   filter(region == reg, 
          period %in% model.periods, type == cost.type,
@@ -292,7 +292,7 @@ df.price0 <- df.mod %>%
   mutate( value = value * 1.2 * 3.66) %>% 
   left_join(map.price.tech) %>% 
   select(-unit, -variable) %>% 
-  mutate( variable = "REMIND Price") %>% 
+  mutate( variable = "REMIND electricity Price") %>% 
   filter(tech %in% plot.tech) %>% 
   revalue.levels(tech = tech.label) %>% 
   select(period, tech, variable, sector,value) %>% 
@@ -378,7 +378,7 @@ df.sp.agg <- list(prod_shareType_RM.broad, sp) %>%
   select(period,tech, sp=value) %>% 
   filter(period %in% model.periods.till2100) 
 
-#market value + capacity constraint shadow price
+# market value + capacity constraint shadow price
 mv.plus.sp.agg <- list(sp.capcon.agg, mv.agg, df.sp.agg) %>% 
   reduce(full_join) %>% 
   select(-cost) %>% 
@@ -539,7 +539,7 @@ df.telcoe_mv.plot <- list(
   # df.total.lcoe.teAgg.plot, 
   mv.plus.sp.agg, mv.agg) %>% 
   reduce(full_join) %>% 
-  filter(!tech %in% c("VRE grid", "Flexible electrolyzers (PtG)")) %>% 
+  filter(!tech %in% c("VRE grid", "Electrolyzers for PtG")) %>% 
   filter(period %in% model.periods.till2100)
 
 if (h2switch == "off"){
@@ -778,12 +778,12 @@ p.teLCOE.REMIND <- ggplot() +
   geom_col( 
             # data = df.lcoe.teAgg.wAdjMrk 
             data = df.lcoe.teAgg.wAdj %>% 
-                    filter(period %in% model.periods.till2100, period >2020) %>% 
+                    filter(period %in% model.periods.till2100, period > 2020) %>% 
                     filter(value < 1e4) %>% 
               mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))),
             aes(period, value, fill=cost), stat='identity', size = 1.2, alpha = 0.5) +
   geom_line(data = df.telcoe_mv.plot %>% 
-                    filter(period >2020) %>% 
+                    filter(period > 2020) %>% 
                     filter(value < 1e4) %>% 
               mutate(tech = factor(tech, levels=rev(unique(dieter.tech.mapping)))),
             aes(period, value, linetype=cost), size=1.2) +
@@ -795,7 +795,7 @@ p.teLCOE.REMIND <- ggplot() +
   coord_cartesian(xlim = c(2020,2100))+
   scale_fill_manual(values = cost.colors) +
   theme(axis.text=element_text(size=20), axis.title=element_text(size=20, face="bold"), strip.text = element_text(size = 20)) +
-  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=15)) +
+  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(), legend.text = element_text(size=15)) +
   facet_wrap(~tech, nrow = 3, scales = "free") 
 
 swfigure(sw,print,p.teLCOE.REMIND)
@@ -1028,14 +1028,17 @@ shadow_prices_DT <- out.prices_DT %>%
 elec_prices_DT <- out.prices_DT %>% 
   filter(variable == "DIETER annual average electricity price with scarcity price") 
 
+elec_prices_DT_woscar <- out.prices_DT %>% 
+  filter(variable == 'DIETER annual average electricity price') 
+
 elec_prices_DT_wShadPrice <- elec_prices_DT %>% 
   left_join(shadow_prices_DT) %>% 
   mutate(value = value + shad) %>% 
-  mutate(variable = "DIETER annual average electricity price with scarcity price + shadow price")
+  mutate(variable = "DIETER annual average electricity price with scarcity price + capacity shadow price")
 
 prices_RM <- df.pricelcoe_minus_tax.plot %>%
   filter(tech == "System") %>%
-  filter(variable %in% c("REMIND Price")) %>%
+  filter(variable %in% c("REMIND electricity Price")) %>%
   select(period, variable, value)%>%
   mutate(model = "REMIND")
 
@@ -1044,8 +1047,8 @@ prices_RM.movingavg <- df.price0 %>%
   filter(tech == "System") %>% 
   select(period, variable, value)%>%
   mutate(model = "REMIND") %>% 
-  mutate(value = frollmean(value, 3, align = "left", fill = NA)) %>%
-  mutate(variable = "REMIND price moving average")
+  mutate(value = frollmean(value, 3, align = "center", fill = NA)) %>%
+  mutate(variable = "REMIND electricity price")
 
 # REMIND price with capacity shadow price
 prices_wShad_RM <- prices_RM.movingavg %>%
@@ -1053,22 +1056,36 @@ prices_wShad_RM <- prices_RM.movingavg %>%
   full_join(df.sp.sys)%>% 
   replace(is.na(.), 0) %>% 
   mutate(value = value +price) %>% 
-  mutate(variable = "REMIND price + shadow price (historical bound on capacities)")
+  mutate(variable = "REMIND electricity price + capacity shadow price (historical bound on capacities)")
 
 prices_w2Shad_RM <- prices_wShad_RM %>%
   select(period,price=value) %>% 
   full_join(df.sp.capcon.sys) %>% 
   replace(is.na(.), 0) %>% 
   mutate(value = value + price) %>% 
-  mutate(variable = "REMIND price + shadow price (historical and peak load bound on cap.)")%>%
+  select(-price) %>% 
+  mutate(variable = "REMIND electricity price + capacity shadow price")%>%
   mutate(model = "REMIND")
-
 
 elec_prices_DT_laIter <- elec_prices_DT %>% 
   filter(iteration == maxiter) %>% 
   select(-iteration)
 
 elec_prices_DT_wShadPrice_laIter <- elec_prices_DT_wShadPrice %>% 
+  filter(iteration == maxiter) %>% 
+  select(-iteration, -shad)
+
+check_diff <- list(prices_w2Shad_RM %>% 
+                     select(-variable,-model,rmprice_wsh=value), 
+                   elec_prices_DT_wShadPrice_laIter %>% 
+                     select(-variable,-model,dtprice_wsh=value)) %>% 
+  reduce(full_join) %>% 
+  filter(period > 2015, period < 2110) %>% 
+  mutate(diff=rmprice_wsh-dtprice_wsh) %>% 
+  select(diff) %>% 
+  dplyr::summarise( diff = mean(diff) )
+
+elec_prices_DT_woscar_laIter <- elec_prices_DT_woscar %>% 
   filter(iteration == maxiter) %>% 
   select(-iteration)
 
@@ -1096,7 +1113,7 @@ genshare1 <- genshare.dieter %>%
 
 sysLCOE.avg.DT <- dieter.telcoe_avg %>% 
   select(iteration,period,tech,variable,value) %>% 
-  filter(!tech %in% c("VRE grid", "Flexible electrolyzers (PtG)")) %>% 
+  filter(!tech %in% c("VRE grid", "Electrolyzers for PtG")) %>% 
   left_join(genshare1) %>% 
   mutate(value = value * genshare) %>% 
   select(iteration,period,tech,variable, value) %>% 
@@ -1166,7 +1183,7 @@ if (save_png == 1){
 
 sysLCOE.avg.DT_tech_lastIter <- dieter.telcoe_avg %>% 
   select(iteration,period,tech,variable,value) %>% 
-  filter(!tech %in% c("VRE grid", "Flexible electrolyzers (PtG)")) %>% 
+  filter(!tech %in% c("VRE grid", "Electrolyzers for PtG")) %>% 
   left_join(genshare1) %>% 
   mutate(value = value * genshare) %>% 
   select(iteration,period,tech,variable,value) %>% 
@@ -1196,12 +1213,12 @@ sys_avgLCOE_compare_tech <- list(sysLCOE.avg.DT_tech_lastIter, sysLCOE_RM_tech) 
 p.sysLCOE_compare <- ggplot() + 
   geom_col( data = sys_avgLCOE_compare_tech, 
             aes(period, value, fill=tech)) +
-  scale_y_continuous("LCOE and electricity price\n(USD2015/MWh)") +
+  scale_y_continuous("LCOE \n(USD2015/MWh)") +
   scale_x_continuous(breaks = seq(2010,2100,10)) +
   coord_cartesian(ylim = c(ymin,ymax))+
   scale_fill_manual(values = color.mapping) +
-  guides(fill=guide_legend(nrow=5,byrow=TRUE), color=guide_legend(nrow=5,byrow=TRUE))+
-  theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank(),legend.text = element_text(size=13)) +
+  # guides(fill=guide_legend(nrow=5,byrow=TRUE))+
+  theme(legend.position="right", legend.title = element_blank(),legend.text = element_text(size=13)) +
   theme(axis.text=element_text(size=15), axis.title=element_text(size= 18, face="bold"),strip.text = element_text(size=13))  +
   # facet_wrap(~model, scales = "free_y") 
   facet_wrap(~model) 
@@ -1209,7 +1226,7 @@ p.sysLCOE_compare <- ggplot() +
 swfigure(sw,print,p.sysLCOE_compare)
 
 if (save_png == 1){
-  ggsave(filename = paste0(outputdir, "/DIETER/sys_avgDT_",plot.tag,"RM_LCOE_tech_price_compare_line.png"), p.sysLCOE_compare, width = 14, height =9, units = "in", dpi = 120)
+  ggsave(filename = paste0(outputdir, "/DIETER/sys_avgDT_",plot.tag,"RM_LCOE_tech_price_compare.png"), p.sysLCOE_compare, width = 14, height =9, units = "in", dpi = 120)
 }
 
 
@@ -1272,7 +1289,7 @@ for (iter in c(start_i,start_i+1,maxiter)){
 
 sysLCOE.marg.DT <- dieter.telcoe_marg %>%
   select(period,tech,variable,value) %>%
-  filter(!tech %in% c("VRE grid", "Flexible electrolyzers (PtG)")) %>%
+  filter(!tech %in% c("VRE grid", "Electrolyzers for PtG")) %>%
   left_join(genshare1) %>%
   mutate(value = value * genshare) %>%
   select(period,tech,variable,value) %>%

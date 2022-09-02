@@ -12,7 +12,7 @@ if (length(dieter.files) != 0) {
     
     remind.peak.demand <- file.path(outputdir, remind.files[i]) %>%  
       read.gdx("p32_peakDemand", factor = FALSE) %>% 
-      filter(ttot %in% model.periods) %>% 
+      filter(ttot %in% model.periods.from2020) %>% 
       filter(all_regi == reg) %>%
       select(period=ttot,value) %>% 
       mutate(value = value * 1e3) %>% 
@@ -31,7 +31,7 @@ out.remind.capacity <- NULL
     
     remind.capacity <- file.path(outputdir, remind.files[i]) %>%  
       read.gdx("vm_cap", factors = FALSE, squeeze = FALSE) %>% 
-      filter(tall %in% model.periods) %>%
+      filter(tall %in% model.periods.from2020) %>%
       filter(all_regi == reg) %>%
       filter(rlf == "1") %>% 
       filter(all_te %in% names(remind.tech.mapping.narrow)) %>%
@@ -70,7 +70,7 @@ if (length(dieter.files) != 0) {
     dieter.cap.data <- file.path(outputdir, dieter.files[i]) %>% 
       read.gdx("p32_report4RM", factor = FALSE, squeeze = FALSE) %>%
       select(period = X..1, tech = X..3, variable=X..4, value)  %>%
-      filter(period %in% model.periods) %>%
+      filter(period %in% model.periods.from2020) %>%
       filter(tech %in% names(dieter.tech.mapping)) %>%
       filter(!tech %in% names(dieter.storage.mapping)) %>% 
       filter(variable %in% c("capacity")) %>%
@@ -81,7 +81,7 @@ if (length(dieter.files) != 0) {
     dieter.sto.cap.data <- file.path(outputdir, dieter.files[i]) %>% 
       read.gdx("p32_report4RM", factor = FALSE, squeeze = FALSE) %>%
       select(period = X..1, tech = X..3, variable=X..4, value) %>%
-      filter(period %in% model.periods) %>%
+      filter(period %in% model.periods.from2020) %>%
       filter(tech %in% names(dieter.storage.mapping)) %>% 
       filter(variable %in% c("sto_P_capacity")) %>%
       revalue.levels(tech = dieter.storage.mapping) %>%
@@ -237,7 +237,7 @@ swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")
 
 
     plot.remind.capacity <- out.remind.capacity %>% 
-      filter(period %in% model.periods.till2100) %>% 
+      filter(period %in% model.periods.from2020.till2100) %>% 
       filter(iteration == max(out.remind.capacity$iteration)) %>% 
       select(period,tech,value) %>% 
       filter(!tech %in% dieter.storage.mapping)%>%
@@ -248,7 +248,7 @@ swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")
         mutate(period = as.numeric(period))%>%
         filter(iteration == max(out.remind.capacity$iteration)) %>% 
         select(period,tech,value) %>% 
-        filter(period %in% model.periods.till2100) %>% 
+        filter(period %in% model.periods.from2020.till2100) %>% 
         filter(tech %in% dieter.storage.mapping)
       
       plot.dieter.capacity.h2stor2 <- plot.dieter.capacity.stor %>% 
@@ -263,7 +263,7 @@ swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")
       
       
       plot.remind.capacity.wDIETERstorage <- plot.remind.capacity.wDIETERstorage %>% 
-        mutate(tech = factor(tech, levels=rev(unique(c(dieter.tech.mapping,"Hydrogen Turbine","Electrolyzers for long-term storage"))))) %>% 
+        mutate(tech = factor(tech, levels=rev(unique(c("Hydrogen Turbine", dieter.tech.mapping,"Electrolyzers for long-term storage"))))) %>% 
         mutate(model="REMIND")
       
       plot.remind.capacity.wDIETERstorage2 <- plot.remind.capacity.wDIETERstorage %>% 
@@ -271,7 +271,7 @@ swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")
         
       plot.dieter.capacity <- out.dieter.capacity %>%
         mutate(period = as.numeric(as.character(period))) %>% 
-        filter(period %in% model.periods.till2100) %>% 
+        filter(period %in% model.periods.from2020.till2100) %>% 
         filter(iteration == max(out.dieter.capacity$iteration)) %>% 
         select(-iteration) %>% 
         full_join(plot.dieter.capacity.h2stor2)%>% 
@@ -351,7 +351,7 @@ if (save_png == 1){
 if (length(dieter.files) != 0) {
 swlatex(sw, paste0("\\section{Capacity factors}"))
 
-for(year_toplot in model.periods){
+for(year_toplot in model.periods.from2020){
   plot.remind.capfac <- out.remind.capfac %>% 
     filter(period == year_toplot)
   

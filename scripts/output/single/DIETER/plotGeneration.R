@@ -10,7 +10,7 @@ for (i in 1:length(remind.files)) {
   # usable energy for VRE (excluding curtailment)
   vmUsableSeTe <- file.path(outputdir, remind.files[i]) %>%
     read.gdx("vm_usableSeTe", factors = FALSE, squeeze = FALSE) %>%
-    filter(ttot %in% model.periods) %>%
+    filter(ttot %in% model.periods.from2020) %>%
     filter(all_regi == reg) %>%
     filter(entySe == "seel") %>%
     filter(all_te %in% names(remind.vre.mapping)) %>%
@@ -26,7 +26,7 @@ for (i in 1:length(remind.files)) {
   # for non-VRE
   vmprodSe <- file.path(outputdir, remind.files[i]) %>%
     read.gdx("vm_prodSe", factors = FALSE, squeeze = FALSE) %>%
-    filter(tall %in% model.periods) %>%
+    filter(tall %in% model.periods.from2020) %>%
     filter(all_regi == reg) %>%
     filter(all_enty.1 == "seel") %>%
     filter(all_te %in% names(remind.nonvre.mapping.whyd)) %>%
@@ -43,7 +43,7 @@ for (i in 1:length(remind.files)) {
   
   generation.withCurt<- file.path(outputdir, remind.files[i]) %>%
     read.gdx("vm_prodSe", factors = FALSE, squeeze = FALSE) %>%
-    filter(tall %in% model.periods) %>%
+    filter(tall %in% model.periods.from2020) %>%
     filter(all_regi == reg) %>%
     filter(all_te %in% names(remind.tech.mapping)) %>%
     filter(all_enty.1 == "seel")  %>%
@@ -68,7 +68,7 @@ for (i in 2:length(remind.files)) {
     read.gdx("p32_seh2elh2Dem",
              factors = FALSE,
              squeeze = FALSE) %>%
-    filter(ttot %in% model.periods) %>%
+    filter(ttot %in% model.periods.from2020) %>%
     filter(all_regi == reg) %>%
     mutate(value = value * sm_TWa_2_MWh / 1e6) %>%
     select(period = ttot, h2dem = value) 
@@ -77,7 +77,7 @@ for (i in 2:length(remind.files)) {
     read.gdx("p32_usableSeDisp",
              factors = FALSE,
              squeeze = FALSE) %>%
-    filter(ttot %in% model.periods) %>%
+    filter(ttot %in% model.periods.from2020) %>%
     filter(all_regi == reg) %>%
     mutate(value = value * sm_TWa_2_MWh / 1e6) %>%
     mutate(tech="seel") %>% 
@@ -104,19 +104,19 @@ remind.consumption <- remind.consumption %>%
   mutate(tech = fct_relevel(tech, table_ordered_name_dem))
 
 generation.withCurt.disp <- remind.generation.withCurt %>% 
-  filter(!tech %in% c("Solar", "Wind Onshore", "Wind Offshore")) %>% 
+  filter(!tech %in% c("Solar", "Wind onshore", "Wind offshore")) %>% 
   dplyr::group_by(period, iteration) %>%
   dplyr::summarise( disp = sum(value) , .groups = 'keep' ) %>%
   dplyr::ungroup(period, iteration)
 
 generation.withCurt.wind <- remind.generation.withCurt %>% 
-  filter(tech %in% c("Wind Onshore")) %>% 
+  filter(tech %in% c("Wind onshore")) %>% 
   left_join(generation.withCurt.disp)  %>% 
   mutate(value = value + disp) %>% 
   select(iteration,period,tech,value)
 
 generation.withCurt.vre <- remind.generation.withCurt %>% 
-  filter(tech %in% c("Solar","Wind Offshore")) %>% 
+  filter(tech %in% c("Solar","Wind offshore")) %>% 
   select(iteration,period,tech,value)%>% 
   full_join(generation.withCurt.wind) 
 
@@ -168,19 +168,19 @@ dieter.gen.wCurt.sum <- out.dieter %>%
   dplyr::ungroup(period, iteration)
 
 dieter.gen.wCurt.disp <- dieter.gen.wCurt %>% 
-  filter(!tech %in% c("Solar", "Wind Onshore", "Wind Offshore")) %>% 
+  filter(!tech %in% c("Solar", "Wind onshore", "Wind offshore")) %>% 
   dplyr::group_by(period, iteration) %>%
   dplyr::summarise( disp = sum(value) , .groups = 'keep' ) %>%
   dplyr::ungroup(period, iteration)
 
 dieter.gen.wCurt.wind <- dieter.gen.wCurt %>% 
-  filter(tech %in% c("Wind Onshore")) %>% 
+  filter(tech %in% c("Wind onshore")) %>% 
   left_join(dieter.gen.wCurt.disp) %>% 
   mutate(value = value +disp) %>% 
   select(iteration,period,tech,value)
 
 dieter.gen.wCurt.vre <- dieter.gen.wCurt %>% 
-  filter(tech %in% c("Wind Offshore","Solar")) %>% 
+  filter(tech %in% c("Wind offshore","Solar")) %>% 
   select(iteration,period,tech,value)%>% 
   full_join(dieter.gen.wCurt.wind) 
 
@@ -191,7 +191,7 @@ dieter.gen.wCurt <- dieter.gen.wCurt.vre
 
 swlatex(sw, paste0("\\section{Generation}"))
 
-for (year_toplot in model.periods) {
+for (year_toplot in model.periods.from2020) {
     
   plot.remind.generation <- out.remind.generation %>%
     filter(period == year_toplot)
@@ -483,7 +483,6 @@ if (h2switch == "on"){
   size = 1.2,
   alpha = 0.5
 )
-  
   
   p.genwConsump2 <- p.genwConsump2 +  geom_area(
     data = plot.remind.consumption%>% filter(period %in% model.periods.till2100)%>% mutate(value = -value),

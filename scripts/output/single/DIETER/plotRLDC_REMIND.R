@@ -20,10 +20,9 @@ remind.genshare.vre <- out.remind.genshare %>%
   dplyr::summarise( genshare = sum(genshare), .groups = "keep" ) %>% 
   dplyr::ungroup(period) 
 
+# for(year_toplot in year_toplot_list){
 
-for(year_toplot in year_toplot_list){
-
-# year_toplot = 2045
+year_toplot = 2045
 print(year_toplot)
 plot.remind.cf <- out.remind.capfac %>% 
   filter(tech %in% remind.nonvre.mapping.whyd) %>% 
@@ -105,16 +104,22 @@ disp.cap <- plot.cap %>%
 baseload.dem <- baseload.cap$value
 
 if (vreShare > 80){
-  # for high VRE share, raise baseload cap to make plot prettier
+  # for high VRE share, raise "baseload" capacity (right edge of outer most trapezoid) to make plot prettier
   baseload.dem = baseload.dem * 1.3
 }
 
-
 # peak demand as calculated from average demand and baseload demand (GW)
 peak.dem <- avg.dem * 2 - baseload.dem
+
 #residual peak demand calculated from peak demand and sum of dispatchable capacities, it should be positive
-# residual <- max(0,peak.dem- disp.cap$value)
-residual = 0
+if (policyMode == 1){
+  residual = 0
+}
+
+if (policyMode == 9){
+  residual <- peak.dem*0.2 #start drawing solar from 80% of peak demand
+}
+
 delta_value = (peak.dem-baseload.dem)/876
 
 plot.remind.peak.demand <- out.remind.peak.demand %>% 
@@ -139,23 +144,25 @@ remind.wind.prod <- file.path(outputdir, remind.files[maxiter]) %>%
 
 avg.wind.gen <- remind.wind.prod$value
 
-# generation without wind (solar and dispatchables), i.e. the area that should be painted in solar
+# generation WithOut wind (solar and dispatchables), i.e. the area that should be painted in solar
 gen.wowind <- avg.dem - avg.wind.gen
 
 width.solar = gen.wowind*2/(peak.dem-residual)
 
+# if the wowind patch width is smaller than 8760
 if (width.solar < 1){
-delta_value2 = (peak.dem - residual) / (round(8760 * width.solar))
+delta_value2 = (peak.dem - residual) / (round(876 * width.solar))
 
 residual.solar.demand <- plot.remind.peak.demand %>%  
-  expand(plot.remind.peak.demand, hour = seq(1, 8760)) %>% 
+  expand(plot.remind.peak.demand, hour = seq(1, 8760,10)) %>% 
   filter(hour <= round(width.solar * 8760)) %>% 
   mutate(value = seq((peak.dem-residual), +delta_value2, -delta_value2)) %>% 
   mutate(tech="Solar")
 }
 
+# if the wowind patch width is larger than 8760, then wowind patch also needs to be a trapezoid
 if (width.solar > 1){
-
+  
 delta_value2 = (peak.dem - residual - (baseload.dem - 2 * avg.wind.gen)) / 876
 
 residual.solar.demand <- plot.remind.peak.demand %>% 
@@ -164,54 +171,67 @@ residual.solar.demand <- plot.remind.peak.demand %>%
   mutate(tech="Solar")
 }
 
-# make a triangle out of total curtailment
-# curtailment in GWa
-# remind.total.curt <- file.path(outputdir, remind.files[maxiter]) %>%  
-#   read.gdx("p32_seelCurt", factor = FALSE) %>% 
-#   filter(all_regi == reg, ttot == year_toplot) %>%
-#   select(value) %>% 
-#   mutate(value = value * 1e3)
-# 
-# curt.value <- remind.total.curt$value
-# largest.cf <- max(plot.remind.cf$cf)/1e2
-# 
-# peak.curt = 2*8760*curt.value/(8760*(1-largest.cf))
-# 
-# delta_value3 = peak.curt/(876*(1-largest.cf))
-  
-# total.curt <- remind.total.curt %>% 
-#   expand(remind.total.curt, hour = seq(8760*largest.cf,8760,10)) %>% 
-#   mutate(value = - seq(0,peak.curt,delta_value3)) %>% 
-#   mutate(tech="Wind") %>% 
-#   select(hour,tech,curt=value)
-# 
-# remind.solar.curt <- file.path(outputdir, remind.files[maxiter]) %>%  
-#   read.gdx("v32_storloss", field="l", factor = FALSE) %>% 
-#   filter(all_regi == reg, all_te == "spv", ttot == year_toplot) %>%
-#   select(value) %>% 
-#   mutate(value = value * 1e3)
-# 
-# solar.curt.value <- remind.solar.curt$value
-# 
-# solar.curt.width = solar.curt.value*8760*2/(peak.curt)
-# 
-# delta_value4 = peak.curt/(solar.curt.width/10)
-# 
-# solar.curt <- remind.total.curt %>% 
-#   expand(remind.total.curt, hour = seq(round(8760-solar.curt.width),8760,10)) %>% 
-#   mutate(value = - seq(0, peak.curt,delta_value4)) %>% 
-#   mutate(tech="Solar") %>% 
-#   select(hour,tech,curt=value)
+if (policyMode == 1){
+largest.cf <- max(plot.remind.cf$cf)/1e2 + 0.07 #add 7% to largest CF for aesthetic reasons
+}
+
+if (policyMode == 9){
+  largest.cf <- max(plot.remind.cf$cf)/1e2 + 0.25 #add 25% to largest CF for aesthetic reasons
+}
+
+# take the GWa curtailment value, times 8760 hours, divided by (width/2), where width is the difference
+# between 8760 and the highest full load hour plant
+remind.total.curt <- file.path(outputdir, remind.files[maxiter]) %>%
+  read.gdx("p32_curtLoss", factor = FALSE) %>%
+  filter(all_regi == reg, ttot == year_toplot) %>%
+  select(value) %>%
+  dplyr::summarise( value = sum(value)) %>%
+  mutate(value = value * 1e3)
+
+curt.value = remind.total.curt$value
+
+peak.curt = 2*8760*curt.value/(8760*(1-largest.cf))
+
+delta_value3 = peak.curt/(876*(1-largest.cf))
+
+total.curt.rldc <- remind.total.curt %>%
+  expand(remind.total.curt, hour = seq(8760*largest.cf,8760,10)) %>%
+  mutate(value = - seq(0,peak.curt,delta_value3)) %>%
+  mutate(tech="Solar") %>%
+  select(hour,tech,value)
+
+remind.wind.curt <- file.path(outputdir, remind.files[maxiter]) %>%
+  read.gdx("v32_storloss", field="l", factor = FALSE) %>%
+  filter(all_regi == reg, all_te%in%c("wind","windoff"), ttot == year_toplot) %>%
+  select(value) %>%
+  dplyr::summarise( value = sum(value)) %>%
+  mutate(value = value * 1e3)
+
+wind.curt.value <- remind.wind.curt$value
+
+wind.curt.width = 2*8760*wind.curt.value/(peak.curt)
+
+delta_value4 = peak.curt/(wind.curt.width/10)
+
+remind.wind.curt.rldc <- remind.total.curt %>%
+  expand(remind.total.curt, hour = seq(round(8760-wind.curt.width),8760,10)) %>%
+  mutate(value = - seq(0, peak.curt,delta_value4)) %>%
+  mutate(tech="Wind") %>%
+  select(hour,tech,value)
 
 RLDC.VRE <- list(residual.solar.demand,total.demand) %>% 
     reduce(full_join) %>% 
     mutate(tech = factor(tech, levels=rev(c("Solar","Wind"))))
 
+RLDC.VREcurt <- list(remind.wind.curt.rldc,total.curt.rldc) %>% 
+  reduce(full_join) %>% 
+  mutate(tech = factor(tech, levels=rev(c("Wind","Solar"))))
 # =================================================================================================
- 
+
 p.RM.rldc <-ggplot() +
-    geom_area(data = RLDC.VRE, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1, position = "identity") +
+    geom_area(data = RLDC.VRE, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1, position = "identity") + 
     geom_area(data = plot.rldc.hr, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1) +
+  geom_area(data = RLDC.VREcurt, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1, position = "identity") + 
     coord_cartesian(ylim = c(-50,210),xlim = c(0,8760))+
     scale_fill_manual(name = "Technology", values = color.mapping.RLDC.basic)+
     xlab("Hour") + ylab("Residual load (GWh)")+
@@ -221,4 +241,4 @@ p.RM.rldc <-ggplot() +
   if (save_png == 1){
     ggsave(filename = paste0(outputdir, "/DIETER/REMIND_RLDC_yr=", year_toplot, ".png"),  p.RM.rldc,  width = 8, height =8, units = "in", dpi = 120)
   }
-}
+# }

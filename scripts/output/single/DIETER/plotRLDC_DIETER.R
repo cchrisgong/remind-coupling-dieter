@@ -13,9 +13,9 @@ if (h2switch == "on"){
 }
 
 # 
-for(year_toplot in year_toplot_list){
+# for(year_toplot in year_toplot_list){
 
-  # year_toplot = 2045
+  year_toplot = 2045
   hr_data <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
     read.gdx("report_tech_hours", factors = FALSE, squeeze = FALSE) %>% 
     # select(model = X., period = X..1, variable = X..3, tech = X..4, hour = X..5, value) %>%
@@ -99,12 +99,12 @@ for(year_toplot in year_toplot_list){
   RLDC.Solar <- RLDC_all %>% arrange(desc(Solar.RLDC)) %>% 
     select(Solar.RLDC)%>%
     mutate(hour.sorted = seq(1, 8760)) %>% 
-    mutate(te = "Lithium-ion Battery")
+    mutate(te = "Lithium-ion battery")
   
   #=================================================================================================
   Battery_Out_Lith <- hr_data %>% 
     filter(variable == "storage generation (GWh)") %>% 
-    filter(tech %in% c("Lithium-ion Battery")) %>% 
+    filter(tech %in% c("Lithium-ion battery")) %>% 
     select(hour, value, tech) %>% 
     dplyr::group_by(hour) %>%
     dplyr::summarise(value = sum(value), .groups = "keep") %>%
@@ -115,7 +115,7 @@ for(year_toplot in year_toplot_list){
   
   Battery_In_Lith <- hr_data %>% 
     filter(variable == "storage loading (GWh)") %>% 
-    filter(tech %in% c("Lithium-ion Battery")) %>% 
+    filter(tech %in% c("Lithium-ion battery")) %>% 
     select(hour, value, tech) %>% 
     dplyr::group_by(hour) %>%
     dplyr::summarise(value = sum(value), .groups = "keep") %>%
@@ -132,7 +132,7 @@ for(year_toplot in year_toplot_list){
   RLDC.Batt_Li <- RLDC_all %>% arrange(desc(Batt.Li.RLDC)) %>%
     select(Batt.Li.RLDC) %>% 
     mutate(hour.sorted = seq(1, 8760)) %>% 
-    mutate(te = "Electrolyzers for long-term storage")
+    mutate(te = "Hydrogen turbine")
   
   #=================================================================================================
   Battery_Out_H2 <- hr_data %>% 
@@ -154,22 +154,33 @@ for(year_toplot in year_toplot_list){
     dplyr::summarise(value = sum(value), .groups = "keep") %>%
     dplyr::ungroup(hour) %>% 
     select(hour, value) %>% 
-    dplyr::rename(battcharge.h2 = value)%>% 
+    dplyr::rename(battcharge.h2 = value) %>% 
     complete(hour = 1:8760, fill = list(battcharge.h2 = 0)) 
   
   RLDC_checkpeak = list(LDC, PV, Wind, Battery_Out_Lith, Battery_Out_H2) %>%
     reduce(full_join) %>%
     mutate(residueLoad = load - solgen - windgen - battgen.li - battgen.h2)
   
-  RLDC_all <- list(RLDC_all, Battery_Out_H2, Battery_In_H2) %>% 
+  RLDC_all <- list(RLDC_all, Battery_Out_H2) %>% 
     reduce(full_join) %>% 
     replace(is.na(.), 0) %>% 
-    mutate(Batt.H2.RLDC = Batt.Li.RLDC - battgen.h2 + battcharge.h2) 
+    mutate(Batt.H2.RLDC = Batt.Li.RLDC - battgen.h2) 
   
   RLDC.Batt_H2 <- RLDC_all %>% arrange(desc(Batt.H2.RLDC)) %>%
     select(Batt.H2.RLDC) %>% 
     mutate(hour.sorted = seq(1, 8760)) %>% 
-    mutate(te = "Flexible electrolyzers (PtG)")
+    mutate(te = "Electrolyzers for long-term storage")
+  
+  RLDC_all <- list(RLDC_all, Battery_In_H2) %>% 
+    reduce(full_join) %>% 
+    replace(is.na(.), 0) %>% 
+    mutate(Batt.H2.RLDC2 = Batt.H2.RLDC + battcharge.h2) 
+  
+  RLDC.Batt2_H2 <- RLDC_all %>% arrange(desc(Batt.H2.RLDC2)) %>%
+    select(Batt.H2.RLDC2) %>% 
+    mutate(hour.sorted = seq(1, 8760)) %>% 
+    mutate(te = "Electrolyzers for PtG")
+  
   #=================================================================================================
   #--------------------------------------------------------------
   running_cost <- file.path(outputdir, dieter.files.report[length(dieter.files.report)]) %>%
@@ -213,7 +224,7 @@ for(year_toplot in year_toplot_list){
   
   LDC_h2 <- hr_data %>% 
     filter(variable == "consumption (GWh)") %>% 
-    filter(tech == "Flexible electrolyzers (PtG)") %>% 
+    filter(tech == "Electrolyzers for PtG") %>% 
     select(hour, value) %>% 
     dplyr::rename(h2 = value) %>% 
     complete(hour = 1:8760, fill = list(h2 = 0)) 
@@ -229,7 +240,6 @@ for(year_toplot in year_toplot_list){
     mutate(te = techranking[[1]]) %>%
     mutate_all(function(H2.RLDC) ifelse(H2.RLDC < 0, 0, H2.RLDC))
   
-
   #=================================================================================================
   #=================================================================================================
   # order dispatchables based on capacity factor
@@ -313,6 +323,7 @@ for(year_toplot in year_toplot_list){
     mutate(te = techranking[[5]])%>% 
     mutate_all(function(RLDC4) ifelse(RLDC4 <0, 0, RLDC4))
   }
+  
   #=================================================================================================
   if (length(techranking) > 5){
   hr_disp_gen5 <- hr_data %>% 
@@ -331,7 +342,7 @@ for(year_toplot in year_toplot_list){
     select(RLDC5) %>% 
     mutate(hour.sorted = seq(1, 8760)) %>% 
     mutate(te = techranking[[6]])%>% 
-    mutate_all(function(RLDC5) ifelse(RLDC5 <0, 0, RLDC5))
+    mutate_all(function(RLDC5) ifelse(RLDC5 < 0, 0, RLDC5))
   }
   
   ### plot negative curtailment
@@ -354,6 +365,27 @@ for(year_toplot in year_toplot_list){
     filter(Wind.RLDC2 <0) %>% 
     complete(hour = 1:8760, fill = list(Wind.RLDC2 = 0)) %>% 
     mutate(te = "Wind")
+ 
+  # if flipping order of solar and wind curtailment: (deprecated)
+  # CU_VRE_Wind.plot <- list(CU_VRE_Solar, CU_VRE_Wind) %>% 
+  #   reduce(full_join) %>% 
+  #   mutate(Wind.RLDC2 = -(curt_w + curt_s)) %>% 
+  #   select(-curt_s, -curt_w) %>% 
+  #   arrange(desc(Wind.RLDC2)) %>% 
+  #   mutate(hour= seq(1, 8760)) %>% 
+  #   mutate(te = "Wind" )
+  # 
+  # CU_VRE_Solarplot = list(LDC, PV, CU_VRE_Solar,Battery_In_Lith,Battery_In_H2,LDC_h2) %>% 
+  #   reduce(full_join) %>% 
+  #   replace(is.na(.), 0) %>% 
+  #   mutate(Solar.RLDC2 = load - solgen - curt_s + battcharge.li + battcharge.h2 + h2) %>%
+  #   # mutate(Wind.RLDC2 = - curt_w + battcharge + h2) %>%
+  #   arrange(desc(Solar.RLDC2)) %>% 
+  #   mutate(hour= seq(1, 8760)) %>% 
+  #   select(Solar.RLDC2,hour) %>% 
+  #   filter(Solar.RLDC2 <0) %>% 
+  #   complete(hour = 1:8760, fill = list(Solar.RLDC2 = 0)) %>% 
+  #   mutate(te = "Solar")
   
   # =================================================================================================
   
@@ -363,9 +395,10 @@ for(year_toplot in year_toplot_list){
     geom_area(data = RLDC.Solar%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = Solar.RLDC, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC.Batt_Li%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = Batt.Li.RLDC, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC.Batt_H2%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = Batt.H2.RLDC, fill = te), size = 1.2, alpha = 1) +
+    geom_area(data = RLDC.Batt2_H2%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = Batt.H2.RLDC2, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC.H2%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = H2.RLDC, fill = te), size = 1.2, alpha = 1) +
     geom_area(data = RLDC1%>% filter(hour.sorted %in% c(seq(1,8760,20),8760)), aes(x = hour.sorted, y = RLDC1, fill = te), size = 1.2, alpha = 1) +
-    xlab("Hour") + ylab("Sorted residual load (GWh)")+
+    xlab("Sorted hours of a year") + ylab("Residual load (GW)")+
     ggtitle(paste0("DIETER ", year_toplot))
   
   if (h2switch == "off"){
@@ -402,7 +435,7 @@ for(year_toplot in year_toplot_list){
     geom_area(data = CU_VRE_Wind.plot %>% filter(hour %in% c(seq(1,8760,20),8760)), aes(x = hour, y = Wind.RLDC2, fill = te), size = 1.2, alpha = 1)
   
   p.DT.rldc <- p.DT.rldc + 
-    theme(axis.text=element_text(size=12), axis.title=element_text(size= 12, face="bold"))
+    theme(axis.text=element_text(size=10), axis.title=element_text(size= 10, face="bold"))
 
   swfigure(sw, grid.draw, p.DT.rldc)
   
@@ -410,5 +443,5 @@ for(year_toplot in year_toplot_list){
     ggsave(filename = paste0(outputdir, "/DIETER/DIETER_RLDC_yr=", year_toplot, ".png"), p.DT.rldc, width = 8, height =8, units = "in", dpi = 120)
   }
 
-}
+# }
 

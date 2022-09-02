@@ -197,7 +197,7 @@ diff.price <- out.RMprice %>%
   filter(period %in% model.periods) %>% 
   filter(!value == 0) %>% 
   select(period,iteration,rmprice=value) %>% 
-  left_join(out.DTprice) %>% 
+  left_join(out.DTprice_wscar) %>% 
   filter(period %in% model.periods.till2100) %>% 
   select(period,iteration,rmprice, value) %>% 
   mutate(value = rmprice - value) %>% 
@@ -223,6 +223,7 @@ if (save_png == 1){
 
 swlatex(sw, paste0("\\subsection{Electricity price difference over iterations (with rolling mean REMIND price over 3 periods)}"))
 
+# price in REMIND compared to no_scar price in DIETER
 diff.price.rollmean <- out.RMprice %>% 
   filter(period %in% model.periods) %>% 
   filter(!value == 0) %>% 
@@ -230,12 +231,28 @@ diff.price.rollmean <- out.RMprice %>%
   dplyr::group_by(iteration) %>%
   mutate( rmprice = frollmean(rmprice, 3, align = "left", fill = 0)) %>%
   dplyr::ungroup(iteration) %>% 
-  left_join(out.DTprice) %>% 
+  left_join(out.DTprice_wscar) %>% 
   filter(period %in% model.periods.till2100) %>% 
   select(period,iteration,rmprice, value) %>% 
   mutate(value = rmprice - value) %>% 
-  select(-rmprice)%>% 
+  select(-rmprice) %>% 
   filter(iteration > start_i-1)
+
+# # price in REMIND plus cap shad price compared to full price in DIETER (improve later: also need to add capacity shadow price for standing capacities in dieter)
+# 
+# diff.price.rollmean <- out.RMprice_wSP %>% 
+#   filter(period %in% model.periods) %>% 
+#   filter(!value == 0) %>% 
+#   select(period,iteration,rmprice=value) %>% 
+#   # dplyr::group_by(iteration) %>%
+#   # mutate( rmprice = frollmean(rmprice, 3, align = "left", fill = 0)) %>%
+#   # dplyr::ungroup(iteration) %>% 
+#   left_join(out.DTprice_wscar) %>% 
+#   filter(period %in% model.periods.till2100) %>% 
+#   select(period,iteration,rmprice, value) %>% 
+#   mutate(value = rmprice - value) %>% 
+#   select(-rmprice) %>% 
+#   filter(iteration > start_i-1)
 
 p <- ggplot() +
   geom_line(data = diff.price.rollmean, aes(x = iteration, y = value,), size = 1.2, alpha = 0.5) +
@@ -357,7 +374,7 @@ if (save_png == 1){
 }
 
 ##################################################################################################
-for (tech_plot in c("OCGT", "Wind Onshore", "Solar")){
+for (tech_plot in c("OCGT", "Wind onshore", "Solar")){
 
 swlatex(sw, paste0("\\subsection{Markup and Market value for ", tech_plot, " over iterations}"))
   # tech_plot = "CCGT"
