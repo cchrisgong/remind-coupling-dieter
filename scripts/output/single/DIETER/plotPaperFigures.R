@@ -706,7 +706,7 @@ p.RM.rldc <-ggplot() +
   geom_area(data = RLDC.VRE, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1, position = "identity") +
   geom_area(data = plot.rldc.hr, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1) +
   geom_area(data = RLDC.VREcurt, aes(x = hour, y = value, fill = tech), size = 1.2, alpha = 1, position = "identity") +
-  coord_cartesian(ylim = c(min(CU_VRE_Solar.plot$Solar.RLDC2) * 1.1,max(LDC0$load) * 1.1 )) +
+  coord_cartesian(ylim = c(min(CU_VRE_Solar.plot$Solar.RLDC2) * 1.1, max(LDC0$load) * 1.1 )) +
   scale_fill_manual(name = "Technology", values = color.mapping.RLDC.basic)+
   theme(legend.position = "none") +
   theme(axis.text=element_text(size=10), axis.title=element_text(size= 10, face="bold"))+

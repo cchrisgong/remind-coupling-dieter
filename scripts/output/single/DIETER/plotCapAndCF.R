@@ -253,7 +253,7 @@ swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")
       
       plot.dieter.capacity.h2stor2 <- plot.dieter.capacity.stor %>% 
         filter(tech == "Electrolyzers for long-term storage") %>% 
-        mutate(tech = "Hydrogen Turbine")  
+        mutate(tech = "Hydrogen turbine")  
       
       plot.remind.capacity.wDIETERstorage <-list(plot.remind.capacity,
                                                  plot.dieter.capacity.stor,
@@ -263,7 +263,7 @@ swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")
       
       
       plot.remind.capacity.wDIETERstorage <- plot.remind.capacity.wDIETERstorage %>% 
-        mutate(tech = factor(tech, levels=rev(unique(c("Hydrogen Turbine", dieter.tech.mapping,"Electrolyzers for long-term storage"))))) %>% 
+        mutate(tech = factor(tech, levels=rev(unique(c("Hydrogen turbine", dieter.tech.mapping,"Electrolyzers for long-term storage"))))) %>% 
         mutate(model="REMIND")
       
       plot.remind.capacity.wDIETERstorage2 <- plot.remind.capacity.wDIETERstorage %>% 
@@ -275,7 +275,7 @@ swlatex(sw, "\\subsection{Capacities last iteration - double bar plot}")
         filter(iteration == max(out.dieter.capacity$iteration)) %>% 
         select(-iteration) %>% 
         full_join(plot.dieter.capacity.h2stor2)%>% 
-        mutate(tech = factor(tech, levels=rev(unique(c(dieter.tech.mapping,"Hydrogen Turbine","Electrolyzers for long-term storage")))))%>% 
+        mutate(tech = factor(tech, levels=rev(unique(c(dieter.tech.mapping,"Hydrogen turbine","Electrolyzers for long-term storage")))))%>% 
         mutate(model="DIETER") 
         
       plot.dieter.capacity2 <- plot.dieter.capacity %>% 

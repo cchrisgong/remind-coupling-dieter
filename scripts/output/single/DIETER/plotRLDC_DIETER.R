@@ -30,7 +30,7 @@ if (h2switch == "on"){
   
   LDC <- hr_data %>% 
     filter(variable == "consumption (GWh)") %>% 
-    filter(tech == "Electricity") %>%
+    filter(tech == "Electricity demand") %>%
     select(hour, value) %>%
     dplyr::rename(load = value)%>% 
     complete(hour = 1:8760, fill = list(load = 0)) 
