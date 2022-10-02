@@ -8,29 +8,13 @@
 
 *' @description  
 *'
-*'The `IntC` realization (Integrated Costs) assumes a single electricity market balance.
+*'The `DTcoup` realization: DIETER coupled power sector module
+
 *'
-*'This module determines power system supply specific technology behavior, which sums up to the general core capacity equations to define the power sector operation and investment decisions.
-*'
-*'Contrary to other secondary energy types in REMIND, this requires to move the electricity secondary energy balance (supply = demand) from the core to the module code.
-*'
-*'
-*'In summary, the specific power technology equations found in this module reflect the points below.
-*'
-*'
-*'Storage requirements are based on intermittent renewables share, synergies between different renewables production profiles and curtailment.
-*'
-*'Additional grid capacities are calculated for high intermittent renewable capacity (solar and wind) and regional spatial differences. 
-*'
-*'Combined heat and power technologies flexibility is limited to technology and spatial observed data.
-*'
-*'Operation reserve requirements are enforced to provide enough flexibility to the power system frequency regulation.   
-*'
-*'Hydrogen can be used to reduce renewable power curtailment and provide flexibility to the system future generation. 
-*'
-*' @authors Robert Pietzcker, Falko Ueckerdt, Renato Rodrigues
+*' @authors Robert Pietzcker, Falko Ueckerdt, Renato Rodrigues, Chris Gong
 
 *####################### R SECTION START (PHASES) ##############################
+$Ifi "%phase%" == "sets" $include "./modules/32_power/DTcoup/sets.gms"
 $Ifi "%phase%" == "declarations" $include "./modules/32_power/DTcoup/declarations.gms"
 $Ifi "%phase%" == "datainput" $include "./modules/32_power/DTcoup/datainput.gms"
 $Ifi "%phase%" == "equations" $include "./modules/32_power/DTcoup/equations.gms"

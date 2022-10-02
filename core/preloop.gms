@@ -26,6 +26,7 @@ vm_emiTe.l(ttot,regi,enty)      = 0;
 vm_emiCdr.l(ttot,regi,enty)	     = 0;
 vm_prodFe.l(ttot,regi,entyFe2,entyFe2,te) = 0;
 vm_prodSe.l(ttot,regi,enty,enty2,te) = 0;
+v32_storloss.l(ttot,regi,te) = 0;
 vm_demSe.l(ttot,regi,enty,enty2,te) = 0;
 vm_Xport.l(ttot,regi,tradePe)       = 0;
 vm_capDistr.l(t,regi,te,rlf)          = 0;
@@ -47,6 +48,7 @@ Execute_Loadpoint 'input' qm_budget.m = qm_budget.m;
 Execute_Loadpoint 'input' pm_pvpRegi = pm_pvpRegi;
 Execute_Loadpoint 'input' pm_pvp = pm_pvp;
 Execute_Loadpoint 'input' vm_demFeSector.l = vm_demFeSector.l;
+Execute_Loadpoint 'input' pm_fuExtr = vm_fuExtr.l;
 
 if (cm_gdximport_target eq 1,
   if ( ((p_emi_budget1_gdx < 1.5 * sm_budgetCO2eqGlob) AND (p_emi_budget1_gdx > 0.5 * sm_budgetCO2eqGlob)),

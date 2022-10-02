@@ -182,6 +182,19 @@ elseif cm_VRE_supply_assumptions eq 3,
   );
 );
 
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+$IFTHEN.DTstor %cm_DTstor% == "on"
+
+table fm_stordata_DIETER(char, all_te)  "storage technology cost for DIETER coupled runs"
+$include "./core/input/generisdata_tech_DIETER_storage.prn"
+;
+
+fm_dataglob(char,te)$(teStor(te)) = fm_stordata_DIETER(char,te);
+
+display fm_stordata_DIETER;
+$ENDIF.DTstor
+$ENDIF.DTcoup
+
 parameter p_inco0(ttot,all_regi,all_te)     "regionalized technology costs Unit: USD$/KW"
 /
 $ondelim
@@ -518,6 +531,7 @@ pm_cf(ttot,regi,"ngt")$(ttot.val ge 2045) = 0.4 * pm_cf(ttot,regi,"ngt");
 pm_cf(ttot,regi,"tdh2b") = pm_cf(ttot,regi,"tdh2s");
 pm_cf(ttot,regi,"tdh2i") = pm_cf(ttot,regi,"tdh2s");
 
+*pm_cf_linear(ttot,regi,te) =  pm_cf(ttot,regi,te);
 
 *SB* Region- and tech-specific early retirement rates
 *Regional*
@@ -532,16 +546,18 @@ loop((ext_regi,te)$p_techEarlyRetiRate(ext_regi,te),
 $ENDIF.tech_earlyreti
 
 
-
-*SB* Time-dependent early retirement rates in Baseline scenarios
-$ifthen.Base_Cprice %carbonprice% == "none"
-$ifthen.Base_techpol %techpol% == "none"
-*** Allow very little early retirement future periods
-pm_regiEarlyRetiRate(t,regi,"pc")$(t.val gt 2025) = 0.01;
-$endif.Base_techpol
-$endif.Base_Cprice
+*** CG: Allow very little early retirement future periods under coupling and if cm_DTnoER is on
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+$IFTHEN.noEarlyReti %cm_DTnoER% == "on"
+pm_regiEarlyRetiRate(t,regi,te)$((t.val ge 2020) AND regDTCoup(regi) AND not sameas(te,"tnrs")) = 0;
+$ENDIF.noEarlyReti
+$ENDIF.DTcoup
 
 display pm_regiEarlyRetiRate;
+
+
+***CG: limit all ngt early reti to 0 a year (since ngt can serve as peaker at high share of VRE)
+pm_regiEarlyRetiRate(ttot,regi,"ngt")$(ttot.val > 2005) = 0;
 
 
 ***---------------------------------------------------------------------------
@@ -1193,7 +1209,7 @@ $if %cm_techcosts% == "REG"   pm_data(regi,"learnMult_wFC",teLearn(te))    = pm_
 $if %cm_techcosts% == "REG"   pm_data(regi,"learnMult_wFC","spv")    = pm_data(regi,"incolearn","spv")/(sum(regi2,p_capCum("2020",regi2,"spv"))**pm_data(regi,"learnExp_wFC","spv"));
 
 display p_capCum;
-display pm_data;
+display "chris core datainput", pm_data;
 
 *** end learning parameters
 

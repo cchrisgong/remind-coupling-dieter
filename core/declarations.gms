@@ -69,6 +69,7 @@ o_taxCO2eq_afterPeakShiftLoop_Itr_1regi(ttot, iteration) "CO2 taxed in the last 
 
 ***----------------------------------------------------------------------------------------
 ***-----------------------------------------------ESM module-------------------------------
+p_earlyreti_lim(tall,all_regi,all_te)                "Time-dependent upper bounds on early retirement of capacity"
 pm_emiExog(tall,all_regi,all_enty)                   "exogenous emissions"
 pm_macBaseMagpie(tall,all_regi,all_enty)              "baseline emissions from MAgPIE (type emiMacMagpie)"
 p_macBaseMagpieNegCo2(tall,all_regi)                 "net negative emissions from co2luc"
@@ -86,6 +87,7 @@ pm_macStep(tall,all_regi,all_enty)                   "step number of abatement l
 pm_macSwitch(all_enty)                               "switch to include mac option in the code"
 pm_macCostSwitch(all_enty)                           "switch to include mac costs in the code (e.g. in coupled scenarios, we want to include the costs in REMIND, but MAC effects on emissions are calculated in MAgPIE)"
 pm_priceCO2(tall,all_regi)                           "carbon price [$/tC]"
+pm_priceCO2_display(tall,all_regi)                   "carbon price [$/tC] for checking"
 p_priceCO2forMAC(tall,all_regi,all_enty)             "carbon price defined for MAC gases [$/tC]"
 p_priceGas(tall,all_regi)                            "gas price in [$/tCeq] for ch4gas MAC"
 pm_ResidualCementDemand(tall,all_regi)               "reduction in cemend demand (and thus process emissions) due to climate policy [0...1]"
@@ -168,7 +170,8 @@ p_boundtmp(tall,all_regi,all_te,rlf)                 "read-in bound on capacitie
 p_bound_cap(tall,all_regi,all_te,rlf)                "read-in bound on capacities"
 pm_data(all_regi,char,all_te)                        "Large array for most technical parameters of technologies; more detail on the individual technical parameters can be found in the declaration of the set 'char' "
 pm_cf(tall,all_regi,all_te)                          "Installed capacity availability - capacity factor (fraction of the year that a plant is running)"
-p_tkpremused(all_regi,all_te)                       "turn-key cost premium used in the model (with a discount rate of 3+ pure rate of time preference); in comparison to overnight costs)"
+pm_cf_linear(tall,all_regi,all_te)                   "heuristic capacity factor"
+p_tkpremused(all_regi,all_te)                        "turn-key cost premium used in the model (with a discount rate of 3+ pure rate of time preference); in comparison to overnight costs)"
 p_aux_tlt(all_te)                                    "auxilliary parameter to determine maximal lifetime of a technology"
 p_aux_check_omeg(all_te)                             "auxiliary parameter for an automated check that no technology is erroneously entered with pm_omeg('1') value of 0"
 p_aux_check_tlt(all_te)                              "auxiliary parameter for an automated check that the pm_omeg calculation and filling of the opTimeYr2te mapping is in accordance"
@@ -230,6 +233,7 @@ pm_temperatureImpulseResponseCO2(tall,tall)          "temperature impulse respon
 *** damage related
 pm_taxCO2eqSCC(ttot,all_regi)                        "carbon tax component due to damages (social cost of carbon) "
 pm_GDPGross(tall,all_regi)                           "gross GDP (before damages)"
+pm_fuExtr(ttot,all_regi,all_enty,rlf)                "fuel use [TWa]"
 
 ***----------------------------------------------------------------------------------------
 *** ----- Parameters needed for MAGICC ----------------------------------------------------
@@ -317,6 +321,10 @@ v_emiEnFuelEx(ttot,all_regi,all_enty)                 "energy emissions from fue
 vm_emiAllMkt(tall,all_regi,all_enty,all_emiMkt)      "total regional emissions for each emission market. [GtC, Mt CH4, Mt N]"
 vm_flexAdj(tall,all_regi,all_te)                     "flexibility adjustment used for flexibility subsidy (tax) to emulate price changes of technologies which see lower-than-average (higher-than-average) elec. prices [trUSD/TWa]"
 vm_taxrevimplFETax(ttot,all_regi)                    "implicit efficiency directive target tax"
+vm_Mrkup(tall,all_regi,all_te)                       "markup adjustment used for subsidy (tax) to emulate market value of power generation technologies produces either below or above annual average elec. prices [trUSD/TWa]"
+vm_reqCap(tall,all_regi)                             "required total dispatchable capacities"
+vm_priceCap(tall,all_regi)                           "shadow price of capacity"
+v_costFuExdampen(ttot,all_regi,all_enty)	     "dampening term for non-biomass PE fuel cost"
 ;
 
 ***----------------------------------------------------------------------------------------
@@ -427,6 +435,8 @@ q_transSe2se(ttot,all_regi,all_enty,all_enty,all_te) "energy transformation se t
 qm_fuel2pe(ttot,all_regi,all_enty)                   "constraint on cumulative fuel use"
 
 q_limitProd(ttot,all_regi,all_te,rlf)                "constraint on annual production"
+
+q_costFuExdampen(ttot,all_regi,all_enty)             "calculate dampening term for non-biomass PE fuel cost"
 
 q_emiCO2Sector(ttot,all_regi,emi_sectors)            "CO2 emissions from different sectors"
 q_emiTeDetail(ttot,all_regi,all_enty,all_enty,all_te,all_enty) "determination of emissions"

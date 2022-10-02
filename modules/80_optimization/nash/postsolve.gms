@@ -300,6 +300,28 @@ if (sm_globalBudget_dev gt 1.01 OR sm_globalBudget_dev lt 0.99,
   p80_messageShow("target") = YES;
 );
 
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+*** check DIETER coupling convergence criteria, must be within target value (between models, and between REMIND iterations)
+$IFTHEN.hasbound not %cm_DTmode% == "none"
+if (sm_DTgenShDiff gt cm_DTcoup_tol,
+  s80_bool = 0;
+  p80_messageShow("target") = YES;
+);
+$ENDIF.hasbound
+
+if (sm_DTgenShDiffIter gt cm_DTcoup_tol_i,
+  s80_bool = 0;
+  p80_messageShow("target") = YES;
+);
+
+*** check DIETER coupling convergence criteria, must have non-zero prices
+if (sm_budgetMin lt sm_eps,
+  s80_bool = 0;
+  p80_messageShow("target") = YES;
+
+);
+$ENDIF.DTcoup
+
 
 display "####";
 display "Convergence diagnostics";
@@ -536,6 +558,13 @@ if(s80_bool eq 1,
 
 );
 
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+if ( (c_keep_iteration_gdxes eq 1) ,
+
+    put_utility "shell" /
+      "cp input.gdx fulldata_0.gdx";
+);
+$ENDIF.DTcoup
 
 *** check if any region has failed to solve consecutively for a certain number of times
 if(cm_abortOnConsecFail, !! execute only if consecutive failures switch is non-zero
@@ -554,9 +583,6 @@ if(cm_abortOnConsecFail, !! execute only if consecutive failures switch is non-z
         );
     )
 )
-
-
-
 
 
 ***Fade out LT correction terms, they should only be important in the first iterations and might interfere with ST corrections.

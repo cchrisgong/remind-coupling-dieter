@@ -11,14 +11,15 @@
 *.swp
 *.pdf
 
-# ignore libreoffice lock files
-.~*#
+# Ignore DIETER folder because of seperate repo
+scripts/iterative/DIETER/
 
 # Ignore everything in "input" folders
 input/
 
 # Ignore everything in root "output" folder
-/output/
+output/*
+!/scripts/output/single/DIETER/
 
 # Ignore xlsx files in config created by remind2::colorScenConf()
 config/scenario_config*_colorful.xlsx

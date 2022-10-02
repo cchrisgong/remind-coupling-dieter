@@ -37,6 +37,8 @@ p21_taxrevBio0(ttot,all_regi)                    "reference level value of bioen
 p21_implicitDiscRate0(ttot,all_regi)             "reference level value of implicit tax on energy efficient capital"
 p21_taxemiMkt0(ttot,all_regi,all_emiMkt)         "reference level value of co2 emission taxes per emission market"
 p21_taxrevFlex0(ttot,all_regi)                   "reference level value of flexibility tax"
+p21_taxrevMrkup0(ttot,all_regi)              "reference level value of markup tax - supply side"
+p21_taxrevCap0(ttot,all_regi)                "reference level value of dispatchable capacity subsidy - supply side"
 p21_taxrevBioImport0(ttot,all_regi)              "reference level value of bioenergy import tax"
 
 p21_taxrevGHG_iter(iteration,ttot,all_regi)                "reference level value of GHG emission tax revenue"
@@ -58,29 +60,33 @@ p21_CO2TaxSectorMarkup(all_regi,emi_sectors)            "CO2 tax markup in build
 
 p21_deltarev(iteration,all_regi)             "convergence criteria for iteration on tax revenue recycling"
 
-p21_tau_CO2_tax_gdx(ttot,all_regi)           "tax path from gdx, may overwrite default values"
-p21_tau_CO2_tax_gdx_bau(ttot,all_regi)       "tax path from gdx, may overwrite default values"
+p21_tau_CO2_tax_gdx(ttot,all_regi)              "tax path from gdx, may overwrite default values"
+p21_tau_CO2_tax_gdx_bau(ttot,all_regi)          "tax path from gdx, may overwrite default values"
 
 p21_implicitDiscRateMarg(ttot,all_regi,all_in)  "Difference between the normal discount rate and the implicit discount rate"
+
+p21_prodSe(tall,all_regi,all_enty,all_enty,all_te)    "vm_prodSe of last iteration"
+p21_demSe(tall,all_regi,all_enty,all_enty,all_te)     "vm_demSe of last iteration"
 ;
 
 
-$ifthen.fetax not "%cm_FEtax_trajectory_abs%" == "off" 
+$ifthen.fetax not "%cm_FEtax_trajectory_abs%" == "off"
 Parameters
-    p21_FEtax_trajectory_abs(ttot,emi_sectors,all_enty)     "absolute final energy tax level of the end year set by cm_FEtax_trajectory_abs switch [USD/MWh]"  / %cm_FEtax_trajectory_abs% /   
+    p21_FEtax_trajectory_abs(ttot,emi_sectors,all_enty)     "absolute final energy tax level of the end year set by cm_FEtax_trajectory_abs switch [USD/MWh]"  / %cm_FEtax_trajectory_abs% /
 ;
 $endif.fetax
 
-$ifthen.fetaxRel not "%cm_FEtax_trajectory_rel%" == "off" 
+$ifthen.fetaxRel not "%cm_FEtax_trajectory_rel%" == "off"
 Parameters
-    p21_FEtax_trajectory_rel(ttot,emi_sectors,all_enty)     "factor to scale final energy tax level of the end year from cm_FEtax_trajectory_rel switch"  / %cm_FEtax_trajectory_rel% /   
+    p21_FEtax_trajectory_rel(ttot,emi_sectors,all_enty)     "factor to scale final energy tax level of the end year from cm_FEtax_trajectory_rel switch"  / %cm_FEtax_trajectory_rel% /
 ;
 $endif.fetaxRel
 
 Scalars
-s21_so2_tax_2010                             "SO2 tax value in 2010 in 10^12$/TgS = 10^6 $/t S"
-s21_tax_time                                 "time when final tax level is reached"
-s21_tax_value                                "target level of tax, sub, inconv in $/GJ, must always be rescaled after setting"
+s21_so2_tax_2010                                "SO2 tax value in 2010 in 10^12$/TgS = 10^6 $/t S"
+s21_tax_time                                    "time when final tax level is reached"
+s21_tax_value                                   "target level of tax, sub, inconv in $/GJ, must always be rescaled after setting"
+sm21_tmp                                        "iteration.val"
 ;
 
 variables
@@ -101,15 +107,20 @@ v21_taxrevBio(ttot,all_regi)                    "tax on bioenergy (to reflect su
 v21_taxrevFlex(ttot,all_regi)                   "tax on technologies with flexible or inflexible electricity input"
 v21_implicitDiscRate(ttot,all_regi)              "implicit tax on energy efficient capital"
 v21_taxemiMkt(ttot,all_regi,all_emiMkt)         "tax on greenhouse gas emissions"
+v21_taxrevMrkup(ttot,all_regi)               "tax on electricity generation technologies with coupled markup tax from DIETER"
+v21_taxrevCap(ttot,all_regi)                 "subsidy for capacities of dispatchable supply electricity generation technologies"
 v21_taxrevBioImport(ttot,all_regi)              "bioenergy import tax"
 ;
 
 Positive Variable
-v21_emiALLco2neg(ttot,all_regi)             "negative part of total CO2 emissions"
-v21_emiALLco2neg_slack(ttot,all_regi)       "dummy variable to extract negatice CO2 emissions from emiAll"
+v21_emiALLco2neg(ttot,all_regi)              "negative part of total CO2 emissions"
+v21_emiALLco2neg_slack(ttot,all_regi)        "dummy variable to extract negatice CO2 emissions from emiAll"
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+v21_greenh2dem_dampen(ttot,all_regi)         "dampening dem for green h2"
+$ENDIF.DTcoup
 ;
 
-equations 
+equations
 q21_taxrev(ttot,all_regi)                       "calculation of difference in tax volume"
 q21_emiAllco2neg(ttot,all_regi)                 "calculates negative part of CO2 emissions"
 q21_tau_bio(ttot)                               "calculation of demand-dependent bioenergy tax"
@@ -130,6 +141,11 @@ q21_taxrevFlex(ttot,all_regi)                   "tax on technologies with flexib
 q21_implicitDiscRate(ttot,all_regi)             "calculation of the implicit discount rate on energy efficiency capital"
 q21_taxemiMkt(ttot,all_regi,all_emiMkt)         "calculation of specific emission market tax on CO2 emissions"
 q21_taxrevBioImport(ttot,all_regi)              "calculation of bioenergy import tax"
+$IFTHEN.DTcoup %cm_DTcoup% == "on"
+q21_greenh2dem_dampen(ttot,all_regi)         "dampening dem for green h2"
+q21_taxrevMrkup(ttot,all_regi)               "calculation for markup of electricity generation technologies from DIETER coupling"
+q21_priceCap(ttot,all_regi)                  "calculation of subsidy for dispatchable electricity generation technologies"
+$ENDIF.DTcoup
 ;
 
 *** EOF ./modules/21_tax/on/declarations.gms
